@@ -29,7 +29,7 @@ stackit organization member list [flags]
   -h, --help                     Help for "stackit organization member list"
       --limit int                Maximum number of entries to list
       --organization-id string   The organization ID
-      --sort-by string           Sort entries by a specific field, one of ["subject" "role"] (default "subject")
+      --sort-by string           Sort entries by a specific field, (one of: [subject, role]) (default "subject")
       --subject string           Filter by subject (Identifier of user, service account or client. Usually email address in case of users or name in case of clients)
 ```
 
@@ -38,10 +38,10 @@ stackit organization member list [flags]
 ```
   -y, --assume-yes             If set, skips all confirmation prompts
       --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, one of ["json" "pretty" "none" "yaml"]
+  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
   -p, --project-id string      Project ID
       --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, one of ["debug" "info" "warning" "error"] (default "info")
+      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

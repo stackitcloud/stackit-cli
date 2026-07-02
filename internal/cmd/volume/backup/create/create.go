@@ -24,13 +24,16 @@ import (
 )
 
 const (
-	sourceIdFlag   = "source-id"
-	sourceTypeFlag = "source-type"
-	nameFlag       = "name"
-	labelsFlag     = "labels"
+	sourceIdFlag = "source-id"
+	nameFlag     = "name"
+	labelsFlag   = "labels"
 )
 
-var sourceTypeFlagOptions = []string{"volume", "snapshot"}
+var sourceTypeFlag = flags.StringEnumFlag(
+	"source-type",
+	[]string{"volume", "snapshot"},
+	"Source type of the backup,",
+)
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
@@ -133,11 +136,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(sourceIdFlag, "", "ID of the source from which a backup should be created")
-	cmd.Flags().Var(flags.EnumFlag(false, "", sourceTypeFlagOptions...), sourceTypeFlag, fmt.Sprintf("Source type of the backup, one of %q", sourceTypeFlagOptions))
+	sourceTypeFlag.Register(cmd.Flags())
 	cmd.Flags().String(nameFlag, "", "Name of the backup")
 	cmd.Flags().StringToString(labelsFlag, nil, "Key-value string pairs as labels")
 
-	err := flags.MarkFlagsRequired(cmd, sourceIdFlag, sourceTypeFlag)
+	err := flags.MarkFlagsRequired(cmd, sourceIdFlag, sourceTypeFlag.Name())
 	cobra.CheckErr(err)
 }
 
@@ -152,8 +155,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		return nil, fmt.Errorf("source-id is required")
 	}
 
-	sourceType := flags.FlagToStringValue(p, cmd, sourceTypeFlag)
-
 	name := flags.FlagToStringPointer(p, cmd, nameFlag)
 	labels := flags.FlagToStringToAny(p, cmd, labelsFlag)
 	if labels == nil {
@@ -163,7 +164,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		SourceID:        sourceID,
-		SourceType:      sourceType,
+		SourceType:      sourceTypeFlag.Get(),
 		Name:            name,
 		Labels:          labels,
 	}

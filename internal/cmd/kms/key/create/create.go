@@ -184,9 +184,9 @@ func outputResult(p *print.Printer, model *inputModel, resp *kms.Key) error {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	algorithmFlag.Register(cmd)
-	purposeFlag.Register(cmd)
-	protectionFlag.Register(cmd)
+	algorithmFlag.Register(cmd.Flags())
+	purposeFlag.Register(cmd.Flags())
+	protectionFlag.Register(cmd.Flags())
 
 	// All further non Enum Flags
 	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS key ring")

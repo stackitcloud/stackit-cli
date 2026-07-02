@@ -92,7 +92,7 @@ func fixtureStandardFlagValues(mods ...func(flagValues map[string]string)) map[s
 		storageClassFlag:          "class",
 		storageSizeFlag:           "10",
 		versionFlag:               "5.0",
-		typeFlag:                  "Single",
+		typeFlag.Name():           "Single",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -283,6 +283,7 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
+			typeFlag.Reset()
 			params := testparams.NewTestParams()
 			cmd := NewCmd(params.CmdParams)
 			err := globalflags.Configure(cmd.Flags())

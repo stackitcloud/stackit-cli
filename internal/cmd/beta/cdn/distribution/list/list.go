@@ -28,9 +28,15 @@ type inputModel struct {
 }
 
 const (
-	sortByFlag  = "sort-by"
 	limitFlag   = ""
 	maxPageSize = int32(100)
+)
+
+var sortByFlag = flags.StringEnumFlag(
+	"sort-by",
+	[]string{"id", "createdAt", "updatedAt", "originUrl", "status", "originUrlRelated"},
+	"Sort entries by a specific field,",
+	flags.StringEnumDefaultValue("createdAt"),
 )
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -75,11 +81,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	return cmd
 }
 
-var sortByFlagOptions = []string{"id", "createdAt", "updatedAt", "originUrl", "status", "originUrlRelated"}
-
 func configureFlags(cmd *cobra.Command) {
 	// same default as apiClient
-	cmd.Flags().Var(flags.EnumFlag(false, "createdAt", sortByFlagOptions...), sortByFlag, fmt.Sprintf("Sort entries by a specific field, one of %q", sortByFlagOptions))
+	sortByFlag.Register(cmd.Flags())
 	cmd.Flags().Int64(limitFlag, 0, "Limit the output to the first n elements")
 }
 
@@ -99,7 +103,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		SortBy:          flags.FlagWithDefaultToStringValue(p, cmd, sortByFlag),
+		SortBy:          sortByFlag.Get(),
 	}
 
 	p.DebugInputModel(model)

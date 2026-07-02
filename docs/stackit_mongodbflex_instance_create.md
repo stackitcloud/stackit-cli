@@ -35,7 +35,7 @@ stackit mongodbflex instance create [flags]
       --ram int                  Amount of RAM (in GB)
       --storage-class string     Storage class (default "premium-perf2-mongodb")
       --storage-size int         Storage size (in GB) (default 10)
-      --type string              Instance type, one of ["Replica" "Sharded" "Single"] (default "Replica")
+      --type string              Instance type, (one of: [Replica, Sharded, Single]) (default "Replica")
       --version string           MongoDB version. Defaults to the latest version available
 ```
 
@@ -44,10 +44,10 @@ stackit mongodbflex instance create [flags]
 ```
   -y, --assume-yes             If set, skips all confirmation prompts
       --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, one of ["json" "pretty" "none" "yaml"]
+  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
   -p, --project-id string      Project ID
       --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, one of ["debug" "info" "warning" "error"] (default "info")
+      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

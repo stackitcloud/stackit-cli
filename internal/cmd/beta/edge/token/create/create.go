@@ -190,7 +190,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	// Make sure to only output if the format is not none
 	if globalFlags.OutputFormat == print.NoneOutputFormat {
 		return nil, &cliErr.FlagValidationError{
-			Flag:    globalflags.OutputFormatFlag,
+			Flag:    globalflags.OutputFormatFlag.Name(),
 			Details: fmt.Sprintf("valid formats for this command are: %s", fmt.Sprintf("%s, %s, %s", print.PrettyOutputFormat, print.JSONOutputFormat, print.YAMLOutputFormat)),
 		}
 	}

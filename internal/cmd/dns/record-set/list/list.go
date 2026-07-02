@@ -23,18 +23,24 @@ import (
 )
 
 const (
-	activeFlag      = "active"
-	inactiveFlag    = "inactive"
-	zoneIdFlag      = "zone-id"
-	deletedFlag     = "deleted"
-	nameLikeFlag    = "name-like"
-	orderByNameFlag = "order-by-name"
-	limitFlag       = "limit"
-	pageSizeFlag    = "page-size"
+	activeFlag   = "active"
+	inactiveFlag = "inactive"
+	zoneIdFlag   = "zone-id"
+	deletedFlag  = "deleted"
+	nameLikeFlag = "name-like"
+	limitFlag    = "limit"
+	pageSizeFlag = "page-size"
 
 	defaultPage          = 1
 	pageSizeDefault      = 100
 	deleteSucceededState = "DELETE_SUCCEEDED"
+)
+
+var orderByNameFlag = flags.StringEnumFlag(
+	"order-by-name",
+	[]string{"asc", "desc"},
+	"Order by name,",
+	flags.StringEnumIgnoreCase[string](),
 )
 
 type inputModel struct {
@@ -107,14 +113,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	orderByNameFlagOptions := []string{"asc", "desc"}
-
 	cmd.Flags().Var(flags.UUIDFlag(), zoneIdFlag, "Zone ID")
 	cmd.Flags().Bool(activeFlag, false, "Filter for active record sets")
 	cmd.Flags().Bool(inactiveFlag, false, "Filter for inactive record sets. Deleted record sets are always inactive and will be included when this flag is set")
 	cmd.Flags().Bool(deletedFlag, false, "Filter for deleted record sets")
 	cmd.Flags().String(nameLikeFlag, "", "Filter by name")
-	cmd.Flags().Var(flags.EnumFlag(true, "", orderByNameFlagOptions...), orderByNameFlag, fmt.Sprintf("Order by name, one of %q", orderByNameFlagOptions))
+	orderByNameFlag.Register(cmd.Flags())
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 	cmd.Flags().Int64(pageSizeFlag, pageSizeDefault, "Number of items fetched in each API call. Does not affect the number of items in the command output")
 
@@ -157,7 +161,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		Inactive:        inactive,
 		Deleted:         flags.FlagToBoolValue(p, cmd, deletedFlag),
 		NameLike:        flags.FlagToStringPointer(p, cmd, nameLikeFlag),
-		OrderByName:     flags.FlagToStringPointer(p, cmd, orderByNameFlag),
+		OrderByName:     orderByNameFlag.Ptr(),
 		Limit:           flags.FlagToInt64Pointer(p, cmd, limitFlag),
 		PageSize:        pageSize,
 	}

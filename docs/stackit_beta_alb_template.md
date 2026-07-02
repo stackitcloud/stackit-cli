@@ -23,9 +23,9 @@ stackit beta alb template [flags]
 ### Options
 
 ```
-  -f, --format string   Defines the output format ('yaml' or 'json'), default is 'json' (default "json")
+  -f, --format string   Defines the output format (one of: [json, yaml]) (default "json")
   -h, --help            Help for "stackit beta alb template"
-  -t, --type string     Defines the output type ('alb' or 'pool'), default is 'alb' (default "alb")
+  -t, --type string     Defines the output type (one of: [alb, pool]) (default "alb")
 ```
 
 ### Options inherited from parent commands
@@ -33,10 +33,10 @@ stackit beta alb template [flags]
 ```
   -y, --assume-yes             If set, skips all confirmation prompts
       --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, one of ["json" "pretty" "none" "yaml"]
+  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
   -p, --project-id string      Project ID
       --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, one of ["debug" "info" "warning" "error"] (default "info")
+      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

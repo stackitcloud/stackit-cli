@@ -27,7 +27,6 @@ const (
 	activeFlag         = "active"
 	inactiveFlag       = "inactive"
 	nameLikeFlag       = "name-like"
-	orderByNameFlag    = "order-by-name"
 	includeDeletedFlag = "include-deleted"
 	limitFlag          = "limit"
 	pageSizeFlag       = "page-size"
@@ -35,6 +34,13 @@ const (
 	defaultPage          = 1
 	pageSizeDefault      = 100
 	deleteSucceededState = "DELETE_SUCCEEDED"
+)
+
+var orderByNameFlag = flags.StringEnumFlag(
+	"order-by-name",
+	[]string{"asc", "desc"},
+	"Order by name,",
+	flags.StringEnumIgnoreCase[string](),
 )
 
 type inputModel struct {
@@ -102,12 +108,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	orderByNameFlagOptions := []string{"asc", "desc"}
-
 	cmd.Flags().Bool(activeFlag, false, "Filter for active zones")
 	cmd.Flags().Bool(inactiveFlag, false, "Filter for inactive zones")
 	cmd.Flags().String(nameLikeFlag, "", "Filter by name")
-	cmd.Flags().Var(flags.EnumFlag(true, "", orderByNameFlagOptions...), orderByNameFlag, fmt.Sprintf("Order by name, one of %q", orderByNameFlagOptions))
+	orderByNameFlag.Register(cmd.Flags())
 	cmd.Flags().Bool(includeDeletedFlag, false, "Includes successfully deleted zones (if unset, these are filtered out)")
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 	cmd.Flags().Int64(pageSizeFlag, pageSizeDefault, "Number of items fetched in each API call. Does not affect the number of items in the command output")
@@ -147,7 +151,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		Inactive:        inactive,
 		IncludeDeleted:  flags.FlagToBoolValue(p, cmd, includeDeletedFlag),
 		NameLike:        flags.FlagToStringPointer(p, cmd, nameLikeFlag),
-		OrderByName:     flags.FlagToStringPointer(p, cmd, orderByNameFlag),
+		OrderByName:     orderByNameFlag.Ptr(),
 		Limit:           limit,
 		PageSize:        pageSize,
 	}

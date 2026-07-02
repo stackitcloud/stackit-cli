@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	sdkUtils "github.com/stackitcloud/stackit-sdk-go/core/utils"
 	cdn "github.com/stackitcloud/stackit-sdk-go/services/cdn/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -22,7 +21,6 @@ import (
 )
 
 const (
-	flagRegion                       = "regions"
 	flagHTTP                         = "http"
 	flagHTTPOriginURL                = "http-origin-url"
 	flagHTTPGeofencing               = "http-geofencing"
@@ -41,6 +39,12 @@ const (
 	flagLokiPushURL                  = "loki-push-url"
 	flagMonthlyLimitBytes            = "monthly-limit-bytes"
 	flagOptimizer                    = "optimizer"
+)
+
+var flagRegion = flags.StringEnumSliceFlag(
+	"regions",
+	cdn.AllowedRegionEnumValues,
+	"Regions in which content should be cached, multiple values accepted,",
 )
 
 type httpInputModel struct {
@@ -154,7 +158,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
-	cmd.Flags().Var(flags.EnumSliceFlag(false, []string{}, sdkUtils.EnumSliceToStringSlice(cdn.AllowedRegionEnumValues)...), flagRegion, fmt.Sprintf("Regions in which content should be cached, multiple of: %q", utils.FormatPossibleValues(sdkUtils.EnumSliceToStringSlice(cdn.AllowedRegionEnumValues)...)))
+	flagRegion.Register(cmd)
 	cmd.Flags().Bool(flagHTTP, false, "Use HTTP backend")
 	cmd.Flags().String(flagHTTPOriginURL, "", "Origin URL for HTTP backend")
 	cmd.Flags().StringSlice(flagHTTPOriginRequestHeaders, []string{}, "Origin request headers for HTTP backend in the format 'HeaderName: HeaderValue', repeatable. WARNING: do not store sensitive values in the headers!")
@@ -177,7 +181,7 @@ func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.Flags().Bool(flagOptimizer, false, "Enable optimizer for the CDN distribution (paid feature).")
 	cmd.MarkFlagsMutuallyExclusive(flagHTTP, flagBucket)
 	cmd.MarkFlagsOneRequired(flagHTTP, flagBucket)
-	err := flags.MarkFlagsRequired(cmd, flagRegion)
+	err := flags.MarkFlagsRequired(cmd, flagRegion.Name())
 	cobra.CheckErr(err)
 }
 
@@ -185,12 +189,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
-	}
-
-	regionStrings := flags.FlagToStringSliceValue(p, cmd, flagRegion)
-	regions := make([]cdn.Region, 0, len(regionStrings))
-	for _, regionStr := range regionStrings {
-		regions = append(regions, cdn.Region(regionStr))
 	}
 
 	var http *httpInputModel
@@ -249,7 +247,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel:      globalFlags,
-		Regions:              regions,
+		Regions:              flagRegion.Get(),
 		HTTP:                 http,
 		Bucket:               bucket,
 		BlockedCountries:     blockedCountries,

@@ -109,7 +109,7 @@ func TestParseInput(t *testing.T) {
 			description: "update roles",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[roleFlag] = "read"
+				flagValues[roleFlag.Name()] = "read"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -183,7 +183,7 @@ func TestParseInput(t *testing.T) {
 			description: "invalid role",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[roleFlag] = "invalid-role"
+				flagValues[roleFlag.Name()] = "invalid-role"
 			}),
 			isValid: false,
 		},
@@ -192,7 +192,7 @@ func TestParseInput(t *testing.T) {
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, databaseFlag)
-				delete(flagValues, roleFlag)
+				delete(flagValues, roleFlag.Name())
 			}),
 			isValid: false,
 		},

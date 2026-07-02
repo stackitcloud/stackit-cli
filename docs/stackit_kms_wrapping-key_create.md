@@ -23,13 +23,13 @@ stackit kms wrapping-key create [flags]
 ### Options
 
 ```
-      --algorithm string     En-/Decryption / signing algorithm. (possible values: [rsa_2048_oaep_sha256, rsa_3072_oaep_sha256, rsa_4096_oaep_sha256, rsa_4096_oaep_sha512, rsa_2048_oaep_sha256_aes_256_key_wrap, rsa_3072_oaep_sha256_aes_256_key_wrap, rsa_4096_oaep_sha256_aes_256_key_wrap, rsa_4096_oaep_sha512_aes_256_key_wrap])
+      --algorithm string     En-/Decryption / signing algorithm. (one of: [rsa_2048_oaep_sha256, rsa_3072_oaep_sha256, rsa_4096_oaep_sha256, rsa_4096_oaep_sha512, rsa_2048_oaep_sha256_aes_256_key_wrap, rsa_3072_oaep_sha256_aes_256_key_wrap, rsa_4096_oaep_sha256_aes_256_key_wrap, rsa_4096_oaep_sha512_aes_256_key_wrap])
       --description string   Optional description of the wrapping key
   -h, --help                 Help for "stackit kms wrapping-key create"
       --keyring-id string    ID of the KMS key ring
       --name string          The display name to distinguish multiple wrapping keys
-      --protection string    The underlying system that is responsible for protecting the key material. (possible values: [software])
-      --purpose string       Purpose of the key. (possible values: [wrap_symmetric_key, wrap_asymmetric_key])
+      --protection string    The underlying system that is responsible for protecting the key material. (one of: [software])
+      --purpose string       Purpose of the key. (one of: [wrap_symmetric_key, wrap_asymmetric_key])
 ```
 
 ### Options inherited from parent commands
@@ -37,10 +37,10 @@ stackit kms wrapping-key create [flags]
 ```
   -y, --assume-yes             If set, skips all confirmation prompts
       --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, one of ["json" "pretty" "none" "yaml"]
+  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
   -p, --project-id string      Project ID
       --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, one of ["debug" "info" "warning" "error"] (default "info")
+      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO
