@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	rabbitmq "github.com/stackitcloud/stackit-sdk-go/services/rabbitmq/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 )
@@ -42,24 +41,6 @@ func FlagToStringSliceValue(p *print.Printer, cmd *cobra.Command, flag string) [
 	if err != nil {
 		p.Debug(print.ErrorLevel, "convert flag to string slice value: %v", err)
 		return nil
-	}
-	if cmd.Flag(flag).Changed {
-		return value
-	}
-	return nil
-}
-
-// Returns the flag's value as a []rabbitmq.InstanceParametersPluginsInner.
-// Returns nil if the flag is not set, if its value can not be converted to []rabbitmq.InstanceParametersPluginsInner, or if the flag does not exist.
-func FlagToInstanceParametersPluginsInnerSliceValue(p *print.Printer, cmd *cobra.Command, flag string) []rabbitmq.InstanceParametersPluginsInner {
-	stringSlice, err := cmd.Flags().GetStringSlice(flag)
-	if err != nil {
-		p.Debug(print.ErrorLevel, "convert flag to string slice value: %v", err)
-		return nil
-	}
-	value := make([]rabbitmq.InstanceParametersPluginsInner, len(stringSlice))
-	for i, v := range stringSlice {
-		value[i] = rabbitmq.InstanceParametersPluginsInner(v)
 	}
 	if cmd.Flag(flag).Changed {
 		return value

@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
@@ -63,7 +63,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		metricsFrequencyFlag:      "100",
 		metricsPrefixFlag:         "example-prefix",
 		monitoringInstanceIdFlag:  testMonitoringInstanceId,
-		pluginFlag:                "example-plugin",
+		flagPlugins.Name():        string(rabbitmq.INSTANCEPARAMETERSPLUGINSINNER_RABBITMQ_MQTT),
 		sgwAclFlag:                "198.51.100.14/24",
 		syslogFlag:                "example-syslog",
 		planIdFlag:                testPlanId,
@@ -87,7 +87,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		MetricsFrequency:     utils.Ptr(int32(100)),
 		MetricsPrefix:        utils.Ptr("example-prefix"),
 		MonitoringInstanceId: utils.Ptr(testMonitoringInstanceId),
-		Plugin:               []rabbitmq.InstanceParametersPluginsInner{"example-plugin"},
+		Plugin:               []rabbitmq.InstanceParametersPluginsInner{rabbitmq.INSTANCEPARAMETERSPLUGINSINNER_RABBITMQ_MQTT},
 		SgwAcl:               utils.Ptr([]string{"198.51.100.14/24"}),
 		Syslog:               []string{"example-syslog"},
 		PlanId:               utils.Ptr(testPlanId),
@@ -107,7 +107,7 @@ func fixtureRequest(mods ...func(request *rabbitmq.ApiPartialUpdateInstanceReque
 			MetricsFrequency:     utils.Ptr(int32(100)),
 			MetricsPrefix:        utils.Ptr("example-prefix"),
 			MonitoringInstanceId: utils.Ptr(testMonitoringInstanceId),
-			Plugins:              []rabbitmq.InstanceParametersPluginsInner{"example-plugin"},
+			Plugins:              []rabbitmq.InstanceParametersPluginsInner{rabbitmq.INSTANCEPARAMETERSPLUGINSINNER_RABBITMQ_MQTT},
 			SgwAcl:               utils.Ptr("198.51.100.14/24"),
 			Syslog:               []string{"example-syslog"},
 		},
@@ -270,11 +270,11 @@ func TestParseInput(t *testing.T) {
 			description:  "repeated plugin flags",
 			argValues:    fixtureArgValues(),
 			flagValues:   fixtureFlagValues(),
-			pluginValues: []string{"example-plugin-1", "example-plugin-2"},
+			pluginValues: []string{string(rabbitmq.INSTANCEPARAMETERSPLUGINSINNER_RABBITMQ_MQTT), string(rabbitmq.INSTANCEPARAMETERSPLUGINSINNER_RABBITMQ_CONSISTENT_HASH_EXCHANGE)},
 			isValid:      true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.Plugin =
-					append(model.Plugin, "example-plugin-1", "example-plugin-2")
+					append(model.Plugin, rabbitmq.INSTANCEPARAMETERSPLUGINSINNER_RABBITMQ_MQTT, rabbitmq.INSTANCEPARAMETERSPLUGINSINNER_RABBITMQ_CONSISTENT_HASH_EXCHANGE)
 			}),
 		},
 		{
@@ -292,84 +292,11 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			params := testparams.NewTestParams()
-			cmd := NewCmd(params.CmdParams)
-			err := globalflags.Configure(cmd.Flags())
-			if err != nil {
-				t.Fatalf("configure global flags: %v", err)
-			}
-
-			for flag, value := range tt.flagValues {
-				err := cmd.Flags().Set(flag, value)
-				if err != nil {
-					if !tt.isValid {
-						return
-					}
-					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
-				}
-			}
-
-			for _, value := range tt.sgwAclValues {
-				err := cmd.Flags().Set(sgwAclFlag, value)
-				if err != nil {
-					if !tt.isValid {
-						return
-					}
-					t.Fatalf("setting flag --%s=%s: %v", sgwAclFlag, value, err)
-				}
-			}
-
-			for _, value := range tt.pluginValues {
-				err := cmd.Flags().Set(pluginFlag, value)
-				if err != nil {
-					if !tt.isValid {
-						return
-					}
-					t.Fatalf("setting flag --%s=%s: %v", pluginFlag, value, err)
-				}
-			}
-
-			for _, value := range tt.syslogValues {
-				err := cmd.Flags().Set(syslogFlag, value)
-				if err != nil {
-					if !tt.isValid {
-						return
-					}
-					t.Fatalf("setting flag --%s=%s: %v", syslogFlag, value, err)
-				}
-			}
-
-			err = cmd.ValidateArgs(tt.argValues)
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error validating args: %v", err)
-			}
-
-			err = cmd.ValidateRequiredFlags()
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error validating flags: %v", err)
-			}
-
-			model, err := parseInput(params.Printer, cmd, tt.argValues)
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error parsing flags: %v", err)
-			}
-
-			if !tt.isValid {
-				t.Fatalf("did not fail on invalid input")
-			}
-			diff := cmp.Diff(model, tt.expectedModel)
-			if diff != "" {
-				t.Fatalf("Data does not match: %s", diff)
-			}
+			testutils.TestParseInputWithAdditionalFlags(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, map[string][]string{
+				sgwAclFlag:         tt.sgwAclValues,
+				syslogFlag:         tt.syslogValues,
+				flagPlugins.Name(): tt.pluginValues,
+			}, tt.isValid)
 		})
 	}
 }

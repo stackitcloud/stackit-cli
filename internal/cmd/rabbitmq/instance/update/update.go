@@ -33,12 +33,17 @@ const (
 	metricsFrequencyFlag     = "metrics-frequency"
 	metricsPrefixFlag        = "metrics-prefix"
 	monitoringInstanceIdFlag = "monitoring-instance-id"
-	pluginFlag               = "plugin"
 	sgwAclFlag               = "acl"
 	syslogFlag               = "syslog"
 	planIdFlag               = "plan-id"
 	planNameFlag             = "plan-name"
 	versionFlag              = "version"
+)
+
+var flagPlugins = flags.StringEnumSliceFlag(
+	"plugin",
+	rabbitmq.AllowedInstanceParametersPluginsInnerEnumValues,
+	"plugins",
 )
 
 type inputModel struct {
@@ -141,7 +146,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int32(metricsFrequencyFlag, 0, "Metrics frequency")
 	cmd.Flags().String(metricsPrefixFlag, "", "Metrics prefix")
 	cmd.Flags().Var(flags.UUIDFlag(), monitoringInstanceIdFlag, "Monitoring instance ID")
-	cmd.Flags().StringSlice(pluginFlag, []string{}, "Plugin")
+	flagPlugins.Register(cmd)
 	cmd.Flags().Var(flags.CIDRSliceFlag(), sgwAclFlag, "List of IP networks in CIDR notation which are allowed to access this instance")
 	cmd.Flags().StringSlice(syslogFlag, []string{}, "Syslog")
 	cmd.Flags().Var(flags.UUIDFlag(), planIdFlag, "Plan ID")
@@ -162,7 +167,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	graphite := flags.FlagToStringPointer(p, cmd, graphiteFlag)
 	metricsFrequency := flags.FlagToInt32Pointer(p, cmd, metricsFrequencyFlag)
 	metricsPrefix := flags.FlagToStringPointer(p, cmd, metricsPrefixFlag)
-	plugin := flags.FlagToInstanceParametersPluginsInnerSliceValue(p, cmd, pluginFlag)
+	plugin := flagPlugins.Get()
 	sgwAcl := flags.FlagToStringSlicePointer(p, cmd, sgwAclFlag)
 	syslog := flags.FlagToStringSliceValue(p, cmd, syslogFlag)
 	planId := flags.FlagToStringPointer(p, cmd, planIdFlag)
