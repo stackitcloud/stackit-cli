@@ -16,7 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/dns"
+	dns "github.com/stackitcloud/stackit-sdk-go/services/dns/v1api"
 )
 
 const (
@@ -62,7 +62,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 			zone := resp.Zone
 
-			return outputResult(params.Printer, model.OutputFormat, zone)
+			return outputResult(params.Printer, model.OutputFormat, &zone)
 		},
 	}
 	return cmd
@@ -86,7 +86,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClient) dns.ApiGetZoneRequest {
-	req := apiClient.GetZone(ctx, model.ProjectId, model.ZoneId)
+	req := apiClient.DefaultAPI.GetZone(ctx, model.ProjectId, model.ZoneId)
 	return req
 }
 
@@ -97,17 +97,17 @@ func outputResult(p *print.Printer, outputFormat string, zone *dns.Zone) error {
 
 	return p.OutputResult(outputFormat, zone, func() error {
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(zone.Id))
+		table.AddRow("ID", zone.Id)
 		table.AddSeparator()
-		table.AddRow("NAME", utils.PtrString(zone.Name))
+		table.AddRow("NAME", zone.Name)
 		table.AddSeparator()
 		table.AddRow("DESCRIPTION", utils.PtrString(zone.Description))
 		table.AddSeparator()
-		table.AddRow("STATE", utils.PtrString(zone.State))
+		table.AddRow("STATE", zone.State)
 		table.AddSeparator()
-		table.AddRow("TYPE", utils.PtrString(zone.Type))
+		table.AddRow("TYPE", zone.Type)
 		table.AddSeparator()
-		table.AddRow("DNS NAME", utils.PtrString(zone.DnsName))
+		table.AddRow("DNS NAME", zone.DnsName)
 		table.AddSeparator()
 		table.AddRow("REVERSE ZONE", utils.PtrString(zone.IsReverseZone))
 		table.AddSeparator()
@@ -115,17 +115,17 @@ func outputResult(p *print.Printer, outputFormat string, zone *dns.Zone) error {
 		table.AddSeparator()
 		table.AddRow("CONTACT EMAIL", utils.PtrString(zone.ContactEmail))
 		table.AddSeparator()
-		table.AddRow("DEFAULT TTL", utils.PtrString(zone.DefaultTTL))
+		table.AddRow("DEFAULT TTL", zone.DefaultTTL)
 		table.AddSeparator()
-		table.AddRow("SERIAL NUMBER", utils.PtrString(zone.SerialNumber))
+		table.AddRow("SERIAL NUMBER", zone.SerialNumber)
 		table.AddSeparator()
-		table.AddRow("REFRESH TIME", utils.PtrString(zone.RefreshTime))
+		table.AddRow("REFRESH TIME", zone.RefreshTime)
 		table.AddSeparator()
-		table.AddRow("RETRY TIME", utils.PtrString(zone.RetryTime))
+		table.AddRow("RETRY TIME", zone.RetryTime)
 		table.AddSeparator()
-		table.AddRow("EXPIRE TIME", utils.PtrString(zone.ExpireTime))
+		table.AddRow("EXPIRE TIME", zone.ExpireTime)
 		table.AddSeparator()
-		table.AddRow("NEGATIVE CACHE", utils.PtrString(zone.NegativeCache))
+		table.AddRow("NEGATIVE CACHE", zone.NegativeCache)
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

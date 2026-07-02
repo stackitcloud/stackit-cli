@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -17,10 +18,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/dns"
+	dns "github.com/stackitcloud/stackit-sdk-go/services/dns/v1api"
 )
 
 const (
@@ -89,7 +89,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Fetch zones
-			zones, err := fetchZones(ctx, model, apiClient)
+			zones, err := fetchZones(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				return err
 			}
@@ -172,7 +172,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient dnsClient, p
 		req = req.NameLike(*model.NameLike)
 	}
 	if model.OrderByName != nil {
-		req = req.OrderByName(strings.ToUpper(*model.OrderByName))
+		req = req.OrderByName(dns.ListZonesOrderByNameParameter(strings.ToUpper(*model.OrderByName)))
 	}
 	if !model.IncludeDeleted {
 		req = req.StateNeq(deleteSucceededState)
@@ -211,7 +211,7 @@ func fetchZones(ctx context.Context, model *inputModel, apiClient dnsClient) ([]
 		if err != nil {
 			return nil, fmt.Errorf("get DNS zones: %w", err)
 		}
-		respZones := *resp.Zones
+		respZones := resp.Zones
 		if len(respZones) == 0 {
 			break
 		}
@@ -241,11 +241,12 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, zones []d
 		table.SetHeader("ID", "NAME", "STATE", "TYPE", "DNS NAME", "RECORD COUNT")
 		for i := range zones {
 			z := zones[i]
-			table.AddRow(utils.PtrString(z.Id),
-				utils.PtrString(z.Name),
-				utils.PtrString(z.State),
-				utils.PtrString(z.Type),
-				utils.PtrString(z.DnsName),
+			table.AddRow(
+				z.Id,
+				z.Name,
+				z.State,
+				z.Type,
+				z.DnsName,
 				utils.PtrString(z.RecordCount),
 			)
 		}

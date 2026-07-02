@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/dns/wait"
+	"github.com/stackitcloud/stackit-sdk-go/services/dns/v1api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/dns"
+	dns "github.com/stackitcloud/stackit-sdk-go/services/dns/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -20,7 +20,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
 	dnsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -36,7 +35,7 @@ const (
 
 var typeFlag = flags.StringEnumFlag(
 	"type",
-	dns.AllowedCreateRecordSetPayloadTypesEnumValues,
+	dns.AllowedCreateRecordSetPayloadTypeEnumValues,
 	"Record type,",
 	flags.StringEnumDefaultValue(defaultType),
 )
@@ -47,8 +46,8 @@ type inputModel struct {
 	Comment *string
 	Name    *string
 	Records []string
-	TTL     *int64
-	Type    dns.CreateRecordSetPayloadTypes
+	TTL     *int32
+	Type    dns.CreateRecordSetPayloadType
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -75,7 +74,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient, model.ProjectId, model.ZoneId)
+			zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient.DefaultAPI, model.ProjectId, model.ZoneId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get zone name: %v", err)
 				zoneLabel = model.ZoneId
@@ -93,12 +92,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("create DNS record set: %w", err)
 			}
-			recordSetId := *resp.Rrset.Id
+			recordSetId := resp.Rrset.Id
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating record set", func() error {
-					_, err = wait.CreateRecordSetWaitHandler(ctx, apiClient, model.ProjectId, model.ZoneId, recordSetId).WaitWithContext(ctx)
+					_, err = wait.CreateRecordSetWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.ZoneId, recordSetId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -117,7 +116,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), zoneIdFlag, "Zone ID")
 	cmd.Flags().String(commentFlag, "", "User comment")
 	cmd.Flags().String(nameFlag, "", "Name of the record, should be compliant with RFC1035, Section 2.3.4")
-	cmd.Flags().Int64(ttlFlag, 0, "Time to live, if not provided defaults to the zone's default TTL")
+	cmd.Flags().Int32(ttlFlag, 0, "Time to live, if not provided defaults to the zone's default TTL")
 	cmd.Flags().StringSlice(recordFlag, []string{}, "Records belonging to the record set")
 	typeFlag.Register(cmd.Flags())
 
@@ -137,7 +136,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		Comment:         flags.FlagToStringPointer(p, cmd, commentFlag),
 		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
 		Records:         flags.FlagToStringSliceValue(p, cmd, recordFlag),
-		TTL:             flags.FlagToInt64Pointer(p, cmd, ttlFlag),
+		TTL:             flags.FlagToInt32Pointer(p, cmd, ttlFlag),
 		Type:            typeFlag.Get(),
 	}
 
@@ -162,16 +161,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClient) dns.ApiCreateRecordSetRequest {
 	records := make([]dns.RecordPayload, 0)
 	for _, r := range model.Records {
-		records = append(records, dns.RecordPayload{Content: utils.Ptr(r)})
+		records = append(records, dns.RecordPayload{Content: r})
 	}
 
-	req := apiClient.CreateRecordSet(ctx, model.ProjectId, model.ZoneId)
+	req := apiClient.DefaultAPI.CreateRecordSet(ctx, model.ProjectId, model.ZoneId)
 	req = req.CreateRecordSetPayload(dns.CreateRecordSetPayload{
 		Comment: model.Comment,
-		Name:    model.Name,
-		Records: &records,
+		Name:    *model.Name,
+		Records: records,
 		Ttl:     model.TTL,
-		Type:    &model.Type,
+		Type:    model.Type,
 	})
 	return req
 }
@@ -185,7 +184,7 @@ func outputResult(p *print.Printer, model *inputModel, zoneLabel string, resp *d
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s record set for zone %s. Record set ID: %s\n", operationState, zoneLabel, utils.PtrString(resp.Rrset.Id))
+		p.Outputf("%s record set for zone %s. Record set ID: %s\n", operationState, zoneLabel, resp.Rrset.Id)
 		return nil
 	})
 }

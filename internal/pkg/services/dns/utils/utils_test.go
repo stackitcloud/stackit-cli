@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/dns"
+	dns "github.com/stackitcloud/stackit-sdk-go/services/dns/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
@@ -28,25 +28,30 @@ const (
 	testRecordSetType = "A"
 )
 
-type dnsClientMocked struct {
+type mockSettings struct {
 	getZoneFails      bool
 	getZoneResp       *dns.ZoneResponse
 	getRecordSetFails bool
 	getRecordSetResp  *dns.RecordSetResponse
 }
 
-func (m *dnsClientMocked) GetZoneExecute(_ context.Context, _, _ string) (*dns.ZoneResponse, error) {
-	if m.getZoneFails {
-		return nil, fmt.Errorf("could not get zone")
-	}
-	return m.getZoneResp, nil
-}
+func newAPIMock(settings *mockSettings) dns.DefaultAPI {
+	return &dns.DefaultAPIServiceMock{
+		GetZoneExecuteMock: utils.Ptr(func(_ dns.ApiGetZoneRequest) (*dns.ZoneResponse, error) {
+			if settings.getZoneFails {
+				return nil, fmt.Errorf("could not get zone")
+			}
 
-func (m *dnsClientMocked) GetRecordSetExecute(_ context.Context, _, _, _ string) (*dns.RecordSetResponse, error) {
-	if m.getRecordSetFails {
-		return nil, fmt.Errorf("could not get record set")
+			return settings.getZoneResp, nil
+		}),
+		GetRecordSetExecuteMock: utils.Ptr(func(_ dns.ApiGetRecordSetRequest) (*dns.RecordSetResponse, error) {
+			if settings.getRecordSetFails {
+				return nil, fmt.Errorf("could not get record set")
+			}
+
+			return settings.getRecordSetResp, nil
+		}),
 	}
-	return m.getRecordSetResp, nil
 }
 
 func TestGetZoneName(t *testing.T) {
@@ -60,8 +65,8 @@ func TestGetZoneName(t *testing.T) {
 		{
 			description: "base",
 			getZoneResp: &dns.ZoneResponse{
-				Zone: &dns.Zone{
-					Name: utils.Ptr(testZoneName),
+				Zone: dns.Zone{
+					Name: testZoneName,
 				},
 			},
 			isValid:        true,
@@ -76,10 +81,10 @@ func TestGetZoneName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &dnsClientMocked{
+			client := newAPIMock(&mockSettings{
 				getZoneFails: tt.getZoneFails,
 				getZoneResp:  tt.getZoneResp,
-			}
+			})
 
 			output, err := GetZoneName(context.Background(), client, testProjectId, testZoneId)
 
@@ -110,8 +115,8 @@ func TestGetRecordSetName(t *testing.T) {
 		{
 			description: "base",
 			getRecordSetResp: &dns.RecordSetResponse{
-				Rrset: &dns.RecordSet{
-					Name: utils.Ptr(testRecordSetName),
+				Rrset: dns.RecordSet{
+					Name: testRecordSetName,
 				},
 			},
 			isValid:        true,
@@ -126,10 +131,10 @@ func TestGetRecordSetName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &dnsClientMocked{
+			client := newAPIMock(&mockSettings{
 				getRecordSetFails: tt.getRecordSetFails,
 				getRecordSetResp:  tt.getRecordSetResp,
-			}
+			})
 
 			output, err := GetRecordSetName(context.Background(), client, testProjectId, testZoneId, testRecordSetId)
 
@@ -160,8 +165,8 @@ func TestGetRecordSetType(t *testing.T) {
 		{
 			description: "base",
 			getRecordSetResp: &dns.RecordSetResponse{
-				Rrset: &dns.RecordSet{
-					Name: utils.Ptr(testRecordSetType),
+				Rrset: dns.RecordSet{
+					Name: testRecordSetType,
 				},
 			},
 			isValid:        true,
@@ -176,10 +181,10 @@ func TestGetRecordSetType(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &dnsClientMocked{
+			client := newAPIMock(&mockSettings{
 				getRecordSetFails: tt.getRecordSetFails,
 				getRecordSetResp:  tt.getRecordSetResp,
-			}
+			})
 
 			output, err := GetRecordSetName(context.Background(), client, testProjectId, testZoneId, testRecordSetId)
 

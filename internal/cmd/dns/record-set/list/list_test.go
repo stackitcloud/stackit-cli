@@ -12,7 +12,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
-	"github.com/stackitcloud/stackit-sdk-go/services/dns"
+	dns "github.com/stackitcloud/stackit-sdk-go/services/dns/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -23,7 +23,7 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &dns.APIClient{}
+var testClient = &dns.APIClient{DefaultAPI: &dns.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testZoneId = uuid.NewString()
 
@@ -58,7 +58,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *dns.ApiListRecordSetsRequest)) dns.ApiListRecordSetsRequest {
-	request := testClient.ListRecordSets(testCtx, testProjectId, testZoneId)
+	request := testClient.DefaultAPI.ListRecordSets(testCtx, testProjectId, testZoneId)
 	request = request.NameLike("some-pattern")
 	request = request.OrderByName("ASC")
 	request = request.PageSize(pageSizeDefault)
@@ -273,16 +273,16 @@ func TestBuildRequest(t *testing.T) {
 				PageSize: 10,
 			},
 			page:            1,
-			expectedRequest: testClient.ListRecordSets(testCtx, testProjectId, testZoneId).Page(1).PageSize(10).StateNeq(deleteSucceededState),
+			expectedRequest: testClient.DefaultAPI.ListRecordSets(testCtx, testProjectId, testZoneId).Page(1).PageSize(10).StateNeq(deleteSucceededState),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient, tt.page)
+			request := buildRequest(testCtx, tt.model, testClient.DefaultAPI, tt.page)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, dns.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {
@@ -420,7 +420,7 @@ func TestFetchRecordSets(t *testing.T) {
 
 				recordSets := make([]dns.RecordSet, numItemsToReturn)
 				mockedResp := dns.ListRecordSetsResponse{
-					RrSets: &recordSets,
+					RrSets: recordSets,
 				}
 
 				mockedRespBytes, err := json.Marshal(mockedResp)
@@ -443,7 +443,7 @@ func TestFetchRecordSets(t *testing.T) {
 				t.Fatalf("Failed to initialize client: %v", err)
 			}
 
-			recordSets, err := fetchRecordSets(testCtx, tt.model, client)
+			recordSets, err := fetchRecordSets(testCtx, tt.model, client.DefaultAPI)
 			if err != nil {
 				if !tt.apiCallFails {
 					t.Fatalf("did not fail on invalid input")

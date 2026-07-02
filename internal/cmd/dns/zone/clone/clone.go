@@ -18,8 +18,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/dns"
-	"github.com/stackitcloud/stackit-sdk-go/services/dns/wait"
+	dns "github.com/stackitcloud/stackit-sdk-go/services/dns/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/dns/v1api/wait"
 )
 
 const (
@@ -69,7 +69,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient, model.ProjectId, model.ZoneId)
+			zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient.DefaultAPI, model.ProjectId, model.ZoneId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get zone name: %v", err)
 				zoneLabel = model.ZoneId
@@ -87,12 +87,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("clone DNS zone: %w", err)
 			}
-			zoneId := *resp.Zone.Id
+			zoneId := resp.Zone.Id
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Cloning zone", func() error {
-					_, err = wait.CreateZoneWaitHandler(ctx, apiClient, model.ProjectId, zoneId).WaitWithContext(ctx)
+					_, err = wait.CreateZoneWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, zoneId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -139,10 +139,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClient) dns.ApiCloneZoneRequest {
-	req := apiClient.CloneZone(ctx, model.ProjectId, model.ZoneId)
+	req := apiClient.DefaultAPI.CloneZone(ctx, model.ProjectId, model.ZoneId)
 	req = req.CloneZonePayload(dns.CloneZonePayload{
 		Name:          model.Name,
-		DnsName:       model.DnsName,
+		DnsName:       *model.DnsName,
 		Description:   model.Description,
 		AdjustRecords: model.AdjustRecords,
 	})
@@ -158,7 +158,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 		if model.Async {
 			operationState = "Triggered cloning of"
 		}
-		p.Outputf("%s zone for project %q. Zone ID: %s\n", operationState, projectLabel, utils.PtrString(resp.Zone.Id))
+		p.Outputf("%s zone for project %q. Zone ID: %s\n", operationState, projectLabel, resp.Zone.Id)
 		return nil
 	})
 }
