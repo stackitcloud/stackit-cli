@@ -74,12 +74,12 @@ func TestGetInstanceName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			mockOptions := &apiClientMockOptions{
+			mockOptions := apiClientMockOptions{
 				getInstanceFails: tt.getInstanceFails,
 				getInstanceResp:  tt.getInstanceResp,
 			}
 
-			output, err := GetInstanceName(context.Background(), newAPIClient(*mockOptions).DefaultAPI, testProjectId, testInstanceId)
+			output, err := GetInstanceName(context.Background(), newAPIClient(mockOptions).DefaultAPI, testProjectId, testInstanceId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")

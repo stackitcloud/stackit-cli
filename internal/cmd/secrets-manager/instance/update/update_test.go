@@ -358,6 +358,7 @@ func TestBuildUpdateInstanceRequest(t *testing.T) {
 		description     string
 		model           *inputModel
 		expectedRequest secretsmanager.ApiUpdateInstanceRequest
+		wantErr         bool
 	}{
 		{
 			description: "with name only",
@@ -382,11 +383,21 @@ func TestBuildUpdateInstanceRequest(t *testing.T) {
 			}),
 			expectedRequest: fixtureUpdateInstanceRequest(),
 		},
+		{
+			description: "nil instance name",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.InstanceName = nil
+			}),
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request, _ := buildUpdateInstanceRequest(testCtx, tt.model, testClient)
+			request, err := buildUpdateInstanceRequest(testCtx, tt.model, testClient)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("buildUpdateInstanceRequest() error = %v, wantErr %v", err, tt.wantErr)
+			}
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),

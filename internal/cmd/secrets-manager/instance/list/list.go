@@ -77,11 +77,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Truncate output
-			if model.Limit != nil && len((resp.Instances)) > int(*model.Limit) {
-				(resp.Instances) = resp.Instances[:*model.Limit]
+			if model.Limit != nil && len(resp.Instances) > int(*model.Limit) {
+				resp.Instances = resp.Instances[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, (resp.Instances))
+			return outputResult(params.Printer, model.OutputFormat, resp.Instances)
 		},
 	}
 

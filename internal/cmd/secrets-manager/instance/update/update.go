@@ -166,26 +166,26 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildUpdateInstanceRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) (secretsmanager.ApiUpdateInstanceRequest, error) {
-	if model.InstanceName != nil {
-		req := apiClient.DefaultAPI.UpdateInstance(ctx, model.ProjectId, model.InstanceId)
-
-		payload := secretsmanager.UpdateInstancePayload{
-			Name: *model.InstanceName,
-		}
-
-		if model.KmsKeyId != nil && model.KmsKeyringId != nil && model.KmsKeyVersion != nil && model.KmsServiceAccountEmail != nil {
-			payload.KmsKey = &secretsmanager.KmsKeyPayload{
-				KeyId:               *model.KmsKeyId,
-				KeyRingId:           *model.KmsKeyringId,
-				KeyVersion:          *model.KmsKeyVersion,
-				ServiceAccountEmail: *model.KmsServiceAccountEmail,
-			}
-		}
-		req = req.UpdateInstancePayload(payload)
-
-		return req, nil
+	if model.InstanceName == nil {
+		return secretsmanager.ApiUpdateInstanceRequest{}, fmt.Errorf("instanceName must not be null")
 	}
-	return secretsmanager.ApiUpdateInstanceRequest{}, fmt.Errorf("instanceName must not be null")
+	req := apiClient.DefaultAPI.UpdateInstance(ctx, model.ProjectId, model.InstanceId)
+
+	payload := secretsmanager.UpdateInstancePayload{
+		Name: *model.InstanceName,
+	}
+
+	if model.KmsKeyId != nil && model.KmsKeyringId != nil && model.KmsKeyVersion != nil && model.KmsServiceAccountEmail != nil {
+		payload.KmsKey = &secretsmanager.KmsKeyPayload{
+			KeyId:               *model.KmsKeyId,
+			KeyRingId:           *model.KmsKeyringId,
+			KeyVersion:          *model.KmsKeyVersion,
+			ServiceAccountEmail: *model.KmsServiceAccountEmail,
+		}
+	}
+	req = req.UpdateInstancePayload(payload)
+
+	return req, nil
 }
 
 func buildUpdateACLsRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiUpdateACLsRequest {

@@ -154,7 +154,7 @@ func buildCreateInstanceRequest(ctx context.Context, model *inputModel, apiClien
 		Name: model.InstanceName,
 	}
 
-	if model.KmsKeyId != nil {
+	if model.KmsKeyId != nil && model.KmsKeyringId != nil && model.KmsKeyVersion != nil && model.KmsServiceAccountEmail != nil {
 		payload.KmsKey = &secretsmanager.KmsKeyPayload{
 			KeyId:               *model.KmsKeyId,
 			KeyRingId:           *model.KmsKeyringId,

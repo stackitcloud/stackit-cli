@@ -7,7 +7,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -46,8 +45,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId:  testInstanceId,
-		Description: utils.Ptr("sample description"),
-		Write:       utils.Ptr(false),
+		Description: "sample description",
+		Write:       false,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -90,7 +89,7 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Description = utils.Ptr("")
+				model.Description = ""
 			}),
 		},
 		{
@@ -148,7 +147,7 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Write = utils.Ptr(true)
+				model.Write = true
 			}),
 		},
 	}

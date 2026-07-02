@@ -14,7 +14,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/client"
 	secretsManagerUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/utils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 	secretsmanager "github.com/stackitcloud/stackit-sdk-go/services/secretsmanager/v1api"
@@ -30,8 +29,8 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 
 	InstanceId  string
-	Description *string
-	Write       *bool
+	Description string
+	Write       bool
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -110,8 +109,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
-		Description:     utils.Ptr(flags.FlagToStringValue(p, cmd, descriptionFlag)),
-		Write:           utils.Ptr(flags.FlagToBoolValue(p, cmd, writeFlag)),
+		Description:     flags.FlagToStringValue(p, cmd, descriptionFlag),
+		Write:           flags.FlagToBoolValue(p, cmd, writeFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -120,17 +119,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiCreateUserRequest {
 	req := apiClient.DefaultAPI.CreateUser(ctx, model.ProjectId, model.InstanceId)
-	var description string
-	var write bool
-	if model.Description != nil {
-		description = *model.Description
-	}
-	if model.Write != nil {
-		write = *model.Write
-	}
 	req = req.CreateUserPayload(secretsmanager.CreateUserPayload{
-		Description: description,
-		Write:       write,
+		Description: model.Description,
+		Write:       model.Write,
 	})
 	return req
 }
