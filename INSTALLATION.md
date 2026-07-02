@@ -24,7 +24,13 @@ The STACKIT CLI can be installed through the [Homebrew](https://brew.sh/) packag
 brew tap stackitcloud/tap
 ```
 
-2. You can then install the CLI via:
+2. Trust the STACKIT CLI cask:
+
+```shell
+brew trust --cask stackitcloud/tap/stackit
+```
+
+3. You can then install the CLI via:
 
 ```shell
 brew install --cask stackit
