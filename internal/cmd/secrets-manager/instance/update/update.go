@@ -18,7 +18,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/secretsmanager"
+	secretsmanager "github.com/stackitcloud/stackit-sdk-go/services/secretsmanager/v1api"
 )
 
 const (
@@ -79,7 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			existingInstanceName, err := secretsManagerUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			existingInstanceName, err := secretsManagerUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				existingInstanceName = model.InstanceId
@@ -93,7 +93,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API - execute UpdateInstance and/or UpdateACLs based on flags
 			if model.InstanceName != nil {
-				req := buildUpdateInstanceRequest(ctx, model, apiClient)
+				req, err := buildUpdateInstanceRequest(ctx, model, apiClient)
+				if err != nil {
+					return fmt.Errorf("unable to build update instance request: %w", err)
+				}
 				err = req.Execute()
 				if err != nil {
 					return fmt.Errorf("update Secrets Manager instance: %w", err)
@@ -162,37 +165,39 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildUpdateInstanceRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiUpdateInstanceRequest {
-	req := apiClient.UpdateInstance(ctx, model.ProjectId, model.InstanceId)
+func buildUpdateInstanceRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) (secretsmanager.ApiUpdateInstanceRequest, error) {
+	if model.InstanceName == nil {
+		return secretsmanager.ApiUpdateInstanceRequest{}, fmt.Errorf("instanceName must not be null")
+	}
+	req := apiClient.DefaultAPI.UpdateInstance(ctx, model.ProjectId, model.InstanceId)
 
 	payload := secretsmanager.UpdateInstancePayload{
-		Name: model.InstanceName,
+		Name: *model.InstanceName,
 	}
 
-	if model.KmsKeyId != nil {
+	if model.KmsKeyId != nil && model.KmsKeyringId != nil && model.KmsKeyVersion != nil && model.KmsServiceAccountEmail != nil {
 		payload.KmsKey = &secretsmanager.KmsKeyPayload{
-			KeyId:               model.KmsKeyId,
-			KeyRingId:           model.KmsKeyringId,
-			KeyVersion:          model.KmsKeyVersion,
-			ServiceAccountEmail: model.KmsServiceAccountEmail,
+			KeyId:               *model.KmsKeyId,
+			KeyRingId:           *model.KmsKeyringId,
+			KeyVersion:          *model.KmsKeyVersion,
+			ServiceAccountEmail: *model.KmsServiceAccountEmail,
 		}
 	}
-
 	req = req.UpdateInstancePayload(payload)
 
-	return req
+	return req, nil
 }
 
 func buildUpdateACLsRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiUpdateACLsRequest {
-	req := apiClient.UpdateACLs(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.DefaultAPI.UpdateACLs(ctx, model.ProjectId, model.InstanceId)
 
 	cidrs := []secretsmanager.UpdateACLPayload{}
 
 	for _, acl := range *model.Acls {
-		cidrs = append(cidrs, secretsmanager.UpdateACLPayload{Cidr: utils.Ptr(acl)})
+		cidrs = append(cidrs, secretsmanager.UpdateACLPayload{Cidr: acl})
 	}
 
-	req = req.UpdateACLsPayload(secretsmanager.UpdateACLsPayload{Cidrs: &cidrs})
+	req = req.UpdateACLsPayload(secretsmanager.UpdateACLsPayload{Cidrs: cidrs})
 
 	return req
 }
