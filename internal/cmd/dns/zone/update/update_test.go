@@ -11,13 +11,13 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/dns"
+	dns "github.com/stackitcloud/stackit-sdk-go/services/dns/v1api"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &dns.APIClient{}
+var testClient = &dns.APIClient{DefaultAPI: &dns.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testZoneId = uuid.NewString()
 
@@ -59,13 +59,13 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		ZoneId:        testZoneId,
 		Name:          utils.Ptr("example"),
-		DefaultTTL:    utils.Ptr(int64(3600)),
-		Primaries:     utils.Ptr([]string{"1.1.1.1"}),
+		DefaultTTL:    utils.Ptr(int32(3600)),
+		Primaries:     []string{"1.1.1.1"},
 		Acl:           utils.Ptr("0.0.0.0/0"),
-		RetryTime:     utils.Ptr(int64(600)),
-		RefreshTime:   utils.Ptr(int64(3600)),
-		NegativeCache: utils.Ptr(int64(60)),
-		ExpireTime:    utils.Ptr(int64(36000000)),
+		RetryTime:     utils.Ptr(int32(600)),
+		RefreshTime:   utils.Ptr(int32(3600)),
+		NegativeCache: utils.Ptr(int32(60)),
+		ExpireTime:    utils.Ptr(int32(36000000)),
 		Description:   utils.Ptr("Example"),
 		ContactEmail:  utils.Ptr("example@example.com"),
 	}
@@ -76,16 +76,16 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *dns.ApiPartialUpdateZoneRequest)) dns.ApiPartialUpdateZoneRequest {
-	request := testClient.PartialUpdateZone(testCtx, testProjectId, testZoneId)
+	request := testClient.DefaultAPI.PartialUpdateZone(testCtx, testProjectId, testZoneId)
 	request = request.PartialUpdateZonePayload(dns.PartialUpdateZonePayload{
 		Name:          utils.Ptr("example"),
-		DefaultTTL:    utils.Ptr(int64(3600)),
-		Primaries:     utils.Ptr([]string{"1.1.1.1"}),
+		DefaultTTL:    utils.Ptr(int32(3600)),
+		Primaries:     []string{"1.1.1.1"},
 		Acl:           utils.Ptr("0.0.0.0/0"),
-		RetryTime:     utils.Ptr(int64(600)),
-		RefreshTime:   utils.Ptr(int64(3600)),
-		NegativeCache: utils.Ptr(int64(60)),
-		ExpireTime:    utils.Ptr(int64(36000000)),
+		RetryTime:     utils.Ptr(int32(600)),
+		RefreshTime:   utils.Ptr(int32(3600)),
+		NegativeCache: utils.Ptr(int32(60)),
+		ExpireTime:    utils.Ptr(int32(36000000)),
 		Description:   utils.Ptr("Example"),
 		ContactEmail:  utils.Ptr("example@example.com"),
 	})
@@ -168,13 +168,13 @@ func TestParseInput(t *testing.T) {
 				},
 				ZoneId:        testZoneId,
 				Name:          utils.Ptr(""),
-				DefaultTTL:    utils.Ptr(int64(0)),
-				Primaries:     utils.Ptr([]string{}),
+				DefaultTTL:    utils.Ptr(int32(0)),
+				Primaries:     []string{},
 				Acl:           utils.Ptr(""),
-				RetryTime:     utils.Ptr(int64(0)),
-				RefreshTime:   utils.Ptr(int64(0)),
-				NegativeCache: utils.Ptr(int64(0)),
-				ExpireTime:    utils.Ptr(int64(0)),
+				RetryTime:     utils.Ptr(int32(0)),
+				RefreshTime:   utils.Ptr(int32(0)),
+				NegativeCache: utils.Ptr(int32(0)),
+				ExpireTime:    utils.Ptr(int32(0)),
 				Description:   utils.Ptr(""),
 				ContactEmail:  utils.Ptr(""),
 			},
@@ -222,9 +222,8 @@ func TestParseInput(t *testing.T) {
 			primaryFlagValues: []string{"1.2.3.4", "5.6.7.8"},
 			isValid:           true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Primaries = utils.Ptr(
-					append(*model.Primaries, "1.2.3.4", "5.6.7.8"),
-				)
+				model.Primaries =
+					append(model.Primaries, "1.2.3.4", "5.6.7.8")
 			}),
 		},
 		{
@@ -234,9 +233,8 @@ func TestParseInput(t *testing.T) {
 			primaryFlagValues: []string{"1.2.3.4,5.6.7.8"},
 			isValid:           true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Primaries = utils.Ptr(
-					append(*model.Primaries, "1.2.3.4", "5.6.7.8"),
-				)
+				model.Primaries =
+					append(model.Primaries, "1.2.3.4", "5.6.7.8")
 			}),
 		},
 	}
@@ -325,7 +323,7 @@ func TestBuildRequest(t *testing.T) {
 				},
 				ZoneId: testZoneId,
 			},
-			expectedRequest: testClient.PartialUpdateZone(testCtx, testProjectId, testZoneId).
+			expectedRequest: testClient.DefaultAPI.PartialUpdateZone(testCtx, testProjectId, testZoneId).
 				PartialUpdateZonePayload(dns.PartialUpdateZonePayload{}),
 		},
 	}
@@ -335,7 +333,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, dns.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {

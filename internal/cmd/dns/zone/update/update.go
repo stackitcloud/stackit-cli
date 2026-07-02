@@ -18,8 +18,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/dns"
-	"github.com/stackitcloud/stackit-sdk-go/services/dns/wait"
+	dns "github.com/stackitcloud/stackit-sdk-go/services/dns/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/dns/v1api/wait"
 )
 
 const (
@@ -41,13 +41,13 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	ZoneId        string
 	Name          *string
-	DefaultTTL    *int64
-	Primaries     *[]string
+	DefaultTTL    *int32
+	Primaries     []string
 	Acl           *string
-	RetryTime     *int64
-	RefreshTime   *int64
-	NegativeCache *int64
-	ExpireTime    *int64
+	RetryTime     *int32
+	RefreshTime   *int32
+	NegativeCache *int32
+	ExpireTime    *int32
 	Description   *string
 	ContactEmail  *string
 }
@@ -76,7 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient, model.ProjectId, model.ZoneId)
+			zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient.DefaultAPI, model.ProjectId, model.ZoneId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get zone name: %v", err)
 				zoneLabel = model.ZoneId
@@ -101,7 +101,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Updating zone", func() error {
-					_, err = wait.PartialUpdateZoneWaitHandler(ctx, apiClient, model.ProjectId, model.ZoneId).WaitWithContext(ctx)
+					_, err = wait.PartialUpdateZoneWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.ZoneId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -123,13 +123,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(nameFlag, "", "User given name of the zone")
-	cmd.Flags().Int64(defaultTTLFlag, 1000, "Default time to live")
+	cmd.Flags().Int32(defaultTTLFlag, 1000, "Default time to live")
 	cmd.Flags().StringSlice(primaryFlag, []string{}, "Primary name server for secondary zone")
 	cmd.Flags().String(aclFlag, "", "Access control list")
-	cmd.Flags().Int64(retryTimeFlag, 0, "Retry time")
-	cmd.Flags().Int64(refreshTimeFlag, 0, "Refresh time")
-	cmd.Flags().Int64(negativeCacheFlag, 0, "Negative cache")
-	cmd.Flags().Int64(expireTimeFlag, 0, "Expire time")
+	cmd.Flags().Int32(retryTimeFlag, 0, "Retry time")
+	cmd.Flags().Int32(refreshTimeFlag, 0, "Refresh time")
+	cmd.Flags().Int32(negativeCacheFlag, 0, "Negative cache")
+	cmd.Flags().Int32(expireTimeFlag, 0, "Expire time")
 	cmd.Flags().String(descriptionFlag, "", "Description of the zone")
 	cmd.Flags().String(contactEmailFlag, "", "Contact email for the zone")
 }
@@ -143,13 +143,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	name := flags.FlagToStringPointer(p, cmd, nameFlag)
-	defaultTTL := flags.FlagToInt64Pointer(p, cmd, defaultTTLFlag)
-	primaries := flags.FlagToStringSlicePointer(p, cmd, primaryFlag)
+	defaultTTL := flags.FlagToInt32Pointer(p, cmd, defaultTTLFlag)
+	primaries := flags.FlagToStringSliceValue(p, cmd, primaryFlag)
 	acl := flags.FlagToStringPointer(p, cmd, aclFlag)
-	retryTime := flags.FlagToInt64Pointer(p, cmd, retryTimeFlag)
-	refreshTime := flags.FlagToInt64Pointer(p, cmd, refreshTimeFlag)
-	negativeCache := flags.FlagToInt64Pointer(p, cmd, negativeCacheFlag)
-	expireTime := flags.FlagToInt64Pointer(p, cmd, expireTimeFlag)
+	retryTime := flags.FlagToInt32Pointer(p, cmd, retryTimeFlag)
+	refreshTime := flags.FlagToInt32Pointer(p, cmd, refreshTimeFlag)
+	negativeCache := flags.FlagToInt32Pointer(p, cmd, negativeCacheFlag)
+	expireTime := flags.FlagToInt32Pointer(p, cmd, expireTimeFlag)
 	description := flags.FlagToStringPointer(p, cmd, descriptionFlag)
 	contactEmail := flags.FlagToStringPointer(p, cmd, contactEmailFlag)
 
@@ -180,7 +180,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClient) dns.ApiPartialUpdateZoneRequest {
-	req := apiClient.PartialUpdateZone(ctx, model.ProjectId, model.ZoneId)
+	req := apiClient.DefaultAPI.PartialUpdateZone(ctx, model.ProjectId, model.ZoneId)
 	req = req.PartialUpdateZonePayload(dns.PartialUpdateZonePayload{
 		Name:          model.Name,
 		DefaultTTL:    model.DefaultTTL,
