@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/secretsmanager"
+	secretsmanager "github.com/stackitcloud/stackit-sdk-go/services/secretsmanager/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
@@ -23,25 +23,30 @@ const (
 	testDescription  = "sample description"
 )
 
-type secretsManagerClientMocked struct {
+type apiClientMockOptions struct {
 	getInstanceFails bool
 	getInstanceResp  *secretsmanager.Instance
 	getUserFails     bool
 	getUserResp      *secretsmanager.User
 }
 
-func (s *secretsManagerClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*secretsmanager.Instance, error) {
-	if s.getInstanceFails {
-		return nil, fmt.Errorf("could not get instance")
+func newAPIClient(options apiClientMockOptions) secretsmanager.APIClient {
+	return secretsmanager.APIClient{
+		DefaultAPI: secretsmanager.DefaultAPIServiceMock{
+			GetUserExecuteMock: utils.Ptr(func(_ secretsmanager.ApiGetUserRequest) (*secretsmanager.User, error) {
+				if options.getUserFails {
+					return nil, fmt.Errorf("could not get user")
+				}
+				return options.getUserResp, nil
+			}),
+			GetInstanceExecuteMock: utils.Ptr(func(_ secretsmanager.ApiGetInstanceRequest) (*secretsmanager.Instance, error) {
+				if options.getInstanceFails {
+					return nil, fmt.Errorf("could not get instance")
+				}
+				return options.getInstanceResp, nil
+			}),
+		},
 	}
-	return s.getInstanceResp, nil
-}
-
-func (s *secretsManagerClientMocked) GetUserExecute(_ context.Context, _, _, _ string) (*secretsmanager.User, error) {
-	if s.getUserFails {
-		return nil, fmt.Errorf("could not get user")
-	}
-	return s.getUserResp, nil
 }
 
 func TestGetInstanceName(t *testing.T) {
@@ -55,7 +60,7 @@ func TestGetInstanceName(t *testing.T) {
 		{
 			description: "base",
 			getInstanceResp: &secretsmanager.Instance{
-				Name: utils.Ptr(testInstanceName),
+				Name: testInstanceName,
 			},
 			isValid:        true,
 			expectedOutput: testInstanceName,
@@ -69,12 +74,12 @@ func TestGetInstanceName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &secretsManagerClientMocked{
+			mockOptions := apiClientMockOptions{
 				getInstanceFails: tt.getInstanceFails,
 				getInstanceResp:  tt.getInstanceResp,
 			}
 
-			output, err := GetInstanceName(context.Background(), client, testProjectId, testInstanceId)
+			output, err := GetInstanceName(context.Background(), newAPIClient(mockOptions).DefaultAPI, testProjectId, testInstanceId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -103,8 +108,8 @@ func TestGetUserDetails(t *testing.T) {
 		{
 			description: "base",
 			GetUserResp: &secretsmanager.User{
-				Username:    utils.Ptr(testUserName),
-				Description: utils.Ptr(testDescription),
+				Username:    testUserName,
+				Description: testDescription,
 			},
 			isValid:        true,
 			expectedOutput: fmt.Sprintf("%q (%s)", testUserName, testDescription),
@@ -112,7 +117,7 @@ func TestGetUserDetails(t *testing.T) {
 		{
 			description: "user has no description",
 			GetUserResp: &secretsmanager.User{
-				Username: utils.Ptr(testUserName),
+				Username: testUserName,
 			},
 			isValid:        true,
 			expectedOutput: fmt.Sprintf("%q", testUserName),
@@ -120,8 +125,8 @@ func TestGetUserDetails(t *testing.T) {
 		{
 			description: "user has empty description",
 			GetUserResp: &secretsmanager.User{
-				Username:    utils.Ptr(testUserName),
-				Description: utils.Ptr(""),
+				Username:    testUserName,
+				Description: "",
 			},
 			isValid:        true,
 			expectedOutput: fmt.Sprintf("%q", testUserName),
@@ -129,14 +134,14 @@ func TestGetUserDetails(t *testing.T) {
 		{
 			description: "user has empty username",
 			GetUserResp: &secretsmanager.User{
-				Username: utils.Ptr(""),
+				Username: "",
 			},
 			isValid: false,
 		},
 		{
 			description: "user has no username",
 			GetUserResp: &secretsmanager.User{
-				Username: nil,
+				Username: "",
 			},
 			isValid: false,
 		},
@@ -149,12 +154,12 @@ func TestGetUserDetails(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &secretsManagerClientMocked{
+			options := &apiClientMockOptions{
 				getUserFails: tt.getUserFails,
 				getUserResp:  tt.GetUserResp,
 			}
 
-			userLabel, err := GetUserLabel(context.Background(), client, testProjectId, testInstanceId, testUserId)
+			userLabel, err := GetUserLabel(context.Background(), newAPIClient(*options).DefaultAPI, testProjectId, testInstanceId, testUserId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
