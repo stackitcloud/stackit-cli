@@ -10,7 +10,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -18,7 +18,7 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &observability.APIClient{}
+var testClient = &observability.APIClient{DefaultAPI: &observability.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 var testJobName = "my-config"
@@ -60,7 +60,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *observability.ApiGetScrapeConfigRequest)) observability.ApiGetScrapeConfigRequest {
-	request := testClient.GetScrapeConfig(testCtx, testInstanceId, testJobName, testProjectId)
+	request := testClient.DefaultAPI.GetScrapeConfig(testCtx, testInstanceId, testJobName, testProjectId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -220,10 +220,10 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			request := buildRequest(testCtx, tt.model, testClient.DefaultAPI)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, observability.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {
@@ -236,7 +236,7 @@ func TestBuildRequest(t *testing.T) {
 func TestOutputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
-		config       *observability.Job
+		config       observability.Job
 	}
 	tests := []struct {
 		name    string
@@ -244,14 +244,13 @@ func TestOutputResult(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "empty",
-			args:    args{},
-			wantErr: true,
+			name: "empty",
+			args: args{},
 		},
 		{
 			name: "empty config",
 			args: args{
-				config: &observability.Job{},
+				config: observability.Job{},
 			},
 			wantErr: false,
 		},
@@ -259,7 +258,7 @@ func TestOutputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.config); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, &tt.args.config); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

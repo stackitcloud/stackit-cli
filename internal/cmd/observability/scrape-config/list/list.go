@@ -14,12 +14,11 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	observabilityUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
 )
 
 const (
@@ -64,7 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get scrape configurations: %w", err)
@@ -72,7 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			configs := resp.GetData()
 
-			instanceLabel, err := observabilityUtils.GetInstanceName(ctx, apiClient, model.InstanceId, model.ProjectId)
+			instanceLabel, err := observabilityUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.InstanceId, model.ProjectId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -120,7 +119,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *observability.APIClient) observability.ApiListScrapeConfigsRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient observability.DefaultAPI) observability.ApiListScrapeConfigsRequest {
 	req := apiClient.ListScrapeConfigs(ctx, model.InstanceId, model.ProjectId)
 	return req
 }
@@ -138,18 +137,18 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, configs 
 
 			targets := 0
 			if c.StaticConfigs != nil {
-				for _, sc := range *c.StaticConfigs {
+				for _, sc := range c.StaticConfigs {
 					if sc.Targets == nil {
 						continue
 					}
-					targets += len(*sc.Targets)
+					targets += len(sc.Targets)
 				}
 			}
 
 			table.AddRow(
-				utils.PtrString(c.JobName),
+				c.JobName,
 				targets,
-				utils.PtrString(c.ScrapeInterval),
+				c.ScrapeInterval,
 			)
 		}
 		err := table.Display(p)

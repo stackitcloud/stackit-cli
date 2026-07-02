@@ -1,12 +1,13 @@
 package utils
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
-	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
-
 	"github.com/spf13/viper"
+	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
+	"github.com/stackitcloud/stackit-sdk-go/core/utils"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 )
@@ -50,6 +51,57 @@ func TestConvertInt64PToFloat64P(t *testing.T) {
 				t.Errorf("ConvertInt64ToFloat64() = %v, want %v", *expected, *tt.expected)
 			}
 		})
+	}
+}
+
+func TestConvertInt32PToFloat64P(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    *int32
+		expected *float32
+	}{
+		{
+			name:     "positive",
+			input:    utils.Ptr(int32(1)),
+			expected: utils.Ptr(float32(1)),
+		},
+		{
+			name:     "negative",
+			input:    utils.Ptr(int32(-1)),
+			expected: utils.Ptr(float32(-1)),
+		},
+		{
+			name:     "zero",
+			input:    utils.Ptr(int32(0)),
+			expected: utils.Ptr(float32(0)),
+		},
+		{
+			name:     "nil",
+			input:    nil,
+			expected: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			expected := ConvertInt32PToFloat32P(tt.input)
+
+			if expected == nil && tt.expected == nil && tt.input == nil {
+				return
+			}
+
+			if *expected != *tt.expected {
+				t.Errorf("ConvertInt64ToFloat64() = %v, want %v", *expected, *tt.expected)
+			}
+		})
+	}
+}
+
+func TestConvertInt32PToFloat64PLossyConversion(t *testing.T) {
+	i := int32(900_000_001)
+	f := ConvertInt32PToFloat32P(&i)
+	s := fmt.Sprintf("%f", *f)
+	if s != "900000000.000000" {
+		t.Errorf("Expected lossy conversion of %d to %f, got %s", i, *f, s)
 	}
 }
 

@@ -16,11 +16,10 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability/wait"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/observability/v1api/wait"
 
 	observabilityUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/utils"
 )
@@ -79,7 +78,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				var observabilityInvalidPlanError *cliErr.ObservabilityInvalidPlanError
 				if !errors.As(err, &observabilityInvalidPlanError) {
@@ -91,12 +90,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("create Observability instance: %w", err)
 			}
-			instanceId := *resp.InstanceId
+			instanceId := resp.InstanceId
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating instance", func() error {
-					_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, instanceId, model.ProjectId).WaitWithContext(ctx)
+					_, err = wait.CreateInstanceWaitHandler(ctx, apiClient.DefaultAPI, instanceId, model.ProjectId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -151,18 +150,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-type observabilityClient interface {
-	CreateInstance(ctx context.Context, projectId string) observability.ApiCreateInstanceRequest
-	ListPlansExecute(ctx context.Context, projectId string) (*observability.PlansResponse, error)
-}
-
-func buildRequest(ctx context.Context, model *inputModel, apiClient observabilityClient) (observability.ApiCreateInstanceRequest, error) {
+func buildRequest(ctx context.Context, model *inputModel, apiClient observability.DefaultAPI) (observability.ApiCreateInstanceRequest, error) {
 	req := apiClient.CreateInstance(ctx, model.ProjectId)
 
-	var planId *string
+	var planId string
 	var err error
 
-	plans, err := apiClient.ListPlansExecute(ctx, model.ProjectId)
+	plans, err := apiClient.ListPlans(ctx, model.ProjectId).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get Observability plans: %w", err)
 	}
@@ -181,7 +175,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient observabilit
 		if err != nil {
 			return req, err
 		}
-		planId = model.PlanId
+		planId = *model.PlanId
 	}
 
 	req = req.CreateInstancePayload(observability.CreateInstancePayload{
@@ -201,7 +195,7 @@ func outputResult(p *print.Printer, outputFormat string, async bool, projectLabe
 		if async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, utils.PtrString(resp.InstanceId))
+		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, resp.InstanceId)
 		return nil
 	})
 }

@@ -16,11 +16,10 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/client"
 	observabilityUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability/wait"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/observability/v1api/wait"
 )
 
 const (
@@ -74,7 +73,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := observabilityUtils.GetInstanceName(ctx, apiClient, model.InstanceId, model.ProjectId)
+			instanceLabel, err := observabilityUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.InstanceId, model.ProjectId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -89,14 +88,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				model.Payload = &defaultPayload
 			}
 
-			prompt := fmt.Sprintf("Are you sure you want to create scrape configuration %q on Observability instance %q?", *model.Payload.JobName, instanceLabel)
+			prompt := fmt.Sprintf("Are you sure you want to create scrape configuration %q on Observability instance %q?", model.Payload.JobName, instanceLabel)
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 			_, err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("create scrape configuration: %w", err)
@@ -107,7 +106,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating scrape config", func() error {
-					_, err = wait.CreateScrapeConfigWaitHandler(ctx, apiClient, model.InstanceId, *jobName, model.ProjectId).WaitWithContext(ctx)
+					_, err = wait.CreateScrapeConfigWaitHandler(ctx, apiClient.DefaultAPI, model.InstanceId, jobName, model.ProjectId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -119,7 +118,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered creation of"
 			}
-			params.Printer.Outputf("%s scrape configuration with name %q for Observability instance %q\n", operationState, utils.PtrString(jobName), instanceLabel)
+			params.Printer.Outputf("%s scrape configuration with name %q for Observability instance %q\n", operationState, jobName, instanceLabel)
 			return nil
 		},
 	}
@@ -158,7 +157,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *observability.APIClient) observability.ApiCreateScrapeConfigRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient observability.DefaultAPI) observability.ApiCreateScrapeConfigRequest {
 	req := apiClient.CreateScrapeConfig(ctx, model.InstanceId, model.ProjectId)
 
 	req = req.CreateScrapeConfigPayload(*model.Payload)

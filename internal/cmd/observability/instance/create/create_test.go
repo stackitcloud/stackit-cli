@@ -13,7 +13,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -21,22 +21,22 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &observability.APIClient{}
+var testClient = &observability.APIClient{DefaultAPI: &observability.DefaultAPIService{}}
 
 type observabilityClientMocked struct {
 	returnError       bool
 	listPlansResponse *observability.PlansResponse
 }
 
-func (c *observabilityClientMocked) CreateInstance(ctx context.Context, projectId string) observability.ApiCreateInstanceRequest {
-	return testClient.CreateInstance(ctx, projectId)
-}
-
-func (c *observabilityClientMocked) ListPlansExecute(_ context.Context, _ string) (*observability.PlansResponse, error) {
-	if c.returnError {
-		return nil, fmt.Errorf("list plans failed")
+func (c *observabilityClientMocked) newMock() observability.DefaultAPI {
+	return observability.DefaultAPIServiceMock{
+		ListPlansExecuteMock: utils.Ptr(func(_ observability.ApiListPlansRequest) (*observability.PlansResponse, error) {
+			if c.returnError {
+				return nil, fmt.Errorf("list plans failed")
+			}
+			return c.listPlansResponse, nil
+		}),
 	}
-	return c.listPlansResponse, nil
 }
 
 var testProjectId = uuid.NewString()
@@ -70,10 +70,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *observability.ApiCreateInstanceRequest)) observability.ApiCreateInstanceRequest {
-	request := testClient.CreateInstance(testCtx, testProjectId)
+	request := testClient.DefaultAPI.CreateInstance(testCtx, testProjectId)
 	request = request.CreateInstancePayload(observability.CreateInstancePayload{
 		Name:   utils.Ptr("example-name"),
-		PlanId: utils.Ptr(testPlanId),
+		PlanId: testPlanId,
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -83,10 +83,10 @@ func fixtureRequest(mods ...func(request *observability.ApiCreateInstanceRequest
 
 func fixturePlansResponse(mods ...func(response *observability.PlansResponse)) *observability.PlansResponse {
 	response := &observability.PlansResponse{
-		Plans: &[]observability.Plan{
+		Plans: []observability.Plan{
 			{
 				Name: utils.Ptr("example-plan-name"),
-				Id:   utils.Ptr(testPlanId),
+				Id:   testPlanId,
 			},
 		},
 	}
@@ -249,8 +249,8 @@ func TestBuildRequest(t *testing.T) {
 				},
 			),
 			getPlansResponse: fixturePlansResponse(),
-			expectedRequest: testClient.CreateInstance(testCtx, testProjectId).
-				CreateInstancePayload(observability.CreateInstancePayload{PlanId: utils.Ptr(testPlanId)}),
+			expectedRequest: testClient.DefaultAPI.CreateInstance(testCtx, testProjectId).
+				CreateInstancePayload(observability.CreateInstancePayload{PlanId: testPlanId}),
 			isValid: true,
 		},
 		{
@@ -263,8 +263,8 @@ func TestBuildRequest(t *testing.T) {
 				},
 			),
 			getPlansResponse: fixturePlansResponse(),
-			expectedRequest: testClient.CreateInstance(testCtx, testProjectId).
-				CreateInstancePayload(observability.CreateInstancePayload{PlanId: utils.Ptr(testPlanId)}),
+			expectedRequest: testClient.DefaultAPI.CreateInstance(testCtx, testProjectId).
+				CreateInstancePayload(observability.CreateInstancePayload{PlanId: testPlanId}),
 			isValid: true,
 		},
 	}
@@ -275,7 +275,7 @@ func TestBuildRequest(t *testing.T) {
 				returnError:       tt.getPlansFails,
 				listPlansResponse: tt.getPlansResponse,
 			}
-			request, err := buildRequest(testCtx, tt.model, client)
+			request, err := buildRequest(testCtx, tt.model, client.newMock())
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -290,6 +290,9 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
+				cmp.FilterPath(func(p cmp.Path) bool {
+					return p.String() == "ApiService"
+				}, cmp.Ignore()),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

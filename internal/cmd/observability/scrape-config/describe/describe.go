@@ -8,7 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -60,13 +60,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read scrape configuration: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, resp.Data)
+			return outputResult(params.Printer, model.OutputFormat, &resp.Data)
 		},
 	}
 	configureFlags(cmd)
@@ -95,16 +95,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *observability.APIClient) observability.ApiGetScrapeConfigRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient observability.DefaultAPI) observability.ApiGetScrapeConfigRequest {
 	req := apiClient.GetScrapeConfig(ctx, model.InstanceId, model.JobName, model.ProjectId)
 	return req
 }
 
 func outputResult(p *print.Printer, outputFormat string, config *observability.Job) error {
-	if config == nil {
-		return fmt.Errorf(`config is nil`)
-	}
-
 	return p.OutputResult(outputFormat, config, func() error {
 		saml2Enabled := "Enabled"
 		if config.Params != nil {
@@ -116,7 +112,7 @@ func outputResult(p *print.Printer, outputFormat string, config *observability.J
 
 		var targets []string
 		if config.StaticConfigs != nil {
-			for _, target := range *config.StaticConfigs {
+			for _, target := range config.StaticConfigs {
 				targetLabels := []string{}
 				targetLabelStr := "N/A"
 				if target.Labels != nil {
@@ -130,22 +126,22 @@ func outputResult(p *print.Printer, outputFormat string, config *observability.J
 				}
 				targetUrlsStr := "N/A"
 				if target.Targets != nil {
-					targetUrlsStr = strings.Join(*target.Targets, ",")
+					targetUrlsStr = strings.Join(target.Targets, ",")
 				}
 				targets = append(targets, fmt.Sprintf("labels: %s\nurls: %s", targetLabelStr, targetUrlsStr))
 			}
 		}
 
 		table := tables.NewTable()
-		table.AddRow("NAME", utils.PtrString(config.JobName))
+		table.AddRow("NAME", config.JobName)
 		table.AddSeparator()
 		table.AddRow("METRICS PATH", utils.PtrString(config.MetricsPath))
 		table.AddSeparator()
 		table.AddRow("SCHEME", utils.PtrString(config.Scheme))
 		table.AddSeparator()
-		table.AddRow("SCRAPE INTERVAL", utils.PtrString(config.ScrapeInterval))
+		table.AddRow("SCRAPE INTERVAL", config.ScrapeInterval)
 		table.AddSeparator()
-		table.AddRow("SCRAPE TIMEOUT", utils.PtrString(config.ScrapeTimeout))
+		table.AddRow("SCRAPE TIMEOUT", config.ScrapeTimeout)
 		table.AddSeparator()
 		table.AddRow("SAML2", saml2Enabled)
 		table.AddSeparator()
@@ -154,9 +150,9 @@ func outputResult(p *print.Printer, outputFormat string, config *observability.J
 		} else {
 			table.AddRow("AUTHENTICATION", "Basic Auth")
 			table.AddSeparator()
-			table.AddRow("USERNAME", utils.PtrString(config.BasicAuth.Username))
+			table.AddRow("USERNAME", config.BasicAuth.Username)
 			table.AddSeparator()
-			table.AddRow("PASSWORD", utils.PtrString(config.BasicAuth.Password))
+			table.AddRow("PASSWORD", config.BasicAuth.Password)
 		}
 		table.AddSeparator()
 		for i, target := range targets {

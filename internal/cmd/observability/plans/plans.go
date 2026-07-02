@@ -18,7 +18,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
 )
 
 const (
@@ -61,7 +61,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get Observability service plans: %w", err)
@@ -115,7 +115,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *observability.APIClient) observability.ApiListPlansRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient observability.DefaultAPI) observability.ApiListPlansRequest {
 	req := apiClient.ListPlans(ctx, model.ProjectId)
 	return req
 }
@@ -131,7 +131,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, plans []o
 		for i := range plans {
 			o := plans[i]
 			table.AddRow(
-				utils.PtrString(o.Id),
+				o.Id,
 				utils.PtrString(o.Name),
 				utils.PtrString(o.Description),
 			)

@@ -16,7 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
 )
 
 const (
@@ -55,7 +55,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read Observability instance: %w", err)
@@ -84,7 +84,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *observability.APIClient) observability.ApiGetInstanceRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient observability.DefaultAPI) observability.ApiGetInstanceRequest {
 	req := apiClient.GetInstance(ctx, model.InstanceId, model.ProjectId)
 	return req
 }
@@ -96,30 +96,27 @@ func outputResult(p *print.Printer, outputFormat string, instance *observability
 
 	return p.OutputResult(outputFormat, instance, func() error {
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(instance.Id))
+		table.AddRow("ID", instance.Id)
 		table.AddSeparator()
 		table.AddRow("NAME", utils.PtrString(instance.Name))
 		table.AddSeparator()
-		table.AddRow("STATUS", utils.PtrString(instance.Status))
+		table.AddRow("STATUS", instance.Status)
 		table.AddSeparator()
-		table.AddRow("PLAN NAME", utils.PtrString(instance.PlanName))
+		table.AddRow("PLAN NAME", instance.PlanName)
 		table.AddSeparator()
-		if inst := instance.Instance; inst != nil {
-			if plan := inst.Plan; plan != nil {
-				table.AddRow("METRIC SAMPLES (PER MIN)", utils.PtrString(plan.TotalMetricSamples))
-				table.AddSeparator()
-				table.AddRow("LOGS (GB)", utils.PtrString(plan.LogsStorage))
-				table.AddSeparator()
-				table.AddRow("TRACES (GB)", utils.PtrString(plan.TracesStorage))
-				table.AddSeparator()
-				table.AddRow("NOTIFICATION RULES", utils.PtrString(plan.AlertRules))
-				table.AddSeparator()
-				table.AddRow("GRAFANA USERS", utils.PtrString(plan.GrafanaGlobalUsers))
-				table.AddSeparator()
-			}
-			table.AddRow("GRAFANA URL", utils.PtrString(inst.GrafanaUrl))
-			table.AddSeparator()
-		}
+		plan := instance.Instance.Plan
+		table.AddRow("METRIC SAMPLES (PER MIN)", plan.TotalMetricSamples)
+		table.AddSeparator()
+		table.AddRow("LOGS (GB)", plan.LogsStorage)
+		table.AddSeparator()
+		table.AddRow("TRACES (GB)", plan.TracesStorage)
+		table.AddSeparator()
+		table.AddRow("NOTIFICATION RULES", plan.AlertRules)
+		table.AddSeparator()
+		table.AddRow("GRAFANA USERS", plan.GrafanaGlobalUsers)
+		table.AddSeparator()
+		table.AddRow("GRAFANA URL", instance.Instance.GrafanaUrl)
+		table.AddSeparator()
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

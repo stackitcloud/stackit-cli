@@ -16,7 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
 )
 
 const (
@@ -55,7 +55,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := observabilityUtils.GetInstanceName(ctx, apiClient, model.InstanceId, model.ProjectId)
+			instanceLabel, err := observabilityUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.InstanceId, model.ProjectId)
 			if err != nil || instanceLabel == "" {
 				instanceLabel = model.InstanceId
 			}
@@ -67,7 +67,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				return fmt.Errorf("build request: %w", err)
 			}
@@ -100,7 +100,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient observabilityUtils.ObservabilityClient) (observability.ApiUpdateGrafanaConfigsRequest, error) {
+func buildRequest(ctx context.Context, model *inputModel, apiClient observability.DefaultAPI) (observability.ApiUpdateGrafanaConfigsRequest, error) {
 	req := apiClient.UpdateGrafanaConfigs(ctx, model.InstanceId, model.ProjectId)
 	payload, err := observabilityUtils.GetPartialUpdateGrafanaConfigsPayload(ctx, apiClient, model.InstanceId, model.ProjectId, utils.Ptr(true), nil)
 	if err != nil {
