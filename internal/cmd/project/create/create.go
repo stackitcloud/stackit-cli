@@ -112,6 +112,8 @@ func configureFlags(cmd *cobra.Command) {
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
+	networkAreaId := flags.FlagToStringPointer(p, cmd, networkAreaIdFlag)
+
 	labels := flags.FlagToStringToStringPointer(p, cmd, labelFlag)
 	if labels != nil {
 		labelKeyRegex := regexp.MustCompile(labelKeyRegex)
@@ -131,6 +133,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 				}
 			}
 		}
+
+		if scope, hasScope := (*labels)["scope"]; hasScope && scope == "PUBLIC" {
+			_, hasBilling := (*labels)["billingReference"]
+
+			if networkAreaId == nil && !hasBilling {
+				return nil, &errors.FlagValidationError{
+					Flag:    labelFlag,
+					Details: "creating a standalone public project (without a network area) requires a 'billingReference' label (e.g., --label billingReference=<value>)",
+				}
+			}
+		}
+
 	}
 
 	model := inputModel{
