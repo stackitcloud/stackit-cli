@@ -20,8 +20,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/logme"
-	"github.com/stackitcloud/stackit-sdk-go/services/logme/wait"
+	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/logme/v1api/wait"
 )
 
 const (
@@ -33,7 +33,6 @@ const (
 	metricsFrequencyFlag     = "metrics-frequency"
 	metricsPrefixFlag        = "metrics-prefix"
 	monitoringInstanceIdFlag = "monitoring-instance-id"
-	pluginFlag               = "plugin"
 	sgwAclFlag               = "acl"
 	syslogFlag               = "syslog"
 	planIdFlag               = "plan-id"
@@ -49,12 +48,13 @@ type inputModel struct {
 
 	EnableMonitoring     *bool
 	Graphite             *string
-	MetricsFrequency     *int64
+	MetricsFrequency     *int32
 	MetricsPrefix        *string
 	MonitoringInstanceId *string
 	SgwAcl               *[]string
-	Syslog               *[]string
+	Syslog               []string
 	PlanId               *string
+	InstanceName         *string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -84,7 +84,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := logmeUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceLabel, err := logmeUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -97,7 +97,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 				if !errors.As(err, &dsaInvalidPlanError) {
@@ -114,7 +114,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Updating instance", func() error {
-					_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
+					_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, instanceId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -137,7 +137,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(enableMonitoringFlag, false, "Enable monitoring")
 	cmd.Flags().String(graphiteFlag, "", "Graphite host")
-	cmd.Flags().Int64(metricsFrequencyFlag, 0, "Metrics frequency")
+	cmd.Flags().Int32(metricsFrequencyFlag, 0, "Metrics frequency")
 	cmd.Flags().String(metricsPrefixFlag, "", "Metrics prefix")
 	cmd.Flags().Var(flags.UUIDFlag(), monitoringInstanceIdFlag, "Monitoring instance ID")
 	cmd.Flags().Var(flags.CIDRSliceFlag(), sgwAclFlag, "List of IP networks in CIDR notation which are allowed to access this instance")
@@ -145,6 +145,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), planIdFlag, "Plan ID")
 	cmd.Flags().String(planNameFlag, "", "Plan name")
 	cmd.Flags().String(versionFlag, "", "Instance LogMe version")
+	cmd.Flags().StringP(instanceNameFlag, "n", "", "Instance name")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -158,13 +159,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	enableMonitoring := flags.FlagToBoolPointer(p, cmd, enableMonitoringFlag)
 	monitoringInstanceId := flags.FlagToStringPointer(p, cmd, monitoringInstanceIdFlag)
 	graphite := flags.FlagToStringPointer(p, cmd, graphiteFlag)
-	metricsFrequency := flags.FlagToInt64Pointer(p, cmd, metricsFrequencyFlag)
+	metricsFrequency := flags.FlagToInt32Pointer(p, cmd, metricsFrequencyFlag)
 	metricsPrefix := flags.FlagToStringPointer(p, cmd, metricsPrefixFlag)
 	sgwAcl := flags.FlagToStringSlicePointer(p, cmd, sgwAclFlag)
-	syslog := flags.FlagToStringSlicePointer(p, cmd, syslogFlag)
+	syslog := flags.FlagToStringSliceValue(p, cmd, syslogFlag)
 	planId := flags.FlagToStringPointer(p, cmd, planIdFlag)
 	planName := flags.FlagToStringValue(p, cmd, planNameFlag)
 	version := flags.FlagToStringValue(p, cmd, versionFlag)
+	instanceName := flags.FlagToStringPointer(p, cmd, instanceNameFlag)
 
 	if planId != nil && (planName != "" || version != "") {
 		return nil, &cliErr.DSAInputPlanError{
@@ -174,8 +176,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	if enableMonitoring == nil && monitoringInstanceId == nil && graphite == nil &&
-		metricsFrequency == nil && metricsPrefix == nil &&
-		sgwAcl == nil && syslog == nil && planId == nil &&
+		metricsFrequency == nil && metricsPrefix == nil && sgwAcl == nil &&
+		syslog == nil && planId == nil && instanceName == nil &&
 		planName == "" && version == "" {
 		return nil, &cliErr.EmptyUpdateError{}
 	}
@@ -193,24 +195,20 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		PlanId:               planId,
 		PlanName:             planName,
 		Version:              version,
+		InstanceName:         instanceName,
 	}
 
 	p.DebugInputModel(model)
 	return &model, nil
 }
 
-type logMeClient interface {
-	PartialUpdateInstance(ctx context.Context, projectId, instanceId string) logme.ApiPartialUpdateInstanceRequest
-	ListOfferingsExecute(ctx context.Context, projectId string) (*logme.ListOfferingsResponse, error)
-}
-
-func buildRequest(ctx context.Context, model *inputModel, apiClient logMeClient) (logme.ApiPartialUpdateInstanceRequest, error) {
+func buildRequest(ctx context.Context, model *inputModel, apiClient logme.DefaultAPI) (logme.ApiPartialUpdateInstanceRequest, error) {
 	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.InstanceId)
 
 	var planId *string
 	var err error
 
-	offerings, err := apiClient.ListOfferingsExecute(ctx, model.ProjectId)
+	offerings, err := apiClient.ListOfferings(ctx, model.ProjectId).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get LogMe offerings: %w", err)
 	}

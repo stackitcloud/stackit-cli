@@ -8,7 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/logme"
+	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v1api"
 )
 
 var (
@@ -22,25 +22,28 @@ const (
 	testCredentialsUsername = "username"
 )
 
-type logMeClientMocked struct {
+type mockSettings struct {
 	getInstanceFails    bool
 	getInstanceResp     *logme.Instance
 	getCredentialsFails bool
 	getCredentialsResp  *logme.CredentialsResponse
 }
 
-func (m *logMeClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*logme.Instance, error) {
-	if m.getInstanceFails {
-		return nil, fmt.Errorf("could not get instance")
+func newAPIMock(s mockSettings) logme.DefaultAPI {
+	return &logme.DefaultAPIServiceMock{
+		GetInstanceExecuteMock: utils.Ptr(func(_ logme.ApiGetInstanceRequest) (*logme.Instance, error) {
+			if s.getInstanceFails {
+				return nil, fmt.Errorf("could not get instance")
+			}
+			return s.getInstanceResp, nil
+		}),
+		GetCredentialsExecuteMock: utils.Ptr(func(_ logme.ApiGetCredentialsRequest) (*logme.CredentialsResponse, error) {
+			if s.getCredentialsFails {
+				return nil, fmt.Errorf("could not get user")
+			}
+			return s.getCredentialsResp, nil
+		}),
 	}
-	return m.getInstanceResp, nil
-}
-
-func (m *logMeClientMocked) GetCredentialsExecute(_ context.Context, _, _, _ string) (*logme.CredentialsResponse, error) {
-	if m.getCredentialsFails {
-		return nil, fmt.Errorf("could not get user")
-	}
-	return m.getCredentialsResp, nil
 }
 
 func TestGetInstanceName(t *testing.T) {
@@ -54,7 +57,7 @@ func TestGetInstanceName(t *testing.T) {
 		{
 			description: "base",
 			getInstanceResp: &logme.Instance{
-				Name: utils.Ptr(testInstanceName),
+				Name: testInstanceName,
 			},
 			isValid:        true,
 			expectedOutput: testInstanceName,
@@ -68,12 +71,12 @@ func TestGetInstanceName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &logMeClientMocked{
+			client := mockSettings{
 				getInstanceFails: tt.getInstanceFails,
 				getInstanceResp:  tt.getInstanceResp,
 			}
 
-			output, err := GetInstanceName(context.Background(), client, testProjectId, testInstanceId)
+			output, err := GetInstanceName(context.Background(), newAPIMock(client), testProjectId, testInstanceId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -103,8 +106,8 @@ func TestGetCredentialsUsername(t *testing.T) {
 			description: "base",
 			getCredentialsResp: &logme.CredentialsResponse{
 				Raw: &logme.RawCredentials{
-					Credentials: &logme.Credentials{
-						Username: utils.Ptr(testCredentialsUsername),
+					Credentials: logme.Credentials{
+						Username: testCredentialsUsername,
 					},
 				},
 			},
@@ -120,12 +123,12 @@ func TestGetCredentialsUsername(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &logMeClientMocked{
+			client := mockSettings{
 				getCredentialsFails: tt.getCredentialsFails,
 				getCredentialsResp:  tt.getCredentialsResp,
 			}
 
-			output, err := GetCredentialsUsername(context.Background(), client, testProjectId, testInstanceId, testCredentialsId)
+			output, err := GetCredentialsUsername(context.Background(), newAPIMock(client), testProjectId, testInstanceId, testCredentialsId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")

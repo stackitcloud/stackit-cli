@@ -13,7 +13,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/logme"
+	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v1api"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -21,22 +21,22 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &logme.APIClient{}
+var testClient = &logme.APIClient{DefaultAPI: &logme.DefaultAPIService{}}
 
-type logMeClientMocked struct {
+type mockSettings struct {
 	returnError       bool
 	listOfferingsResp *logme.ListOfferingsResponse
 }
 
-func (c *logMeClientMocked) CreateInstance(ctx context.Context, projectId string) logme.ApiCreateInstanceRequest {
-	return testClient.CreateInstance(ctx, projectId)
-}
-
-func (c *logMeClientMocked) ListOfferingsExecute(_ context.Context, _ string) (*logme.ListOfferingsResponse, error) {
-	if c.returnError {
-		return nil, fmt.Errorf("list flavors failed")
+func newAPIMock(s mockSettings) logme.DefaultAPI {
+	return &logme.DefaultAPIServiceMock{
+		ListOfferingsExecuteMock: utils.Ptr(func(_ logme.ApiListOfferingsRequest) (*logme.ListOfferingsResponse, error) {
+			if s.returnError {
+				return nil, fmt.Errorf("list flavors failed")
+			}
+			return s.listOfferingsResp, nil
+		}),
 	}
-	return c.listOfferingsResp, nil
 }
 
 var testProjectId = uuid.NewString()
@@ -71,12 +71,12 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		InstanceName:         utils.Ptr("example-name"),
 		EnableMonitoring:     utils.Ptr(true),
 		Graphite:             utils.Ptr("example-graphite"),
-		MetricsFrequency:     utils.Ptr(int64(100)),
+		MetricsFrequency:     utils.Ptr(int32(100)),
 		MetricsPrefix:        utils.Ptr("example-prefix"),
-		MonitoringInstanceId: utils.Ptr(testMonitoringInstanceId),
+		MonitoringInstanceId: &testMonitoringInstanceId,
 		SgwAcl:               utils.Ptr([]string{"198.51.100.14/24"}),
-		Syslog:               utils.Ptr([]string{"example-syslog"}),
-		PlanId:               utils.Ptr(testPlanId),
+		Syslog:               []string{"example-syslog"},
+		PlanId:               &testPlanId,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -85,19 +85,19 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *logme.ApiCreateInstanceRequest)) logme.ApiCreateInstanceRequest {
-	request := testClient.CreateInstance(testCtx, testProjectId)
+	request := testClient.DefaultAPI.CreateInstance(testCtx, testProjectId)
 	request = request.CreateInstancePayload(logme.CreateInstancePayload{
-		InstanceName: utils.Ptr("example-name"),
+		InstanceName: "example-name",
 		Parameters: &logme.InstanceParameters{
 			EnableMonitoring:     utils.Ptr(true),
 			Graphite:             utils.Ptr("example-graphite"),
-			MetricsFrequency:     utils.Ptr(int64(100)),
+			MetricsFrequency:     utils.Ptr(int32(100)),
 			MetricsPrefix:        utils.Ptr("example-prefix"),
-			MonitoringInstanceId: utils.Ptr(testMonitoringInstanceId),
+			MonitoringInstanceId: &testMonitoringInstanceId,
 			SgwAcl:               utils.Ptr("198.51.100.14/24"),
-			Syslog:               utils.Ptr([]string{"example-syslog"}),
+			Syslog:               []string{"example-syslog"},
 		},
-		PlanId: utils.Ptr(testPlanId),
+		PlanId: testPlanId,
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -154,7 +154,7 @@ func TestParseInput(t *testing.T) {
 					Verbosity: globalflags.VerbosityDefault,
 				},
 				InstanceName: utils.Ptr("example-name"),
-				PlanId:       utils.Ptr(testPlanId),
+				PlanId:       &testPlanId,
 			},
 		},
 		{
@@ -174,11 +174,11 @@ func TestParseInput(t *testing.T) {
 					ProjectId: testProjectId,
 					Verbosity: globalflags.VerbosityDefault,
 				},
-				PlanId:           utils.Ptr(testPlanId),
+				PlanId:           &testPlanId,
 				InstanceName:     utils.Ptr(""),
 				EnableMonitoring: utils.Ptr(false),
 				Graphite:         utils.Ptr(""),
-				MetricsFrequency: utils.Ptr(int64(0)),
+				MetricsFrequency: utils.Ptr(int32(0)),
 				MetricsPrefix:    utils.Ptr(""),
 			},
 		},
@@ -254,9 +254,7 @@ func TestParseInput(t *testing.T) {
 			syslogValues: []string{"example-syslog-1", "example-syslog-2"},
 			isValid:      true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Syslog = utils.Ptr(
-					append(*model.Syslog, "example-syslog-1", "example-syslog-2"),
-				)
+				model.Syslog = append(model.Syslog, "example-syslog-1", "example-syslog-2")
 			}),
 		},
 	}
@@ -285,13 +283,13 @@ func TestBuildRequest(t *testing.T) {
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
 			getOfferingsResp: &logme.ListOfferingsResponse{
-				Offerings: &[]logme.Offering{
+				Offerings: []logme.Offering{
 					{
-						Version: utils.Ptr("example-version"),
-						Plans: &[]logme.Plan{
+						Version: "example-version",
+						Plans: []logme.Plan{
 							{
-								Name: utils.Ptr("example-plan-name"),
-								Id:   utils.Ptr(testPlanId),
+								Name: "example-plan-name",
+								Id:   testPlanId,
 							},
 						},
 					},
@@ -309,13 +307,13 @@ func TestBuildRequest(t *testing.T) {
 			),
 			expectedRequest: fixtureRequest(),
 			getOfferingsResp: &logme.ListOfferingsResponse{
-				Offerings: &[]logme.Offering{
+				Offerings: []logme.Offering{
 					{
-						Version: utils.Ptr("example-version"),
-						Plans: &[]logme.Plan{
+						Version: "example-version",
+						Plans: []logme.Plan{
 							{
-								Name: utils.Ptr("example-plan-name"),
-								Id:   utils.Ptr(testPlanId),
+								Name: "example-plan-name",
+								Id:   testPlanId,
 							},
 						},
 					},
@@ -344,13 +342,13 @@ func TestBuildRequest(t *testing.T) {
 				},
 			),
 			getOfferingsResp: &logme.ListOfferingsResponse{
-				Offerings: &[]logme.Offering{
+				Offerings: []logme.Offering{
 					{
-						Version: utils.Ptr("example-version"),
-						Plans: &[]logme.Plan{
+						Version: "example-version",
+						Plans: []logme.Plan{
 							{
-								Name: utils.Ptr("other-plan-name"),
-								Id:   utils.Ptr(testPlanId),
+								Name: "other-plan-name",
+								Id:   testPlanId,
 							},
 						},
 					},
@@ -365,33 +363,33 @@ func TestBuildRequest(t *testing.T) {
 					ProjectId: testProjectId,
 					Verbosity: globalflags.VerbosityDefault,
 				},
-				PlanId: utils.Ptr(testPlanId),
+				PlanId: &testPlanId,
 			},
 			getOfferingsResp: &logme.ListOfferingsResponse{
-				Offerings: &[]logme.Offering{
+				Offerings: []logme.Offering{
 					{
-						Version: utils.Ptr("example-version"),
-						Plans: &[]logme.Plan{
+						Version: "example-version",
+						Plans: []logme.Plan{
 							{
-								Name: utils.Ptr("example-plan-name"),
-								Id:   utils.Ptr(testPlanId),
+								Name: "example-plan-name",
+								Id:   testPlanId,
 							},
 						},
 					},
 				},
 			},
-			expectedRequest: testClient.CreateInstance(testCtx, testProjectId).
-				CreateInstancePayload(logme.CreateInstancePayload{PlanId: utils.Ptr(testPlanId), Parameters: &logme.InstanceParameters{}}),
+			expectedRequest: testClient.DefaultAPI.CreateInstance(testCtx, testProjectId).
+				CreateInstancePayload(logme.CreateInstancePayload{PlanId: testPlanId, Parameters: &logme.InstanceParameters{}}),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &logMeClientMocked{
+			settings := mockSettings{
 				returnError:       tt.getOfferingsFails,
 				listOfferingsResp: tt.getOfferingsResp,
 			}
-			request, err := buildRequest(testCtx, tt.model, client)
+			request, err := buildRequest(testCtx, tt.model, newAPIMock(settings))
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -402,6 +400,8 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateEmpty(),
+				cmpopts.IgnoreFields(tt.expectedRequest, "ApiService"),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

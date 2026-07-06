@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/rabbitmq"
+	rabbitmq "github.com/stackitcloud/stackit-sdk-go/services/rabbitmq/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -18,7 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/rabbitmq/client"
 	rabbitmqUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/rabbitmq/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -70,7 +69,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 			credentials := resp.GetCredentialsList()
 
-			instanceLabel, err := rabbitmqUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceLabel, err := rabbitmqUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -121,7 +120,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *rabbitmq.APIClient) rabbitmq.ApiListCredentialsRequest {
-	req := apiClient.ListCredentials(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.DefaultAPI.ListCredentials(ctx, model.ProjectId, model.Region, model.InstanceId)
 	return req
 }
 
@@ -136,7 +135,7 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, credenti
 		table.SetHeader("ID")
 		for i := range credentials {
 			c := credentials[i]
-			table.AddRow(utils.PtrString(c.Id))
+			table.AddRow(c.Id)
 		}
 		err := table.Display(p)
 		if err != nil {

@@ -16,7 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/logme"
+	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v1api"
 )
 
 const (
@@ -87,7 +87,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *logme.APIClient) logme.ApiGetInstanceRequest {
-	req := apiClient.GetInstance(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.DefaultAPI.GetInstance(ctx, model.ProjectId, model.InstanceId)
 	return req
 }
 
@@ -100,18 +100,18 @@ func outputResult(p *print.Printer, outputFormat string, instance *logme.Instanc
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(instance.InstanceId))
 		table.AddSeparator()
-		table.AddRow("NAME", utils.PtrString(instance.Name))
+		table.AddRow("NAME", instance.Name)
 		table.AddSeparator()
-		if instance.LastOperation != nil {
-			table.AddRow("LAST OPERATION TYPE", utils.PtrString(instance.LastOperation.Type))
+		if _, ok := instance.LastOperation.GetStateOk(); ok {
+			table.AddRow("LAST OPERATION TYPE", instance.LastOperation.Type)
 			table.AddSeparator()
-			table.AddRow("LAST OPERATION STATE", utils.PtrString(instance.LastOperation.State))
+			table.AddRow("LAST OPERATION STATE", instance.LastOperation.State)
 			table.AddSeparator()
 		}
-		table.AddRow("PLAN ID", utils.PtrString(instance.PlanId))
+		table.AddRow("PLAN ID", instance.PlanId)
 		// Only show ACL if it's present and not empty
 		if instance.Parameters != nil {
-			acl := (*instance.Parameters)[aclParameterKey]
+			acl := (instance.Parameters)[aclParameterKey]
 			aclStr, ok := acl.(string)
 			if ok && aclStr != "" {
 				table.AddSeparator()

@@ -15,10 +15,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/rabbitmq/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/rabbitmq"
+	rabbitmq "github.com/stackitcloud/stackit-sdk-go/services/rabbitmq/v2api"
 )
 
 const (
@@ -115,7 +114,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *rabbitmq.APIClient) rabbitmq.ApiListOfferingsRequest {
-	req := apiClient.ListOfferings(ctx, model.ProjectId)
+	req := apiClient.DefaultAPI.ListOfferings(ctx, model.ProjectId, model.Region)
 	return req
 }
 
@@ -131,14 +130,14 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, plans []r
 		for i := range plans {
 			o := plans[i]
 			if o.Plans != nil {
-				for j := range *o.Plans {
-					plan := (*o.Plans)[j]
+				for j := range o.Plans {
+					plan := o.Plans[j]
 					table.AddRow(
-						utils.PtrString(o.Name),
-						utils.PtrString(o.Version),
-						utils.PtrString(plan.Id),
-						utils.PtrString(plan.Name),
-						utils.PtrString(plan.Description),
+						o.Name,
+						o.Version,
+						plan.Id,
+						plan.Name,
+						plan.Description,
 					)
 				}
 				table.AddSeparator()

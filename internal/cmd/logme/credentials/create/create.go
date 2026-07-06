@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/logme"
+	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -51,14 +51,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
-
 			// Configure API client
 			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
 				return err
 			}
 
-			instanceLabel, err := logmeUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceLabel, err := logmeUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -109,7 +108,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *logme.APIClient) logme.ApiCreateCredentialsRequest {
-	req := apiClient.CreateCredentials(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.DefaultAPI.CreateCredentials(ctx, model.ProjectId, model.InstanceId)
 	return req
 }
 
@@ -118,26 +117,26 @@ func outputResult(p *print.Printer, outputFormat string, showPassword bool, inst
 		return fmt.Errorf("credentials response is empty")
 	}
 
-	if !showPassword && resp.HasRaw() && resp.Raw.Credentials != nil {
-		resp.Raw.Credentials.Password = utils.Ptr("hidden")
+	if !showPassword && resp.HasRaw() {
+		resp.Raw.Credentials.Password = "hidden"
 	}
 
 	return p.OutputResult(outputFormat, resp, func() error {
-		p.Outputf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, utils.PtrString(resp.Id))
+		p.Outputf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, resp.Id)
 		// The username field cannot be set by the user so we only display it if it's not returned empty
-		if resp.HasRaw() && resp.Raw.Credentials != nil {
-			if username := resp.Raw.Credentials.Username; username != nil && *username != "" {
-				p.Outputf("Username: %s\n", utils.PtrString(username))
+		if resp.HasRaw() {
+			if username := resp.Raw.Credentials.Username; username != "" {
+				p.Outputf("Username: %s\n", username)
 			}
 			if !showPassword {
 				p.Outputf("Password: <hidden>\n")
 			} else {
-				p.Outputf("Password: %s\n", utils.PtrString(resp.Raw.Credentials.Password))
+				p.Outputf("Password: %s\n", resp.Raw.Credentials.Password)
 			}
-			p.Outputf("Host: %s\n", utils.PtrString(resp.Raw.Credentials.Host))
+			p.Outputf("Host: %s\n", resp.Raw.Credentials.Host)
 			p.Outputf("Port: %s\n", utils.PtrString(resp.Raw.Credentials.Port))
 		}
-		p.Outputf("URI: %s\n", utils.PtrString(resp.Uri))
+		p.Outputf("URI: %s\n", resp.Uri)
 		return nil
 	})
 }
