@@ -132,11 +132,10 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, instances
 			instance := instances[i]
 
 			lastOperationType, lastOperationState := logme.INSTANCELASTOPERATIONTYPE_UNKNOWN_DEFAULT_OPEN_API, logme.INSTANCELASTOPERATIONSTATE_UNKNOWN_DEFAULT_OPEN_API
-			_, ok := instance.LastOperation.GetStateOk()
-			if ok {
+			if _, ok := instance.LastOperation.GetStateOk(); ok {
 				lastOperationType = instance.LastOperation.Type
 				lastOperationState = instance.LastOperation.State
-			}
+}
 
 			table.AddRow(
 				utils.PtrString(instance.InstanceId),
