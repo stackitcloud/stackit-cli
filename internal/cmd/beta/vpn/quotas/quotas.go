@@ -6,6 +6,8 @@ import (
 
 	"github.com/spf13/cobra"
 
+	vpn "github.com/stackitcloud/stackit-sdk-go/services/vpn/v1api"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -16,7 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/vpn/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-	vpn "github.com/stackitcloud/stackit-sdk-go/services/vpn/v1api"
 )
 
 const (
@@ -105,7 +106,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *vpn.APIClie
 
 func outputResult(p *print.Printer, outputFormat string, quota *vpn.QuotaListResponse, projectLabel string) error {
 	return p.OutputResult(outputFormat, quota, func() error {
-
 		if quota == nil {
 			p.Info("No quotas for %q\n", projectLabel)
 			return nil

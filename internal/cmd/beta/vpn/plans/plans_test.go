@@ -7,7 +7,6 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/google/uuid"
 	vpn "github.com/stackitcloud/stackit-sdk-go/services/vpn/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -16,7 +15,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
 var regionFlag = globalflags.RegionFlag
 
 type testCtxKey struct{}
@@ -24,16 +22,14 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &vpn.APIClient{DefaultAPI: &vpn.DefaultAPIService{}}
 
-var testProjectId = uuid.NewString()
 var testRegion = "eu01"
-
 var testLimit int64 = 10
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
-		regionFlag:    testRegion,
-		limitFlag:     strconv.FormatInt(testLimit, 10),
+		// Project ID is not necessary for this request
+		regionFlag: testRegion,
+		limitFlag:  strconv.FormatInt(testLimit, 10),
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -44,7 +40,6 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
-			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 			Region:    testRegion,
 		},
@@ -81,28 +76,12 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "no flag values",
 			flagValues:  map[string]string{},
-			isValid:     false,
-		},
-		{
-			description: "project id missing",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
-			}),
-			isValid: false,
-		},
-		{
-			description: "project id invalid 1",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
-			}),
-			isValid: false,
-		},
-		{
-			description: "project id invalid 2",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
-			}),
-			isValid: false,
+			expectedModel: &inputModel{
+				GlobalFlagModel: &globalflags.GlobalFlagModel{
+					Verbosity: globalflags.VerbosityDefault,
+				},
+			},
+			isValid: true,
 		},
 		{
 			description: "invalid limit 1",

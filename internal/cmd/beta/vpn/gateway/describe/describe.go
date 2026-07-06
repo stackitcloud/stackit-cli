@@ -36,7 +36,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(gatewayIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Describe a gateway with ID "xxx"`,
+				`Describe a gateway with the ID "xxx"`,
 				"$ stackit beta vpn gateway describe xxx",
 			),
 		),
@@ -105,7 +105,7 @@ func outputResult(p *print.Printer, outputFormat, gatewayId, projectLabel string
 		table.AddSeparator()
 		table.AddRow("NAME", gateway.DisplayName)
 		table.AddSeparator()
-		table.AddRow("Labels", gateway.GetLabels())
+		table.AddRow("Labels", utils.JoinStringMap(gateway.GetLabels(), ": ", "\n"))
 		table.AddSeparator()
 		table.AddRow("STATE", utils.PtrString(gateway.State))
 		table.AddSeparator()

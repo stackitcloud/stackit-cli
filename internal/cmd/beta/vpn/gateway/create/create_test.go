@@ -46,7 +46,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		nameFlag:                        testName,
 		labelsFlag:                      "foo=bar",
 		planIdFlag:                      testPlanId,
-		routingTypeFlag:                 string(testRoutingType),
+		routingTypeFlag.Name():          string(testRoutingType),
 	}
 	for _, mod := range mods {
 		mod(flagValues)
