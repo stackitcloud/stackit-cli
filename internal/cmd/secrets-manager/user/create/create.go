@@ -14,10 +14,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/client"
 	secretsManagerUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/utils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/secretsmanager"
+	secretsmanager "github.com/stackitcloud/stackit-sdk-go/services/secretsmanager/v1api"
 )
 
 const (
@@ -30,8 +29,8 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 
 	InstanceId  string
-	Description *string
-	Write       *bool
+	Description string
+	Write       bool
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -65,7 +64,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := secretsManagerUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceLabel, err := secretsManagerUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -110,8 +109,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
-		Description:     utils.Ptr(flags.FlagToStringValue(p, cmd, descriptionFlag)),
-		Write:           utils.Ptr(flags.FlagToBoolValue(p, cmd, writeFlag)),
+		Description:     flags.FlagToStringValue(p, cmd, descriptionFlag),
+		Write:           flags.FlagToBoolValue(p, cmd, writeFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -119,7 +118,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiCreateUserRequest {
-	req := apiClient.CreateUser(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.DefaultAPI.CreateUser(ctx, model.ProjectId, model.InstanceId)
 	req = req.CreateUserPayload(secretsmanager.CreateUserPayload{
 		Description: model.Description,
 		Write:       model.Write,
@@ -133,11 +132,11 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, user *se
 	}
 
 	return p.OutputResult(outputFormat, user, func() error {
-		p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, utils.PtrString(user.Id))
-		p.Outputf("Username: %s\n", utils.PtrString(user.Username))
-		p.Outputf("Password: %s\n", utils.PtrString(user.Password))
-		p.Outputf("Description: %s\n", utils.PtrString(user.Description))
-		p.Outputf("Write Access: %s\n", utils.PtrString(user.Write))
+		p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, user.Id)
+		p.Outputf("Username: %s\n", user.Username)
+		p.Outputf("Password: %s\n", user.Password)
+		p.Outputf("Description: %s\n", user.Description)
+		p.Outputf("Write Access: %t\n", user.Write)
 
 		return nil
 	})
