@@ -135,7 +135,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, instances
 			if _, ok := instance.LastOperation.GetStateOk(); ok {
 				lastOperationType = instance.LastOperation.Type
 				lastOperationState = instance.LastOperation.State
-}
+			}
 
 			table.AddRow(
 				utils.PtrString(instance.InstanceId),
