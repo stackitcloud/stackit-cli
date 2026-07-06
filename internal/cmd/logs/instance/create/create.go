@@ -37,7 +37,7 @@ type inputModel struct {
 
 	DisplayName   *string
 	RetentionDays *int32
-	ACL           *[]string
+	ACL           []string
 	Description   *string
 }
 
@@ -135,7 +135,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		DisplayName:     flags.FlagToStringPointer(p, cmd, displayNameFlag),
 		RetentionDays:   flags.FlagToInt32Pointer(p, cmd, retentionDaysFlag),
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
-		ACL:             flags.FlagToStringSlicePointer(p, cmd, aclFlag),
+		ACL:             flags.FlagToStringSliceValue(p, cmd, aclFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -148,7 +148,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *logs.APICli
 		DisplayName:   utils.PtrString(model.DisplayName),
 		Description:   model.Description,
 		RetentionDays: utils.PtrValue(model.RetentionDays),
-		Acl:           utils.GetSliceFromPointer(model.ACL),
+		Acl:           model.ACL,
 	})
 	return req
 }

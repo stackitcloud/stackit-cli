@@ -62,7 +62,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		DisplayName:   utils.Ptr(testDisplayName),
 		Description:   utils.Ptr(testDescription),
 		RetentionDays: utils.Ptr(int32(testRetentionDays)),
-		ACL:           utils.Ptr([]string{testAcl}),
+		ACL:           []string{testAcl},
 	}
 	for _, mod := range mods {
 		mod(model)
