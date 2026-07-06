@@ -42,7 +42,7 @@ const (
 var flagPlugins = flags.StringEnumSliceFlag(
 	"plugin",
 	rabbitmq.AllowedInstanceParametersPluginsInnerEnumValues,
-	"plugins",
+	"Plugins",
 )
 
 type inputModel struct {
