@@ -135,9 +135,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		}
 
 		if scope, hasScope := (*labels)["scope"]; hasScope && scope == "PUBLIC" {
-			_, hasBilling := (*labels)["billingReference"]
+			billingReference, hasBilling := (*labels)["billingReference"]
 
-			if networkAreaId == nil && !hasBilling {
+			if networkAreaId == nil && (!hasBilling || billingReference == "") {
 				return nil, &errors.FlagValidationError{
 					Flag:    labelFlag,
 					Details: "creating a standalone public project (without a network area) requires a 'billingReference' label (e.g., --label billingReference=<value>)",
