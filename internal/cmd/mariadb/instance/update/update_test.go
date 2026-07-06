@@ -86,7 +86,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		MetricsPrefix:        utils.Ptr("example-prefix"),
 		MonitoringInstanceId: utils.Ptr(testMonitoringInstanceId),
 		SgwAcl:               utils.Ptr([]string{"198.51.100.14/24"}),
-		Syslog:               utils.Ptr([]string{"example-syslog"}),
+		Syslog:               []string{"example-syslog"},
 		PlanId:               utils.Ptr(testPlanId),
 	}
 	for _, mod := range mods {
@@ -268,9 +268,7 @@ func TestParseInput(t *testing.T) {
 			syslogValues: []string{"example-syslog-1", "example-syslog-2"},
 			isValid:      true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Syslog = utils.Ptr(
-					append(*model.Syslog, "example-syslog-1", "example-syslog-2"),
-				)
+				model.Syslog = append(model.Syslog, "example-syslog-1", "example-syslog-2")
 			}),
 		},
 	}

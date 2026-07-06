@@ -51,7 +51,7 @@ type inputModel struct {
 	MetricsPrefix        *string
 	MonitoringInstanceId *string
 	SgwAcl               *[]string
-	Syslog               *[]string
+	Syslog               []string
 	PlanId               *string
 }
 
@@ -159,7 +159,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	metricsFrequency := flags.FlagToInt32Pointer(p, cmd, metricsFrequencyFlag)
 	metricsPrefix := flags.FlagToStringPointer(p, cmd, metricsPrefixFlag)
 	sgwAcl := flags.FlagToStringSlicePointer(p, cmd, sgwAclFlag)
-	syslog := flags.FlagToStringSlicePointer(p, cmd, syslogFlag)
+	syslog := flags.FlagToStringSliceValue(p, cmd, syslogFlag)
 	planId := flags.FlagToStringPointer(p, cmd, planIdFlag)
 	planName := flags.FlagToStringValue(p, cmd, planNameFlag)
 	version := flags.FlagToStringValue(p, cmd, versionFlag)
@@ -241,7 +241,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient mariadb.Defa
 			MetricsFrequency:     model.MetricsFrequency,
 			MetricsPrefix:        model.MetricsPrefix,
 			SgwAcl:               sgwAcl,
-			Syslog:               utils.GetSliceFromPointer(model.Syslog),
+			Syslog:               model.Syslog,
 		},
 		PlanId: planId,
 	})
