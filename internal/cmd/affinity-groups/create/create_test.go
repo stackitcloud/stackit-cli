@@ -121,6 +121,26 @@ func TestParseInput(t *testing.T) {
 				},
 			),
 		},
+		{
+			description: "fails public project without network area and without billing reference",
+			flagValues: fixtureFlagValues(
+				func(flagValues map[string]string) {
+					flagValues["label"] = "scope=PUBLIC"
+					delete(flagValues, "network-area-id")
+				},
+			),
+			isValid: false,
+		},
+		{
+			description: "fails public project with empty billing reference",
+			flagValues: fixtureFlagValues(
+				func(flagValues map[string]string) {
+					flagValues["label"] = "scope=PUBLIC,billingReference="
+					delete(flagValues, "network-area-id")
+				},
+			),
+			isValid: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
