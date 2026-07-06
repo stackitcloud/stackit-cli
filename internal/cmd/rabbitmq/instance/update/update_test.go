@@ -6,39 +6,40 @@ import (
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/rabbitmq"
+	rabbitmq "github.com/stackitcloud/stackit-sdk-go/services/rabbitmq/v2api"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &rabbitmq.APIClient{}
+var testClient = &rabbitmq.APIClient{DefaultAPI: &rabbitmq.DefaultAPIService{}}
 
-type rabbitMQClientMocked struct {
+type mockSettings struct {
 	returnError       bool
 	listOfferingsResp *rabbitmq.ListOfferingsResponse
 }
 
-func (c *rabbitMQClientMocked) PartialUpdateInstance(ctx context.Context, projectId, instanceId string) rabbitmq.ApiPartialUpdateInstanceRequest {
-	return testClient.PartialUpdateInstance(ctx, projectId, instanceId)
-}
-
-func (c *rabbitMQClientMocked) ListOfferingsExecute(_ context.Context, _ string) (*rabbitmq.ListOfferingsResponse, error) {
-	if c.returnError {
-		return nil, fmt.Errorf("list flavors failed")
+func newAPIMock(settings mockSettings) rabbitmq.DefaultAPI {
+	return rabbitmq.DefaultAPIServiceMock{
+		ListOfferingsExecuteMock: utils.Ptr(func(_ rabbitmq.ApiListOfferingsRequest) (*rabbitmq.ListOfferingsResponse, error) {
+			if settings.returnError {
+				return nil, fmt.Errorf("list flavors failed")
+			}
+			return settings.listOfferingsResp, nil
+		}),
 	}
-	return c.listOfferingsResp, nil
 }
 
 var (
 	testProjectId            = uuid.NewString()
 	testInstanceId           = uuid.NewString()
+	testRegion               = "eu01"
 	testPlanId               = uuid.NewString()
 	testMonitoringInstanceId = uuid.NewString()
 )
@@ -56,12 +57,13 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
 		enableMonitoringFlag:      "true",
 		graphiteFlag:              "example-graphite",
 		metricsFrequencyFlag:      "100",
 		metricsPrefixFlag:         "example-prefix",
 		monitoringInstanceIdFlag:  testMonitoringInstanceId,
-		pluginFlag:                "example-plugin",
+		flagPlugins.Name():        string(rabbitmq.INSTANCEPARAMETERSPLUGINSINNER_RABBITMQ_MQTT),
 		sgwAclFlag:                "198.51.100.14/24",
 		syslogFlag:                "example-syslog",
 		planIdFlag:                testPlanId,
@@ -76,17 +78,18 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId:           testInstanceId,
 		EnableMonitoring:     utils.Ptr(true),
 		Graphite:             utils.Ptr("example-graphite"),
-		MetricsFrequency:     utils.Ptr(int64(100)),
+		MetricsFrequency:     utils.Ptr(int32(100)),
 		MetricsPrefix:        utils.Ptr("example-prefix"),
 		MonitoringInstanceId: utils.Ptr(testMonitoringInstanceId),
-		Plugin:               utils.Ptr([]string{"example-plugin"}),
+		Plugin:               []rabbitmq.InstanceParametersPluginsInner{rabbitmq.INSTANCEPARAMETERSPLUGINSINNER_RABBITMQ_MQTT},
 		SgwAcl:               utils.Ptr([]string{"198.51.100.14/24"}),
-		Syslog:               utils.Ptr([]string{"example-syslog"}),
+		Syslog:               []string{"example-syslog"},
 		PlanId:               utils.Ptr(testPlanId),
 	}
 	for _, mod := range mods {
@@ -96,17 +99,17 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *rabbitmq.ApiPartialUpdateInstanceRequest)) rabbitmq.ApiPartialUpdateInstanceRequest {
-	request := testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId)
+	request := testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId)
 	request = request.PartialUpdateInstancePayload(rabbitmq.PartialUpdateInstancePayload{
 		Parameters: &rabbitmq.InstanceParameters{
 			EnableMonitoring:     utils.Ptr(true),
 			Graphite:             utils.Ptr("example-graphite"),
-			MetricsFrequency:     utils.Ptr(int64(100)),
+			MetricsFrequency:     utils.Ptr(int32(100)),
 			MetricsPrefix:        utils.Ptr("example-prefix"),
 			MonitoringInstanceId: utils.Ptr(testMonitoringInstanceId),
-			Plugins:              utils.Ptr([]string{"example-plugin"}),
+			Plugins:              []rabbitmq.InstanceParametersPluginsInner{rabbitmq.INSTANCEPARAMETERSPLUGINSINNER_RABBITMQ_MQTT},
 			SgwAcl:               utils.Ptr("198.51.100.14/24"),
-			Syslog:               utils.Ptr([]string{"example-syslog"}),
+			Syslog:               []string{"example-syslog"},
 		},
 		PlanId: utils.Ptr(testPlanId),
 	})
@@ -188,7 +191,7 @@ func TestParseInput(t *testing.T) {
 				PlanId:           utils.Ptr(testPlanId),
 				EnableMonitoring: utils.Ptr(false),
 				Graphite:         utils.Ptr(""),
-				MetricsFrequency: utils.Ptr(int64(0)),
+				MetricsFrequency: utils.Ptr(int32(0)),
 				MetricsPrefix:    utils.Ptr(""),
 			},
 		},
@@ -267,12 +270,11 @@ func TestParseInput(t *testing.T) {
 			description:  "repeated plugin flags",
 			argValues:    fixtureArgValues(),
 			flagValues:   fixtureFlagValues(),
-			pluginValues: []string{"example-plugin-1", "example-plugin-2"},
+			pluginValues: []string{string(rabbitmq.INSTANCEPARAMETERSPLUGINSINNER_RABBITMQ_MQTT), string(rabbitmq.INSTANCEPARAMETERSPLUGINSINNER_RABBITMQ_CONSISTENT_HASH_EXCHANGE)},
 			isValid:      true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Plugin = utils.Ptr(
-					append(*model.Plugin, "example-plugin-1", "example-plugin-2"),
-				)
+				model.Plugin =
+					append(model.Plugin, rabbitmq.INSTANCEPARAMETERSPLUGINSINNER_RABBITMQ_MQTT, rabbitmq.INSTANCEPARAMETERSPLUGINSINNER_RABBITMQ_CONSISTENT_HASH_EXCHANGE)
 			}),
 		},
 		{
@@ -282,93 +284,19 @@ func TestParseInput(t *testing.T) {
 			syslogValues: []string{"example-syslog-1", "example-syslog-2"},
 			isValid:      true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Syslog = utils.Ptr(
-					append(*model.Syslog, "example-syslog-1", "example-syslog-2"),
-				)
+				model.Syslog =
+					append(model.Syslog, "example-syslog-1", "example-syslog-2")
 			}),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			params := testparams.NewTestParams()
-			cmd := NewCmd(params.CmdParams)
-			err := globalflags.Configure(cmd.Flags())
-			if err != nil {
-				t.Fatalf("configure global flags: %v", err)
-			}
-
-			for flag, value := range tt.flagValues {
-				err := cmd.Flags().Set(flag, value)
-				if err != nil {
-					if !tt.isValid {
-						return
-					}
-					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
-				}
-			}
-
-			for _, value := range tt.sgwAclValues {
-				err := cmd.Flags().Set(sgwAclFlag, value)
-				if err != nil {
-					if !tt.isValid {
-						return
-					}
-					t.Fatalf("setting flag --%s=%s: %v", sgwAclFlag, value, err)
-				}
-			}
-
-			for _, value := range tt.pluginValues {
-				err := cmd.Flags().Set(pluginFlag, value)
-				if err != nil {
-					if !tt.isValid {
-						return
-					}
-					t.Fatalf("setting flag --%s=%s: %v", pluginFlag, value, err)
-				}
-			}
-
-			for _, value := range tt.syslogValues {
-				err := cmd.Flags().Set(syslogFlag, value)
-				if err != nil {
-					if !tt.isValid {
-						return
-					}
-					t.Fatalf("setting flag --%s=%s: %v", syslogFlag, value, err)
-				}
-			}
-
-			err = cmd.ValidateArgs(tt.argValues)
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error validating args: %v", err)
-			}
-
-			err = cmd.ValidateRequiredFlags()
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error validating flags: %v", err)
-			}
-
-			model, err := parseInput(params.Printer, cmd, tt.argValues)
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error parsing flags: %v", err)
-			}
-
-			if !tt.isValid {
-				t.Fatalf("did not fail on invalid input")
-			}
-			diff := cmp.Diff(model, tt.expectedModel)
-			if diff != "" {
-				t.Fatalf("Data does not match: %s", diff)
-			}
+			testutils.TestParseInputWithAdditionalFlags(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, map[string][]string{
+				sgwAclFlag:         tt.sgwAclValues,
+				syslogFlag:         tt.syslogValues,
+				flagPlugins.Name(): tt.pluginValues,
+			}, tt.isValid)
 		})
 	}
 }
@@ -387,13 +315,13 @@ func TestBuildRequest(t *testing.T) {
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
 			listOfferingsResp: &rabbitmq.ListOfferingsResponse{
-				Offerings: &[]rabbitmq.Offering{
+				Offerings: []rabbitmq.Offering{
 					{
-						Version: utils.Ptr("example-version"),
-						Plans: &[]rabbitmq.Plan{
+						Version: "example-version",
+						Plans: []rabbitmq.Plan{
 							{
-								Name: utils.Ptr("example-plan-name"),
-								Id:   utils.Ptr(testPlanId),
+								Name: "example-plan-name",
+								Id:   testPlanId,
 							},
 						},
 					},
@@ -411,13 +339,13 @@ func TestBuildRequest(t *testing.T) {
 			),
 			expectedRequest: fixtureRequest(),
 			listOfferingsResp: &rabbitmq.ListOfferingsResponse{
-				Offerings: &[]rabbitmq.Offering{
+				Offerings: []rabbitmq.Offering{
 					{
-						Version: utils.Ptr("example-version"),
-						Plans: &[]rabbitmq.Plan{
+						Version: "example-version",
+						Plans: []rabbitmq.Plan{
 							{
-								Name: utils.Ptr("example-plan-name"),
-								Id:   utils.Ptr(testPlanId),
+								Name: "example-plan-name",
+								Id:   testPlanId,
 							},
 						},
 					},
@@ -446,13 +374,13 @@ func TestBuildRequest(t *testing.T) {
 				},
 			),
 			listOfferingsResp: &rabbitmq.ListOfferingsResponse{
-				Offerings: &[]rabbitmq.Offering{
+				Offerings: []rabbitmq.Offering{
 					{
-						Version: utils.Ptr("example-version"),
-						Plans: &[]rabbitmq.Plan{
+						Version: "example-version",
+						Plans: []rabbitmq.Plan{
 							{
-								Name: utils.Ptr("other-plan-name"),
-								Id:   utils.Ptr(testPlanId),
+								Name: "other-plan-name",
+								Id:   testPlanId,
 							},
 						},
 					},
@@ -465,22 +393,23 @@ func TestBuildRequest(t *testing.T) {
 			model: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
+					Region:    testRegion,
 					Verbosity: globalflags.VerbosityDefault,
 				},
 				InstanceId: testInstanceId,
 			},
-			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId).
+			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId).
 				PartialUpdateInstancePayload(rabbitmq.PartialUpdateInstancePayload{Parameters: &rabbitmq.InstanceParameters{}}),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &rabbitMQClientMocked{
+			settings := mockSettings{
 				returnError:       tt.getOfferingsFails,
 				listOfferingsResp: tt.listOfferingsResp,
 			}
-			request, err := buildRequest(testCtx, tt.model, client)
+			request, err := buildRequest(testCtx, tt.model, newAPIMock(settings))
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -490,7 +419,10 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, rabbitmq.DefaultAPIService{}),
+				cmp.FilterPath(func(p cmp.Path) bool {
+					return p.String() == "ApiService"
+				}, cmp.Ignore()),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

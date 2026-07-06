@@ -20,8 +20,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/rabbitmq"
-	"github.com/stackitcloud/stackit-sdk-go/services/rabbitmq/wait"
+	rabbitmq "github.com/stackitcloud/stackit-sdk-go/services/rabbitmq/v2api"
+	wait "github.com/stackitcloud/stackit-sdk-go/services/rabbitmq/v2api/wait"
 )
 
 const (
@@ -33,12 +33,17 @@ const (
 	metricsFrequencyFlag     = "metrics-frequency"
 	metricsPrefixFlag        = "metrics-prefix"
 	monitoringInstanceIdFlag = "monitoring-instance-id"
-	pluginFlag               = "plugin"
 	sgwAclFlag               = "acl"
 	syslogFlag               = "syslog"
 	planIdFlag               = "plan-id"
 	planNameFlag             = "plan-name"
 	versionFlag              = "version"
+)
+
+var flagPlugins = flags.StringEnumSliceFlag(
+	"plugin",
+	rabbitmq.AllowedInstanceParametersPluginsInnerEnumValues,
+	"Plugins",
 )
 
 type inputModel struct {
@@ -49,12 +54,12 @@ type inputModel struct {
 
 	EnableMonitoring     *bool
 	Graphite             *string
-	MetricsFrequency     *int64
+	MetricsFrequency     *int32
 	MetricsPrefix        *string
 	MonitoringInstanceId *string
-	Plugin               *[]string
+	Plugin               []rabbitmq.InstanceParametersPluginsInner
 	SgwAcl               *[]string
-	Syslog               *[]string
+	Syslog               []string
 	PlanId               *string
 }
 
@@ -85,7 +90,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := rabbitmqUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceLabel, err := rabbitmqUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -98,7 +103,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 				if !errors.As(err, &dsaInvalidPlanError) {
@@ -115,7 +120,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Updating instance", func() error {
-					_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
+					_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, instanceId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -138,10 +143,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(enableMonitoringFlag, false, "Enable monitoring")
 	cmd.Flags().String(graphiteFlag, "", "Graphite host")
-	cmd.Flags().Int64(metricsFrequencyFlag, 0, "Metrics frequency")
+	cmd.Flags().Int32(metricsFrequencyFlag, 0, "Metrics frequency")
 	cmd.Flags().String(metricsPrefixFlag, "", "Metrics prefix")
 	cmd.Flags().Var(flags.UUIDFlag(), monitoringInstanceIdFlag, "Monitoring instance ID")
-	cmd.Flags().StringSlice(pluginFlag, []string{}, "Plugin")
+	flagPlugins.Register(cmd)
 	cmd.Flags().Var(flags.CIDRSliceFlag(), sgwAclFlag, "List of IP networks in CIDR notation which are allowed to access this instance")
 	cmd.Flags().StringSlice(syslogFlag, []string{}, "Syslog")
 	cmd.Flags().Var(flags.UUIDFlag(), planIdFlag, "Plan ID")
@@ -160,11 +165,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	enableMonitoring := flags.FlagToBoolPointer(p, cmd, enableMonitoringFlag)
 	monitoringInstanceId := flags.FlagToStringPointer(p, cmd, monitoringInstanceIdFlag)
 	graphite := flags.FlagToStringPointer(p, cmd, graphiteFlag)
-	metricsFrequency := flags.FlagToInt64Pointer(p, cmd, metricsFrequencyFlag)
+	metricsFrequency := flags.FlagToInt32Pointer(p, cmd, metricsFrequencyFlag)
 	metricsPrefix := flags.FlagToStringPointer(p, cmd, metricsPrefixFlag)
-	plugin := flags.FlagToStringSlicePointer(p, cmd, pluginFlag)
+	plugin := flagPlugins.Get()
 	sgwAcl := flags.FlagToStringSlicePointer(p, cmd, sgwAclFlag)
-	syslog := flags.FlagToStringSlicePointer(p, cmd, syslogFlag)
+	syslog := flags.FlagToStringSliceValue(p, cmd, syslogFlag)
 	planId := flags.FlagToStringPointer(p, cmd, planIdFlag)
 	planName := flags.FlagToStringValue(p, cmd, planNameFlag)
 	version := flags.FlagToStringValue(p, cmd, versionFlag)
@@ -204,17 +209,17 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 type rabbitMQClient interface {
-	PartialUpdateInstance(ctx context.Context, projectId, instanceId string) rabbitmq.ApiPartialUpdateInstanceRequest
-	ListOfferingsExecute(ctx context.Context, projectId string) (*rabbitmq.ListOfferingsResponse, error)
+	PartialUpdateInstance(ctx context.Context, projectId, regionId, instanceId string) rabbitmq.ApiPartialUpdateInstanceRequest
+	ListOfferings(ctx context.Context, projectId, regionId string) rabbitmq.ApiListOfferingsRequest
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient rabbitMQClient) (rabbitmq.ApiPartialUpdateInstanceRequest, error) {
-	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 
 	var planId *string
 	var err error
 
-	offerings, err := apiClient.ListOfferingsExecute(ctx, model.ProjectId)
+	offerings, err := apiClient.ListOfferings(ctx, model.ProjectId, model.Region).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get RabbitMQ offerings: %w", err)
 	}

@@ -6,9 +6,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/viper"
-	"github.com/stackitcloud/stackit-sdk-go/services/rabbitmq"
+	rabbitmq "github.com/stackitcloud/stackit-sdk-go/services/rabbitmq/v2api"
 )
 
 func ConfigureClient(p *print.Printer, cliVersion string) (*rabbitmq.APIClient, error) {
-	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.RabbitMQCustomEndpointKey), true, genericclient.CreateApiClient[*rabbitmq.APIClient](rabbitmq.NewAPIClient))
+	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.RabbitMQCustomEndpointKey), false, genericclient.CreateApiClient[*rabbitmq.APIClient](rabbitmq.NewAPIClient))
 }
