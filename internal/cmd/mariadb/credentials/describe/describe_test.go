@@ -61,7 +61,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *mariadb.ApiGetCredentialsRequest)) mariadb.ApiGetCredentialsRequest {
-	request := testClient.GetCredentials(testCtx, testProjectId, testInstanceId, testCredentialsId)
+	request := testClient.DefaultAPI.GetCredentials(testCtx, testProjectId, testInstanceId, testCredentialsId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -189,7 +189,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, mariadb.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
