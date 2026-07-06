@@ -102,11 +102,12 @@ func outputResult(p *print.Printer, outputFormat string, instance *mariadb.Insta
 		table.AddSeparator()
 		table.AddRow("NAME", instance.Name)
 		table.AddSeparator()
-		table.AddRow("LAST OPERATION TYPE", instance.LastOperation.GetType())
-		table.AddSeparator()
-		table.AddRow("LAST OPERATION STATE", instance.LastOperation.GetState())
-		table.AddSeparator()
-
+		if _, ok := instance.LastOperation.GetStateOk(); ok {
+			table.AddRow("LAST OPERATION TYPE", instance.LastOperation.GetType())
+			table.AddSeparator()
+			table.AddRow("LAST OPERATION STATE", instance.LastOperation.GetState())
+			table.AddSeparator()
+		}
 		table.AddRow("PLAN ID", instance.PlanId)
 		// Only show ACL if it's present and not empty
 		if instance.Parameters != nil {
