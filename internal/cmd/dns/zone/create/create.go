@@ -4,11 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	sdkUtils "github.com/stackitcloud/stackit-sdk-go/core/utils"
-
-	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -18,6 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/dns/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
 	dns "github.com/stackitcloud/stackit-sdk-go/services/dns/v1api"
@@ -30,7 +26,6 @@ const (
 	defaultTTLFlag    = "default-ttl"
 	primaryFlag       = "primary"
 	aclFlag           = "acl"
-	typeFlag          = "type"
 	retryTimeFlag     = "retry-time"
 	refreshTimeFlag   = "refresh-time"
 	negativeCacheFlag = "negative-cache"
@@ -38,6 +33,13 @@ const (
 	expireTimeFlag    = "expire-time"
 	descriptionFlag   = "description"
 	contactEmailFlag  = "contact-email"
+)
+
+var typeFlag = flags.StringEnumFlag(
+	"type",
+	append(dns.AllowedCreateZonePayloadTypeEnumValues, ""),
+	"Zone type,",
+	flags.StringEnumDefaultValue(dns.CreateZonePayloadType("")),
 )
 
 type inputModel struct {
@@ -128,7 +130,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int32(defaultTTLFlag, 1000, "Default time to live")
 	cmd.Flags().StringSlice(primaryFlag, []string{}, "Primary name server for secondary zone")
 	cmd.Flags().String(aclFlag, "", "Access control list")
-	cmd.Flags().Var(flags.EnumFlag(false, "", append(sdkUtils.EnumSliceToStringSlice(dns.AllowedCreateZonePayloadTypeEnumValues), "")...), typeFlag, fmt.Sprintf("Zone type, one of: %q", utils.FormatPossibleValues(sdkUtils.EnumSliceToStringSlice(dns.AllowedCreateZonePayloadTypeEnumValues)...)))
+	typeFlag.Register(cmd.Flags())
 	cmd.Flags().Int32(retryTimeFlag, 0, "Retry time")
 	cmd.Flags().Int32(refreshTimeFlag, 0, "Refresh time")
 	cmd.Flags().Int32(negativeCacheFlag, 0, "Negative cache")
@@ -148,8 +150,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	var zoneType *dns.CreateZonePayloadType
-	if zoneTypeString := flags.FlagToStringPointer(p, cmd, typeFlag); zoneTypeString != nil && *zoneTypeString != "" {
-		zoneType = dns.CreateZonePayloadType(*zoneTypeString).Ptr()
+	if typeFlagValue := typeFlag.Ptr(); typeFlagValue != nil && *typeFlagValue != "" {
+		zoneType = typeFlagValue
 	}
 
 	model := inputModel{

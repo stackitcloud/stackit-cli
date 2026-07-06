@@ -25,7 +25,12 @@ const (
 
 	instanceIdFlag = "instance-id"
 	databaseFlag   = "database"
-	roleFlag       = "role"
+)
+
+var roleFlag = flags.StringEnumSliceFlag(
+	"role",
+	[]string{"read", "readWrite", "readAnyDatabase", "readWriteAnyDatabase", "stackitAdmin"},
+	"Roles of the user. The \"readAnyDatabase\", \"readWriteAnyDatabase\" and \"stackitAdmin\" roles will always be created in the admin database.",
 )
 
 type inputModel struct {
@@ -96,11 +101,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	roleOptions := []string{"read", "readWrite", "readAnyDatabase", "readWriteAnyDatabase", "stackitAdmin"}
-
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the instance")
 	cmd.Flags().String(databaseFlag, "", "The database inside the MongoDB instance that the user has access to. If it does not exist, it will be created once the user writes to it")
-	cmd.Flags().Var(flags.EnumSliceFlag(false, nil, roleOptions...), roleFlag, fmt.Sprintf("Roles of the user, possible values are %q. The \"readAnyDatabase\", \"readWriteAnyDatabase\" and \"stackitAdmin\" roles will always be created in the admin database.", roleOptions))
+	roleFlag.Register(cmd)
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)
@@ -115,7 +118,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	database := flags.FlagToStringPointer(p, cmd, databaseFlag)
-	roles := flags.FlagToStringSlicePointer(p, cmd, roleFlag)
+	roles := roleFlag.Ptr()
 
 	if database == nil && roles == nil {
 		return nil, &errors.EmptyUpdateError{}

@@ -6,7 +6,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/secretsmanager"
+	secretsmanager "github.com/stackitcloud/stackit-sdk-go/services/secretsmanager/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -16,7 +16,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/secrets-manager/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -34,7 +33,7 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 
-	InstanceName *string
+	InstanceName string
 	Acls         *[]string
 
 	KmsKeyId               *string
@@ -92,7 +91,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("create Secrets Manager instance: %w", err)
 			}
-			instanceId := *resp.Id
+			instanceId := resp.Id
 
 			// Call API to create ACLs for instance, if ACLs are provided
 			if model.Acls != nil {
@@ -136,7 +135,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel:        globalFlags,
-		InstanceName:           flags.FlagToStringPointer(p, cmd, instanceNameFlag),
+		InstanceName:           flags.FlagToStringValue(p, cmd, instanceNameFlag),
 		Acls:                   flags.FlagToStringSlicePointer(p, cmd, aclFlag),
 		KmsKeyId:               flags.FlagToStringPointer(p, cmd, kmsKeyIdFlag),
 		KmsKeyringId:           flags.FlagToStringPointer(p, cmd, kmsKeyringIdFlag),
@@ -149,18 +148,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildCreateInstanceRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiCreateInstanceRequest {
-	req := apiClient.CreateInstance(ctx, model.ProjectId)
+	req := apiClient.DefaultAPI.CreateInstance(ctx, model.ProjectId)
 
 	payload := secretsmanager.CreateInstancePayload{
 		Name: model.InstanceName,
 	}
 
-	if model.KmsKeyId != nil {
+	if model.KmsKeyId != nil && model.KmsKeyringId != nil && model.KmsKeyVersion != nil && model.KmsServiceAccountEmail != nil {
 		payload.KmsKey = &secretsmanager.KmsKeyPayload{
-			KeyId:               model.KmsKeyId,
-			KeyRingId:           model.KmsKeyringId,
-			KeyVersion:          model.KmsKeyVersion,
-			ServiceAccountEmail: model.KmsServiceAccountEmail,
+			KeyId:               *model.KmsKeyId,
+			KeyRingId:           *model.KmsKeyringId,
+			KeyVersion:          *model.KmsKeyVersion,
+			ServiceAccountEmail: *model.KmsServiceAccountEmail,
 		}
 	}
 
@@ -170,15 +169,15 @@ func buildCreateInstanceRequest(ctx context.Context, model *inputModel, apiClien
 }
 
 func buildUpdateACLsRequest(ctx context.Context, model *inputModel, instanceId string, apiClient *secretsmanager.APIClient) secretsmanager.ApiUpdateACLsRequest {
-	req := apiClient.UpdateACLs(ctx, model.ProjectId, instanceId)
+	req := apiClient.DefaultAPI.UpdateACLs(ctx, model.ProjectId, instanceId)
 
 	cidrs := make([]secretsmanager.UpdateACLPayload, len(*model.Acls))
 
 	for i, acl := range *model.Acls {
-		cidrs[i] = secretsmanager.UpdateACLPayload{Cidr: utils.Ptr(acl)}
+		cidrs[i] = secretsmanager.UpdateACLPayload{Cidr: acl}
 	}
 
-	req = req.UpdateACLsPayload(secretsmanager.UpdateACLsPayload{Cidrs: &cidrs})
+	req = req.UpdateACLsPayload(secretsmanager.UpdateACLsPayload{Cidrs: cidrs})
 
 	return req
 }

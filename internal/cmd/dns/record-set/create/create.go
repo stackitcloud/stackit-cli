@@ -4,10 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	sdkUtils "github.com/stackitcloud/stackit-sdk-go/core/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/dns/v1api/wait"
-
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
@@ -31,10 +28,16 @@ const (
 	nameFlag    = "name"
 	recordFlag  = "record"
 	ttlFlag     = "ttl"
-	typeFlag    = "type"
 
 	defaultType = dns.CREATERECORDSETPAYLOADTYPE_A
 	txtType     = dns.CREATERECORDSETPAYLOADTYPE_TXT
+)
+
+var typeFlag = flags.StringEnumFlag(
+	"type",
+	dns.AllowedCreateRecordSetPayloadTypeEnumValues,
+	"Record type,",
+	flags.StringEnumDefaultValue(defaultType),
 )
 
 type inputModel struct {
@@ -115,7 +118,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(nameFlag, "", "Name of the record, should be compliant with RFC1035, Section 2.3.4")
 	cmd.Flags().Int32(ttlFlag, 0, "Time to live, if not provided defaults to the zone's default TTL")
 	cmd.Flags().StringSlice(recordFlag, []string{}, "Records belonging to the record set")
-	cmd.Flags().Var(flags.EnumFlag(false, string(defaultType), sdkUtils.EnumSliceToStringSlice(dns.AllowedCreateRecordSetPayloadTypeEnumValues)...), typeFlag, fmt.Sprintf("Record type, one of %q", utils.FormatPossibleValues(sdkUtils.EnumSliceToStringSlice(dns.AllowedCreateRecordSetPayloadTypeEnumValues)...)))
+	typeFlag.Register(cmd.Flags())
 
 	err := flags.MarkFlagsRequired(cmd, zoneIdFlag, nameFlag, recordFlag)
 	cobra.CheckErr(err)
@@ -127,8 +130,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		return nil, &errors.ProjectIdError{}
 	}
 
-	recordType := flags.FlagWithDefaultToStringValue(p, cmd, typeFlag)
-
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		ZoneId:          flags.FlagToStringValue(p, cmd, zoneIdFlag),
@@ -136,7 +137,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
 		Records:         flags.FlagToStringSliceValue(p, cmd, recordFlag),
 		TTL:             flags.FlagToInt32Pointer(p, cmd, ttlFlag),
-		Type:            dns.CreateRecordSetPayloadType(recordType),
+		Type:            typeFlag.Get(),
 	}
 
 	if model.Type == txtType {

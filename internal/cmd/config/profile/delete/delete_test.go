@@ -68,7 +68,7 @@ func TestParseInput(t *testing.T) {
 			description: "some global flag",
 			argValues:   fixtureArgValues(),
 			flagValues: map[string]string{
-				globalflags.VerbosityFlag: globalflags.DebugVerbosity,
+				globalflags.VerbosityFlag.Name(): globalflags.DebugVerbosity,
 			},
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {

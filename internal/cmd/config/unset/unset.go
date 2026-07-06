@@ -17,12 +17,10 @@ import (
 )
 
 const (
-	asyncFlag        = globalflags.AsyncFlag
-	outputFormatFlag = globalflags.OutputFormatFlag
-	projectIdFlag    = globalflags.ProjectIdFlag
-	regionFlag       = globalflags.RegionFlag
-	verbosityFlag    = globalflags.VerbosityFlag
-	assumeYesFlag    = globalflags.AssumeYesFlag
+	asyncFlag     = globalflags.AsyncFlag
+	projectIdFlag = globalflags.ProjectIdFlag
+	regionFlag    = globalflags.RegionFlag
+	assumeYesFlag = globalflags.AssumeYesFlag
 
 	sessionTimeLimitFlag                             = "session-time-limit"
 	identityProviderCustomWellKnownConfigurationFlag = "identity-provider-custom-well-known-configuration"
@@ -58,6 +56,11 @@ const (
 	intakeCustomEndpointFlag            = "intake-custom-endpoint"
 	logsCustomEndpointFlag              = "logs-custom-endpoint"
 	cdnCustomEndpointFlag               = "cdn-custom-endpoint"
+)
+
+var (
+	outputFormatFlag = globalflags.OutputFormatFlag.Name()
+	verbosityFlag    = globalflags.VerbosityFlag.Name()
 )
 
 type inputModel struct {

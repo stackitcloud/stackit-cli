@@ -22,8 +22,15 @@ import (
 )
 
 const (
-	limitFlag     = "limit"
-	immutableFlag = "immutable"
+	limitFlag = "limit"
+)
+
+var immutableFlag = flags.StringEnumFlag(
+	"immutable",
+	[]string{"all", "immutable-only", "mutable-only"},
+	"Immutable snapshot policy,",
+	flags.StringEnumDefaultValue("all"),
+	flags.StringEnumIgnoreCase[string](),
 )
 
 type inputModel struct {
@@ -99,8 +106,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	immutableOptions := []string{"all", "immutable-only", "mutable-only"}
-	cmd.Flags().Var(flags.EnumFlag(true, "all", immutableOptions...), immutableFlag, fmt.Sprintf("Immutable snapshot policy, one of %q", immutableOptions))
+	immutableFlag.Register(cmd.Flags())
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 }
 
@@ -121,7 +127,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Limit:           limit,
-		Immutable:       flags.FlagToStringPointer(p, cmd, immutableFlag),
+		Immutable:       immutableFlag.Ptr(),
 	}
 
 	p.DebugInputModel(model)

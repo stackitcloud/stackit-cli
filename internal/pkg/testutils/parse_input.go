@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -79,6 +80,14 @@ func RunParseInputCase[T any](t *testing.T, tc ParseInputTestCase[T], opts ...Pa
 	if err := globalflags.Configure(cmd.Flags()); err != nil {
 		t.Fatalf("configure global flags: %v", err)
 	}
+	cmd.Flags().VisitAll(func(flag *pflag.Flag) {
+		if flag.Value == nil {
+			return
+		}
+		if r, ok := flag.Value.(Resettable); ok {
+			r.Reset()
+		}
+	})
 
 	// Set regular flag values.
 	for flag, value := range tc.Flags {

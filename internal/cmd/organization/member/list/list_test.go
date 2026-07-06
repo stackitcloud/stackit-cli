@@ -107,7 +107,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "sort by role",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[sortByFlag] = "role"
+				flagValues[sortByFlag.Name()] = "role"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -117,7 +117,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "sort by invalid",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[sortByFlag] = "invalid"
+				flagValues[sortByFlag.Name()] = "invalid"
 			}),
 			isValid: false,
 		},

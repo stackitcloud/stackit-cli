@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/secretsmanager"
+	secretsmanager "github.com/stackitcloud/stackit-sdk-go/services/secretsmanager/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -20,7 +20,9 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &secretsmanager.APIClient{}
+var testClient = &secretsmanager.APIClient{
+	DefaultAPI: secretsmanager.DefaultAPIServiceMock{},
+}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 
@@ -49,7 +51,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		InstanceName: utils.Ptr("example"),
+		InstanceName: "example",
 		Acls:         utils.Ptr([]string{"198.51.100.14/24"}),
 	}
 	for _, mod := range mods {
@@ -59,9 +61,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *secretsmanager.ApiCreateInstanceRequest)) secretsmanager.ApiCreateInstanceRequest {
-	request := testClient.CreateInstance(testCtx, testProjectId)
+	request := testClient.DefaultAPI.CreateInstance(testCtx, testProjectId)
 	request = request.CreateInstancePayload(secretsmanager.CreateInstancePayload{
-		Name: utils.Ptr("example"),
+		Name: "example",
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -70,11 +72,11 @@ func fixtureRequest(mods ...func(request *secretsmanager.ApiCreateInstanceReques
 }
 
 func fixtureUpdateACLsRequest(mods ...func(request *secretsmanager.ApiUpdateACLsRequest)) secretsmanager.ApiUpdateACLsRequest {
-	request := testClient.UpdateACLs(testCtx, testProjectId, testInstanceId)
+	request := testClient.DefaultAPI.UpdateACLs(testCtx, testProjectId, testInstanceId)
 	request = request.UpdateACLsPayload(secretsmanager.UpdateACLsPayload{
-		Cidrs: utils.Ptr([]secretsmanager.UpdateACLPayload{
-			{Cidr: utils.Ptr("198.51.100.14/24")},
-		})})
+		Cidrs: []secretsmanager.UpdateACLPayload{
+			{Cidr: "198.51.100.14/24"},
+		}})
 
 	for _, mod := range mods {
 		mod(&request)
@@ -115,7 +117,7 @@ func TestParseInput(t *testing.T) {
 					ProjectId: testProjectId,
 					Verbosity: globalflags.VerbosityDefault,
 				},
-				InstanceName: utils.Ptr(""),
+				InstanceName: "",
 				Acls:         &[]string{},
 			},
 		},
@@ -240,15 +242,15 @@ func TestBuildCreateInstanceRequest(t *testing.T) {
 			}),
 			expectedRequest: fixtureRequest(func(request *secretsmanager.ApiCreateInstanceRequest) {
 				payload := secretsmanager.CreateInstancePayload{
-					Name: utils.Ptr("example"),
+					Name: "example",
 					KmsKey: &secretsmanager.KmsKeyPayload{
-						KeyId:               utils.Ptr(testKmsKeyId),
-						KeyRingId:           utils.Ptr(testKmsKeyringId),
-						KeyVersion:          utils.Ptr(testKmsKeyVersion),
-						ServiceAccountEmail: utils.Ptr(testKmsServiceAccountEmail),
+						KeyId:               testKmsKeyId,
+						KeyRingId:           testKmsKeyringId,
+						KeyVersion:          testKmsKeyVersion,
+						ServiceAccountEmail: testKmsServiceAccountEmail,
 					},
 				}
-				*request = (*request).CreateInstancePayload(payload)
+				*request = request.CreateInstancePayload(payload)
 			}),
 		},
 	}
@@ -284,10 +286,10 @@ func TestBuildCreateACLRequests(t *testing.T) {
 				*model.Acls = append(*model.Acls, "1.2.3.4/32")
 			}),
 			expectedRequest: fixtureUpdateACLsRequest().UpdateACLsPayload(secretsmanager.UpdateACLsPayload{
-				Cidrs: utils.Ptr([]secretsmanager.UpdateACLPayload{
-					{Cidr: utils.Ptr("198.51.100.14/24")},
-					{Cidr: utils.Ptr("1.2.3.4/32")},
-				})}),
+				Cidrs: []secretsmanager.UpdateACLPayload{
+					{Cidr: "198.51.100.14/24"},
+					{Cidr: "1.2.3.4/32"},
+				}}),
 		},
 	}
 

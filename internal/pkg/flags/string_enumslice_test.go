@@ -133,7 +133,7 @@ func TestStringEnumSliceFlag_DefaultValues(t *testing.T) {
 func TestStringEnumSliceFlag_Usage(t *testing.T) {
 	f := StringEnumSliceFlag("test", []string{"a", "b"}, "docs")
 	usage := f.Usage()
-	if usage != "docs (possible values: [a, b])" {
+	if usage != "docs (multiple of: [a, b])" {
 		t.Errorf("Expected usage 'docs (possible values: [a, b])', got %q", usage)
 	}
 }
@@ -141,7 +141,7 @@ func TestStringEnumSliceFlag_Usage(t *testing.T) {
 func TestStringEnumSliceFlag_UnknownDefaultOpenAPI(t *testing.T) {
 	f := StringEnumSliceFlag("test", []string{"a", "unknown_default_open_api", "b"}, "docs")
 	usage := f.Usage()
-	if usage != "docs (possible values: [a, b])" {
+	if usage != "docs (multiple of: [a, b])" {
 		t.Errorf("Expected unknown_default_open_api to be filtered out, got %q", usage)
 	}
 }
@@ -155,7 +155,7 @@ func TestStringEnumSliceFlag_Register(t *testing.T) {
 	if flag == nil {
 		t.Fatalf("Expected flag 'my-flag' to be registered")
 	}
-	if flag.Usage != "docs (possible values: [a, b])" {
+	if flag.Usage != "docs (multiple of: [a, b])" {
 		t.Errorf("Expected flag usage to be set correctly")
 	}
 }

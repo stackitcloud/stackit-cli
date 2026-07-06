@@ -219,12 +219,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		if globalFlags.OutputFormat == "" || globalFlags.OutputFormat == print.NoneOutputFormat {
 			return nil, &cliErr.FlagValidationError{
 				Flag:    commonKubeconfig.DisableWritingFlag,
-				Details: fmt.Sprintf("must be used with --%s", globalflags.OutputFormatFlag),
+				Details: fmt.Sprintf("must be used with --%s", globalflags.OutputFormatFlag.Name()),
 			}
 		}
 		if globalFlags.OutputFormat != print.JSONOutputFormat && globalFlags.OutputFormat != print.YAMLOutputFormat {
 			return nil, &cliErr.FlagValidationError{
-				Flag:    globalflags.OutputFormatFlag,
+				Flag:    globalflags.OutputFormatFlag.Name(),
 				Details: fmt.Sprintf("valid output formats for this command are: %s", fmt.Sprintf("%s, %s", print.JSONOutputFormat, print.YAMLOutputFormat)),
 			}
 		}

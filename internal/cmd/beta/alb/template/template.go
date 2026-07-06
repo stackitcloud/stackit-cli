@@ -20,9 +20,23 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
-const (
-	formatFlag = "format"
-	typeFlag   = "type"
+var (
+	formatFlag = flags.StringEnumFlag(
+		"format",
+		[]string{"json", "yaml"},
+		"Defines the output format",
+		flags.StringEnumIgnoreCase[string](),
+		flags.StringEnumShortHand[string]("f"),
+		flags.StringEnumDefaultValue("json"),
+	)
+	typeFlag = flags.StringEnumFlag(
+		"type",
+		[]string{"alb", "pool"},
+		"Defines the output type",
+		flags.StringEnumIgnoreCase[string](),
+		flags.StringEnumShortHand[string]("t"),
+		flags.StringEnumDefaultValue("alb"),
+	)
 )
 
 type inputModel struct {
@@ -97,8 +111,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().VarP(flags.EnumFlag(true, "json", "json", "yaml"), formatFlag, "f", "Defines the output format ('yaml' or 'json'), default is 'json'")
-	cmd.Flags().VarP(flags.EnumFlag(true, "alb", "alb", "pool"), typeFlag, "t", "Defines the output type ('alb' or 'pool'), default is 'alb'")
+	formatFlag.Register(cmd.Flags())
+	typeFlag.Register(cmd.Flags())
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
@@ -109,8 +123,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		Format:          flags.FlagToStringPointer(p, cmd, formatFlag),
-		Type:            flags.FlagToStringPointer(p, cmd, typeFlag),
+		Format:          formatFlag.Ptr(),
+		Type:            typeFlag.Ptr(),
 	}
 
 	p.DebugInputModel(model)

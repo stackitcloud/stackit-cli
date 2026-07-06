@@ -31,7 +31,7 @@ const testRegions = cdn.REGION_EU
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
-		flagRegion:                string(testRegions),
+		flagRegion.Name():         string(testRegions),
 	}
 	flagsHTTPBackend()(flagValues)
 	for _, mod := range mods {
@@ -69,11 +69,11 @@ func flagsLoki() func(flagValues map[string]string) {
 func flagRegions(regions ...cdn.Region) func(flagValues map[string]string) {
 	return func(flagValues map[string]string) {
 		if len(regions) == 0 {
-			delete(flagValues, flagRegion)
+			delete(flagValues, flagRegion.Name())
 			return
 		}
 		stringRegions := sdkUtils.EnumSliceToStringSlice(regions)
-		flagValues[flagRegion] = strings.Join(stringRegions, ",")
+		flagValues[flagRegion.Name()] = strings.Join(stringRegions, ",")
 	}
 }
 

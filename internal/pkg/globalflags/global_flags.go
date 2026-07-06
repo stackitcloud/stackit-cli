@@ -13,12 +13,10 @@ import (
 )
 
 const (
-	AsyncFlag        = "async"
-	AssumeYesFlag    = "assume-yes"
-	OutputFormatFlag = "output-format"
-	ProjectIdFlag    = "project-id"
-	RegionFlag       = "region"
-	VerbosityFlag    = "verbosity"
+	AsyncFlag     = "async"
+	AssumeYesFlag = "assume-yes"
+	ProjectIdFlag = "project-id"
+	RegionFlag    = "region"
 
 	DebugVerbosity   = string(print.DebugLevel)
 	InfoVerbosity    = string(print.InfoLevel)
@@ -28,8 +26,22 @@ const (
 	VerbosityDefault = InfoVerbosity
 )
 
-var outputFormatFlagOptions = []string{print.JSONOutputFormat, print.PrettyOutputFormat, print.NoneOutputFormat, print.YAMLOutputFormat}
-var verbosityFlagOptions = []string{DebugVerbosity, InfoVerbosity, WarningVerbosity, ErrorVerbosity}
+var (
+	OutputFormatFlag = flags.StringEnumFlag(
+		"output-format",
+		[]string{print.JSONOutputFormat, print.PrettyOutputFormat, print.NoneOutputFormat, print.YAMLOutputFormat},
+		"Output format,",
+		flags.StringEnumIgnoreCase[string](),
+		flags.StringEnumShortHand[string]("o"),
+	)
+	VerbosityFlag = flags.StringEnumFlag(
+		"verbosity",
+		[]string{DebugVerbosity, InfoVerbosity, WarningVerbosity, ErrorVerbosity},
+		"Verbosity of the CLI,",
+		flags.StringEnumDefaultValue(VerbosityDefault),
+		flags.StringEnumIgnoreCase[string](),
+	)
+)
 
 type GlobalFlagModel struct {
 	Async        bool
@@ -47,10 +59,10 @@ func Configure(flagSet *pflag.FlagSet) error {
 		return fmt.Errorf("bind --%s flag to config: %w", ProjectIdFlag, err)
 	}
 
-	flagSet.VarP(flags.EnumFlag(true, "", outputFormatFlagOptions...), OutputFormatFlag, "o", fmt.Sprintf("Output format, one of %q", outputFormatFlagOptions))
-	err = viper.BindPFlag(config.OutputFormatKey, flagSet.Lookup(OutputFormatFlag))
+	OutputFormatFlag.Register(flagSet)
+	err = viper.BindPFlag(config.OutputFormatKey, flagSet.Lookup(OutputFormatFlag.Name()))
 	if err != nil {
-		return fmt.Errorf("bind --%s flag to config: %w", OutputFormatFlag, err)
+		return fmt.Errorf("bind --%s flag to config: %w", OutputFormatFlag.Name(), err)
 	}
 
 	flagSet.Bool(AsyncFlag, false, "If set, runs the command asynchronously")
@@ -65,10 +77,10 @@ func Configure(flagSet *pflag.FlagSet) error {
 		return fmt.Errorf("bind --%s flag to config: %w", AssumeYesFlag, err)
 	}
 
-	flagSet.Var(flags.EnumFlag(true, VerbosityDefault, verbosityFlagOptions...), VerbosityFlag, fmt.Sprintf("Verbosity of the CLI, one of %q", verbosityFlagOptions))
-	err = viper.BindPFlag(config.VerbosityKey, flagSet.Lookup(VerbosityFlag))
+	VerbosityFlag.Register(flagSet)
+	err = viper.BindPFlag(config.VerbosityKey, flagSet.Lookup(VerbosityFlag.Name()))
 	if err != nil {
-		return fmt.Errorf("bind --%s flag to config: %w", VerbosityFlag, err)
+		return fmt.Errorf("bind --%s flag to config: %w", VerbosityFlag.Name(), err)
 	}
 
 	flagSet.String(RegionFlag, "", "Target region for region-specific requests")

@@ -36,7 +36,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		requestMethodFlag:          "post",
+		requestMethodFlag.Name():   "post",
 		headerFlag:                 "Test-header-1: Test value 1",
 		dataFlag:                   "data",
 		includeResponseHeadersFlag: "true",
@@ -143,7 +143,7 @@ func TestParseInput(t *testing.T) {
 			description: "invalid method 1",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[requestMethodFlag] = ""
+				flagValues[requestMethodFlag.Name()] = ""
 			}),
 			isValid: false,
 		},
@@ -151,7 +151,7 @@ func TestParseInput(t *testing.T) {
 			description: "invalid method 2",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[requestMethodFlag] = "foo"
+				flagValues[requestMethodFlag.Name()] = "foo"
 			}),
 			isValid: false,
 		},
@@ -159,7 +159,7 @@ func TestParseInput(t *testing.T) {
 			description: "invalid method 3",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[requestMethodFlag] = " GET"
+				flagValues[requestMethodFlag.Name()] = " GET"
 			}),
 			isValid: false,
 		},
@@ -167,7 +167,7 @@ func TestParseInput(t *testing.T) {
 			description: "valid method 1",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[requestMethodFlag] = "put"
+				flagValues[requestMethodFlag.Name()] = "put"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -178,7 +178,7 @@ func TestParseInput(t *testing.T) {
 			description: "valid method 2",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[requestMethodFlag] = "pAtCh"
+				flagValues[requestMethodFlag.Name()] = "pAtCh"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -217,6 +217,7 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
+			requestMethodFlag.Reset()
 			params := testparams.NewTestParams()
 			cmd := NewCmd(params.CmdParams)
 			err := globalflags.Configure(cmd.Flags())

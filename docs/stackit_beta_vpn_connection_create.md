@@ -34,20 +34,20 @@ stackit beta vpn connection create [flags]
                                                        The peering object defines the point-to-point IP configuration for the Tunnel Interface. These addresses serve as next-hop identifiers and are used for BGP peering sessions and can be used in Static Route-Based connectivity.
       --tunnel1-peering-remote-address string          Tunnel 1 Peering Remote Address
       --tunnel1-phase1-dh-groups strings               Tunnel 1 Phase 1 DH Groups.
-                                                       The Diffie-Hellman Group. Required, except if AEAD algorithms are selected. (possible values: [modp1024, modp2048, ecp256, ecp384, modp2048s256]) (default [])
-      --tunnel1-phase1-encryption-algorithms strings   Required: Tunnel 1 Phase 1 Encryption Algorithms (possible values: [aes256, aes128gcm16, aes256gcm16]) (default [])
-      --tunnel1-phase1-integrity-algorithms strings    Required: Tunnel 1 Phase 1 Integrity Algorithms (possible values: [sha1, sha2_256, sha2_384]) (default [])
+                                                       The Diffie-Hellman Group. Required, except if AEAD algorithms are selected. (multiple of: [modp1024, modp2048, ecp256, ecp384, modp2048s256]) (default [])
+      --tunnel1-phase1-encryption-algorithms strings   Required: Tunnel 1 Phase 1 Encryption Algorithms (multiple of: [aes256, aes128gcm16, aes256gcm16]) (default [])
+      --tunnel1-phase1-integrity-algorithms strings    Required: Tunnel 1 Phase 1 Integrity Algorithms (multiple of: [sha1, sha2_256, sha2_384]) (default [])
       --tunnel1-phase1-rekey-time int                  Tunnel 1 Phase 1 Rekey Time.
                                                        Time to schedule a IKE re-keying (in seconds).
-      --tunnel1-phase2-dh-groups strings               Tunnel 1 Phase 2 DH Groups (possible values: [modp1024, modp2048, ecp256, ecp384, modp2048s256]) (default [])
+      --tunnel1-phase2-dh-groups strings               Tunnel 1 Phase 2 DH Groups (multiple of: [modp1024, modp2048, ecp256, ecp384, modp2048s256]) (default [])
       --tunnel1-phase2-dpd-action string               Tunnel 1 Phase 2 DPD Action.
-                                                       Action to perform for this CHILD_SA on DPD timeout. "clear": Closes the CHILD_SA and does not take further action. "restart": immediately tries to re-negotiate the CILD_SA under a fresh IKE_SA. (possible values: [clear, restart])
-      --tunnel1-phase2-encryption-algorithms strings   Required: Tunnel 1 Phase 2 Encryption Algorithms (possible values: [aes256, aes128gcm16, aes256gcm16]) (default [])
-      --tunnel1-phase2-integrity-algorithms strings    Required: Tunnel 1 Phase 2 Integrity Algorithms (possible values: [sha1, sha2_256, sha2_384]) (default [])
+                                                       Action to perform for this CHILD_SA on DPD timeout. "clear": Closes the CHILD_SA and does not take further action. "restart": immediately tries to re-negotiate the CILD_SA under a fresh IKE_SA. (one of: [clear, restart])
+      --tunnel1-phase2-encryption-algorithms strings   Required: Tunnel 1 Phase 2 Encryption Algorithms (multiple of: [aes256, aes128gcm16, aes256gcm16]) (default [])
+      --tunnel1-phase2-integrity-algorithms strings    Required: Tunnel 1 Phase 2 Integrity Algorithms (multiple of: [sha1, sha2_256, sha2_384]) (default [])
       --tunnel1-phase2-rekey-time int                  Tunnel 1 Phase 2 Rekey Time.
                                                        Time to schedule a Child SA re-keying (in seconds).
       --tunnel1-phase2-start-action string             Tunnel 1 Phase 2 Start Action.
-                                                       Action to perform after loading the connection configuration. "none": The connection will be loaded but needs to be manually initiated. "start": initiates the connection actively. (possible values: [none, start])
+                                                       Action to perform after loading the connection configuration. "none": The connection will be loaded but needs to be manually initiated. "start": initiates the connection actively. (one of: [none, start])
       --tunnel1-pre-shared-key string                  Required: Tunnel 1 Pre Shared Key.
                                                        A Pre-Shared Key for authentication. Required in create-requests, optional in update-requests and omitted in every response.
       --tunnel1-remote-address string                  Tunnel 1 Remote Address
@@ -56,22 +56,22 @@ stackit beta vpn connection create [flags]
                                                        The peering object defines the point-to-point IP configuration for the Tunnel Interface. These addresses serve as next-hop identifiers and are used for BGP peering sessions and can be used in Static Route-Based connectivity.
       --tunnel2-peering-remote-address string          Tunnel 2 Peering Remote Address
       --tunnel2-phase1-dh-groups strings               Tunnel 2 Phase 1 DH Groups
-                                                       The Diffie-Hellman Group. Required, except if AEAD algorithms are selected. (possible values: [modp1024, modp2048, ecp256, ecp384, modp2048s256]) (default [])
-      --tunnel2-phase1-encryption-algorithms strings   Required: Tunnel 2 Phase 1 Encryption Algorithms (possible values: [aes256, aes128gcm16, aes256gcm16]) (default [])
-      --tunnel2-phase1-integrity-algorithms strings    Required: Tunnel 2 Phase 1 Integrity Algorithms (possible values: [sha1, sha2_256, sha2_384]) (default [])
+                                                       The Diffie-Hellman Group. Required, except if AEAD algorithms are selected. (multiple of: [modp1024, modp2048, ecp256, ecp384, modp2048s256]) (default [])
+      --tunnel2-phase1-encryption-algorithms strings   Required: Tunnel 2 Phase 1 Encryption Algorithms (multiple of: [aes256, aes128gcm16, aes256gcm16]) (default [])
+      --tunnel2-phase1-integrity-algorithms strings    Required: Tunnel 2 Phase 1 Integrity Algorithms (multiple of: [sha1, sha2_256, sha2_384]) (default [])
       --tunnel2-phase1-rekey-time int                  Tunnel 2 Phase 1 Rekey Time.
                                                        Time to schedule a IKE re-keying (in seconds).
-      --tunnel2-phase2-dh-groups strings               Tunnel 2 Phase 2 DH Groups (possible values: [modp1024, modp2048, ecp256, ecp384, modp2048s256]) (default [])
+      --tunnel2-phase2-dh-groups strings               Tunnel 2 Phase 2 DH Groups (multiple of: [modp1024, modp2048, ecp256, ecp384, modp2048s256]) (default [])
       --tunnel2-phase2-dpd-action string               Tunnel 2 Phase 2 DPD Action.
-                                                       Action to perform for this CHILD_SA on DPD timeout. "clear": Closes the CHILD_SA and does not take further action. "restart": immediately tries to re-negotiate the CILD_SA under a fresh IKE_SA. (possible values: [clear, restart])
-      --tunnel2-phase2-encryption-algorithms strings   Required: Tunnel 2 Phase 2 Encryption Algorithms (possible values: [aes256, aes128gcm16, aes256gcm16]) (default [])
-      --tunnel2-phase2-integrity-algorithms strings    Required: Tunnel 2 Phase 2 Integrity Algorithms (possible values: [sha1, sha2_256, sha2_384]) (default [])
+                                                       Action to perform for this CHILD_SA on DPD timeout. "clear": Closes the CHILD_SA and does not take further action. "restart": immediately tries to re-negotiate the CILD_SA under a fresh IKE_SA. (one of: [clear, restart])
+      --tunnel2-phase2-encryption-algorithms strings   Required: Tunnel 2 Phase 2 Encryption Algorithms (multiple of: [aes256, aes128gcm16, aes256gcm16]) (default [])
+      --tunnel2-phase2-integrity-algorithms strings    Required: Tunnel 2 Phase 2 Integrity Algorithms (multiple of: [sha1, sha2_256, sha2_384]) (default [])
       --tunnel2-phase2-rekey-time int                  Tunnel 2 Phase 2 Rekey Time.
                                                        Time to schedule a Child SA re-keying (in seconds).
       --tunnel2-phase2-start-action string             Tunnel 2 Phase 2 Start Action.
                                                        Default: "start"
                                                        Enum: "none" "start"
-                                                       Action to perform after loading the connection configuration. "none": The connection will be loaded but needs to be manually initiated. "start": initiates the connection actively. (possible values: [none, start])
+                                                       Action to perform after loading the connection configuration. "none": The connection will be loaded but needs to be manually initiated. "start": initiates the connection actively. (one of: [none, start])
       --tunnel2-pre-shared-key string                  Required: Tunnel 2 Pre Shared Key.
                                                        A Pre-Shared Key for authentication. Required in create-requests, optional in update-requests and omitted in every response.
       --tunnel2-remote-address string                  Tunnel 2 Remote Address
@@ -82,10 +82,10 @@ stackit beta vpn connection create [flags]
 ```
   -y, --assume-yes             If set, skips all confirmation prompts
       --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, one of ["json" "pretty" "none" "yaml"]
+  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
   -p, --project-id string      Project ID
       --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, one of ["debug" "info" "warning" "error"] (default "info")
+      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO
