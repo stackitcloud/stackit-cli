@@ -6,18 +6,18 @@ import (
 
 	"github.com/spf13/cobra"
 
+	vpn "github.com/stackitcloud/stackit-sdk-go/services/vpn/v1api"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/vpn/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	vpn "github.com/stackitcloud/stackit-sdk-go/services/vpn/v1api"
 )
 
 const (
@@ -67,12 +67,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				items = items[:*model.Limit]
 			}
 
-			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-			if err != nil || projectLabel == "" {
-				projectLabel = model.ProjectId
-			}
-
-			return outputResult(params.Printer, model.OutputFormat, items, projectLabel)
+			return outputResult(params.Printer, model.OutputFormat, items, model.Region)
 		},
 	}
 	configureFlags(cmd)
@@ -85,9 +80,6 @@ func configureFlags(cmd *cobra.Command) {
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
-	if globalFlags.ProjectId == "" {
-		return nil, &errors.ProjectIdError{}
-	}
 
 	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
@@ -110,11 +102,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *vpn.APIClie
 	return apiClient.DefaultAPI.ListPlans(ctx, model.Region)
 }
 
-func outputResult(p *print.Printer, outputFormat string, plans []vpn.Plan, projectLabel string) error {
+func outputResult(p *print.Printer, outputFormat string, plans []vpn.Plan, region string) error {
 	return p.OutputResult(outputFormat, plans, func() error {
-
 		if len(plans) == 0 {
-			p.Info("No plans found for %q\n", projectLabel)
+			p.Info("No plans found for Region %q\n", region)
 			return nil
 		}
 

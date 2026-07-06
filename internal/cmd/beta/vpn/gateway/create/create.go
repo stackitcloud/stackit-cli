@@ -6,6 +6,9 @@ import (
 
 	"github.com/spf13/cobra"
 
+	vpn "github.com/stackitcloud/stackit-sdk-go/services/vpn/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/vpn/v1api/wait"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -17,8 +20,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	vpn "github.com/stackitcloud/stackit-sdk-go/services/vpn/v1api"
-	"github.com/stackitcloud/stackit-sdk-go/services/vpn/v1api/wait"
 )
 
 const (
@@ -29,7 +30,14 @@ const (
 	nameFlag                        = "name"
 	labelsFlag                      = "labels"
 	planIdFlag                      = "plan-id"
-	routingTypeFlag                 = "routing-type"
+)
+
+var (
+	routingTypeFlag = flags.StringEnumFlag(
+		"routing-type",
+		vpn.AllowedRoutingTypeEnumValues,
+		"Routing Type of the VPN",
+	)
 )
 
 type inputModel struct {
@@ -123,10 +131,9 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(nameFlag, "", "Gateway name")
 	cmd.Flags().StringToString(labelsFlag, nil, "Labels in key=value format, separated by commas")
 	cmd.Flags().String(planIdFlag, "", "Plan ID")
-	cmd.Flags().String(routingTypeFlag, "", fmt.Sprintf("Routing Type: %q", vpn.AllowedRoutingTypeEnumValues))
-	// cmd.Flags().Var(flags.EnumFlag(false, "", sdkUtils.EnumSliceToStringSlice(vpn.AllowedRoutingTypeEnumValues)...), routingTypeFlag, fmt.Sprintf("Routing Type, one of: %q", vpn.AllowedRoutingTypeEnumValues))
+	routingTypeFlag.Register(cmd.Flags())
 
-	err := flags.MarkFlagsRequired(cmd, availabilityZoneTunnel1Flag, availabilityZoneTunnel2Flag, nameFlag, planIdFlag, routingTypeFlag)
+	err := flags.MarkFlagsRequired(cmd, availabilityZoneTunnel1Flag, availabilityZoneTunnel2Flag, nameFlag, planIdFlag, routingTypeFlag.Name())
 	cobra.CheckErr(err)
 }
 
@@ -173,7 +180,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		Name:        flags.FlagToStringValue(p, cmd, nameFlag),
 		Labels:      flags.FlagToStringToStringPointer(p, cmd, labelsFlag),
 		PlanId:      flags.FlagToStringValue(p, cmd, planIdFlag),
-		RoutingType: vpn.RoutingType(flags.FlagToStringValue(p, cmd, routingTypeFlag)),
+		RoutingType: vpn.RoutingType(routingTypeFlag.Get()),
 	}
 
 	p.DebugInputModel(model)

@@ -6,6 +6,8 @@ import (
 
 	"github.com/spf13/cobra"
 
+	vpn "github.com/stackitcloud/stackit-sdk-go/services/vpn/v1api"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -17,7 +19,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	vpn "github.com/stackitcloud/stackit-sdk-go/services/vpn/v1api"
 )
 
 const (
@@ -39,6 +40,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			examples.NewExample(
 				`List all vpn gateways`,
 				"$ stackit beta vpn gateway list",
+			),
+			examples.NewExample(
+				`List up to 4 vpn gateways`,
+				"$ stackit beta vpn gateway list --limit 4",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -112,7 +117,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *vpn.APIClie
 
 func outputResult(p *print.Printer, outputFormat string, gateways []vpn.GatewayResponse, projectLabel string) error {
 	return p.OutputResult(outputFormat, gateways, func() error {
-
 		if len(gateways) == 0 {
 			p.Info("No gateways found for %q\n", projectLabel)
 			return nil
