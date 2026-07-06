@@ -18,7 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mariadb/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -131,14 +130,14 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, plans []m
 		for i := range plans {
 			o := plans[i]
 			if o.Plans != nil {
-				for j := range *o.Plans {
-					plan := (*o.Plans)[j]
+				for j := range o.Plans {
+					plan := o.Plans[j]
 					table.AddRow(
-						utils.PtrString(o.Name),
-						utils.PtrString(o.Version),
-						utils.PtrString(plan.Id),
-						utils.PtrString(plan.Name),
-						utils.PtrString(plan.Description),
+						o.Name,
+						o.Version,
+						plan.Id,
+						plan.Name,
+						plan.Description,
 					)
 				}
 				table.AddSeparator()

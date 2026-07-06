@@ -131,15 +131,12 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, instances
 		for i := range instances {
 			instance := instances[i]
 
-			lastOperationType, lastOperationState := "", ""
-			if instance.LastOperation != nil {
-				lastOperationType = utils.PtrString(instance.LastOperation.Type)
-				lastOperationState = utils.PtrString(instance.LastOperation.State)
-			}
+			lastOperationType := string(instance.LastOperation.GetType())
+			lastOperationState := string(instance.LastOperation.GetState())
 
 			table.AddRow(
 				utils.PtrString(instance.InstanceId),
-				utils.PtrString(instance.Name),
+				instance.Name,
 				lastOperationType,
 				lastOperationState,
 			)
