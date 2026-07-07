@@ -17,7 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/mariadb"
+	mariadb "github.com/stackitcloud/stackit-sdk-go/services/mariadb/v1api"
 )
 
 const (
@@ -99,7 +99,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *mariadb.APIClient) mariadb.ApiGetCredentialsRequest {
-	req := apiClient.GetCredentials(ctx, model.ProjectId, model.InstanceId, model.CredentialsId)
+	req := apiClient.DefaultAPI.GetCredentials(ctx, model.ProjectId, model.InstanceId, model.CredentialsId)
 	return req
 }
 
@@ -110,15 +110,15 @@ func outputResult(p *print.Printer, outputFormat string, credentials *mariadb.Cr
 
 	return p.OutputResult(outputFormat, credentials, func() error {
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(credentials.Id))
+		table.AddRow("ID", credentials.Id)
 		table.AddSeparator()
 		// The username field cannot be set by the user so we only display it if it's not returned empty
-		if credentials.HasRaw() && credentials.Raw.Credentials != nil {
-			if username := credentials.Raw.Credentials.Username; username != nil && *username != "" {
-				table.AddRow("USERNAME", *username)
+		if credentials.HasRaw() {
+			if credentials.Raw.Credentials.Username != "" {
+				table.AddRow("USERNAME", credentials.Raw.Credentials.Username)
 				table.AddSeparator()
 			}
-			table.AddRow("PASSWORD", utils.PtrString(credentials.Raw.Credentials.Password))
+			table.AddRow("PASSWORD", credentials.Raw.Credentials.Password)
 			table.AddSeparator()
 			table.AddRow("URI", utils.PtrString(credentials.Raw.Credentials.Uri))
 		}
