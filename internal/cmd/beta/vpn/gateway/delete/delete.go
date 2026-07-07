@@ -37,7 +37,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(gatewayIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete a vpn gateway with the ID "xxx"`,
+				`Delete the vpn gateway with the ID "xxx"`,
 				"$ stackit beta vpn gateway delete xxx",
 			),
 		),

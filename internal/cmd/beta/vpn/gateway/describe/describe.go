@@ -36,7 +36,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(gatewayIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Describe a gateway with the ID "xxx"`,
+				`Describe the gateway with the ID "xxx"`,
 				"$ stackit beta vpn gateway describe xxx",
 			),
 		),
