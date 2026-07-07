@@ -13,7 +13,7 @@ stackit beta vpn gateway delete GATEWAY_ID [flags]
 ### Examples
 
 ```
-  Delete a vpn gateway with the ID "xxx"
+  Delete the vpn gateway with the ID "xxx"
   $ stackit beta vpn gateway delete xxx
 ```
 

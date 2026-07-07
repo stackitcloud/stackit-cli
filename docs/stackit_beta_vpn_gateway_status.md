@@ -1,26 +1,26 @@
-## stackit beta vpn gateway describe
+## stackit beta vpn gateway status
 
-Shows details of a gateway
+Shows the status of a gateway
 
 ### Synopsis
 
-Shows details of a gateway.
+Shows the status of a gateway.
 
 ```
-stackit beta vpn gateway describe GATEWAY_ID [flags]
+stackit beta vpn gateway status GATEWAY_ID [flags]
 ```
 
 ### Examples
 
 ```
-  Describe the gateway with the ID "xxx"
+  Show the status of the gateway with the ID "xxx"
   $ stackit beta vpn gateway describe xxx
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta vpn gateway describe"
+  -h, --help   Help for "stackit beta vpn gateway status"
 ```
 
 ### Options inherited from parent commands
