@@ -95,21 +95,20 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			// Check if the project is enabled before trying to create
-			enabled, err := serviceEnablementUtils.ProjectEnabled(ctx, serviceEnablementApiClient, model.ProjectId, model.Region)
-			if err != nil {
-				return err
-			}
-			if !enabled {
-				return &errors.ServiceDisabledError{
-					Service: "ske",
-				}
-			}
-
 			// Check if cluster exists
 			exists, err := skeUtils.ClusterExists(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ClusterName)
 			if err != nil {
-				return err
+				// Check if the project is enabled
+				enabled, enabledErr := serviceEnablementUtils.ProjectEnabled(ctx, serviceEnablementApiClient, model.ProjectId, model.Region)
+				if enabledErr != nil {
+					return fmt.Errorf("check if project is enabled failed: %w", enabledErr)
+				}
+				if !enabled {
+					return &errors.ServiceDisabledError{
+						Service: "ske",
+					}
+				}
+				return fmt.Errorf("cluster exists check failed: %w", err)
 			}
 			if exists {
 				return fmt.Errorf("cluster with name %s already exists", model.ClusterName)
