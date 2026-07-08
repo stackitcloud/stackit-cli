@@ -40,7 +40,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/vpn v0.14.0
 	github.com/zalando/go-keyring v0.2.6
 	golang.org/x/mod v0.34.0
-	golang.org/x/oauth2 v0.35.0
+	golang.org/x/oauth2 v0.36.0
 	golang.org/x/term v0.42.0
 	golang.org/x/text v0.36.0
 	k8s.io/apimachinery v0.35.4
@@ -272,7 +272,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.7.0
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.17.0
 	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.1.0
-  	github.com/stackitcloud/stackit-sdk-go/services/redis v1.1.0
+	github.com/stackitcloud/stackit-sdk-go/services/redis v1.1.0
 	github.com/stackitcloud/stackit-sdk-go/services/sfs v0.9.0
 	github.com/subosito/gotenv v1.6.0 // indirect
 	golang.org/x/sys v0.43.0 // indirect
