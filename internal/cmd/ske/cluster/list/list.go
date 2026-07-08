@@ -68,19 +68,20 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			// Check if SKE is enabled for this project
-			enabled, err := serviceEnablementUtils.ProjectEnabled(ctx, serviceEnablementApiClient, model.ProjectId, model.Region)
-			if err != nil {
-				return err
-			}
-			if !enabled {
-				return fmt.Errorf("SKE isn't enabled for this project, please run 'stackit ske enable'")
-			}
-
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
+				// Check if SKE is enabled for this project
+				enabled, enabledErr := serviceEnablementUtils.ProjectEnabled(ctx, serviceEnablementApiClient, model.ProjectId, model.Region)
+				if enabledErr != nil {
+					return fmt.Errorf("check if project is enabled failed: %w", enabledErr)
+				}
+				if !enabled {
+					return &errors.ServiceDisabledError{
+						Service: "ske",
+					}
+				}
 				return fmt.Errorf("get SKE clusters: %w", err)
 			}
 			clusters := resp.Items
