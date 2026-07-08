@@ -17,7 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/redis"
+	redis "github.com/stackitcloud/stackit-sdk-go/services/redis/v2api"
 )
 
 const (
@@ -58,7 +58,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := redisUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceLabel, err := redisUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -109,7 +109,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *redis.APIClient) redis.ApiCreateCredentialsRequest {
-	req := apiClient.CreateCredentials(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.DefaultAPI.CreateCredentials(ctx, model.ProjectId, model.Region, model.InstanceId)
 	return req
 }
 
@@ -122,30 +122,27 @@ func outputResult(p *print.Printer, model inputModel, instanceLabel string, resp
 	}
 	if !model.ShowPassword {
 		if resp.Raw == nil {
-			resp.Raw = &redis.RawCredentials{}
+			resp.Raw = &redis.RawCredentials{Credentials: redis.Credentials{}}
 		}
-		if resp.Raw.Credentials == nil {
-			resp.Raw.Credentials = &redis.Credentials{}
-		}
-		resp.Raw.Credentials.Password = utils.Ptr("hidden")
+		resp.Raw.Credentials.Password = "hidden"
 	}
 
 	return p.OutputResult(model.OutputFormat, resp, func() error {
-		p.Outputf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, utils.PtrString(resp.Id))
+		p.Outputf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, resp.Id)
 		// The username field cannot be set by the user, so we only display it if it's not returned empty
-		if resp.HasRaw() && resp.Raw.Credentials != nil {
-			if username := resp.Raw.Credentials.Username; username != nil && *username != "" {
-				p.Outputf("Username: %s\n", utils.PtrString(username))
+		if resp.HasRaw() {
+			if username := resp.Raw.Credentials.Username; username != "" {
+				p.Outputf("Username: %s\n", username)
 			}
 			if !model.ShowPassword {
 				p.Outputf("Password: <hidden>\n")
 			} else {
-				p.Outputf("Password: %s\n", utils.PtrString(resp.Raw.Credentials.Password))
+				p.Outputf("Password: %s\n", resp.Raw.Credentials.Password)
 			}
-			p.Outputf("Host: %s\n", utils.PtrString(resp.Raw.Credentials.Host))
+			p.Outputf("Host: %s\n", resp.Raw.Credentials.Host)
 			p.Outputf("Port: %s\n", utils.PtrString(resp.Raw.Credentials.Port))
 		}
-		p.Outputf("URI: %s\n", utils.PtrString(resp.Uri))
+		p.Outputf("URI: %s\n", resp.Uri)
 		return nil
 	})
 }

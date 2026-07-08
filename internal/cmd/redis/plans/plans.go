@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/redis"
+	redis "github.com/stackitcloud/stackit-sdk-go/services/redis/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -18,7 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/redis/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -66,7 +65,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get Redis service plans: %w", err)
 			}
-			plans := *resp.Offerings
+			plans := resp.Offerings
 			if len(plans) == 0 {
 				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 				if err != nil {
@@ -118,7 +117,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *redis.APIClient) redis.ApiListOfferingsRequest {
-	req := apiClient.ListOfferings(ctx, model.ProjectId)
+	req := apiClient.DefaultAPI.ListOfferings(ctx, model.ProjectId, model.Region)
 	return req
 }
 
@@ -129,14 +128,14 @@ func outputResult(p *print.Printer, outputFormat string, plans []redis.Offering)
 		for i := range plans {
 			o := plans[i]
 			if o.Plans != nil {
-				for j := range *o.Plans {
-					plan := (*o.Plans)[j]
+				for j := range o.Plans {
+					plan := (o.Plans)[j]
 					table.AddRow(
-						utils.PtrString(o.Name),
-						utils.PtrString(o.Version),
-						utils.PtrString(plan.Id),
-						utils.PtrString(plan.Name),
-						utils.PtrString(plan.Description),
+						o.Name,
+						o.Version,
+						plan.Id,
+						plan.Name,
+						plan.Description,
 					)
 				}
 				table.AddSeparator()
