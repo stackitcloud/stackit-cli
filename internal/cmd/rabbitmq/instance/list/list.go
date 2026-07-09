@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/rabbitmq"
+	rabbitmq "github.com/stackitcloud/stackit-sdk-go/services/rabbitmq/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -115,7 +115,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *rabbitmq.APIClient) rabbitmq.ApiListInstancesRequest {
-	req := apiClient.ListInstances(ctx, model.ProjectId)
+	req := apiClient.DefaultAPI.ListInstances(ctx, model.ProjectId, model.Region)
 	return req
 }
 
@@ -133,15 +133,11 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, instances
 			var (
 				opType, opState string
 			)
-			if lastOperation := instance.LastOperation; lastOperation != nil {
-				opType = utils.PtrString(lastOperation.Type)
-				opState = utils.PtrString(lastOperation.State)
-			} else {
-				opType, opState = "n/a", "n/a"
-			}
+			opType = string(instance.LastOperation.Type)
+			opState = string(instance.LastOperation.State)
 			table.AddRow(
 				utils.PtrString(instance.InstanceId),
-				utils.PtrString(instance.Name),
+				instance.Name,
 				opType,
 				opState,
 			)

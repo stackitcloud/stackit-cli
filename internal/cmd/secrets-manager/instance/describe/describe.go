@@ -17,7 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/secretsmanager"
+	secretsmanager "github.com/stackitcloud/stackit-sdk-go/services/secretsmanager/v1api"
 )
 
 const (
@@ -93,12 +93,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildGetInstanceRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiGetInstanceRequest {
-	req := apiClient.GetInstance(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.DefaultAPI.GetInstance(ctx, model.ProjectId, model.InstanceId)
 	return req
 }
 
 func buildListACLsRequest(ctx context.Context, model *inputModel, apiClient *secretsmanager.APIClient) secretsmanager.ApiListACLsRequest {
-	req := apiClient.ListACLs(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.DefaultAPI.ListACLs(ctx, model.ProjectId, model.InstanceId)
 	return req
 }
 
@@ -116,38 +116,37 @@ func outputResult(p *print.Printer, outputFormat string, instance *secretsmanage
 
 	return p.OutputResult(outputFormat, output, func() error {
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(instance.Id))
+		table.AddRow("ID", instance.Id)
 		table.AddSeparator()
-		table.AddRow("NAME", utils.PtrString(instance.Name))
+		table.AddRow("NAME", instance.Name)
 		table.AddSeparator()
-		table.AddRow("STATE", utils.PtrString(instance.State))
+		table.AddRow("STATE", instance.State)
 		table.AddSeparator()
-		table.AddRow("SECRETS", utils.PtrString(instance.SecretCount))
+		table.AddRow("SECRETS", instance.SecretCount)
 		table.AddSeparator()
-		table.AddRow("ENGINE", utils.PtrString(instance.SecretsEngine))
+		table.AddRow("ENGINE", instance.SecretsEngine)
 		table.AddSeparator()
-		table.AddRow("CREATION DATE", utils.PtrString(instance.CreationStartDate))
+		table.AddRow("CREATION DATE", instance.CreationStartDate)
 		table.AddSeparator()
 		kmsKey := instance.KmsKey
-		showKms := kmsKey != nil && (kmsKey.KeyId != nil || kmsKey.KeyRingId != nil || kmsKey.KeyVersion != nil || kmsKey.ServiceAccountEmail != nil)
-		if showKms {
-			table.AddRow("KMS KEY ID", utils.PtrString(kmsKey.KeyId))
+		if kmsKey != nil {
+			table.AddRow("KMS KEY ID", kmsKey.KeyId)
 			table.AddSeparator()
-			table.AddRow("KMS KEYRING ID", utils.PtrString(kmsKey.KeyRingId))
+			table.AddRow("KMS KEYRING ID", kmsKey.KeyRingId)
 			table.AddSeparator()
-			table.AddRow("KMS KEY VERSION", utils.PtrString(kmsKey.KeyVersion))
+			table.AddRow("KMS KEY VERSION", kmsKey.KeyVersion)
 			table.AddSeparator()
-			table.AddRow("KMS SERVICE ACCOUNT EMAIL", utils.PtrString(kmsKey.ServiceAccountEmail))
+			table.AddRow("KMS SERVICE ACCOUNT EMAIL", kmsKey.ServiceAccountEmail)
 		}
 		// Only show ACL if it's present and not empty
-		if aclList.Acls != nil && len(*aclList.Acls) > 0 {
+		if len(aclList.Acls) > 0 {
 			var cidrs []string
 
-			for _, acl := range *aclList.Acls {
-				cidrs = append(cidrs, *acl.Cidr)
+			for _, acl := range aclList.Acls {
+				cidrs = append(cidrs, acl.Cidr)
 			}
 
-			if showKms {
+			if kmsKey != nil {
 				table.AddSeparator()
 			}
 			table.AddRow("ACL", strings.Join(cidrs, ","))

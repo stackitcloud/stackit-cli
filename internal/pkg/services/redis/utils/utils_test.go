@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/redis"
+	redis "github.com/stackitcloud/stackit-sdk-go/services/redis/v2api"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 var (
@@ -20,27 +20,33 @@ var (
 const (
 	testInstanceName        = "instance"
 	testCredentialsUsername = "username"
+	testRegion              = "eu01"
 )
 
-type redisClientMocked struct {
+type mockSettings struct {
 	getInstanceFails    bool
 	getInstanceResp     *redis.Instance
 	getCredentialsFails bool
 	getCredentialsResp  *redis.CredentialsResponse
 }
 
-func (m *redisClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*redis.Instance, error) {
-	if m.getInstanceFails {
-		return nil, fmt.Errorf("could not get instance")
-	}
-	return m.getInstanceResp, nil
-}
+func newAPIMock(settings *mockSettings) redis.DefaultAPI {
+	return &redis.DefaultAPIServiceMock{
+		GetInstanceExecuteMock: utils.Ptr(func(_ redis.ApiGetInstanceRequest) (*redis.Instance, error) {
+			if settings.getInstanceFails {
+				return nil, fmt.Errorf("could not get instance")
+			}
 
-func (m *redisClientMocked) GetCredentialsExecute(_ context.Context, _, _, _ string) (*redis.CredentialsResponse, error) {
-	if m.getCredentialsFails {
-		return nil, fmt.Errorf("could not get user")
+			return settings.getInstanceResp, nil
+		}),
+		GetCredentialsExecuteMock: utils.Ptr(func(_ redis.ApiGetCredentialsRequest) (*redis.CredentialsResponse, error) {
+			if settings.getCredentialsFails {
+				return nil, fmt.Errorf("could not get user")
+			}
+
+			return settings.getCredentialsResp, nil
+		}),
 	}
-	return m.getCredentialsResp, nil
 }
 
 func TestGetInstanceName(t *testing.T) {
@@ -54,7 +60,7 @@ func TestGetInstanceName(t *testing.T) {
 		{
 			description: "base",
 			getInstanceResp: &redis.Instance{
-				Name: utils.Ptr(testInstanceName),
+				Name: testInstanceName,
 			},
 			isValid:        true,
 			expectedOutput: testInstanceName,
@@ -68,12 +74,12 @@ func TestGetInstanceName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &redisClientMocked{
+			client := newAPIMock(&mockSettings{
 				getInstanceFails: tt.getInstanceFails,
 				getInstanceResp:  tt.getInstanceResp,
-			}
+			})
 
-			output, err := GetInstanceName(context.Background(), client, testProjectId, testInstanceId)
+			output, err := GetInstanceName(context.Background(), client, testProjectId, testInstanceId, testRegion)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -103,8 +109,8 @@ func TestGetCredentialsUsername(t *testing.T) {
 			description: "base",
 			getCredentialsResp: &redis.CredentialsResponse{
 				Raw: &redis.RawCredentials{
-					Credentials: &redis.Credentials{
-						Username: utils.Ptr(testCredentialsUsername),
+					Credentials: redis.Credentials{
+						Username: testCredentialsUsername,
 					},
 				},
 			},
@@ -120,12 +126,12 @@ func TestGetCredentialsUsername(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &redisClientMocked{
+			client := newAPIMock(&mockSettings{
 				getCredentialsFails: tt.getCredentialsFails,
 				getCredentialsResp:  tt.getCredentialsResp,
-			}
+			})
 
-			output, err := GetCredentialsUsername(context.Background(), client, testProjectId, testInstanceId, testCredentialsId)
+			output, err := GetCredentialsUsername(context.Background(), client, testProjectId, testInstanceId, testCredentialsId, testRegion)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")

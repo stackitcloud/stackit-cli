@@ -61,7 +61,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		storageClassFlag:          "premium-perf4-stackit", // Non-default
 		storageSizeFlag:           "10",
 		versionFlag:               "6.0",
-		typeFlag:                  "Replica",
+		typeFlag.Name():           "Replica",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -141,7 +141,7 @@ func TestParseInput(t *testing.T) {
 			description: "with defaults",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, backupScheduleFlag)
-				delete(flagValues, typeFlag)
+				delete(flagValues, typeFlag.Name())
 			}),
 			isValid:       true,
 			expectedModel: fixtureInputModel(),

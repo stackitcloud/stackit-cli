@@ -39,7 +39,7 @@ stackit server create [flags]
 
 ```
       --affinity-group string                  The affinity group the server is assigned to
-      --agent-provisioning-policy string       Whether to provision an agent on server creation, one of ["ALWAYS" "NEVER" "INHERIT"] (default "INHERIT")
+      --agent-provisioning-policy string       Whether to provision an agent on server creation, (one of: [ALWAYS, NEVER, INHERIT]) (default "INHERIT")
       --availability-zone string               The availability zone of the server
       --boot-volume-delete-on-termination      Delete the volume during the termination of the server. Defaults to false
       --boot-volume-performance-class string   Boot volume performance class
@@ -64,10 +64,10 @@ stackit server create [flags]
 ```
   -y, --assume-yes             If set, skips all confirmation prompts
       --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, one of ["json" "pretty" "none" "yaml"]
+  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
   -p, --project-id string      Project ID
       --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, one of ["debug" "info" "warning" "error"] (default "info")
+      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

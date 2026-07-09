@@ -30,7 +30,7 @@ stackit volume backup create [flags]
       --labels stringToString   Key-value string pairs as labels (default [])
       --name string             Name of the backup
       --source-id string        ID of the source from which a backup should be created
-      --source-type string      Source type of the backup, one of ["volume" "snapshot"]
+      --source-type string      Source type of the backup, (one of: [volume, snapshot])
 ```
 
 ### Options inherited from parent commands
@@ -38,10 +38,10 @@ stackit volume backup create [flags]
 ```
   -y, --assume-yes             If set, skips all confirmation prompts
       --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, one of ["json" "pretty" "none" "yaml"]
+  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
   -p, --project-id string      Project ID
       --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, one of ["debug" "info" "warning" "error"] (default "info")
+      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

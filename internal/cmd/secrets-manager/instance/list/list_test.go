@@ -12,7 +12,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/secretsmanager"
+	secretsmanager "github.com/stackitcloud/stackit-sdk-go/services/secretsmanager/v1api"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -20,7 +20,9 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &secretsmanager.APIClient{}
+var testClient = &secretsmanager.APIClient{
+	DefaultAPI: secretsmanager.DefaultAPIServiceMock{},
+}
 var testProjectId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -49,7 +51,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *secretsmanager.ApiListInstancesRequest)) secretsmanager.ApiListInstancesRequest {
-	request := testClient.ListInstances(testCtx, testProjectId)
+	request := testClient.DefaultAPI.ListInstances(testCtx, testProjectId)
 	for _, mod := range mods {
 		mod(&request)
 	}

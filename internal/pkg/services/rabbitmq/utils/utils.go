@@ -7,7 +7,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/rabbitmq"
+	rabbitmq "github.com/stackitcloud/stackit-sdk-go/services/rabbitmq/v2api"
 )
 
 const (
@@ -15,9 +15,9 @@ const (
 )
 
 func ValidatePlanId(planId string, offerings *rabbitmq.ListOfferingsResponse) error {
-	for _, offer := range *offerings.Offerings {
-		for _, plan := range *offer.Plans {
-			if plan.Id != nil && strings.EqualFold(*plan.Id, planId) {
+	for _, offer := range offerings.GetOfferings() {
+		for _, plan := range offer.Plans {
+			if strings.EqualFold(plan.Id, planId) {
 				return nil
 			}
 		}
@@ -33,21 +33,18 @@ func LoadPlanId(planName, version string, offerings *rabbitmq.ListOfferingsRespo
 	availableVersions := ""
 	availablePlanNames := ""
 	isValidVersion := false
-	for _, offer := range *offerings.Offerings {
-		if !strings.EqualFold(*offer.Version, version) {
-			availableVersions = fmt.Sprintf("%s\n- %s", availableVersions, *offer.Version)
+	for _, offer := range offerings.GetOfferings() {
+		if !strings.EqualFold(offer.Version, version) {
+			availableVersions = fmt.Sprintf("%s\n- %s", availableVersions, offer.Version)
 			continue
 		}
 		isValidVersion = true
 
-		for _, plan := range *offer.Plans {
-			if plan.Name == nil {
-				continue
+		for _, plan := range offer.Plans {
+			if strings.EqualFold(plan.Name, planName) {
+				return &plan.Id, nil
 			}
-			if strings.EqualFold(*plan.Name, planName) && plan.Id != nil {
-				return plan.Id, nil
-			}
-			availablePlanNames = fmt.Sprintf("%s\n- %s", availablePlanNames, *plan.Name)
+			availablePlanNames = fmt.Sprintf("%s\n- %s", availablePlanNames, plan.Name)
 		}
 	}
 
@@ -65,23 +62,18 @@ func LoadPlanId(planName, version string, offerings *rabbitmq.ListOfferingsRespo
 	}
 }
 
-type RabbitMQClient interface {
-	GetInstanceExecute(ctx context.Context, projectId, instanceId string) (*rabbitmq.Instance, error)
-	GetCredentialsExecute(ctx context.Context, projectId, instanceId, credentialsId string) (*rabbitmq.CredentialsResponse, error)
-}
-
-func GetInstanceName(ctx context.Context, apiClient RabbitMQClient, projectId, instanceId string) (string, error) {
-	resp, err := apiClient.GetInstanceExecute(ctx, projectId, instanceId)
+func GetInstanceName(ctx context.Context, apiClient rabbitmq.DefaultAPI, projectId, region, instanceId string) (string, error) {
+	resp, err := apiClient.GetInstance(ctx, projectId, region, instanceId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get RabbitMQ instance: %w", err)
 	}
-	return *resp.Name, nil
+	return resp.Name, nil
 }
 
-func GetCredentialsUsername(ctx context.Context, apiClient RabbitMQClient, projectId, instanceId, credentialsId string) (string, error) {
-	resp, err := apiClient.GetCredentialsExecute(ctx, projectId, instanceId, credentialsId)
+func GetCredentialsUsername(ctx context.Context, apiClient rabbitmq.DefaultAPI, projectId, region, instanceId, credentialsId string) (string, error) {
+	resp, err := apiClient.GetCredentials(ctx, projectId, region, instanceId, credentialsId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get RabbitMQ credentials: %w", err)
 	}
-	return *resp.Raw.Credentials.Username, nil
+	return resp.Raw.Credentials.Username, nil
 }

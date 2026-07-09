@@ -35,7 +35,12 @@ const (
 	storageClassFlag   = "storage-class"
 	storageSizeFlag    = "storage-size"
 	versionFlag        = "version"
-	typeFlag           = "type"
+)
+
+var typeFlag = flags.StringEnumFlag(
+	"type",
+	mongodbflexUtils.AvailableInstanceTypes(),
+	"Instance type,",
 )
 
 type inputModel struct {
@@ -124,8 +129,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	typeFlagOptions := mongodbflexUtils.AvailableInstanceTypes()
-
 	cmd.Flags().StringP(instanceNameFlag, "n", "", "Instance name")
 	cmd.Flags().Var(flags.CIDRSliceFlag(), aclFlag, "Lists of IP networks in CIDR notation which are allowed to access this instance")
 	cmd.Flags().String(backupScheduleFlag, "", "Backup schedule")
@@ -135,7 +138,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(storageClassFlag, "", "Storage class")
 	cmd.Flags().Int64(storageSizeFlag, 0, "Storage size (in GB)")
 	cmd.Flags().String(versionFlag, "", "Version")
-	cmd.Flags().Var(flags.EnumFlag(false, "", typeFlagOptions...), typeFlag, fmt.Sprintf("Instance type, one of %q", typeFlagOptions))
+	typeFlag.Register(cmd.Flags())
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -155,7 +158,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	storageClass := flags.FlagToStringPointer(p, cmd, storageClassFlag)
 	storageSize := flags.FlagToInt64Pointer(p, cmd, storageSizeFlag)
 	version := flags.FlagToStringPointer(p, cmd, versionFlag)
-	instanceType := flags.FlagToStringPointer(p, cmd, typeFlag)
+	instanceType := typeFlag.Ptr()
 
 	if instanceName == nil && flavorId == nil && cpu == nil && ram == nil && acl == nil &&
 		backupSchedule == nil && storageClass == nil && storageSize == nil && version == nil && instanceType == nil {

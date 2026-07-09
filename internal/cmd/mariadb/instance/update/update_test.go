@@ -12,7 +12,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/mariadb"
+	mariadb "github.com/stackitcloud/stackit-sdk-go/services/mariadb/v1api"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -20,22 +20,22 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &mariadb.APIClient{}
+var testClient = &mariadb.APIClient{DefaultAPI: &mariadb.DefaultAPIService{}}
 
-type mariaDBClientMocked struct {
+type mockSettings struct {
 	returnError       bool
 	listOfferingsResp *mariadb.ListOfferingsResponse
 }
 
-func (c *mariaDBClientMocked) PartialUpdateInstance(ctx context.Context, projectId, instanceId string) mariadb.ApiPartialUpdateInstanceRequest {
-	return testClient.PartialUpdateInstance(ctx, projectId, instanceId)
-}
-
-func (c *mariaDBClientMocked) ListOfferingsExecute(_ context.Context, _ string) (*mariadb.ListOfferingsResponse, error) {
-	if c.returnError {
-		return nil, fmt.Errorf("list flavors failed")
+func newAPIMock(s mockSettings) mariadb.DefaultAPI {
+	return &mariadb.DefaultAPIServiceMock{
+		ListOfferingsExecuteMock: utils.Ptr(func(_ mariadb.ApiListOfferingsRequest) (*mariadb.ListOfferingsResponse, error) {
+			if s.returnError {
+				return nil, fmt.Errorf("list flavors failed")
+			}
+			return s.listOfferingsResp, nil
+		}),
 	}
-	return c.listOfferingsResp, nil
 }
 
 var (
@@ -82,11 +82,11 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		InstanceId:           testInstanceId,
 		EnableMonitoring:     utils.Ptr(true),
 		Graphite:             utils.Ptr("example-graphite"),
-		MetricsFrequency:     utils.Ptr(int64(100)),
+		MetricsFrequency:     utils.Ptr(int32(100)),
 		MetricsPrefix:        utils.Ptr("example-prefix"),
 		MonitoringInstanceId: utils.Ptr(testMonitoringInstanceId),
 		SgwAcl:               utils.Ptr([]string{"198.51.100.14/24"}),
-		Syslog:               utils.Ptr([]string{"example-syslog"}),
+		Syslog:               []string{"example-syslog"},
 		PlanId:               utils.Ptr(testPlanId),
 	}
 	for _, mod := range mods {
@@ -96,16 +96,16 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *mariadb.ApiPartialUpdateInstanceRequest)) mariadb.ApiPartialUpdateInstanceRequest {
-	request := testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId)
+	request := testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testInstanceId)
 	request = request.PartialUpdateInstancePayload(mariadb.PartialUpdateInstancePayload{
 		Parameters: &mariadb.InstanceParameters{
 			EnableMonitoring:     utils.Ptr(true),
 			Graphite:             utils.Ptr("example-graphite"),
-			MetricsFrequency:     utils.Ptr(int64(100)),
+			MetricsFrequency:     utils.Ptr(int32(100)),
 			MetricsPrefix:        utils.Ptr("example-prefix"),
 			MonitoringInstanceId: utils.Ptr(testMonitoringInstanceId),
 			SgwAcl:               utils.Ptr("198.51.100.14/24"),
-			Syslog:               utils.Ptr([]string{"example-syslog"}),
+			Syslog:               []string{"example-syslog"},
 		},
 		PlanId: utils.Ptr(testPlanId),
 	})
@@ -186,7 +186,7 @@ func TestParseInput(t *testing.T) {
 				PlanId:           utils.Ptr(testPlanId),
 				EnableMonitoring: utils.Ptr(false),
 				Graphite:         utils.Ptr(""),
-				MetricsFrequency: utils.Ptr(int64(0)),
+				MetricsFrequency: utils.Ptr(int32(0)),
 				MetricsPrefix:    utils.Ptr(""),
 			},
 		},
@@ -268,9 +268,7 @@ func TestParseInput(t *testing.T) {
 			syslogValues: []string{"example-syslog-1", "example-syslog-2"},
 			isValid:      true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Syslog = utils.Ptr(
-					append(*model.Syslog, "example-syslog-1", "example-syslog-2"),
-				)
+				model.Syslog = append(model.Syslog, "example-syslog-1", "example-syslog-2")
 			}),
 		},
 	}
@@ -363,13 +361,13 @@ func TestBuildRequest(t *testing.T) {
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
 			listOfferingsResp: &mariadb.ListOfferingsResponse{
-				Offerings: &[]mariadb.Offering{
+				Offerings: []mariadb.Offering{
 					{
-						Version: utils.Ptr("example-version"),
-						Plans: &[]mariadb.Plan{
+						Version: "example-version",
+						Plans: []mariadb.Plan{
 							{
-								Name: utils.Ptr("example-plan-name"),
-								Id:   utils.Ptr(testPlanId),
+								Name: "example-plan-name",
+								Id:   testPlanId,
 							},
 						},
 					},
@@ -387,13 +385,13 @@ func TestBuildRequest(t *testing.T) {
 			),
 			expectedRequest: fixtureRequest(),
 			listOfferingsResp: &mariadb.ListOfferingsResponse{
-				Offerings: &[]mariadb.Offering{
+				Offerings: []mariadb.Offering{
 					{
-						Version: utils.Ptr("example-version"),
-						Plans: &[]mariadb.Plan{
+						Version: "example-version",
+						Plans: []mariadb.Plan{
 							{
-								Name: utils.Ptr("example-plan-name"),
-								Id:   utils.Ptr(testPlanId),
+								Name: "example-plan-name",
+								Id:   testPlanId,
 							},
 						},
 					},
@@ -422,13 +420,13 @@ func TestBuildRequest(t *testing.T) {
 				},
 			),
 			listOfferingsResp: &mariadb.ListOfferingsResponse{
-				Offerings: &[]mariadb.Offering{
+				Offerings: []mariadb.Offering{
 					{
-						Version: utils.Ptr("example-version"),
-						Plans: &[]mariadb.Plan{
+						Version: "example-version",
+						Plans: []mariadb.Plan{
 							{
-								Name: utils.Ptr("other-plan-name"),
-								Id:   utils.Ptr(testPlanId),
+								Name: "other-plan-name",
+								Id:   testPlanId,
 							},
 						},
 					},
@@ -445,18 +443,18 @@ func TestBuildRequest(t *testing.T) {
 				},
 				InstanceId: testInstanceId,
 			},
-			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId).
+			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testInstanceId).
 				PartialUpdateInstancePayload(mariadb.PartialUpdateInstancePayload{Parameters: &mariadb.InstanceParameters{}}),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &mariaDBClientMocked{
+			settings := mockSettings{
 				returnError:       tt.getOfferingsFails,
 				listOfferingsResp: tt.listOfferingsResp,
 			}
-			request, err := buildRequest(testCtx, tt.model, client)
+			request, err := buildRequest(testCtx, tt.model, newAPIMock(settings))
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -467,6 +465,8 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateEmpty(),
+				cmpopts.IgnoreFields(tt.expectedRequest, "ApiService"),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

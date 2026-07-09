@@ -4,17 +4,18 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
 
 type stringEnumFlag[T ~string] struct {
-	ignoreCase bool
-	options    []T
-	value      T
-	valueSet   bool
-	docs       string
-	name       string
+	ignoreCase   bool
+	options      []T
+	value        T
+	defaultValue T
+	valueSet     bool
+	docs         string
+	name         string
+	shortHand    *string
 }
 
 type StringEnumFlagOption[T ~string] func(*stringEnumFlag[T])
@@ -28,7 +29,14 @@ func StringEnumIgnoreCase[T ~string]() StringEnumFlagOption[T] {
 func StringEnumDefaultValue[T ~string](value T) StringEnumFlagOption[T] {
 	return func(f *stringEnumFlag[T]) {
 		f.value = value
+		f.defaultValue = value
 		f.valueSet = true
+	}
+}
+
+func StringEnumShortHand[T ~string](short string) StringEnumFlagOption[T] {
+	return func(f *stringEnumFlag[T]) {
+		f.shortHand = &short
 	}
 }
 
@@ -50,12 +58,16 @@ func StringEnumFlag[T ~string](name string, possibleValues []T, docs string, opt
 
 var _ pflag.Value = &stringEnumFlag[string]{}
 
-func (s *stringEnumFlag[T]) Register(cmd *cobra.Command) {
-	cmd.Flags().Var(s, s.name, s.Usage())
+func (s *stringEnumFlag[T]) Register(fs *pflag.FlagSet) {
+	if s.shortHand == nil {
+		fs.Var(s, s.name, s.Usage())
+	} else {
+		fs.VarP(s, s.name, *s.shortHand, s.Usage())
+	}
 }
 
 func (s *stringEnumFlag[T]) Usage() string {
-	return s.docs + fmt.Sprintf(" (possible values: %s)", s.fmtValues(s.options))
+	return s.docs + fmt.Sprintf(" (one of: %s)", s.fmtValues(s.options))
 }
 
 func (s *stringEnumFlag[T]) Get() T {
@@ -90,13 +102,7 @@ func (s *stringEnumFlag[T]) fmtValues(xs []T) string {
 	return sb.String()
 }
 
-func (s *stringEnumFlag[T]) Set(value string) error {
-	v := strings.TrimSpace(value)
-
-	if v == "" {
-		return fmt.Errorf("value cannot be empty")
-	}
-
+func (s *stringEnumFlag[T]) Set(v string) error {
 	for _, o := range s.options {
 		if !s.ignoreCase && v == string(o) {
 			s.value = T(v)
@@ -114,4 +120,15 @@ func (s *stringEnumFlag[T]) Set(value string) error {
 
 func (s *stringEnumFlag[T]) Type() string {
 	return "string"
+}
+
+func (s *stringEnumFlag[T]) Reset() {
+	if s.defaultValue == "" {
+		var zero T
+		s.value = zero
+		s.valueSet = false
+	} else {
+		s.value = s.defaultValue
+		s.valueSet = true
+	}
 }

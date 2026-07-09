@@ -29,6 +29,8 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{ProjectId: testProjectId, Region: testRegion, Verbosity: globalflags.VerbosityDefault},
+		Format:          utils.Ptr("json"),
+		Type:            utils.Ptr("alb"),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -79,8 +81,8 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "alb with yaml",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[formatFlag] = "yaml"
-				flagValues[typeFlag] = "alb"
+				flagValues[formatFlag.Name()] = "yaml"
+				flagValues[typeFlag.Name()] = "alb"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -90,8 +92,8 @@ func TestParseInput(t *testing.T) {
 		}, {
 			description: "alb with yaml",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[formatFlag] = "yaml"
-				flagValues[typeFlag] = "alb"
+				flagValues[formatFlag.Name()] = "yaml"
+				flagValues[typeFlag.Name()] = "alb"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -101,8 +103,8 @@ func TestParseInput(t *testing.T) {
 		}, {
 			description: "alb with json",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[formatFlag] = "json"
-				flagValues[typeFlag] = "alb"
+				flagValues[formatFlag.Name()] = "json"
+				flagValues[typeFlag.Name()] = "alb"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -112,8 +114,8 @@ func TestParseInput(t *testing.T) {
 		}, {
 			description: "pool with yaml",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[formatFlag] = "yaml"
-				flagValues[typeFlag] = "pool"
+				flagValues[formatFlag.Name()] = "yaml"
+				flagValues[typeFlag.Name()] = "pool"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -124,8 +126,8 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "pool with json",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[formatFlag] = "json"
-				flagValues[typeFlag] = "pool"
+				flagValues[formatFlag.Name()] = "json"
+				flagValues[typeFlag.Name()] = "pool"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {

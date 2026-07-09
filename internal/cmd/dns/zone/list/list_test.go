@@ -30,7 +30,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
 		nameLikeFlag:              "some-pattern",
-		orderByNameFlag:           "asc",
+		orderByNameFlag.Name():    "asc",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -170,7 +170,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "order by name desc",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[orderByNameFlag] = "desc"
+				flagValues[orderByNameFlag.Name()] = "desc"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -180,14 +180,14 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "order by name invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[orderByNameFlag] = ""
+				flagValues[orderByNameFlag.Name()] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "order by name invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[orderByNameFlag] = "invalid"
+				flagValues[orderByNameFlag.Name()] = "invalid"
 			}),
 			isValid: false,
 		},

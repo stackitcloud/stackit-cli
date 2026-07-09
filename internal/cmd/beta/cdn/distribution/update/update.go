@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	sdkUtils "github.com/stackitcloud/stackit-sdk-go/core/utils"
 	cdn "github.com/stackitcloud/stackit-sdk-go/services/cdn/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -23,7 +22,6 @@ import (
 
 const (
 	argDistributionID                = "DISTRIBUTION_ID"
-	flagRegions                      = "regions"
 	flagHTTP                         = "http"
 	flagHTTPOriginURL                = "http-origin-url"
 	flagHTTPGeofencing               = "http-geofencing"
@@ -42,6 +40,12 @@ const (
 	flagLokiPushURL                  = "loki-push-url"
 	flagMonthlyLimitBytes            = "monthly-limit-bytes"
 	flagOptimizer                    = "optimizer"
+)
+
+var flagRegions = flags.StringEnumSliceFlag(
+	"regions",
+	cdn.AllowedRegionEnumValues,
+	"Regions in which content should be cached,",
 )
 
 type bucketInputModel struct {
@@ -127,7 +131,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
-	cmd.Flags().Var(flags.EnumSliceFlag(false, []string{}, sdkUtils.EnumSliceToStringSlice(cdn.AllowedRegionEnumValues)...), flagRegions, fmt.Sprintf("Regions in which content should be cached, multiple of: %q", utils.FormatPossibleValues(sdkUtils.EnumSliceToStringSlice(cdn.AllowedRegionEnumValues)...)))
+	flagRegions.Register(cmd)
 	cmd.Flags().Bool(flagHTTP, false, "Use HTTP backend")
 	cmd.Flags().String(flagHTTPOriginURL, "", "Origin URL for HTTP backend")
 	cmd.Flags().StringSlice(flagHTTPOriginRequestHeaders, []string{}, "Origin request headers for HTTP backend in the format 'HeaderName: HeaderValue', repeatable. WARNING: do not store sensitive values in the headers!")
@@ -158,11 +162,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 	distributionID := inputArgs[0]
 
-	regionStrings := flags.FlagToStringSliceValue(p, cmd, flagRegions)
-	regions := make([]cdn.Region, 0, len(regionStrings))
-	for _, regionStr := range regionStrings {
-		regions = append(regions, cdn.Region(regionStr))
-	}
+	regions := flagRegions.Get()
 
 	var http *httpInputModel
 	if flags.FlagToBoolValue(p, cmd, flagHTTP) {

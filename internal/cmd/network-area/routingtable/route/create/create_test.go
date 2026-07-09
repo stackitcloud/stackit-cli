@@ -41,15 +41,15 @@ var testLabels = map[string]any{
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		globalflags.RegionFlag: testRegion,
-		labelFlag:              testLabelSelectorFlag,
-		organizationIdFlag:     testOrgId,
-		networkAreaIdFlag:      testNetworkAreaId,
-		routingTableIdFlag:     testRoutingTableId,
-		destinationTypeFlag:    testDestinationTypeFlag,
-		destinationValueFlag:   testDestinationValueFlag,
-		nextHopTypeFlag:        testNextHopTypeFlag,
-		nextHopValueFlag:       testNextHopValueFlag,
+		globalflags.RegionFlag:     testRegion,
+		labelFlag:                  testLabelSelectorFlag,
+		organizationIdFlag:         testOrgId,
+		networkAreaIdFlag:          testNetworkAreaId,
+		routingTableIdFlag:         testRoutingTableId,
+		destinationTypeFlag.Name(): testDestinationTypeFlag,
+		destinationValueFlag:       testDestinationValueFlag,
+		nextHopTypeFlag.Name():     testNextHopTypeFlag,
+		nextHopValueFlag:           testNextHopValueFlag,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -144,14 +144,14 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "destination type missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, destinationTypeFlag)
+				delete(flagValues, destinationTypeFlag.Name())
 			}),
 			isValid: false,
 		},
 		{
 			description: "next hop type missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, nextHopTypeFlag)
+				delete(flagValues, nextHopTypeFlag.Name())
 			}),
 			isValid: false,
 		},
@@ -212,7 +212,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "invalid destination type enum",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[destinationTypeFlag] = nextHopTypeIPv4 // Deliberately invalid for dest
+				flagValues[destinationTypeFlag.Name()] = nextHopTypeIPv4 // Deliberately invalid for dest
 			}),
 			isValid: false,
 		},
@@ -226,7 +226,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "destination value not IPv6 CIDR",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[destinationTypeFlag] = destTypeCIDRv6
+				flagValues[destinationTypeFlag.Name()] = destTypeCIDRv6
 				flagValues[destinationValueFlag] = "2001:db8::"
 			}),
 			isValid: false,
@@ -234,7 +234,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "destination value is IPv6 CIDR",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[destinationTypeFlag] = destTypeCIDRv6
+				flagValues[destinationTypeFlag.Name()] = destTypeCIDRv6
 				flagValues[destinationValueFlag] = "2001:db8::/32"
 			}),
 			isValid: true,
@@ -246,14 +246,14 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "invalid next hop type enum",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[nextHopTypeFlag] = destTypeCIDRv4 // Deliberately invalid for hop
+				flagValues[nextHopTypeFlag.Name()] = destTypeCIDRv4 // Deliberately invalid for hop
 			}),
 			isValid: false,
 		},
 		{
 			description: "next hop type is internet and next hop value is provided",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[nextHopTypeFlag] = nextHopTypeInternet
+				flagValues[nextHopTypeFlag.Name()] = nextHopTypeInternet
 				flagValues[nextHopValueFlag] = "1.1.1.1" // should not be allowed
 			}),
 			isValid: false,
@@ -261,7 +261,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "next hop type is blackhole and next hop value is provided",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[nextHopTypeFlag] = nextHopTypeBlackhole
+				flagValues[nextHopTypeFlag.Name()] = nextHopTypeBlackhole
 				flagValues[nextHopValueFlag] = "1.1.1.1"
 			}),
 			isValid: false,
@@ -269,7 +269,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "next hop type is internet and next hop value is not provided",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[nextHopTypeFlag] = nextHopTypeInternet
+				flagValues[nextHopTypeFlag.Name()] = nextHopTypeInternet
 				delete(flagValues, nextHopValueFlag)
 			}),
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -281,7 +281,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "next hop type is blackhole and next hop value is not provided",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[nextHopTypeFlag] = nextHopTypeBlackhole
+				flagValues[nextHopTypeFlag.Name()] = nextHopTypeBlackhole
 				delete(flagValues, nextHopValueFlag)
 			}),
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -293,7 +293,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "next hop type is IPv4 and next hop value is missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[nextHopTypeFlag] = nextHopTypeIPv4
+				flagValues[nextHopTypeFlag.Name()] = nextHopTypeIPv4
 				delete(flagValues, nextHopValueFlag)
 			}),
 			isValid: false,
@@ -301,7 +301,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "next hop type is IPv6 and next hop value is missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[nextHopTypeFlag] = nextHopTypeIPv6
+				flagValues[nextHopTypeFlag.Name()] = nextHopTypeIPv6
 				delete(flagValues, nextHopValueFlag)
 			}),
 			isValid: false,
@@ -309,7 +309,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "invalid next hop type provided",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[nextHopTypeFlag] = "invalid-type"
+				flagValues[nextHopTypeFlag.Name()] = "invalid-type"
 			}),
 			isValid: false,
 		},

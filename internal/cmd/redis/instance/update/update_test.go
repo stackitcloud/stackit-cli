@@ -12,7 +12,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/redis"
+	redis "github.com/stackitcloud/stackit-sdk-go/services/redis/v2api"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -20,22 +20,23 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &redis.APIClient{}
+var testClient = &redis.APIClient{DefaultAPI: &redis.DefaultAPIService{}}
+var testRegion = "eu01"
 
-type redisClientMocked struct {
+type mockSettings struct {
 	returnError       bool
 	listOfferingsResp *redis.ListOfferingsResponse
 }
 
-func (c *redisClientMocked) PartialUpdateInstance(ctx context.Context, projectId, instanceId string) redis.ApiPartialUpdateInstanceRequest {
-	return testClient.PartialUpdateInstance(ctx, projectId, instanceId)
-}
-
-func (c *redisClientMocked) ListOfferingsExecute(_ context.Context, _ string) (*redis.ListOfferingsResponse, error) {
-	if c.returnError {
-		return nil, fmt.Errorf("list flavors failed")
+func newAPIMock(s mockSettings) redis.DefaultAPI {
+	return &redis.DefaultAPIServiceMock{
+		ListOfferingsExecuteMock: utils.Ptr(func(_ redis.ApiListOfferingsRequest) (*redis.ListOfferingsResponse, error) {
+			if s.returnError {
+				return nil, fmt.Errorf("list flavors failed")
+			}
+			return s.listOfferingsResp, nil
+		}),
 	}
-	return c.listOfferingsResp, nil
 }
 
 var (
@@ -58,6 +59,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		projectIdFlag:            testProjectId,
+		globalflags.RegionFlag:   testRegion,
 		enableMonitoringFlag:     "true",
 		graphiteFlag:             "example-graphite",
 		metricsFrequencyFlag:     "100",
@@ -78,15 +80,16 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
+			Region:    testRegion,
 		},
 		InstanceId:           testInstanceId,
 		EnableMonitoring:     utils.Ptr(true),
 		Graphite:             utils.Ptr("example-graphite"),
-		MetricsFrequency:     utils.Ptr(int64(100)),
+		MetricsFrequency:     utils.Ptr(int32(100)),
 		MetricsPrefix:        utils.Ptr("example-prefix"),
 		MonitoringInstanceId: utils.Ptr(testMonitoringInstanceId),
 		SgwAcl:               utils.Ptr([]string{"198.51.100.14/24"}),
-		Syslog:               utils.Ptr([]string{"example-syslog"}),
+		Syslog:               []string{"example-syslog"},
 		PlanId:               utils.Ptr(testPlanId),
 	}
 	for _, mod := range mods {
@@ -96,16 +99,16 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *redis.ApiPartialUpdateInstanceRequest)) redis.ApiPartialUpdateInstanceRequest {
-	request := testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId)
+	request := testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId)
 	request = request.PartialUpdateInstancePayload(redis.PartialUpdateInstancePayload{
 		Parameters: &redis.InstanceParameters{
 			EnableMonitoring:     utils.Ptr(true),
 			Graphite:             utils.Ptr("example-graphite"),
-			MetricsFrequency:     utils.Ptr(int64(100)),
+			MetricsFrequency:     utils.Ptr(int32(100)),
 			MetricsPrefix:        utils.Ptr("example-prefix"),
 			MonitoringInstanceId: utils.Ptr(testMonitoringInstanceId),
 			SgwAcl:               utils.Ptr("198.51.100.14/24"),
-			Syslog:               utils.Ptr([]string{"example-syslog"}),
+			Syslog:               []string{"example-syslog"},
 		},
 		PlanId: utils.Ptr(testPlanId),
 	})
@@ -186,7 +189,7 @@ func TestParseInput(t *testing.T) {
 				PlanId:           utils.Ptr(testPlanId),
 				EnableMonitoring: utils.Ptr(false),
 				Graphite:         utils.Ptr(""),
-				MetricsFrequency: utils.Ptr(int64(0)),
+				MetricsFrequency: utils.Ptr(int32(0)),
 				MetricsPrefix:    utils.Ptr(""),
 			},
 		},
@@ -268,9 +271,7 @@ func TestParseInput(t *testing.T) {
 			syslogValues: []string{"example-syslog-1", "example-syslog-2"},
 			isValid:      true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Syslog = utils.Ptr(
-					append(*model.Syslog, "example-syslog-1", "example-syslog-2"),
-				)
+				model.Syslog = append(model.Syslog, "example-syslog-1", "example-syslog-2")
 			}),
 		},
 	}
@@ -363,13 +364,13 @@ func TestBuildRequest(t *testing.T) {
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
 			listOfferingsResp: &redis.ListOfferingsResponse{
-				Offerings: &[]redis.Offering{
+				Offerings: []redis.Offering{
 					{
-						Version: utils.Ptr("example-version"),
-						Plans: &[]redis.Plan{
+						Version: "example-version",
+						Plans: []redis.Plan{
 							{
-								Name: utils.Ptr("example-plan-name"),
-								Id:   utils.Ptr(testPlanId),
+								Name: "example-plan-name",
+								Id:   testPlanId,
 							},
 						},
 					},
@@ -387,13 +388,13 @@ func TestBuildRequest(t *testing.T) {
 			),
 			expectedRequest: fixtureRequest(),
 			listOfferingsResp: &redis.ListOfferingsResponse{
-				Offerings: &[]redis.Offering{
+				Offerings: []redis.Offering{
 					{
-						Version: utils.Ptr("example-version"),
-						Plans: &[]redis.Plan{
+						Version: "example-version",
+						Plans: []redis.Plan{
 							{
-								Name: utils.Ptr("example-plan-name"),
-								Id:   utils.Ptr(testPlanId),
+								Name: "example-plan-name",
+								Id:   testPlanId,
 							},
 						},
 					},
@@ -422,13 +423,13 @@ func TestBuildRequest(t *testing.T) {
 				},
 			),
 			listOfferingsResp: &redis.ListOfferingsResponse{
-				Offerings: &[]redis.Offering{
+				Offerings: []redis.Offering{
 					{
-						Version: utils.Ptr("example-version"),
-						Plans: &[]redis.Plan{
+						Version: "example-version",
+						Plans: []redis.Plan{
 							{
-								Name: utils.Ptr("other-plan-name"),
-								Id:   utils.Ptr(testPlanId),
+								Name: "other-plan-name",
+								Id:   testPlanId,
 							},
 						},
 					},
@@ -442,21 +443,22 @@ func TestBuildRequest(t *testing.T) {
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
 					Verbosity: globalflags.VerbosityDefault,
+					Region:    testRegion,
 				},
 				InstanceId: testInstanceId,
 			},
-			expectedRequest: testClient.PartialUpdateInstance(testCtx, testProjectId, testInstanceId).
+			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId).
 				PartialUpdateInstancePayload(redis.PartialUpdateInstancePayload{Parameters: &redis.InstanceParameters{}}),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &redisClientMocked{
+			client := mockSettings{
 				returnError:       tt.getOfferingsFails,
 				listOfferingsResp: tt.listOfferingsResp,
 			}
-			request, err := buildRequest(testCtx, tt.model, client)
+			request, err := buildRequest(testCtx, tt.model, newAPIMock(client))
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -465,8 +467,11 @@ func TestBuildRequest(t *testing.T) {
 			}
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, redis.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
+				cmp.FilterPath(func(p cmp.Path) bool {
+					return p.String() == "ApiService"
+				}, cmp.Ignore()),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

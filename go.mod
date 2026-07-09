@@ -9,7 +9,7 @@ require (
 	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
 	github.com/inhies/go-bytesize v0.0.0-20220417184213-4913239db9cf
-	github.com/jedib0t/go-pretty/v6 v6.7.10
+	github.com/jedib0t/go-pretty/v6 v6.8.2
 	github.com/lmittmann/tint v1.1.3
 	github.com/mattn/go-colorable v0.1.14
 	github.com/spf13/cobra v1.10.2
@@ -30,7 +30,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.3.5
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.24.0
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.4.3
-	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.14.3
+	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.18.1
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.3.8
 	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.2.6
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.12.0
@@ -40,8 +40,8 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/vpn v0.14.0
 	github.com/zalando/go-keyring v0.2.6
 	golang.org/x/mod v0.34.0
-	golang.org/x/oauth2 v0.35.0
-	golang.org/x/term v0.42.0
+	golang.org/x/oauth2 v0.36.0
+	golang.org/x/term v0.44.0
 	golang.org/x/text v0.36.0
 	k8s.io/apimachinery v0.35.4
 	k8s.io/client-go v0.35.1
@@ -267,15 +267,15 @@ require (
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/stackitcloud/stackit-sdk-go/services/kms v1.11.0
 	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.14.0
-	github.com/stackitcloud/stackit-sdk-go/services/logme v0.25.6
-	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.25.6
+	github.com/stackitcloud/stackit-sdk-go/services/logme v0.30.0
+	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.30.0
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.7.0
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.24.0
-	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v0.26.0
-	github.com/stackitcloud/stackit-sdk-go/services/redis v0.25.6
+	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.1.0
+	github.com/stackitcloud/stackit-sdk-go/services/redis v1.1.0
 	github.com/stackitcloud/stackit-sdk-go/services/sfs v0.9.0
 	github.com/subosito/gotenv v1.6.0 // indirect
-	golang.org/x/sys v0.43.0 // indirect
+	golang.org/x/sys v0.46.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/api v0.35.1 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect

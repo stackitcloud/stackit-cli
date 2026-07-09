@@ -46,7 +46,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 			Region:    testRegion,
 		},
-		Limit: utils.Ptr(int64(10)),
+		Immutable: utils.Ptr("all"),
+		Limit:     utils.Ptr(int64(10)),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -105,7 +106,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "immutable snapshot policies",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[immutableFlag] = "immutable-only"
+				flagValues[immutableFlag.Name()] = "immutable-only"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -115,7 +116,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "mutable snapshot policies",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[immutableFlag] = "mutable-only"
+				flagValues[immutableFlag.Name()] = "mutable-only"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -125,21 +126,11 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "all snapshot policies",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[immutableFlag] = "all"
+				flagValues[immutableFlag.Name()] = "all"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.Immutable = utils.Ptr("all")
-			}),
-		},
-		{
-			description: "all snapshot policies - without immutable flag",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, immutableFlag)
-			}),
-			isValid: true,
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Immutable = nil
 			}),
 		},
 	}

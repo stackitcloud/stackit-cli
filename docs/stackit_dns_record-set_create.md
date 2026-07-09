@@ -25,7 +25,7 @@ stackit dns record-set create [flags]
       --name string      Name of the record, should be compliant with RFC1035, Section 2.3.4
       --record strings   Records belonging to the record set
       --ttl int32        Time to live, if not provided defaults to the zone's default TTL
-      --type string      Record type, one of ["A" "AAAA" "SOA" "CNAME" "NS" "MX" "TXT" "SRV" "PTR" "ALIAS" "DNAME" "CAA" "DNSKEY" "DS" "LOC" "NAPTR" "SSHFP" "TLSA" "URI" "CERT" "SVCB" "TYPE" "CSYNC" "HINFO" "HTTPS"] (default "A")
+      --type string      Record type, (one of: [A, AAAA, SOA, CNAME, NS, MX, TXT, SRV, PTR, ALIAS, DNAME, CAA, DNSKEY, DS, LOC, NAPTR, SSHFP, TLSA, URI, CERT, SVCB, TYPE, CSYNC, HINFO, HTTPS]) (default "A")
       --zone-id string   Zone ID
 ```
 
@@ -34,10 +34,10 @@ stackit dns record-set create [flags]
 ```
   -y, --assume-yes             If set, skips all confirmation prompts
       --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, one of ["json" "pretty" "none" "yaml"]
+  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
   -p, --project-id string      Project ID
       --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, one of ["debug" "info" "warning" "error"] (default "info")
+      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

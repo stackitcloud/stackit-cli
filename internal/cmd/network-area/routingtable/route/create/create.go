@@ -21,11 +21,9 @@ import (
 )
 
 const (
-	destinationTypeFlag  = "destination-type"
 	destinationValueFlag = "destination-value"
 	labelFlag            = "labels"
 	networkAreaIdFlag    = "network-area-id"
-	nextHopTypeFlag      = "nexthop-type"
 	nextHopValueFlag     = "nexthop-value"
 	organizationIdFlag   = "organization-id"
 	routingTableIdFlag   = "routing-table-id"
@@ -39,6 +37,21 @@ const (
 	nextHopTypeIPv6      = "ipv6"
 	nextHopTypeInternet  = "internet"
 	nextHopTypeBlackhole = "blackhole"
+)
+
+var (
+	destinationTypeFlag = flags.StringEnumFlag(
+		"destination-type",
+		[]string{destTypeCIDRv4, destTypeCIDRv6},
+		"Destination type",
+		flags.StringEnumIgnoreCase[string](),
+	)
+	nextHopTypeFlag = flags.StringEnumFlag(
+		"nexthop-type",
+		[]string{nextHopTypeIPv4, nextHopTypeIPv6, nextHopTypeInternet, nextHopTypeBlackhole},
+		"Next hop type",
+		flags.StringEnumIgnoreCase[string](),
+	)
 )
 
 type inputModel struct {
@@ -118,20 +131,12 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), networkAreaIdFlag, "Network-Area ID")
 	cmd.Flags().Var(flags.UUIDFlag(), organizationIdFlag, "Organization ID")
 	cmd.Flags().Var(flags.UUIDFlag(), routingTableIdFlag, "Routing-Table ID")
-
-	cmd.Flags().Var(
-		flags.EnumFlag(true, "", destTypeCIDRv4, destTypeCIDRv6),
-		destinationTypeFlag,
-		"Destination type")
-
-	cmd.Flags().Var(
-		flags.EnumFlag(true, "", nextHopTypeIPv4, nextHopTypeIPv6, nextHopTypeInternet, nextHopTypeBlackhole),
-		nextHopTypeFlag,
-		"Next hop type")
+	destinationTypeFlag.Register(cmd.Flags())
+	nextHopTypeFlag.Register(cmd.Flags())
 
 	cmd.Flags().StringToString(labelFlag, nil, "Key=value labels")
 
-	err := flags.MarkFlagsRequired(cmd, organizationIdFlag, networkAreaIdFlag, routingTableIdFlag, destinationTypeFlag, destinationValueFlag, nextHopTypeFlag)
+	err := flags.MarkFlagsRequired(cmd, organizationIdFlag, networkAreaIdFlag, routingTableIdFlag, destinationTypeFlag.Name(), destinationValueFlag, nextHopTypeFlag.Name())
 	cobra.CheckErr(err)
 }
 
@@ -140,11 +145,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := &inputModel{
 		GlobalFlagModel:  globalFlags,
-		DestinationType:  flags.FlagToStringValue(p, cmd, destinationTypeFlag),
+		DestinationType:  destinationTypeFlag.Get(),
 		DestinationValue: flags.FlagToStringPointer(p, cmd, destinationValueFlag),
 		Labels:           flags.FlagToStringToAny(p, cmd, labelFlag),
 		NetworkAreaId:    flags.FlagToStringValue(p, cmd, networkAreaIdFlag),
-		NextHopType:      flags.FlagToStringValue(p, cmd, nextHopTypeFlag),
+		NextHopType:      nextHopTypeFlag.Get(),
 		NextHopValue:     flags.FlagToStringPointer(p, cmd, nextHopValueFlag),
 		OrganizationId:   flags.FlagToStringValue(p, cmd, organizationIdFlag),
 		RoutingTableId:   flags.FlagToStringValue(p, cmd, routingTableIdFlag),

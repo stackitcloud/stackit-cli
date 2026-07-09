@@ -27,7 +27,7 @@ stackit redis instance update INSTANCE_ID [flags]
       --enable-monitoring               Enable monitoring
       --graphite string                 Graphite host
   -h, --help                            Help for "stackit redis instance update"
-      --metrics-frequency int           Metrics frequency
+      --metrics-frequency int32         Metrics frequency
       --metrics-prefix string           Metrics prefix
       --monitoring-instance-id string   Monitoring instance ID
       --plan-id string                  Plan ID
@@ -41,10 +41,10 @@ stackit redis instance update INSTANCE_ID [flags]
 ```
   -y, --assume-yes             If set, skips all confirmation prompts
       --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, one of ["json" "pretty" "none" "yaml"]
+  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
   -p, --project-id string      Project ID
       --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, one of ["debug" "info" "warning" "error"] (default "info")
+      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

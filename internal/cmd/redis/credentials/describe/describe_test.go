@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/redis"
+	redis "github.com/stackitcloud/stackit-sdk-go/services/redis/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -19,10 +19,11 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &redis.APIClient{}
+var testClient = &redis.APIClient{DefaultAPI: &redis.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 var testCredentialsId = uuid.NewString()
+var testRegion = "eu01"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
@@ -36,8 +37,9 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:  testProjectId,
-		instanceIdFlag: testInstanceId,
+		projectIdFlag:          testProjectId,
+		instanceIdFlag:         testInstanceId,
+		globalflags.RegionFlag: testRegion,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -50,6 +52,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
+			Region:    testRegion,
 		},
 		InstanceId:    testInstanceId,
 		CredentialsId: testCredentialsId,
@@ -61,7 +64,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *redis.ApiGetCredentialsRequest)) redis.ApiGetCredentialsRequest {
-	request := testClient.GetCredentials(testCtx, testProjectId, testInstanceId, testCredentialsId)
+	request := testClient.DefaultAPI.GetCredentials(testCtx, testProjectId, testRegion, testInstanceId, testCredentialsId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -188,7 +191,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, redis.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {

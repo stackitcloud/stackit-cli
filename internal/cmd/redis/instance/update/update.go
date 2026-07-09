@@ -20,8 +20,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/redis"
-	"github.com/stackitcloud/stackit-sdk-go/services/redis/wait"
+	redis "github.com/stackitcloud/stackit-sdk-go/services/redis/v2api"
+	"github.com/stackitcloud/stackit-sdk-go/services/redis/v2api/wait"
 )
 
 const (
@@ -47,11 +47,11 @@ type inputModel struct {
 
 	EnableMonitoring     *bool
 	Graphite             *string
-	MetricsFrequency     *int64
+	MetricsFrequency     *int32
 	MetricsPrefix        *string
 	MonitoringInstanceId *string
 	SgwAcl               *[]string
-	Syslog               *[]string
+	Syslog               []string
 	PlanId               *string
 }
 
@@ -82,7 +82,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := redisUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceLabel, err := redisUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -95,7 +95,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 				if !errors.As(err, &dsaInvalidPlanError) {
@@ -112,7 +112,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Updating instance", func() error {
-					_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
+					_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, instanceId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -135,7 +135,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(enableMonitoringFlag, false, "Enable monitoring")
 	cmd.Flags().String(graphiteFlag, "", "Graphite host")
-	cmd.Flags().Int64(metricsFrequencyFlag, 0, "Metrics frequency")
+	cmd.Flags().Int32(metricsFrequencyFlag, 0, "Metrics frequency")
 	cmd.Flags().String(metricsPrefixFlag, "", "Metrics prefix")
 	cmd.Flags().Var(flags.UUIDFlag(), monitoringInstanceIdFlag, "Monitoring instance ID")
 	cmd.Flags().Var(flags.CIDRSliceFlag(), sgwAclFlag, "List of IP networks in CIDR notation which are allowed to access this instance")
@@ -156,10 +156,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	enableMonitoring := flags.FlagToBoolPointer(p, cmd, enableMonitoringFlag)
 	monitoringInstanceId := flags.FlagToStringPointer(p, cmd, monitoringInstanceIdFlag)
 	graphite := flags.FlagToStringPointer(p, cmd, graphiteFlag)
-	metricsFrequency := flags.FlagToInt64Pointer(p, cmd, metricsFrequencyFlag)
+	metricsFrequency := flags.FlagToInt32Pointer(p, cmd, metricsFrequencyFlag)
 	metricsPrefix := flags.FlagToStringPointer(p, cmd, metricsPrefixFlag)
 	sgwAcl := flags.FlagToStringSlicePointer(p, cmd, sgwAclFlag)
-	syslog := flags.FlagToStringSlicePointer(p, cmd, syslogFlag)
+	syslog := flags.FlagToStringSliceValue(p, cmd, syslogFlag)
 	planId := flags.FlagToStringPointer(p, cmd, planIdFlag)
 	planName := flags.FlagToStringValue(p, cmd, planNameFlag)
 	version := flags.FlagToStringValue(p, cmd, versionFlag)
@@ -197,18 +197,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-type redisClient interface {
-	PartialUpdateInstance(ctx context.Context, projectId, instanceId string) redis.ApiPartialUpdateInstanceRequest
-	ListOfferingsExecute(ctx context.Context, projectId string) (*redis.ListOfferingsResponse, error)
-}
-
-func buildRequest(ctx context.Context, model *inputModel, apiClient redisClient) (redis.ApiPartialUpdateInstanceRequest, error) {
-	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.InstanceId)
+func buildRequest(ctx context.Context, model *inputModel, apiClient redis.DefaultAPI) (redis.ApiPartialUpdateInstanceRequest, error) {
+	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 
 	var planId *string
 	var err error
 
-	offerings, err := apiClient.ListOfferingsExecute(ctx, model.ProjectId)
+	offerings, err := apiClient.ListOfferings(ctx, model.ProjectId, model.Region).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get Redis offerings: %w", err)
 	}

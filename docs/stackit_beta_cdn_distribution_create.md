@@ -50,7 +50,7 @@ stackit beta cdn distribution create [flags]
       --loki-username string                      Username for log sink
       --monthly-limit-bytes int                   Monthly limit in bytes for the CDN distribution
       --optimizer                                 Enable optimizer for the CDN distribution (paid feature).
-      --regions strings                           Regions in which content should be cached, multiple of: ["EU" "US" "AF" "SA" "ASIA"] (default [])
+      --regions strings                           Regions in which content should be cached, multiple values accepted, (multiple of: [EU, US, AF, SA, ASIA]) (default [])
 ```
 
 ### Options inherited from parent commands
@@ -58,10 +58,10 @@ stackit beta cdn distribution create [flags]
 ```
   -y, --assume-yes             If set, skips all confirmation prompts
       --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, one of ["json" "pretty" "none" "yaml"]
+  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
   -p, --project-id string      Project ID
       --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, one of ["debug" "info" "warning" "error"] (default "info")
+      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO
