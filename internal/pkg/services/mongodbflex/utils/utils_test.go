@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
+	mongodbflex "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api"
 )
 
 var (
@@ -25,7 +25,36 @@ const (
 	testUserName     = "user"
 )
 
-type mongoDBFlexClientMocked struct {
+func newAPIClientMock(m clientMockSettings) mongodbflex.DefaultAPI {
+	return mongodbflex.DefaultAPIServiceMock{
+		ListVersionsExecuteMock: utils.Ptr(func(_ mongodbflex.ApiListVersionsRequest) (*mongodbflex.ListVersionsResponse, error) {
+			if m.listVersionsFails {
+				return nil, fmt.Errorf("could not list versions")
+			}
+			return m.listVersionsResp, nil
+		}),
+		ListRestoreJobsExecuteMock: utils.Ptr(func(_ mongodbflex.ApiListRestoreJobsRequest) (*mongodbflex.ListRestoreJobsResponse, error) {
+			if m.listRestoreJobsFails {
+				return nil, fmt.Errorf("could not list versions")
+			}
+			return m.listRestoreJobsResp, nil
+		}),
+		GetInstanceExecuteMock: utils.Ptr(func(_ mongodbflex.ApiGetInstanceRequest) (*mongodbflex.InstanceResponse, error) {
+			if m.getInstanceFails {
+				return nil, fmt.Errorf("could not get instance")
+			}
+			return m.getInstanceResp, nil
+		}),
+		GetUserExecuteMock: utils.Ptr(func(_ mongodbflex.ApiGetUserRequest) (*mongodbflex.GetUserResponse, error) {
+			if m.getUserFails {
+				return nil, fmt.Errorf("could not get user")
+			}
+			return m.getUserResp, nil
+		}),
+	}
+}
+
+type clientMockSettings struct {
 	listVersionsFails    bool
 	listVersionsResp     *mongodbflex.ListVersionsResponse
 	getInstanceFails     bool
@@ -34,34 +63,6 @@ type mongoDBFlexClientMocked struct {
 	getUserResp          *mongodbflex.GetUserResponse
 	listRestoreJobsFails bool
 	listRestoreJobsResp  *mongodbflex.ListRestoreJobsResponse
-}
-
-func (m *mongoDBFlexClientMocked) ListVersionsExecute(_ context.Context, _, _ string) (*mongodbflex.ListVersionsResponse, error) {
-	if m.listVersionsFails {
-		return nil, fmt.Errorf("could not list versions")
-	}
-	return m.listVersionsResp, nil
-}
-
-func (m *mongoDBFlexClientMocked) ListRestoreJobsExecute(_ context.Context, _, _, _ string) (*mongodbflex.ListRestoreJobsResponse, error) {
-	if m.listRestoreJobsFails {
-		return nil, fmt.Errorf("could not list versions")
-	}
-	return m.listRestoreJobsResp, nil
-}
-
-func (m *mongoDBFlexClientMocked) GetInstanceExecute(_ context.Context, _, _, _ string) (*mongodbflex.InstanceResponse, error) {
-	if m.getInstanceFails {
-		return nil, fmt.Errorf("could not get instance")
-	}
-	return m.getInstanceResp, nil
-}
-
-func (m *mongoDBFlexClientMocked) GetUserExecute(_ context.Context, _, _, _, _ string) (*mongodbflex.GetUserResponse, error) {
-	if m.getUserFails {
-		return nil, fmt.Errorf("could not get user")
-	}
-	return m.getUserResp, nil
 }
 
 func TestValidateStorage(t *testing.T) {
@@ -77,7 +78,7 @@ func TestValidateStorage(t *testing.T) {
 			storageClass: utils.Ptr("foo"),
 			storageSize:  utils.Ptr(int64(10)),
 			storages: &mongodbflex.ListStoragesResponse{
-				StorageClasses: &[]string{"bar-1", "bar-2", "foo"},
+				StorageClasses: []string{"bar-1", "bar-2", "foo"},
 				StorageRange: &mongodbflex.StorageRange{
 					Min: utils.Ptr(int64(5)),
 					Max: utils.Ptr(int64(20)),
@@ -97,7 +98,7 @@ func TestValidateStorage(t *testing.T) {
 			storageClass: utils.Ptr("foo"),
 			storageSize:  utils.Ptr(int64(1)),
 			storages: &mongodbflex.ListStoragesResponse{
-				StorageClasses: &[]string{"bar-1", "bar-2", "foo"},
+				StorageClasses: []string{"bar-1", "bar-2", "foo"},
 				StorageRange: &mongodbflex.StorageRange{
 					Min: utils.Ptr(int64(5)),
 					Max: utils.Ptr(int64(20)),
@@ -110,7 +111,7 @@ func TestValidateStorage(t *testing.T) {
 			storageClass: utils.Ptr("foo"),
 			storageSize:  utils.Ptr(int64(200)),
 			storages: &mongodbflex.ListStoragesResponse{
-				StorageClasses: &[]string{"bar-1", "bar-2", "foo"},
+				StorageClasses: []string{"bar-1", "bar-2", "foo"},
 				StorageRange: &mongodbflex.StorageRange{
 					Min: utils.Ptr(int64(5)),
 					Max: utils.Ptr(int64(20)),
@@ -123,7 +124,7 @@ func TestValidateStorage(t *testing.T) {
 			storageClass: utils.Ptr("foo"),
 			storageSize:  utils.Ptr(int64(5)),
 			storages: &mongodbflex.ListStoragesResponse{
-				StorageClasses: &[]string{"bar-1", "bar-2", "foo"},
+				StorageClasses: []string{"bar-1", "bar-2", "foo"},
 				StorageRange: &mongodbflex.StorageRange{
 					Min: utils.Ptr(int64(5)),
 					Max: utils.Ptr(int64(20)),
@@ -136,7 +137,7 @@ func TestValidateStorage(t *testing.T) {
 			storageClass: utils.Ptr("foo"),
 			storageSize:  utils.Ptr(int64(20)),
 			storages: &mongodbflex.ListStoragesResponse{
-				StorageClasses: &[]string{"bar-1", "bar-2", "foo"},
+				StorageClasses: []string{"bar-1", "bar-2", "foo"},
 				StorageRange: &mongodbflex.StorageRange{
 					Min: utils.Ptr(int64(5)),
 					Max: utils.Ptr(int64(20)),
@@ -149,7 +150,7 @@ func TestValidateStorage(t *testing.T) {
 			storageClass: utils.Ptr("foo"),
 			storageSize:  utils.Ptr(int64(10)),
 			storages: &mongodbflex.ListStoragesResponse{
-				StorageClasses: &[]string{"bar-1", "bar-2", "bar-3"},
+				StorageClasses: []string{"bar-1", "bar-2", "bar-3"},
 				StorageRange: &mongodbflex.StorageRange{
 					Min: utils.Ptr(int64(5)),
 					Max: utils.Ptr(int64(20)),
@@ -239,8 +240,8 @@ func TestValidateFlavorId(t *testing.T) {
 func TestLoadFlavorId(t *testing.T) {
 	tests := []struct {
 		description    string
-		cpu            int64
-		ram            int64
+		cpu            int32
+		ram            int32
 		flavors        *[]mongodbflex.InstanceFlavor
 		isValid        bool
 		expectedOutput *string
@@ -252,18 +253,18 @@ func TestLoadFlavorId(t *testing.T) {
 			flavors: &[]mongodbflex.InstanceFlavor{
 				{
 					Id:     utils.Ptr("bar-1"),
-					Cpu:    utils.Ptr(int64(2)),
-					Memory: utils.Ptr(int64(2)),
+					Cpu:    utils.Ptr(int32(2)),
+					Memory: utils.Ptr(int32(2)),
 				},
 				{
 					Id:     utils.Ptr("bar-2"),
-					Cpu:    utils.Ptr(int64(4)),
-					Memory: utils.Ptr(int64(4)),
+					Cpu:    utils.Ptr(int32(4)),
+					Memory: utils.Ptr(int32(4)),
 				},
 				{
 					Id:     utils.Ptr("foo"),
-					Cpu:    utils.Ptr(int64(2)),
-					Memory: utils.Ptr(int64(4)),
+					Cpu:    utils.Ptr(int32(2)),
+					Memory: utils.Ptr(int32(4)),
 				},
 			},
 			isValid:        true,
@@ -295,13 +296,13 @@ func TestLoadFlavorId(t *testing.T) {
 				},
 				{
 					Id:     utils.Ptr("bar-2"),
-					Cpu:    utils.Ptr(int64(4)),
-					Memory: utils.Ptr(int64(4)),
+					Cpu:    utils.Ptr(int32(4)),
+					Memory: utils.Ptr(int32(4)),
 				},
 				{
 					Id:     utils.Ptr("foo"),
-					Cpu:    utils.Ptr(int64(2)),
-					Memory: utils.Ptr(int64(4)),
+					Cpu:    utils.Ptr(int32(2)),
+					Memory: utils.Ptr(int32(4)),
 				},
 			},
 			isValid:        true,
@@ -314,18 +315,18 @@ func TestLoadFlavorId(t *testing.T) {
 			flavors: &[]mongodbflex.InstanceFlavor{
 				{
 					Id:     utils.Ptr("bar-1"),
-					Cpu:    utils.Ptr(int64(2)),
-					Memory: utils.Ptr(int64(2)),
+					Cpu:    utils.Ptr(int32(2)),
+					Memory: utils.Ptr(int32(2)),
 				},
 				{
 					Id:     utils.Ptr("bar-2"),
-					Cpu:    utils.Ptr(int64(4)),
-					Memory: utils.Ptr(int64(4)),
+					Cpu:    utils.Ptr(int32(4)),
+					Memory: utils.Ptr(int32(4)),
 				},
 				{
 					Id:     nil,
-					Cpu:    utils.Ptr(int64(2)),
-					Memory: utils.Ptr(int64(4)),
+					Cpu:    utils.Ptr(int32(2)),
+					Memory: utils.Ptr(int32(4)),
 				},
 			},
 			isValid: false,
@@ -337,13 +338,13 @@ func TestLoadFlavorId(t *testing.T) {
 			flavors: &[]mongodbflex.InstanceFlavor{
 				{
 					Id:     utils.Ptr("bar-1"),
-					Cpu:    utils.Ptr(int64(2)),
-					Memory: utils.Ptr(int64(2)),
+					Cpu:    utils.Ptr(int32(2)),
+					Memory: utils.Ptr(int32(2)),
 				},
 				{
 					Id:     utils.Ptr("bar-2"),
-					Cpu:    utils.Ptr(int64(4)),
-					Memory: utils.Ptr(int64(4)),
+					Cpu:    utils.Ptr(int32(4)),
+					Memory: utils.Ptr(int32(4)),
 				},
 			},
 			isValid: false,
@@ -386,7 +387,7 @@ func TestGetLatestMongoDBFlexVersion(t *testing.T) {
 		{
 			description: "base",
 			listVersionsResp: &mongodbflex.ListVersionsResponse{
-				Versions: &[]string{"8", "10", "9"},
+				Versions: []string{"8", "10", "9"},
 			},
 			isValid:        true,
 			expectedOutput: "10",
@@ -399,7 +400,7 @@ func TestGetLatestMongoDBFlexVersion(t *testing.T) {
 		{
 			description: "no versions",
 			listVersionsResp: &mongodbflex.ListVersionsResponse{
-				Versions: &[]string{},
+				Versions: []string{},
 			},
 			isValid: false,
 		},
@@ -407,12 +408,12 @@ func TestGetLatestMongoDBFlexVersion(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &mongoDBFlexClientMocked{
+			settings := clientMockSettings{
 				listVersionsFails: tt.listVersionsFails,
 				listVersionsResp:  tt.listVersionsResp,
 			}
 
-			output, err := GetLatestMongoDBVersion(context.Background(), client, testProjectId, testRegion)
+			output, err := GetLatestMongoDBVersion(context.Background(), newAPIClientMock(settings), testProjectId, testRegion)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -457,12 +458,12 @@ func TestGetInstanceName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &mongoDBFlexClientMocked{
+			settings := clientMockSettings{
 				getInstanceFails: tt.getInstanceFails,
 				getInstanceResp:  tt.getInstanceResp,
 			}
 
-			output, err := GetInstanceName(context.Background(), client, testProjectId, testInstanceId, testRegion)
+			output, err := GetInstanceName(context.Background(), newAPIClientMock(settings), testProjectId, testInstanceId, testRegion)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -507,12 +508,12 @@ func TestGetUserName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &mongoDBFlexClientMocked{
+			settings := clientMockSettings{
 				getUserFails: tt.getUserFails,
 				getUserResp:  tt.getUserResp,
 			}
 
-			output, err := GetUserName(context.Background(), client, testProjectId, testInstanceId, testUserId, testRegion)
+			output, err := GetUserName(context.Background(), newAPIClientMock(settings), testProjectId, testInstanceId, testUserId, testRegion)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -539,7 +540,7 @@ func TestGetRestoreStatus(t *testing.T) {
 		{
 			description: "base",
 			listRestoreJobsResp: &mongodbflex.ListRestoreJobsResponse{
-				Items: &[]mongodbflex.RestoreInstanceStatus{
+				Items: []mongodbflex.RestoreInstanceStatus{
 					{
 						BackupID: utils.Ptr(testBackupId),
 						Date:     utils.Ptr("2024-05-14T12:01:11Z"),
@@ -557,7 +558,7 @@ func TestGetRestoreStatus(t *testing.T) {
 		{
 			description: "get latest restore, ordered array",
 			listRestoreJobsResp: &mongodbflex.ListRestoreJobsResponse{
-				Items: &[]mongodbflex.RestoreInstanceStatus{
+				Items: []mongodbflex.RestoreInstanceStatus{
 					{
 						BackupID: utils.Ptr(testBackupId),
 						Date:     utils.Ptr("2024-05-14T12:01:11Z"),
@@ -575,7 +576,7 @@ func TestGetRestoreStatus(t *testing.T) {
 		{
 			description: "get latest restore, unordered array",
 			listRestoreJobsResp: &mongodbflex.ListRestoreJobsResponse{
-				Items: &[]mongodbflex.RestoreInstanceStatus{
+				Items: []mongodbflex.RestoreInstanceStatus{
 					{
 						BackupID: utils.Ptr(testBackupId),
 						Date:     utils.Ptr("2024-05-13T12:01:11Z"),
@@ -593,7 +594,7 @@ func TestGetRestoreStatus(t *testing.T) {
 		{
 			description: "get latest restore, another date format",
 			listRestoreJobsResp: &mongodbflex.ListRestoreJobsResponse{
-				Items: &[]mongodbflex.RestoreInstanceStatus{
+				Items: []mongodbflex.RestoreInstanceStatus{
 					{
 						BackupID: utils.Ptr(testBackupId),
 						Date:     utils.Ptr("2009-11-10 23:00:00 +0000 UTC m=+0.000000001"),
@@ -611,7 +612,7 @@ func TestGetRestoreStatus(t *testing.T) {
 		{
 			description: "no restore job for that backup",
 			listRestoreJobsResp: &mongodbflex.ListRestoreJobsResponse{
-				Items: &[]mongodbflex.RestoreInstanceStatus{
+				Items: []mongodbflex.RestoreInstanceStatus{
 					{
 						BackupID: utils.Ptr("bar"),
 						Date:     utils.Ptr("2024-05-13T12:01:11Z"),
@@ -649,7 +650,7 @@ func TestGetRestoreStatus(t *testing.T) {
 func TestGetInstanceType(t *testing.T) {
 	tests := []struct {
 		description    string
-		numReplicas    int64
+		numReplicas    int32
 		expectedOutput string
 		isValid        bool
 	}{

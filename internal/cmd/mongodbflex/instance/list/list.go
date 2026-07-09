@@ -18,7 +18,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
+	mongodbflex "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api"
 )
 
 const (
@@ -66,7 +66,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get MongoDB Flex instances: %w", err)
 			}
-			instances := utils.GetSliceFromPointer(resp.Items)
+			instances := resp.Items
 
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
@@ -115,7 +115,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex.APIClient) mongodbflex.ApiListInstancesRequest {
-	req := apiClient.ListInstances(ctx, model.ProjectId, model.Region).Tag("")
+	req := apiClient.DefaultAPI.ListInstances(ctx, model.ProjectId, model.Region).Tag("")
 	return req
 }
 

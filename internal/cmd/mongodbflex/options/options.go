@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
+	mongodbflex "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -77,7 +77,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			err = buildAndExecuteRequest(ctx, params.Printer, model, apiClient)
+			err = buildAndExecuteRequest(ctx, params.Printer, model, apiClient.DefaultAPI)
 			if err != nil {
 				return fmt.Errorf("get MongoDB Flex options: %w", err)
 			}
@@ -129,9 +129,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 type mongoDBFlexOptionsClient interface {
-	ListFlavorsExecute(ctx context.Context, projectId, region string) (*mongodbflex.ListFlavorsResponse, error)
-	ListVersionsExecute(ctx context.Context, projectId, region string) (*mongodbflex.ListVersionsResponse, error)
-	ListStoragesExecute(ctx context.Context, projectId, flavorId, region string) (*mongodbflex.ListStoragesResponse, error)
+	ListFlavors(ctx context.Context, projectId, region string) mongodbflex.ApiListFlavorsRequest
+	ListVersions(ctx context.Context, projectId, region string) mongodbflex.ApiListVersionsRequest
+	ListStorages(ctx context.Context, projectId, flavorId, region string) mongodbflex.ApiListStoragesRequest
 }
 
 func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputModel, apiClient mongoDBFlexOptionsClient) error {
@@ -141,19 +141,19 @@ func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputM
 	var err error
 
 	if model.Flavors {
-		flavors, err = apiClient.ListFlavorsExecute(ctx, model.ProjectId, model.Region)
+		flavors, err = apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Execute()
 		if err != nil {
 			return fmt.Errorf("get MongoDB Flex flavors: %w", err)
 		}
 	}
 	if model.Versions {
-		versions, err = apiClient.ListVersionsExecute(ctx, model.ProjectId, model.Region)
+		versions, err = apiClient.ListVersions(ctx, model.ProjectId, model.Region).Execute()
 		if err != nil {
 			return fmt.Errorf("get MongoDB Flex versions: %w", err)
 		}
 	}
 	if model.Storages {
-		storages, err = apiClient.ListStoragesExecute(ctx, model.ProjectId, *model.FlavorId, model.Region)
+		storages, err = apiClient.ListStorages(ctx, model.ProjectId, *model.FlavorId, model.Region).Execute()
 		if err != nil {
 			return fmt.Errorf("get MongoDB Flex storages: %w", err)
 		}
@@ -169,10 +169,10 @@ func outputResult(p *print.Printer, model *inputModel, flavors *mongodbflex.List
 
 	options := &options{}
 	if flavors != nil {
-		options.Flavors = flavors.Flavors
+		options.Flavors = &flavors.Flavors
 	}
 	if versions != nil {
-		options.Versions = versions.Versions
+		options.Versions = &versions.Versions
 	}
 	if storages != nil && model.FlavorId != nil {
 		options.Storages = &flavorStorages{
@@ -200,7 +200,7 @@ func outputResultAsTable(p *print.Printer, model *inputModel, options *options) 
 	if model.Versions && len(*options.Versions) != 0 {
 		content = append(content, buildVersionsTable(*options.Versions))
 	}
-	if model.Storages && options.Storages.Storages != nil && len(*options.Storages.Storages.StorageClasses) > 0 {
+	if model.Storages && options.Storages.Storages != nil && len(options.Storages.Storages.StorageClasses) > 0 {
 		content = append(content, buildStoragesTable(*options.Storages.Storages))
 	}
 
@@ -223,7 +223,8 @@ func buildFlavorsTable(flavors []mongodbflex.InstanceFlavor) tables.Table {
 			utils.PtrString(f.Cpu),
 			utils.PtrString(f.Memory),
 			utils.PtrString(f.Description),
-			utils.PtrString(f.Categories),
+			//TODO: check if this is ok
+			f.Categories,
 		)
 	}
 	return table
@@ -241,7 +242,7 @@ func buildVersionsTable(versions []string) tables.Table {
 }
 
 func buildStoragesTable(storagesResp mongodbflex.ListStoragesResponse) tables.Table {
-	storages := *storagesResp.StorageClasses
+	storages := storagesResp.StorageClasses
 	table := tables.NewTable()
 	table.SetTitle("Storages")
 	table.SetHeader("MINIMUM", "MAXIMUM", "STORAGE CLASS")

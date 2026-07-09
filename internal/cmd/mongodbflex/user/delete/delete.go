@@ -17,7 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
+	mongodbflex "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api"
 )
 
 const (
@@ -60,13 +60,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := mongodbflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId, model.Region)
+			instanceLabel, err := mongodbflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
 			}
 
-			userLabel, err := mongodbflexUtils.GetUserName(ctx, apiClient, model.ProjectId, model.InstanceId, model.UserId, model.Region)
+			userLabel, err := mongodbflexUtils.GetUserName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.UserId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get user name: %v", err)
 				userLabel = model.UserId
@@ -119,6 +119,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex.APIClient) mongodbflex.ApiDeleteUserRequest {
-	req := apiClient.DeleteUser(ctx, model.ProjectId, model.InstanceId, model.UserId, model.Region)
+	req := apiClient.DefaultAPI.DeleteUser(ctx, model.ProjectId, model.InstanceId, model.UserId, model.Region)
 	return req
 }

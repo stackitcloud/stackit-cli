@@ -25,11 +25,11 @@ stackit mongodbflex instance update INSTANCE_ID [flags]
 ```
       --acl strings              Lists of IP networks in CIDR notation which are allowed to access this instance (default [])
       --backup-schedule string   Backup schedule
-      --cpu int                  Number of CPUs
+      --cpu int32                Number of CPUs
       --flavor-id string         ID of the flavor
   -h, --help                     Help for "stackit mongodbflex instance update"
   -n, --name string              Instance name
-      --ram int                  Amount of RAM (in GB)
+      --ram int32                Amount of RAM (in GB)
       --storage-class string     Storage class
       --storage-size int         Storage size (in GB)
       --type string              Instance type, (one of: [Replica, Sharded, Single])

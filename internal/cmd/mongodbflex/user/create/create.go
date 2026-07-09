@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
+	mongodbflex "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -77,7 +77,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := mongodbflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId, model.Region)
+			instanceLabel, err := mongodbflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -134,11 +134,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex.APIClient) mongodbflex.ApiCreateUserRequest {
-	req := apiClient.CreateUser(ctx, model.ProjectId, model.InstanceId, model.Region)
+	req := apiClient.DefaultAPI.CreateUser(ctx, model.ProjectId, model.InstanceId, model.Region)
 	req = req.CreateUserPayload(mongodbflex.CreateUserPayload{
 		Username: model.Username,
-		Database: model.Database,
-		Roles:    model.Roles,
+		Database: *model.Database,
+		Roles:    *model.Roles,
 	})
 	return req
 }
@@ -152,7 +152,8 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, user *mo
 		p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, utils.PtrString(user.Id))
 		p.Outputf("Username: %s\n", utils.PtrString(user.Username))
 		p.Outputf("Password: %s\n", utils.PtrString(user.Password))
-		p.Outputf("Roles: %v\n", utils.PtrString(user.Roles))
+		//TODO: check if this is ok
+		p.Outputf("Roles: %v\n", user.Roles)
 		p.Outputf("Database: %s\n", utils.PtrString(user.Database))
 		p.Outputf("Host: %s\n", utils.PtrString(user.Host))
 		p.Outputf("Port: %s\n", utils.PtrString(user.Port))

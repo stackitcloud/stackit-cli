@@ -17,8 +17,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/wait"
+	mongodbflex "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api"
+	wait "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api/wait"
 )
 
 const (
@@ -71,7 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := mongodbUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId, model.Region)
+			instanceLabel, err := mongodbUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.ProjectId
@@ -100,7 +100,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 				if !model.Async {
 					err := spinner.Run(params.Printer, "Restoring instance", func() error {
-						_, err = wait.RestoreInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.InstanceId, model.BackupId, model.Region).WaitWithContext(ctx)
+						_, err = wait.RestoreInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.BackupId, model.Region).WaitWithContext(ctx)
 						return err
 					})
 					if err != nil {
@@ -125,7 +125,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Cloning instance", func() error {
-					_, err = wait.CloneInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.InstanceId, model.Region).WaitWithContext(ctx)
+					_, err = wait.CloneInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -183,19 +183,19 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRestoreRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex.APIClient) mongodbflex.ApiRestoreInstanceRequest {
-	req := apiClient.RestoreInstance(ctx, model.ProjectId, model.InstanceId, model.Region)
+	req := apiClient.DefaultAPI.RestoreInstance(ctx, model.ProjectId, model.InstanceId, model.Region)
 	req = req.RestoreInstancePayload(mongodbflex.RestoreInstancePayload{
-		BackupId:   &model.BackupId,
-		InstanceId: &model.BackupInstanceId,
+		BackupId:   model.BackupId,
+		InstanceId: model.BackupInstanceId,
 	})
 	return req
 }
 
 func buildCloneRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex.APIClient) mongodbflex.ApiCloneInstanceRequest {
-	req := apiClient.CloneInstance(ctx, model.ProjectId, model.InstanceId, model.Region)
+	req := apiClient.DefaultAPI.CloneInstance(ctx, model.ProjectId, model.InstanceId, model.Region)
 	req = req.CloneInstancePayload(mongodbflex.CloneInstancePayload{
 		Timestamp:  &model.Timestamp,
-		InstanceId: &model.BackupInstanceId,
+		InstanceId: model.BackupInstanceId,
 	})
 	return req
 }

@@ -28,11 +28,11 @@ stackit mongodbflex instance create [flags]
 ```
       --acl strings              The access control list (ACL). Must contain at least one valid subnet, for instance '0.0.0.0/0' for open access (discouraged), '1.2.3.0/24 for a public IP range of an organization, '1.2.3.4/32' for a single IP range, etc. (default [])
       --backup-schedule string   Backup schedule (default "0 0/6 * * *")
-      --cpu int                  Number of CPUs
+      --cpu int32                Number of CPUs
       --flavor-id string         ID of the flavor
   -h, --help                     Help for "stackit mongodbflex instance create"
   -n, --name string              Instance name
-      --ram int                  Amount of RAM (in GB)
+      --ram int32                Amount of RAM (in GB)
       --storage-class string     Storage class (default "premium-perf2-mongodb")
       --storage-size int         Storage size (in GB) (default 10)
       --type string              Instance type, (one of: [Replica, Sharded, Single]) (default "Replica")

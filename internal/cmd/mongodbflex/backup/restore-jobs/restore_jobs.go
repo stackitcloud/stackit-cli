@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
+	mongodbflex "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -63,7 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := mongodbflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, *model.InstanceId, model.Region)
+			instanceLabel, err := mongodbflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, *model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = *model.InstanceId
@@ -75,11 +75,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get restore jobs for MongoDB Flex instance %q: %w", instanceLabel, err)
 			}
-			if resp.Items == nil || len(*resp.Items) == 0 {
+			if len(resp.Items) == 0 {
 				cmd.Printf("No restore jobs found for instance %q\n", instanceLabel)
 				return nil
 			}
-			restoreJobs := *resp.Items
+			restoreJobs := resp.Items
 
 			// Truncate output
 			if model.Limit != nil && len(restoreJobs) > int(*model.Limit) {
@@ -127,7 +127,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex.APIClient) mongodbflex.ApiListRestoreJobsRequest {
-	req := apiClient.ListRestoreJobs(ctx, model.ProjectId, *model.InstanceId, model.Region)
+	req := apiClient.DefaultAPI.ListRestoreJobs(ctx, model.ProjectId, *model.InstanceId, model.Region)
 	return req
 }
 
