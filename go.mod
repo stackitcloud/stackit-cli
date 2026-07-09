@@ -38,7 +38,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/ske v1.11.0
 	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.11.0
 	github.com/stackitcloud/stackit-sdk-go/services/vpn v0.14.0
-	github.com/zalando/go-keyring v0.2.6
+	github.com/zalando/go-keyring v0.2.8
 	golang.org/x/mod v0.34.0
 	golang.org/x/oauth2 v0.36.0
 	golang.org/x/term v0.44.0
@@ -56,7 +56,6 @@ require (
 require (
 	4d63.com/gocheckcompilerdirectives v1.3.0 // indirect
 	4d63.com/gochecknoglobals v0.2.2 // indirect
-	al.essio.dev/pkg/shellescape v1.5.1 // indirect
 	codeberg.org/chavacava/garif v0.2.0 // indirect
 	codeberg.org/polyfloyd/go-errorlint v1.9.0 // indirect
 	dev.gaijin.team/go/exhaustruct/v4 v4.0.0 // indirect
@@ -248,11 +247,11 @@ require (
 
 require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.6 // indirect
-	github.com/danieljoos/wincred v1.2.2 // indirect
+	github.com/danieljoos/wincred v1.2.3 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
-	github.com/godbus/dbus/v5 v5.1.0 // indirect
+	github.com/godbus/dbus/v5 v5.2.2 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
