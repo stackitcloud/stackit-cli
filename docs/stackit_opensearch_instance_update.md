@@ -27,12 +27,12 @@ stackit opensearch instance update INSTANCE_ID [flags]
       --enable-monitoring               Enable monitoring
       --graphite string                 Graphite host
   -h, --help                            Help for "stackit opensearch instance update"
-      --metrics-frequency int           Metrics frequency
+      --metrics-frequency int32         Metrics frequency
       --metrics-prefix string           Metrics prefix
       --monitoring-instance-id string   Monitoring instance ID
       --plan-id string                  Plan ID
       --plan-name string                Plan name
-      --plugin strings                  Plugin
+      --plugin strings                  Plugins (multiple of: [repository-s3, repository-azure, analysis-phonetic]) (default [])
       --syslog strings                  Syslog
       --version string                  Instance OpenSearch version
 ```

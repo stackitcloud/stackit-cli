@@ -17,7 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/opensearch"
+	opensearch "github.com/stackitcloud/stackit-sdk-go/services/opensearch/v2api"
 )
 
 const (
@@ -56,13 +56,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := opensearchUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceLabel, err := opensearchUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
 			}
 
-			credentialsLabel, err := opensearchUtils.GetCredentialsUsername(ctx, apiClient, model.ProjectId, model.InstanceId, model.CredentialsId)
+			credentialsLabel, err := opensearchUtils.GetCredentialsUsername(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId, model.CredentialsId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get credentials user name: %v", err)
 				credentialsLabel = model.CredentialsId
@@ -115,6 +115,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *opensearch.APIClient) opensearch.ApiDeleteCredentialsRequest {
-	req := apiClient.DeleteCredentials(ctx, model.ProjectId, model.InstanceId, model.CredentialsId)
+	req := apiClient.DefaultAPI.DeleteCredentials(ctx, model.ProjectId, model.Region, model.InstanceId, model.CredentialsId)
 	return req
 }
