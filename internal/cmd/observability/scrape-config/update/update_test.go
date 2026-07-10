@@ -10,7 +10,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -18,35 +18,39 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &observability.APIClient{}
+var testClient = &observability.APIClient{DefaultAPI: &observability.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 var testJobName = "my-config"
 
 var testPayload = observability.UpdateScrapeConfigPayload{
-	BasicAuth: &observability.PartialUpdateScrapeConfigsRequestInnerBasicAuth{
+	BasicAuth: &observability.UpdateScrapeConfigPayloadBasicAuth{
 		Username: utils.Ptr("username"),
 		Password: utils.Ptr("password"),
 	},
 	BearerToken:     utils.Ptr("bearerToken"),
 	HonorLabels:     utils.Ptr(true),
 	HonorTimeStamps: utils.Ptr(true),
-	MetricsPath:     utils.Ptr("/metrics"),
-	MetricsRelabelConfigs: &[]observability.PartialUpdateScrapeConfigsRequestInnerMetricsRelabelConfigsInner{
+	MetricsPath:     "/metrics",
+	MetricsRelabelConfigs: []observability.UpdateScrapeConfigPayloadMetricsRelabelConfigsInner{
 		{
-			Action:       observability.PARTIALUPDATESCRAPECONFIGSREQUESTINNERMETRICSRELABELCONFIGSINNERACTION_REPLACE.Ptr(),
-			Modulus:      utils.Ptr(1.0),
+			Action:       observability.UPDATESCRAPECONFIGPAYLOADMETRICSRELABELCONFIGSINNERACTION_REPLACE.Ptr(),
+			Modulus:      utils.Ptr(float32(1.0)),
 			Regex:        utils.Ptr("regex"),
 			Replacement:  utils.Ptr("replacement"),
 			Separator:    utils.Ptr("separator"),
-			SourceLabels: &[]string{"sourceLabel"},
+			SourceLabels: []string{"sourceLabel"},
 			TargetLabel:  utils.Ptr("targetLabel"),
 		},
 	},
-	Params: &map[string]interface{}{
-		"key":  []interface{}{string("value1"), string("value2")},
+	Params: map[string]interface{}{
+		"key":  []interface{}{"value1", "value2"},
 		"key2": []interface{}{},
 	},
+	ScrapeInterval: "5m",
+	ScrapeTimeout:  "10s",
+	Scheme:         "https",
+	StaticConfigs:  []observability.UpdateScrapeConfigPayloadStaticConfigsInner{},
 }
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
@@ -86,7 +90,11 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 			"params": {
 				"key": ["value1", "value2"],
 				"key2": []
-			}
+			},
+			"scheme": "https",
+			"scrapeInterval": "5m",
+			"scrapeTimeout": "10s",
+			"staticConfigs": []
 		  }`,
 	}
 	for _, mod := range mods {
@@ -112,7 +120,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *observability.ApiUpdateScrapeConfigRequest)) observability.ApiUpdateScrapeConfigRequest {
-	request := testClient.UpdateScrapeConfig(testCtx, testInstanceId, testJobName, testProjectId)
+	request := testClient.DefaultAPI.UpdateScrapeConfig(testCtx, testInstanceId, testJobName, testProjectId)
 	request = request.UpdateScrapeConfigPayload(testPayload)
 	for _, mod := range mods {
 		mod(&request)
@@ -262,7 +270,9 @@ func TestParseInput(t *testing.T) {
 			if !tt.isValid {
 				t.Fatalf("did not fail on invalid input")
 			}
-			diff := cmp.Diff(model, tt.expectedModel)
+			diff := cmp.Diff(model, tt.expectedModel, cmp.FilterPath(func(path cmp.Path) bool {
+				return path.Last().String() == ".AdditionalProperties"
+			}, cmp.Ignore()))
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
 			}
@@ -286,10 +296,10 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			request := buildRequest(testCtx, tt.model, testClient.DefaultAPI)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, observability.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {

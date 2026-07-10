@@ -78,6 +78,17 @@ func ConvertInt64PToFloat64P(i *int64) *float64 {
 	return &f
 }
 
+// ConvertInt32PToFloat32P converts an int32 pointer to a float64 pointer
+// This function will return nil if the input is nil
+// This is a lossy conversion for i > 2^24
+func ConvertInt32PToFloat32P(i *int32) *float32 {
+	if i == nil {
+		return nil
+	}
+	f := float32(*i)
+	return &f
+}
+
 func ValidateURLDomain(value string) error {
 	urlStruct, err := url.Parse(value)
 	if err != nil {

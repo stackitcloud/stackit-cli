@@ -17,7 +17,7 @@ import (
 	observabilityUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
 )
 
 const (
@@ -79,7 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return outputCreateResult(params.Printer, model.FilePath, &createPayload)
 			}
 
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read Observability scrape config: %w", err)
@@ -121,7 +121,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *observability.APIClient) observability.ApiGetScrapeConfigRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient observability.DefaultAPI) observability.ApiGetScrapeConfigRequest {
 	req := apiClient.GetScrapeConfig(ctx, model.InstanceId, *model.JobName, model.ProjectId)
 	return req
 }
@@ -131,7 +131,7 @@ func outputCreateResult(p *print.Printer, filePath *string, payload *observabili
 		return fmt.Errorf("payload is nil")
 	}
 
-	payloadBytes, err := json.MarshalIndent(*payload, "", "  ")
+	payloadBytes, err := json.MarshalIndent(*payload, "", "  ") // nolint:gosec // false positive
 	if err != nil {
 		return fmt.Errorf("marshal payload: %w", err)
 	}
@@ -153,7 +153,7 @@ func outputUpdateResult(p *print.Printer, filePath *string, payload *observabili
 		return fmt.Errorf("payload is nil")
 	}
 
-	payloadBytes, err := json.MarshalIndent(*payload, "", "  ")
+	payloadBytes, err := json.MarshalIndent(*payload, "", "  ") // nolint:gosec // false positive
 	if err != nil {
 		return fmt.Errorf("marshal payload: %w", err)
 	}

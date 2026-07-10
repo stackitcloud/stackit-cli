@@ -15,10 +15,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/client"
 	observabilityUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
 )
 
 const (
@@ -63,7 +62,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list Observability credentials: %w", err)
@@ -71,7 +70,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			credentials := resp.GetCredentials()
 
-			instanceLabel, err := observabilityUtils.GetInstanceName(ctx, apiClient, model.InstanceId, model.ProjectId)
+			instanceLabel, err := observabilityUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.InstanceId, model.ProjectId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -117,7 +116,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *observability.APIClient) observability.ApiListCredentialsRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient observability.DefaultAPI) observability.ApiListCredentialsRequest {
 	req := apiClient.ListCredentials(ctx, model.InstanceId, model.ProjectId)
 	return req
 }
@@ -132,7 +131,7 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, credenti
 		table.SetHeader("USERNAME")
 		for i := range credentials {
 			c := credentials[i]
-			table.AddRow(utils.PtrString(c.Name))
+			table.AddRow(c.Name)
 		}
 		err := table.Display(p)
 		if err != nil {

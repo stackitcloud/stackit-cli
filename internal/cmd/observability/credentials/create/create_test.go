@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -20,7 +20,7 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &observability.APIClient{}
+var testClient = &observability.APIClient{DefaultAPI: &observability.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 
@@ -50,7 +50,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *observability.ApiCreateCredentialsRequest)) observability.ApiCreateCredentialsRequest {
-	request := testClient.CreateCredentials(testCtx, testInstanceId, testProjectId)
+	request := testClient.DefaultAPI.CreateCredentials(testCtx, testInstanceId, testProjectId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -142,10 +142,10 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			request := buildRequest(testCtx, tt.model, testClient.DefaultAPI)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, observability.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {
@@ -182,7 +182,7 @@ func TestOutputResult(t *testing.T) {
 			name: "set response with credentials",
 			args: args{
 				resp: &observability.CreateCredentialsResponse{
-					Credentials: observability.NewCredentials("dummy-pw", "dummy-user"),
+					Credentials: *observability.NewCredentials("dummy-pw", "dummy-user"),
 				},
 			},
 			wantErr: false,

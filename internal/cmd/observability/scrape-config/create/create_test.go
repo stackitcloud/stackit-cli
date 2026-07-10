@@ -13,7 +13,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -21,12 +21,12 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &observability.APIClient{}
+var testClient = &observability.APIClient{DefaultAPI: &observability.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 
 var testPayload = &observability.CreateScrapeConfigPayload{
-	BasicAuth: &observability.PartialUpdateScrapeConfigsRequestInnerBasicAuth{
+	BasicAuth: &observability.CreateScrapeConfigPayloadBasicAuth{
 		Username: utils.Ptr("username"),
 		Password: utils.Ptr("password"),
 	},
@@ -34,36 +34,36 @@ var testPayload = &observability.CreateScrapeConfigPayload{
 	HonorLabels:     utils.Ptr(true),
 	HonorTimeStamps: utils.Ptr(true),
 	MetricsPath:     utils.Ptr("/metrics"),
-	JobName:         utils.Ptr("default-name"),
-	MetricsRelabelConfigs: &[]observability.PartialUpdateScrapeConfigsRequestInnerMetricsRelabelConfigsInner{
+	JobName:         "default-name",
+	MetricsRelabelConfigs: []observability.CreateScrapeConfigPayloadMetricsRelabelConfigsInner{
 		{
-			Action:       observability.PARTIALUPDATESCRAPECONFIGSREQUESTINNERMETRICSRELABELCONFIGSINNERACTION_REPLACE.Ptr(),
-			Modulus:      utils.Ptr(1.0),
+			Action:       observability.CREATESCRAPECONFIGPAYLOADMETRICSRELABELCONFIGSINNERACTION_REPLACE.Ptr(),
+			Modulus:      utils.Ptr(float32(1.0)),
 			Regex:        utils.Ptr("regex"),
 			Replacement:  utils.Ptr("replacement"),
 			Separator:    utils.Ptr("separator"),
-			SourceLabels: &[]string{"sourceLabel"},
+			SourceLabels: []string{"sourceLabel"},
 			TargetLabel:  utils.Ptr("targetLabel"),
 		},
 	},
-	Params: &map[string]interface{}{
+	Params: map[string]interface{}{
 		"key":  []interface{}{string("value1"), string("value2")},
 		"key2": []interface{}{},
 	},
-	SampleLimit:    utils.Ptr(1.0),
-	Scheme:         observability.CREATESCRAPECONFIGPAYLOADSCHEME_HTTPS.Ptr(),
-	ScrapeInterval: utils.Ptr("interval"),
-	ScrapeTimeout:  utils.Ptr("timeout"),
-	StaticConfigs: &[]observability.PartialUpdateScrapeConfigsRequestInnerStaticConfigsInner{
+	SampleLimit:    utils.Ptr(float32(1.0)),
+	Scheme:         observability.CREATESCRAPECONFIGPAYLOADSCHEME_HTTPS,
+	ScrapeInterval: "interval",
+	ScrapeTimeout:  "timeout",
+	StaticConfigs: []observability.CreateScrapeConfigPayloadStaticConfigsInner{
 		{
-			Labels: &map[string]interface{}{
+			Labels: map[string]interface{}{
 				"label":  "value",
 				"label2": "value2",
 			},
-			Targets: &[]string{"target"},
+			Targets: []string{"target"},
 		},
 	},
-	TlsConfig: &observability.PartialUpdateScrapeConfigsRequestInnerHttpSdConfigsInnerOauth2TlsConfig{
+	TlsConfig: &observability.CreateScrapeConfigPayloadTlsConfig{
 		InsecureSkipVerify: utils.Ptr(true),
 	},
 }
@@ -137,7 +137,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *observability.ApiCreateScrapeConfigRequest)) observability.ApiCreateScrapeConfigRequest {
-	request := testClient.CreateScrapeConfig(testCtx, testInstanceId, testProjectId)
+	request := testClient.DefaultAPI.CreateScrapeConfig(testCtx, testInstanceId, testProjectId)
 	request = request.CreateScrapeConfigPayload(*testPayload)
 	for _, mod := range mods {
 		mod(&request)
@@ -233,7 +233,12 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
+			testutils.TestParseInputWithOptions(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, nil, tt.isValid, []testutils.TestingOption{
+				testutils.WithCmpOptions(cmp.FilterPath(func(p cmp.Path) bool {
+					last := p.Last().String()
+					return last == ".AdditionalProperties"
+				}, cmp.Ignore())),
+			})
 		})
 	}
 }
@@ -254,10 +259,10 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			request := buildRequest(testCtx, tt.model, testClient.DefaultAPI)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, observability.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {

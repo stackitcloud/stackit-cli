@@ -13,7 +13,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -21,7 +21,7 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &observability.APIClient{}
+var testClient = &observability.APIClient{DefaultAPI: &observability.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 
@@ -53,7 +53,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *observability.ApiListScrapeConfigsRequest)) observability.ApiListScrapeConfigsRequest {
-	request := testClient.ListScrapeConfigs(testCtx, testInstanceId, testProjectId)
+	request := testClient.DefaultAPI.ListScrapeConfigs(testCtx, testInstanceId, testProjectId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -159,10 +159,10 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			request := buildRequest(testCtx, tt.model, testClient.DefaultAPI)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, observability.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {

@@ -17,8 +17,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability/wait"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/observability/v1api/wait"
 )
 
 const (
@@ -54,7 +54,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := observabilityUtils.GetInstanceName(ctx, apiClient, model.InstanceId, model.ProjectId)
+			instanceLabel, err := observabilityUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.InstanceId, model.ProjectId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -67,7 +67,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 			_, err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("delete Observability instance: %w", err)
@@ -76,7 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Deleting instance", func() error {
-					_, err = wait.DeleteInstanceWaitHandler(ctx, apiClient, model.InstanceId, model.ProjectId).WaitWithContext(ctx)
+					_, err = wait.DeleteInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.InstanceId, model.ProjectId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -112,7 +112,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *observability.APIClient) observability.ApiDeleteInstanceRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient observability.DefaultAPI) observability.ApiDeleteInstanceRequest {
 	req := apiClient.DeleteInstance(ctx, model.InstanceId, model.ProjectId)
 	return req
 }

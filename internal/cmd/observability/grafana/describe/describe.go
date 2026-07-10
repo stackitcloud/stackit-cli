@@ -17,7 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
 )
 
 const (
@@ -63,12 +63,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			grafanaConfigsReq := buildGetGrafanaConfigRequest(ctx, model, apiClient)
+			grafanaConfigsReq := buildGetGrafanaConfigRequest(ctx, model, apiClient.DefaultAPI)
 			grafanaConfigsResp, err := grafanaConfigsReq.Execute()
 			if err != nil {
 				return fmt.Errorf("get Grafana configs: %w", err)
 			}
-			instanceReq := buildGetInstanceRequest(ctx, model, apiClient)
+			instanceReq := buildGetInstanceRequest(ctx, model, apiClient.DefaultAPI)
 			instanceResp, err := instanceReq.Execute()
 			if err != nil {
 				return fmt.Errorf("get instance: %w", err)
@@ -104,18 +104,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildGetGrafanaConfigRequest(ctx context.Context, model *inputModel, apiClient *observability.APIClient) observability.ApiGetGrafanaConfigsRequest {
+func buildGetGrafanaConfigRequest(ctx context.Context, model *inputModel, apiClient observability.DefaultAPI) observability.ApiGetGrafanaConfigsRequest {
 	req := apiClient.GetGrafanaConfigs(ctx, model.InstanceId, model.ProjectId)
 	return req
 }
 
-func buildGetInstanceRequest(ctx context.Context, model *inputModel, apiClient *observability.APIClient) observability.ApiGetInstanceRequest {
+func buildGetInstanceRequest(ctx context.Context, model *inputModel, apiClient observability.DefaultAPI) observability.ApiGetInstanceRequest {
 	req := apiClient.GetInstance(ctx, model.InstanceId, model.ProjectId)
 	return req
 }
 
 func outputResult(p *print.Printer, outputFormat string, showPassword bool, grafanaConfigs *observability.GrafanaConfigs, instance *observability.GetInstanceResponse) error {
-	if instance == nil || instance.Instance == nil {
+	if instance == nil {
 		return fmt.Errorf("instance or instance content is nil")
 	} else if grafanaConfigs == nil {
 		return fmt.Errorf("grafanaConfigs is nil")
@@ -130,7 +130,7 @@ func outputResult(p *print.Printer, outputFormat string, showPassword bool, graf
 		}
 
 		table := tables.NewTable()
-		table.AddRow("GRAFANA DASHBOARD", utils.PtrString(instance.Instance.GrafanaUrl))
+		table.AddRow("GRAFANA DASHBOARD", instance.Instance.GrafanaUrl)
 		table.AddSeparator()
 		table.AddRow("PUBLIC READ ACCESS", utils.PtrString(grafanaConfigs.PublicReadAccess))
 		table.AddSeparator()

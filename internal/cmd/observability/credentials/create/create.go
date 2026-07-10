@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -17,7 +17,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/client"
 	observabilityUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/observability/utils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -56,7 +55,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := observabilityUtils.GetInstanceName(ctx, apiClient, model.InstanceId, model.ProjectId)
+			instanceLabel, err := observabilityUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.InstanceId, model.ProjectId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -69,7 +68,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				return err
 			}
@@ -104,7 +103,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *observability.APIClient) observability.ApiCreateCredentialsRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient observability.DefaultAPI) observability.ApiCreateCredentialsRequest {
 	req := apiClient.CreateCredentials(ctx, model.InstanceId, model.ProjectId)
 	return req
 }
@@ -117,15 +116,13 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, resp *ob
 	return p.OutputResult(outputFormat, resp, func() error {
 		p.Outputf("Created credentials for instance %q.\n\n", instanceLabel)
 
-		if resp.Credentials != nil {
-			// The username field cannot be set by the user, so we only display it if it's not returned empty
-			username := *resp.Credentials.Username
-			if username != "" {
-				p.Outputf("Username: %s\n", username)
-			}
-
-			p.Outputf("Password: %s\n", utils.PtrString(resp.Credentials.Password))
+		// The username field cannot be set by the user, so we only display it if it's not returned empty
+		username := resp.Credentials.Username
+		if username != "" {
+			p.Outputf("Username: %s\n", username)
 		}
+
+		p.Outputf("Password: %s\n", resp.Credentials.Password)
 		return nil
 	})
 }

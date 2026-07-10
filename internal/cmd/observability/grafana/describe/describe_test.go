@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -19,7 +19,7 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &observability.APIClient{}
+var testClient = &observability.APIClient{DefaultAPI: &observability.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 
@@ -58,7 +58,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureGetGrafanaConfigsRequest(mods ...func(request *observability.ApiGetGrafanaConfigsRequest)) observability.ApiGetGrafanaConfigsRequest {
-	request := testClient.GetGrafanaConfigs(testCtx, testInstanceId, testProjectId)
+	request := testClient.DefaultAPI.GetGrafanaConfigs(testCtx, testInstanceId, testProjectId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -66,7 +66,7 @@ func fixtureGetGrafanaConfigsRequest(mods ...func(request *observability.ApiGetG
 }
 
 func fixtureGetInstanceRequest(mods ...func(request *observability.ApiGetInstanceRequest)) observability.ApiGetInstanceRequest {
-	request := testClient.GetInstance(testCtx, testInstanceId, testProjectId)
+	request := testClient.DefaultAPI.GetInstance(testCtx, testInstanceId, testProjectId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -237,10 +237,10 @@ func TestBuildGetGrafanaConfigsRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildGetGrafanaConfigRequest(testCtx, tt.model, testClient)
+			request := buildGetGrafanaConfigRequest(testCtx, tt.model, testClient.DefaultAPI)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, observability.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {
@@ -265,10 +265,10 @@ func TestBuildGetInstanceRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildGetInstanceRequest(testCtx, tt.model, testClient)
+			request := buildGetInstanceRequest(testCtx, tt.model, testClient.DefaultAPI)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
+				cmp.AllowUnexported(tt.expectedRequest, observability.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
 			if diff != "" {
@@ -306,7 +306,7 @@ func TestOutputResult(t *testing.T) {
 			name: "set instance but no grafana config",
 			args: args{
 				instance: &observability.GetInstanceResponse{
-					Instance: &observability.InstanceSensitiveData{},
+					Instance: observability.InstanceSensitiveData{},
 				},
 			},
 			wantErr: true,
@@ -316,7 +316,7 @@ func TestOutputResult(t *testing.T) {
 			args: args{
 				grafanaConfig: &observability.GrafanaConfigs{},
 				instance: &observability.GetInstanceResponse{
-					Instance: &observability.InstanceSensitiveData{},
+					Instance: observability.InstanceSensitiveData{},
 				},
 			},
 			wantErr: false,

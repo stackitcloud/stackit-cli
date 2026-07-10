@@ -3,9 +3,10 @@ package utils
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"strings"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -15,27 +16,21 @@ const (
 	service = "observability"
 )
 
-type ObservabilityClient interface {
-	GetInstanceExecute(ctx context.Context, instanceId, projectId string) (*observability.GetInstanceResponse, error)
-	GetGrafanaConfigsExecute(ctx context.Context, instanceId, projectId string) (*observability.GrafanaConfigs, error)
-	UpdateGrafanaConfigs(ctx context.Context, instanceId string, projectId string) observability.ApiUpdateGrafanaConfigsRequest
-}
-
 var (
-	defaultStaticConfigs = []observability.PartialUpdateScrapeConfigsRequestInnerStaticConfigsInner{
+	defaultStaticConfigs = []observability.CreateScrapeConfigPayloadStaticConfigsInner{
 		{
-			Targets: utils.Ptr([]string{
+			Targets: []string{
 				"url-target",
-			}),
+			},
 		},
 	}
 	DefaultCreateScrapeConfigPayload = observability.CreateScrapeConfigPayload{
-		JobName:        utils.Ptr("default-name"),
+		JobName:        "default-name",
 		MetricsPath:    utils.Ptr("/metrics"),
-		Scheme:         observability.CREATESCRAPECONFIGPAYLOADSCHEME_HTTPS.Ptr(),
-		ScrapeInterval: utils.Ptr("5m"),
-		ScrapeTimeout:  utils.Ptr("2m"),
-		StaticConfigs:  utils.Ptr(defaultStaticConfigs),
+		Scheme:         observability.CREATESCRAPECONFIGPAYLOADSCHEME_HTTPS,
+		ScrapeInterval: "5m",
+		ScrapeTimeout:  "2m",
+		StaticConfigs:  defaultStaticConfigs,
 	}
 )
 
@@ -44,9 +39,9 @@ func ValidatePlanId(planId string, resp *observability.PlansResponse) error {
 		return fmt.Errorf("no Observability plans provided")
 	}
 
-	for i := range *resp.Plans {
-		plan := (*resp.Plans)[i]
-		if plan.Id != nil && strings.EqualFold(*plan.Id, planId) {
+	for i := range resp.Plans {
+		plan := resp.Plans[i]
+		if strings.EqualFold(plan.Id, planId) {
 			return nil
 		}
 	}
@@ -57,32 +52,32 @@ func ValidatePlanId(planId string, resp *observability.PlansResponse) error {
 	}
 }
 
-func LoadPlanId(planName string, resp *observability.PlansResponse) (*string, error) {
+func LoadPlanId(planName string, resp *observability.PlansResponse) (string, error) {
 	availablePlanNames := ""
 	if resp == nil {
-		return nil, fmt.Errorf("no Observability plans provided")
+		return "", fmt.Errorf("no Observability plans provided")
 	}
 
-	for i := range *resp.Plans {
-		plan := (*resp.Plans)[i]
+	for i := range resp.Plans {
+		plan := resp.Plans[i]
 		if plan.Name == nil {
 			continue
 		}
-		if strings.EqualFold(*plan.Name, planName) && plan.Id != nil {
+		if strings.EqualFold(*plan.Name, planName) {
 			return plan.Id, nil
 		}
 		availablePlanNames = fmt.Sprintf("%s\n- %s", availablePlanNames, *plan.Name)
 	}
 
 	details := fmt.Sprintf("You provided plan name %q, which is invalid. Available plan names are: %s", planName, availablePlanNames)
-	return nil, &errors.ObservabilityInvalidPlanError{
+	return "", &errors.ObservabilityInvalidPlanError{
 		Service: service,
 		Details: details,
 	}
 }
 
 func MapToUpdateScrapeConfigPayload(resp *observability.GetScrapeConfigResponse) (*observability.UpdateScrapeConfigPayload, error) {
-	if resp == nil || resp.Data == nil {
+	if resp == nil {
 		return nil, fmt.Errorf("no Observability scrape config provided")
 	}
 
@@ -93,9 +88,14 @@ func MapToUpdateScrapeConfigPayload(resp *observability.GetScrapeConfigResponse)
 	tlsConfig := mapTlsConfig(data.TlsConfig)
 	metricsRelabelConfigs := mapMetricsRelabelConfig(data.MetricsRelabelConfigs)
 
-	var params *map[string]interface{}
+	var params map[string]interface{}
 	if data.Params != nil {
-		params = utils.Ptr(mapParams(*data.Params))
+		params = mapParams(*data.Params)
+	}
+
+	var scheme observability.UpdateScrapeConfigPayloadScheme
+	if data.Scheme != nil {
+		scheme = observability.UpdateScrapeConfigPayloadScheme(*data.Scheme)
 	}
 
 	payload := observability.UpdateScrapeConfigPayload{
@@ -103,33 +103,33 @@ func MapToUpdateScrapeConfigPayload(resp *observability.GetScrapeConfigResponse)
 		BearerToken:           data.BearerToken,
 		HonorLabels:           data.HonorLabels,
 		HonorTimeStamps:       data.HonorTimeStamps,
-		MetricsPath:           data.MetricsPath,
+		MetricsPath:           utils.PtrString(data.MetricsPath),
 		MetricsRelabelConfigs: metricsRelabelConfigs,
 		Params:                params,
-		SampleLimit:           utils.ConvertInt64PToFloat64P(data.SampleLimit),
-		Scheme:                observability.UpdateScrapeConfigPayloadGetSchemeAttributeType(data.Scheme),
+		SampleLimit:           utils.ConvertInt32PToFloat32P(data.SampleLimit),
+		Scheme:                scheme,
 		ScrapeInterval:        data.ScrapeInterval,
 		ScrapeTimeout:         data.ScrapeTimeout,
 		StaticConfigs:         staticConfigs,
 		TlsConfig:             tlsConfig,
 	}
 
-	if payload == (observability.UpdateScrapeConfigPayload{}) {
+	if reflect.DeepEqual(payload, observability.UpdateScrapeConfigPayload{}) {
 		return nil, fmt.Errorf("the provided Observability scrape config payload is empty")
 	}
 
 	return &payload, nil
 }
 
-func mapMetricsRelabelConfig(metricsRelabelConfigs *[]observability.MetricsRelabelConfig) *[]observability.PartialUpdateScrapeConfigsRequestInnerMetricsRelabelConfigsInner {
+func mapMetricsRelabelConfig(metricsRelabelConfigs []observability.MetricsRelabelConfig) []observability.UpdateScrapeConfigPayloadMetricsRelabelConfigsInner {
 	if metricsRelabelConfigs == nil {
 		return nil
 	}
-	var mappedConfigs []observability.PartialUpdateScrapeConfigsRequestInnerMetricsRelabelConfigsInner
-	for _, config := range *metricsRelabelConfigs {
-		mappedConfig := observability.PartialUpdateScrapeConfigsRequestInnerMetricsRelabelConfigsInner{
-			Action:       observability.PartialUpdateScrapeConfigsRequestInnerMetricsRelabelConfigsInnerGetActionAttributeType(config.Action),
-			Modulus:      utils.ConvertInt64PToFloat64P(config.Modulus),
+	var mappedConfigs []observability.UpdateScrapeConfigPayloadMetricsRelabelConfigsInner
+	for _, config := range metricsRelabelConfigs {
+		mappedConfig := observability.UpdateScrapeConfigPayloadMetricsRelabelConfigsInner{
+			Action:       (*observability.UpdateScrapeConfigPayloadMetricsRelabelConfigsInnerAction)(config.Action),
+			Modulus:      utils.ConvertInt32PToFloat32P(config.Modulus),
 			Regex:        config.Regex,
 			Replacement:  config.Replacement,
 			Separator:    config.Separator,
@@ -138,18 +138,18 @@ func mapMetricsRelabelConfig(metricsRelabelConfigs *[]observability.MetricsRelab
 		}
 		mappedConfigs = append(mappedConfigs, mappedConfig)
 	}
-	return &mappedConfigs
+	return mappedConfigs
 }
 
-func mapStaticConfig(staticConfigs *[]observability.StaticConfigs) *[]observability.UpdateScrapeConfigPayloadStaticConfigsInner {
+func mapStaticConfig(staticConfigs []observability.StaticConfigs) []observability.UpdateScrapeConfigPayloadStaticConfigsInner {
 	if staticConfigs == nil {
 		return nil
 	}
 	var mappedConfigs []observability.UpdateScrapeConfigPayloadStaticConfigsInner
-	for _, config := range *staticConfigs {
-		var labels *map[string]interface{}
+	for _, config := range staticConfigs {
+		var labels map[string]interface{}
 		if config.Labels != nil {
-			labels = utils.Ptr(mapStaticConfigLabels(*config.Labels))
+			labels = mapStaticConfigLabels(*config.Labels)
 		}
 		mappedConfig := observability.UpdateScrapeConfigPayloadStaticConfigsInner{
 			Labels:  labels,
@@ -158,26 +158,34 @@ func mapStaticConfig(staticConfigs *[]observability.StaticConfigs) *[]observabil
 		mappedConfigs = append(mappedConfigs, mappedConfig)
 	}
 
-	return &mappedConfigs
+	return mappedConfigs
 }
 
-func mapBasicAuth(basicAuth *observability.BasicAuth) *observability.PartialUpdateScrapeConfigsRequestInnerBasicAuth {
+func mapBasicAuth(basicAuth *observability.BasicAuth) *observability.UpdateScrapeConfigPayloadBasicAuth {
 	if basicAuth == nil {
 		return nil
 	}
 
-	return &observability.PartialUpdateScrapeConfigsRequestInnerBasicAuth{
-		Password: basicAuth.Password,
-		Username: basicAuth.Username,
+	var password, username *string
+	if basicAuth.Password != "" {
+		password = &basicAuth.Password
+	}
+	if basicAuth.Username != "" {
+		username = &basicAuth.Username
+	}
+
+	return &observability.UpdateScrapeConfigPayloadBasicAuth{
+		Password: password,
+		Username: username,
 	}
 }
 
-func mapTlsConfig(tlsConfig *observability.TLSConfig) *observability.PartialUpdateScrapeConfigsRequestInnerHttpSdConfigsInnerOauth2TlsConfig {
+func mapTlsConfig(tlsConfig *observability.TLSConfig) *observability.UpdateScrapeConfigPayloadTlsConfig {
 	if tlsConfig == nil {
 		return nil
 	}
 
-	return &observability.PartialUpdateScrapeConfigsRequestInnerHttpSdConfigsInnerOauth2TlsConfig{
+	return &observability.UpdateScrapeConfigPayloadTlsConfig{
 		InsecureSkipVerify: tlsConfig.InsecureSkipVerify,
 	}
 }
@@ -198,8 +206,8 @@ func mapStaticConfigLabels(labels map[string]string) map[string]interface{} {
 	return labelsMap
 }
 
-func GetInstanceName(ctx context.Context, apiClient ObservabilityClient, instanceId, projectId string) (string, error) {
-	resp, err := apiClient.GetInstanceExecute(ctx, instanceId, projectId)
+func GetInstanceName(ctx context.Context, apiClient observability.DefaultAPI, instanceId, projectId string) (string, error) {
+	resp, err := apiClient.GetInstance(ctx, instanceId, projectId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get Observability instance: %w", err)
 	}
@@ -225,8 +233,8 @@ func ToPayloadGenericOAuth(respOAuth *observability.GrafanaOauth) *observability
 	}
 }
 
-func GetPartialUpdateGrafanaConfigsPayload(ctx context.Context, apiClient ObservabilityClient, instanceId, projectId string, singleSignOn, publicReadAccess *bool) (*observability.UpdateGrafanaConfigsPayload, error) {
-	currentConfigs, err := apiClient.GetGrafanaConfigsExecute(ctx, instanceId, projectId)
+func GetPartialUpdateGrafanaConfigsPayload(ctx context.Context, apiClient observability.DefaultAPI, instanceId, projectId string, singleSignOn, publicReadAccess *bool) (*observability.UpdateGrafanaConfigsPayload, error) {
+	currentConfigs, err := apiClient.GetGrafanaConfigs(ctx, instanceId, projectId).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("get current Grafana configs: %w", err)
 	}

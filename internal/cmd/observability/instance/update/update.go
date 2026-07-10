@@ -19,8 +19,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability/wait"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/observability/v1api/wait"
 )
 
 const (
@@ -70,7 +70,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := observabilityUtils.GetInstanceName(ctx, apiClient, model.InstanceId, model.ProjectId)
+			instanceLabel, err := observabilityUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.InstanceId, model.ProjectId)
 			if err != nil || instanceLabel == "" {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -83,7 +83,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				var observabilityInvalidPlanError *cliErr.ObservabilityInvalidPlanError
 				if !errors.As(err, &observabilityInvalidPlanError) {
@@ -101,7 +101,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Updating instance", func() error {
-					_, err = wait.UpdateInstanceWaitHandler(ctx, apiClient, instanceId, model.ProjectId).WaitWithContext(ctx)
+					_, err = wait.UpdateInstanceWaitHandler(ctx, apiClient.DefaultAPI, instanceId, model.ProjectId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -161,34 +161,28 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-type observabilityClient interface {
-	UpdateInstance(ctx context.Context, instanceId, projectId string) observability.ApiUpdateInstanceRequest
-	ListPlansExecute(ctx context.Context, projectId string) (*observability.PlansResponse, error)
-	GetInstanceExecute(ctx context.Context, instanceId, projectId string) (*observability.GetInstanceResponse, error)
-}
-
-func buildRequest(ctx context.Context, model *inputModel, apiClient observabilityClient) (observability.ApiUpdateInstanceRequest, error) {
+func buildRequest(ctx context.Context, model *inputModel, apiClient observability.DefaultAPI) (observability.ApiUpdateInstanceRequest, error) {
 	req := apiClient.UpdateInstance(ctx, model.InstanceId, model.ProjectId)
 
 	var err error
 
-	plans, err := apiClient.ListPlansExecute(ctx, model.ProjectId)
+	plans, err := apiClient.ListPlans(ctx, model.ProjectId).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get Observability plans: %w", err)
 	}
 
-	currentInstance, err := apiClient.GetInstanceExecute(ctx, model.InstanceId, model.ProjectId)
+	currentInstance, err := apiClient.GetInstance(ctx, model.InstanceId, model.ProjectId).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get Observability instance: %w", err)
 	}
 
 	payload := observability.UpdateInstancePayload{
-		PlanId: currentInstance.PlanId,
+		PlanId: &currentInstance.PlanId,
 		Name:   currentInstance.Name,
 	}
 
 	if model.PlanId == nil && model.PlanName != "" {
-		payload.PlanId, err = observabilityUtils.LoadPlanId(model.PlanName, plans)
+		planId, err := observabilityUtils.LoadPlanId(model.PlanName, plans)
 		if err != nil {
 			var observabilityInvalidPlanError *cliErr.ObservabilityInvalidPlanError
 			if !errors.As(err, &observabilityInvalidPlanError) {
@@ -196,6 +190,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient observabilit
 			}
 			return req, err
 		}
+		payload.PlanId = &planId
 	} else if model.PlanId != nil && model.PlanName == "" {
 		err := observabilityUtils.ValidatePlanId(*model.PlanId, plans)
 		if err != nil {

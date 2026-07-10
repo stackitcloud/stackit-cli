@@ -13,7 +13,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -21,7 +21,7 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &observability.APIClient{}
+var testClient = &observability.APIClient{DefaultAPI: &observability.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 
@@ -30,19 +30,15 @@ type observabilityClientMocked struct {
 	getGrafanaConfigsResp  *observability.GrafanaConfigs
 }
 
-func (c *observabilityClientMocked) GetInstanceExecute(ctx context.Context, instanceId, projectId string) (*observability.GetInstanceResponse, error) {
-	return testClient.GetInstanceExecute(ctx, instanceId, projectId)
-}
-
-func (c *observabilityClientMocked) UpdateGrafanaConfigs(ctx context.Context, instanceId, projectId string) observability.ApiUpdateGrafanaConfigsRequest {
-	return testClient.UpdateGrafanaConfigs(ctx, instanceId, projectId)
-}
-
-func (c *observabilityClientMocked) GetGrafanaConfigsExecute(_ context.Context, _, _ string) (*observability.GrafanaConfigs, error) {
-	if c.getGrafanaConfigsFails {
-		return nil, fmt.Errorf("get payload failed")
+func (c *observabilityClientMocked) newMock() observability.DefaultAPI {
+	return observability.DefaultAPIServiceMock{
+		GetGrafanaConfigsExecuteMock: utils.Ptr(func(_ observability.ApiGetGrafanaConfigsRequest) (*observability.GrafanaConfigs, error) {
+			if c.getGrafanaConfigsFails {
+				return nil, fmt.Errorf("get payload failed")
+			}
+			return c.getGrafanaConfigsResp, nil
+		}),
 	}
-	return c.getGrafanaConfigsResp, nil
 }
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
@@ -81,17 +77,17 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 func fixtureGrafanaConfigs(mods ...func(gc *observability.GrafanaConfigs)) *observability.GrafanaConfigs {
 	gc := observability.GrafanaConfigs{
-		GenericOauth: &observability.GrafanaOauth{
-			ApiUrl:              utils.Ptr("apiUrl"),
-			AuthUrl:             utils.Ptr("authUrl"),
-			Enabled:             utils.Ptr(true),
+		GenericOauth: &observability.GrafanaOauth{ // nolint:gosec // false positive
+			ApiUrl:              "apiUrl",
+			AuthUrl:             "authUrl",
+			Enabled:             true,
 			Name:                utils.Ptr("name"),
-			OauthClientId:       utils.Ptr("oauthClientId"),
-			OauthClientSecret:   utils.Ptr("oauthClientSecret"),
-			RoleAttributePath:   utils.Ptr("roleAttributePath"),
+			OauthClientId:       "oauthClientId",
+			OauthClientSecret:   "oauthClientSecret",
+			RoleAttributePath:   "roleAttributePath",
 			RoleAttributeStrict: utils.Ptr(true),
 			Scopes:              utils.Ptr("scopes"),
-			TokenUrl:            utils.Ptr("tokenUrl"),
+			TokenUrl:            "tokenUrl",
 			UsePkce:             utils.Ptr(true),
 		},
 		PublicReadAccess: utils.Ptr(false),
@@ -116,7 +112,7 @@ func fixturePayload(mods ...func(payload *observability.UpdateGrafanaConfigsPayl
 }
 
 func fixtureRequest(mods ...func(request *observability.ApiUpdateGrafanaConfigsRequest)) observability.ApiUpdateGrafanaConfigsRequest {
-	request := testClient.UpdateGrafanaConfigs(testCtx, testInstanceId, testProjectId)
+	request := testClient.DefaultAPI.UpdateGrafanaConfigs(testCtx, testInstanceId, testProjectId)
 	request = request.UpdateGrafanaConfigsPayload(*fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -214,7 +210,7 @@ func TestBuildRequest(t *testing.T) {
 			}),
 			isValid: true,
 			expectedRequest: fixtureRequest(func(request *observability.ApiUpdateGrafanaConfigsRequest) {
-				*request = (*request).UpdateGrafanaConfigsPayload(*fixturePayload(func(payload *observability.UpdateGrafanaConfigsPayload) {
+				*request = request.UpdateGrafanaConfigsPayload(*fixturePayload(func(payload *observability.UpdateGrafanaConfigsPayload) {
 					payload.GenericOauth = nil
 				}))
 			}),
@@ -239,7 +235,7 @@ func TestBuildRequest(t *testing.T) {
 				getGrafanaConfigsFails: tt.getGrafanaConfigsFails,
 				getGrafanaConfigsResp:  tt.getGrafanaConfigsResp,
 			}
-			request, err := buildRequest(testCtx, tt.model, client)
+			request, err := buildRequest(testCtx, tt.model, client.newMock())
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -250,6 +246,9 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
+				cmp.FilterPath(func(p cmp.Path) bool {
+					return p.String() == "ApiService"
+				}, cmp.Ignore()),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

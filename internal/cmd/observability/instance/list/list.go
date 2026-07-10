@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -61,7 +61,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get Observability instances: %w", err)
@@ -115,7 +115,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *observability.APIClient) observability.ApiListInstancesRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient observability.DefaultAPI) observability.ApiListInstancesRequest {
 	req := apiClient.ListInstances(ctx, model.ProjectId)
 	return req
 }
@@ -131,10 +131,10 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, instances
 		for i := range instances {
 			instance := instances[i]
 			table.AddRow(
-				utils.PtrString(instance.Id),
+				instance.Id,
 				utils.PtrString(instance.Name),
-				utils.PtrString(instance.PlanName),
-				utils.PtrString(instance.Status),
+				instance.PlanName,
+				instance.Status,
 			)
 		}
 		err := table.Display(p)

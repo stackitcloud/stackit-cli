@@ -10,11 +10,10 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
 )
 
 var (
-	testClient     = &observability.APIClient{}
 	testProjectId  = uuid.NewString()
 	testInstanceId = uuid.NewString()
 	testPlanId     = uuid.NewString()
@@ -26,34 +25,34 @@ const (
 )
 
 var testPlansResponse = observability.PlansResponse{
-	Plans: &[]observability.Plan{
+	Plans: []observability.Plan{
 		{
-			Id:   utils.Ptr(testPlanId),
+			Id:   testPlanId,
 			Name: utils.Ptr(testPlanName),
 		},
 	},
 }
 
 func fixtureGetScrapeConfigResponse(mods ...func(*observability.GetScrapeConfigResponse)) *observability.GetScrapeConfigResponse {
-	number := int64(1)
+	number := int32(1)
 	resp := &observability.GetScrapeConfigResponse{
-		Data: &observability.Job{
+		Data: observability.Job{
 			BasicAuth: &observability.BasicAuth{
-				Username: utils.Ptr("username"),
-				Password: utils.Ptr("password"),
+				Username: "username",
+				Password: "password",
 			},
 			BearerToken:     utils.Ptr("bearerToken"),
 			HonorLabels:     utils.Ptr(true),
 			HonorTimeStamps: utils.Ptr(true),
 			MetricsPath:     utils.Ptr("/metrics"),
-			MetricsRelabelConfigs: &[]observability.MetricsRelabelConfig{
+			MetricsRelabelConfigs: []observability.MetricsRelabelConfig{
 				{
-					Action:       observability.METRICSRELABELCONFIGACTION_REPLACE.Ptr(),
+					Action:       observability.ACTION_REPLACE.Ptr(),
 					Modulus:      &number,
 					Regex:        utils.Ptr("regex"),
 					Replacement:  utils.Ptr("replacement"),
 					Separator:    utils.Ptr("separator"),
-					SourceLabels: &[]string{"sourceLabel"},
+					SourceLabels: []string{"sourceLabel"},
 					TargetLabel:  utils.Ptr("targetLabel"),
 				},
 			},
@@ -62,16 +61,16 @@ func fixtureGetScrapeConfigResponse(mods ...func(*observability.GetScrapeConfigR
 				"key2": {},
 			},
 			SampleLimit:    &number,
-			Scheme:         observability.JOBSCHEME_HTTP.Ptr(),
-			ScrapeInterval: utils.Ptr("interval"),
-			ScrapeTimeout:  utils.Ptr("timeout"),
-			StaticConfigs: &[]observability.StaticConfigs{
+			Scheme:         observability.SCHEME_HTTP.Ptr(),
+			ScrapeInterval: "interval",
+			ScrapeTimeout:  "timeout",
+			StaticConfigs: []observability.StaticConfigs{
 				{
 					Labels: &map[string]string{
 						"label":  "value",
 						"label2": "value2",
 					},
-					Targets: &[]string{"target"},
+					Targets: []string{"target"},
 				},
 			},
 			TlsConfig: &observability.TLSConfig{
@@ -89,43 +88,43 @@ func fixtureGetScrapeConfigResponse(mods ...func(*observability.GetScrapeConfigR
 
 func fixtureUpdateScrapeConfigPayload(mods ...func(*observability.UpdateScrapeConfigPayload)) *observability.UpdateScrapeConfigPayload {
 	payload := &observability.UpdateScrapeConfigPayload{
-		BasicAuth: &observability.PartialUpdateScrapeConfigsRequestInnerBasicAuth{
+		BasicAuth: &observability.UpdateScrapeConfigPayloadBasicAuth{
 			Username: utils.Ptr("username"),
 			Password: utils.Ptr("password"),
 		},
 		BearerToken:     utils.Ptr("bearerToken"),
 		HonorLabels:     utils.Ptr(true),
 		HonorTimeStamps: utils.Ptr(true),
-		MetricsPath:     utils.Ptr("/metrics"),
-		MetricsRelabelConfigs: &[]observability.PartialUpdateScrapeConfigsRequestInnerMetricsRelabelConfigsInner{
+		MetricsPath:     "/metrics",
+		MetricsRelabelConfigs: []observability.UpdateScrapeConfigPayloadMetricsRelabelConfigsInner{
 			{
-				Action:       observability.PartialUpdateScrapeConfigsRequestInnerMetricsRelabelConfigsInnerGetActionAttributeType(utils.Ptr("replace")),
-				Modulus:      utils.Ptr(1.0),
+				Action:       observability.UpdateScrapeConfigPayloadMetricsRelabelConfigsInnerAction("replace").Ptr(),
+				Modulus:      utils.Ptr(float32(1.0)),
 				Regex:        utils.Ptr("regex"),
 				Replacement:  utils.Ptr("replacement"),
 				Separator:    utils.Ptr("separator"),
-				SourceLabels: &[]string{"sourceLabel"},
+				SourceLabels: []string{"sourceLabel"},
 				TargetLabel:  utils.Ptr("targetLabel"),
 			},
 		},
-		Params: &map[string]interface{}{
+		Params: map[string]interface{}{
 			"key":  []string{"value1", "value2"},
 			"key2": []string{},
 		},
-		SampleLimit:    utils.Ptr(1.0),
-		Scheme:         observability.UPDATESCRAPECONFIGPAYLOADSCHEME_HTTP.Ptr(),
-		ScrapeInterval: utils.Ptr("interval"),
-		ScrapeTimeout:  utils.Ptr("timeout"),
-		StaticConfigs: &[]observability.UpdateScrapeConfigPayloadStaticConfigsInner{
+		SampleLimit:    utils.Ptr(float32(1.0)),
+		Scheme:         observability.UPDATESCRAPECONFIGPAYLOADSCHEME_HTTP,
+		ScrapeInterval: "interval",
+		ScrapeTimeout:  "timeout",
+		StaticConfigs: []observability.UpdateScrapeConfigPayloadStaticConfigsInner{
 			{
-				Labels: &map[string]interface{}{
+				Labels: map[string]interface{}{
 					"label":  "value",
 					"label2": "value2",
 				},
-				Targets: &[]string{"target"},
+				Targets: []string{"target"},
 			},
 		},
-		TlsConfig: &observability.PartialUpdateScrapeConfigsRequestInnerHttpSdConfigsInnerOauth2TlsConfig{
+		TlsConfig: &observability.UpdateScrapeConfigPayloadTlsConfig{
 			InsecureSkipVerify: utils.Ptr(true),
 		},
 	}
@@ -144,37 +143,36 @@ type observabilityClientMocked struct {
 	getGrafanaConfigsResp  *observability.GrafanaConfigs
 }
 
-func (m *observabilityClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*observability.GetInstanceResponse, error) {
-	if m.getInstanceFails {
-		return nil, fmt.Errorf("could not get instance")
+func (m *observabilityClientMocked) newMock() observability.DefaultAPI {
+	return observability.DefaultAPIServiceMock{
+		GetInstanceExecuteMock: utils.Ptr(func(_ observability.ApiGetInstanceRequest) (*observability.GetInstanceResponse, error) {
+			if m.getInstanceFails {
+				return nil, fmt.Errorf("could not get instance")
+			}
+			return m.getInstanceResp, nil
+		}),
+		GetGrafanaConfigsExecuteMock: utils.Ptr(func(_ observability.ApiGetGrafanaConfigsRequest) (*observability.GrafanaConfigs, error) {
+			if m.getGrafanaConfigsFails {
+				return nil, fmt.Errorf("could not get grafana configs")
+			}
+			return m.getGrafanaConfigsResp, nil
+		}),
 	}
-	return m.getInstanceResp, nil
-}
-
-func (m *observabilityClientMocked) GetGrafanaConfigsExecute(_ context.Context, _, _ string) (*observability.GrafanaConfigs, error) {
-	if m.getGrafanaConfigsFails {
-		return nil, fmt.Errorf("could not get grafana configs")
-	}
-	return m.getGrafanaConfigsResp, nil
-}
-
-func (c *observabilityClientMocked) UpdateGrafanaConfigs(ctx context.Context, instanceId, projectId string) observability.ApiUpdateGrafanaConfigsRequest {
-	return testClient.UpdateGrafanaConfigs(ctx, instanceId, projectId)
 }
 
 func fixtureGrafanaConfigs(mods ...func(gc *observability.GrafanaConfigs)) *observability.GrafanaConfigs {
 	gc := observability.GrafanaConfigs{
-		GenericOauth: &observability.GrafanaOauth{
-			ApiUrl:              utils.Ptr("apiUrl"),
-			AuthUrl:             utils.Ptr("authUrl"),
-			Enabled:             utils.Ptr(true),
+		GenericOauth: &observability.GrafanaOauth{ // nolint:gosec // false positive
+			ApiUrl:              "apiUrl",
+			AuthUrl:             "authUrl",
+			Enabled:             true,
 			Name:                utils.Ptr("name"),
-			OauthClientId:       utils.Ptr("oauthClientId"),
-			OauthClientSecret:   utils.Ptr("oauthClientSecret"),
-			RoleAttributePath:   utils.Ptr("roleAttributePath"),
+			OauthClientId:       "oauthClientId",
+			OauthClientSecret:   "oauthClientSecret",
+			RoleAttributePath:   "roleAttributePath",
 			RoleAttributeStrict: utils.Ptr(true),
 			Scopes:              utils.Ptr("scopes"),
-			TokenUrl:            utils.Ptr("tokenUrl"),
+			TokenUrl:            "tokenUrl",
 			UsePkce:             utils.Ptr(true),
 		},
 		PublicReadAccess: utils.Ptr(false),
@@ -216,7 +214,7 @@ func TestGetInstanceName(t *testing.T) {
 				getInstanceResp:  tt.getInstanceResp,
 			}
 
-			output, err := GetInstanceName(context.Background(), client, testInstanceId, testProjectId)
+			output, err := GetInstanceName(context.Background(), client.newMock(), testInstanceId, testProjectId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -276,7 +274,7 @@ func TestLoadPlanId(t *testing.T) {
 			description: "no available plans",
 			planName:    testPlanName,
 			plansResponse: &observability.PlansResponse{
-				Plans: &[]observability.Plan{},
+				Plans: []observability.Plan{},
 			},
 			isValid: false,
 		},
@@ -295,8 +293,8 @@ func TestLoadPlanId(t *testing.T) {
 			if !tt.isValid {
 				return
 			}
-			if *output != tt.expectedOutput {
-				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, *output)
+			if output != tt.expectedOutput {
+				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}
 		})
 	}
@@ -341,7 +339,7 @@ func TestValidatePlanId(t *testing.T) {
 			description: "no available plans",
 			planId:      testPlanId,
 			plansResponse: &observability.PlansResponse{
-				Plans: &[]observability.Plan{},
+				Plans: []observability.Plan{},
 			},
 			isValid: false,
 		},
@@ -383,16 +381,9 @@ func TestMapToUpdateScrapeConfigPayload(t *testing.T) {
 			isValid:     false,
 		},
 		{
-			description: "nil data",
-			resp: &observability.GetScrapeConfigResponse{
-				Data: nil,
-			},
-			isValid: false,
-		},
-		{
 			description: "empty data",
 			resp: &observability.GetScrapeConfigResponse{
-				Data: &observability.Job{},
+				Data: observability.Job{},
 			},
 			isValid: false,
 		},
@@ -425,37 +416,37 @@ func TestMapToUpdateScrapeConfigPayload(t *testing.T) {
 func TestMapMetricsRelabelConfig(t *testing.T) {
 	tests := []struct {
 		description string
-		config      *[]observability.MetricsRelabelConfig
-		expected    *[]observability.PartialUpdateScrapeConfigsRequestInnerMetricsRelabelConfigsInner
+		config      []observability.MetricsRelabelConfig
+		expected    *[]observability.UpdateScrapeConfigPayloadMetricsRelabelConfigsInner
 	}{
 		{
 			description: "base case",
-			config: &[]observability.MetricsRelabelConfig{
+			config: []observability.MetricsRelabelConfig{
 				{
-					Action:       observability.METRICSRELABELCONFIGACTION_REPLACE.Ptr(),
-					Modulus:      utils.Int64Ptr(1),
+					Action:       observability.ACTION_REPLACE.Ptr(),
+					Modulus:      utils.Ptr(int32(1)),
 					Regex:        utils.Ptr("regex"),
 					Replacement:  utils.Ptr("replacement"),
 					Separator:    utils.Ptr("separator"),
-					SourceLabels: utils.Ptr([]string{"sourceLabel", "sourceLabel2"}),
+					SourceLabels: []string{"sourceLabel", "sourceLabel2"},
 					TargetLabel:  utils.Ptr("targetLabel"),
 				},
 			},
-			expected: &[]observability.PartialUpdateScrapeConfigsRequestInnerMetricsRelabelConfigsInner{
+			expected: &[]observability.UpdateScrapeConfigPayloadMetricsRelabelConfigsInner{
 				{
-					Action:       observability.PARTIALUPDATESCRAPECONFIGSREQUESTINNERMETRICSRELABELCONFIGSINNERACTION_REPLACE.Ptr(),
-					Modulus:      utils.Float64Ptr(1.0),
+					Action:       observability.UPDATESCRAPECONFIGPAYLOADMETRICSRELABELCONFIGSINNERACTION_REPLACE.Ptr(),
+					Modulus:      utils.Ptr(float32(1.0)),
 					Regex:        utils.Ptr("regex"),
 					Replacement:  utils.Ptr("replacement"),
 					Separator:    utils.Ptr("separator"),
-					SourceLabels: utils.Ptr([]string{"sourceLabel", "sourceLabel2"}),
+					SourceLabels: []string{"sourceLabel", "sourceLabel2"},
 					TargetLabel:  utils.Ptr("targetLabel"),
 				},
 			},
 		},
 		{
 			description: "empty data",
-			config:      &[]observability.MetricsRelabelConfig{},
+			config:      []observability.MetricsRelabelConfig{},
 			expected:    nil,
 		},
 		{
@@ -469,11 +460,11 @@ func TestMapMetricsRelabelConfig(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			output := mapMetricsRelabelConfig(tt.config)
 
-			if tt.expected == nil && output == nil || *output == nil {
+			if tt.expected == nil && output == nil {
 				return
 			}
 
-			diff := cmp.Diff(*output, *tt.expected)
+			diff := cmp.Diff(output, *tt.expected)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
 			}
@@ -484,33 +475,33 @@ func TestMapMetricsRelabelConfig(t *testing.T) {
 func TestMapStaticConfig(t *testing.T) {
 	tests := []struct {
 		description string
-		config      *[]observability.StaticConfigs
+		config      []observability.StaticConfigs
 		expected    *[]observability.UpdateScrapeConfigPayloadStaticConfigsInner
 	}{
 		{
 			description: "base case",
-			config: &[]observability.StaticConfigs{
+			config: []observability.StaticConfigs{
 				{
 					Labels: &map[string]string{
 						"label":  "value",
 						"label2": "value2",
 					},
-					Targets: &[]string{"target", "target2"},
+					Targets: []string{"target", "target2"},
 				},
 			},
 			expected: &[]observability.UpdateScrapeConfigPayloadStaticConfigsInner{
 				{
-					Labels: utils.Ptr(map[string]interface{}{
+					Labels: map[string]interface{}{
 						"label":  "value",
 						"label2": "value2",
-					}),
-					Targets: utils.Ptr([]string{"target", "target2"}),
+					},
+					Targets: []string{"target", "target2"},
 				},
 			},
 		},
 		{
 			description: "empty data",
-			config:      &[]observability.StaticConfigs{},
+			config:      []observability.StaticConfigs{},
 			expected:    nil,
 		},
 		{
@@ -524,11 +515,11 @@ func TestMapStaticConfig(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			output := mapStaticConfig(tt.config)
 
-			if tt.expected == nil && (output == nil || *output == nil) {
+			if tt.expected == nil && output == nil {
 				return
 			}
 
-			diff := cmp.Diff(*output, *tt.expected)
+			diff := cmp.Diff(output, *tt.expected)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
 			}
@@ -540,15 +531,15 @@ func TestMapBasicAuth(t *testing.T) {
 	tests := []struct {
 		description string
 		auth        *observability.BasicAuth
-		expected    *observability.PartialUpdateScrapeConfigsRequestInnerBasicAuth
+		expected    *observability.UpdateScrapeConfigPayloadBasicAuth
 	}{
 		{
 			description: "base case",
 			auth: &observability.BasicAuth{
-				Username: utils.Ptr("username"),
-				Password: utils.Ptr("password"),
+				Username: "username",
+				Password: "password",
 			},
-			expected: &observability.PartialUpdateScrapeConfigsRequestInnerBasicAuth{
+			expected: &observability.UpdateScrapeConfigPayloadBasicAuth{
 				Username: utils.Ptr("username"),
 				Password: utils.Ptr("password"),
 			},
@@ -556,7 +547,7 @@ func TestMapBasicAuth(t *testing.T) {
 		{
 			description: "empty data",
 			auth:        &observability.BasicAuth{},
-			expected:    &observability.PartialUpdateScrapeConfigsRequestInnerBasicAuth{},
+			expected:    &observability.UpdateScrapeConfigPayloadBasicAuth{},
 		},
 		{
 			description: "nil",
@@ -585,21 +576,21 @@ func TestMapTlsConfig(t *testing.T) {
 	tests := []struct {
 		description string
 		config      *observability.TLSConfig
-		expected    *observability.PartialUpdateScrapeConfigsRequestInnerHttpSdConfigsInnerOauth2TlsConfig
+		expected    *observability.UpdateScrapeConfigPayloadTlsConfig
 	}{
 		{
 			description: "base case",
 			config: &observability.TLSConfig{
 				InsecureSkipVerify: utils.Ptr(true),
 			},
-			expected: &observability.PartialUpdateScrapeConfigsRequestInnerHttpSdConfigsInnerOauth2TlsConfig{
+			expected: &observability.UpdateScrapeConfigPayloadTlsConfig{
 				InsecureSkipVerify: utils.Ptr(true),
 			},
 		},
 		{
 			description: "empty data",
 			config:      &observability.TLSConfig{},
-			expected:    &observability.PartialUpdateScrapeConfigsRequestInnerHttpSdConfigsInnerOauth2TlsConfig{},
+			expected:    &observability.UpdateScrapeConfigPayloadTlsConfig{},
 		},
 		{
 			description: "nil",
@@ -708,30 +699,30 @@ func TestToPayloadGenericOAuth(t *testing.T) {
 	}{
 		{
 			description: "base",
-			response: &observability.GrafanaOauth{
-				ApiUrl:              utils.Ptr("apiUrl"),
-				AuthUrl:             utils.Ptr("authUrl"),
-				Enabled:             utils.Ptr(true),
+			response: &observability.GrafanaOauth{ // nolint:gosec // false positive
+				ApiUrl:              "apiUrl",
+				AuthUrl:             "authUrl",
+				Enabled:             true,
 				Name:                utils.Ptr("name"),
-				OauthClientId:       utils.Ptr("oauthClientId"),
-				OauthClientSecret:   utils.Ptr("oauthClientSecret"),
-				RoleAttributePath:   utils.Ptr("roleAttributePath"),
+				OauthClientId:       "oauthClientId",
+				OauthClientSecret:   "oauthClientSecret",
+				RoleAttributePath:   "roleAttributePath",
 				RoleAttributeStrict: utils.Ptr(true),
 				Scopes:              utils.Ptr("scopes"),
-				TokenUrl:            utils.Ptr("tokenUrl"),
+				TokenUrl:            "tokenUrl",
 				UsePkce:             utils.Ptr(true),
 			},
-			expected: &observability.UpdateGrafanaConfigsPayloadGenericOauth{
-				ApiUrl:              utils.Ptr("apiUrl"),
-				AuthUrl:             utils.Ptr("authUrl"),
-				Enabled:             utils.Ptr(true),
+			expected: &observability.UpdateGrafanaConfigsPayloadGenericOauth{ // nolint:gosec // false positive
+				ApiUrl:              "apiUrl",
+				AuthUrl:             "authUrl",
+				Enabled:             true,
 				Name:                utils.Ptr("name"),
-				OauthClientId:       utils.Ptr("oauthClientId"),
-				OauthClientSecret:   utils.Ptr("oauthClientSecret"),
-				RoleAttributePath:   utils.Ptr("roleAttributePath"),
+				OauthClientId:       "oauthClientId",
+				OauthClientSecret:   "oauthClientSecret",
+				RoleAttributePath:   "roleAttributePath",
 				RoleAttributeStrict: utils.Ptr(true),
 				Scopes:              utils.Ptr("scopes"),
-				TokenUrl:            utils.Ptr("tokenUrl"),
+				TokenUrl:            "tokenUrl",
 				UsePkce:             utils.Ptr(true),
 			},
 		},
@@ -875,7 +866,7 @@ func TestGetPartialUpdateGrafanaConfigsPayload(t *testing.T) {
 				getGrafanaConfigsResp:  tt.getGrafanaConfigsResp,
 			}
 
-			payload, err := GetPartialUpdateGrafanaConfigsPayload(context.Background(), client, testInstanceId, testProjectId, tt.singleSignOn, tt.publicReadAccess)
+			payload, err := GetPartialUpdateGrafanaConfigsPayload(context.Background(), client.newMock(), testInstanceId, testProjectId, tt.singleSignOn, tt.publicReadAccess)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -892,5 +883,38 @@ func TestGetPartialUpdateGrafanaConfigsPayload(t *testing.T) {
 				t.Errorf("expected output payload to be %+v, got %+v", tt.expectedPayload, payload)
 			}
 		})
+	}
+}
+
+// in internal/pkg/services/observability/utils/utils.go#mapMetricsRelabelConfig we cast from one enum to another, esure that both have the same values
+func TestUpdateScrapeConfigPayloadMetricsRelabelConfigsInnerActionIsAction(t *testing.T) {
+	innerKeys := make(map[string]struct{})
+	actionKeys := make(map[string]struct{})
+	for _, innerEnumVal := range observability.AllowedUpdateScrapeConfigPayloadMetricsRelabelConfigsInnerActionEnumValues {
+		innerKeys[string(innerEnumVal)] = struct{}{}
+	}
+	for _, actionEnumVal := range observability.AllowedActionEnumValues {
+		actionKeys[string(actionEnumVal)] = struct{}{}
+	}
+	onlyInInner := make([]string, 0)
+	onlyInAction := make([]string, 0)
+	for innerKey := range innerKeys {
+		if _, ok := actionKeys[innerKey]; !ok {
+			onlyInInner = append(onlyInInner, innerKey)
+		}
+	}
+	for actionKey := range actionKeys {
+		if _, ok := innerKeys[actionKey]; !ok {
+			onlyInAction = append(onlyInAction, actionKey)
+		}
+	}
+	if len(onlyInInner) > 0 {
+		t.Logf("the following keys are only in AllowedUpdateScrapeConfigPayloadMetricsRelabelConfigsInnerActionEnumValues: %v", onlyInInner)
+	}
+	if len(onlyInAction) > 0 {
+		t.Logf("the following keys are only in AllowedActionEnumValues: %v", onlyInAction)
+	}
+	if len(onlyInInner) > 0 || len(onlyInAction) > 0 {
+		t.Fail()
 	}
 }

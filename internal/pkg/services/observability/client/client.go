@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/stackitcloud/stackit-sdk-go/services/observability"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	genericclient "github.com/stackitcloud/stackit-cli/internal/pkg/generic-client"
