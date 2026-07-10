@@ -51,9 +51,9 @@ var typeFlag = flags.StringEnumFlag(
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 
-	InstanceName   *string
-	ACL            *[]string
-	BackupSchedule *string
+	InstanceName   string
+	ACL            []string
+	BackupSchedule string
 	FlavorId       *string
 	CPU            *int32
 	RAM            *int32
@@ -185,9 +185,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceName:    flags.FlagToStringPointer(p, cmd, instanceNameFlag),
-		ACL:             flags.FlagToStringSlicePointer(p, cmd, aclFlag),
-		BackupSchedule:  utils.Ptr(flags.FlagWithDefaultToStringValue(p, cmd, backupScheduleFlag)),
+		InstanceName:    flags.FlagToStringValue(p, cmd, instanceNameFlag),
+		ACL:             flags.FlagToStringSliceValue(p, cmd, aclFlag),
+		BackupSchedule:  flags.FlagWithDefaultToStringValue(p, cmd, backupScheduleFlag),
 		FlavorId:        flavorId,
 		CPU:             cpu,
 		RAM:             ram,
@@ -228,7 +228,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 			return req, err
 		}
 	} else {
-		err := mongodbflexUtils.ValidateFlavorId(*model.FlavorId, &flavors.Flavors)
+		err := mongodbflexUtils.ValidateFlavorId(*model.FlavorId, flavors.Flavors)
 		if err != nil {
 			return req, err
 		}
@@ -250,9 +250,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 	}
 
 	req = req.CreateInstancePayload(mongodbflex.CreateInstancePayload{
-		Name:           *model.InstanceName,
-		Acl:            mongodbflex.ACL{Items: *model.ACL},
-		BackupSchedule: *model.BackupSchedule,
+		Name:           model.InstanceName,
+		Acl:            mongodbflex.ACL{Items: model.ACL},
+		BackupSchedule: model.BackupSchedule,
 		FlavorId:       *flavorId,
 		Replicas:       replicas,
 		Storage: mongodbflex.Storage{

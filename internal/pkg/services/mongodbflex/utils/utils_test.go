@@ -177,13 +177,13 @@ func TestValidateFlavorId(t *testing.T) {
 	tests := []struct {
 		description string
 		flavorId    string
-		flavors     *[]mongodbflex.InstanceFlavor
+		flavors     []mongodbflex.InstanceFlavor
 		isValid     bool
 	}{
 		{
 			description: "base",
 			flavorId:    "foo",
-			flavors: &[]mongodbflex.InstanceFlavor{
+			flavors: []mongodbflex.InstanceFlavor{
 				{Id: utils.Ptr("bar-1")},
 				{Id: utils.Ptr("bar-2")},
 				{Id: utils.Ptr("foo")},
@@ -199,13 +199,13 @@ func TestValidateFlavorId(t *testing.T) {
 		{
 			description: "no flavors",
 			flavorId:    "foo",
-			flavors:     &[]mongodbflex.InstanceFlavor{},
+			flavors:     []mongodbflex.InstanceFlavor{},
 			isValid:     false,
 		},
 		{
 			description: "nil flavor id",
 			flavorId:    "foo",
-			flavors: &[]mongodbflex.InstanceFlavor{
+			flavors: []mongodbflex.InstanceFlavor{
 				{Id: utils.Ptr("bar-1")},
 				{Id: nil},
 				{Id: utils.Ptr("foo")},
@@ -215,7 +215,7 @@ func TestValidateFlavorId(t *testing.T) {
 		{
 			description: "invalid flavor",
 			flavorId:    "foo",
-			flavors: &[]mongodbflex.InstanceFlavor{
+			flavors: []mongodbflex.InstanceFlavor{
 				{Id: utils.Ptr("bar-1")},
 				{Id: utils.Ptr("bar-2")},
 				{Id: utils.Ptr("bar-3")},

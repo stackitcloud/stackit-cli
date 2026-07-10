@@ -58,12 +58,12 @@ func GetInstanceType(numReplicas int32) (string, error) {
 	return "", fmt.Errorf("invalid number of replicas: %v", numReplicas)
 }
 
-func ValidateFlavorId(flavorId string, flavors *[]mongodbflex.InstanceFlavor) error {
+func ValidateFlavorId(flavorId string, flavors []mongodbflex.InstanceFlavor) error {
 	if flavors == nil {
 		return fmt.Errorf("nil flavors")
 	}
 
-	for _, f := range *flavors {
+	for _, f := range flavors {
 		if f.Id != nil && strings.EqualFold(*f.Id, flavorId) {
 			return nil
 		}

@@ -77,9 +77,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		InstanceName:   utils.Ptr("example-name"),
-		ACL:            utils.Ptr([]string{"0.0.0.0/0"}),
-		BackupSchedule: utils.Ptr("0 0/6 * * *"),
+		InstanceName:   "example-name",
+		ACL:            []string{"0.0.0.0/0"},
+		BackupSchedule: "0 0/6 * * *",
 		FlavorId:       utils.Ptr(testFlavorId),
 		StorageClass:   utils.Ptr("premium-perf4-mongodb"),
 		StorageSize:    utils.Ptr(int64(10)),
@@ -225,9 +225,8 @@ func TestParseInput(t *testing.T) {
 			aclValues:   []string{"198.51.100.14/24", "198.51.100.14/32"},
 			isValid:     true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.ACL = utils.Ptr(
-					append(*model.ACL, "198.51.100.14/24", "198.51.100.14/32"),
-				)
+				model.ACL =
+					append(model.ACL, "198.51.100.14/24", "198.51.100.14/32")
 			}),
 		},
 		{
@@ -236,9 +235,8 @@ func TestParseInput(t *testing.T) {
 			aclValues:   []string{"198.51.100.14/24,198.51.100.14/32"},
 			isValid:     true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.ACL = utils.Ptr(
-					append(*model.ACL, "198.51.100.14/24", "198.51.100.14/32"),
-				)
+				model.ACL =
+					append(model.ACL, "198.51.100.14/24", "198.51.100.14/32")
 			}),
 		},
 		{

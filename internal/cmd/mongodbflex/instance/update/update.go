@@ -233,7 +233,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 			return req, err
 		}
 	} else if model.FlavorId != nil {
-		err := mongodbflexUtils.ValidateFlavorId(*model.FlavorId, &flavors.Flavors)
+		err := mongodbflexUtils.ValidateFlavorId(*model.FlavorId, flavors.Flavors)
 		if err != nil {
 			return req, err
 		}

@@ -36,9 +36,9 @@ type inputModel struct {
 }
 
 type options struct {
-	Flavors  *[]mongodbflex.InstanceFlavor `json:"flavors,omitempty"`
-	Versions *[]string                     `json:"versions,omitempty"`
-	Storages *flavorStorages               `json:"flavorStorages,omitempty"`
+	Flavors  []mongodbflex.InstanceFlavor `json:"flavors,omitempty"`
+	Versions []string                     `json:"versions,omitempty"`
+	Storages *flavorStorages              `json:"flavorStorages,omitempty"`
 }
 
 type flavorStorages struct {
@@ -169,10 +169,10 @@ func outputResult(p *print.Printer, model *inputModel, flavors *mongodbflex.List
 
 	options := &options{}
 	if flavors != nil {
-		options.Flavors = &flavors.Flavors
+		options.Flavors = flavors.Flavors
 	}
 	if versions != nil {
-		options.Versions = &versions.Versions
+		options.Versions = versions.Versions
 	}
 	if storages != nil && model.FlavorId != nil {
 		options.Storages = &flavorStorages{
@@ -194,11 +194,11 @@ func outputResultAsTable(p *print.Printer, model *inputModel, options *options) 
 	}
 
 	content := []tables.Table{}
-	if model.Flavors && len(*options.Flavors) != 0 {
-		content = append(content, buildFlavorsTable(*options.Flavors))
+	if model.Flavors && len(options.Flavors) != 0 {
+		content = append(content, buildFlavorsTable(options.Flavors))
 	}
-	if model.Versions && len(*options.Versions) != 0 {
-		content = append(content, buildVersionsTable(*options.Versions))
+	if model.Versions && len(options.Versions) != 0 {
+		content = append(content, buildVersionsTable(options.Versions))
 	}
 	if model.Storages && options.Storages.Storages != nil && len(options.Storages.Storages.StorageClasses) > 0 {
 		content = append(content, buildStoragesTable(*options.Storages.Storages))

@@ -119,9 +119,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 }
 
 func outputResult(p *print.Printer, outputFormat, restoreStatus string, backup *mongodbflex.Backup) error {
-	// allows passing empty backups but avoids having to pass large backup by value
 	if backup == nil {
-		backup = &mongodbflex.Backup{}
+		return fmt.Errorf("API response is nil")
 	}
 	return p.OutputResult(outputFormat, backup, func() error {
 		table := tables.NewTable()

@@ -210,7 +210,7 @@ func TestOutputResult(t *testing.T) {
 		{
 			name:    "empty",
 			args:    args{},
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name: "set backup",
