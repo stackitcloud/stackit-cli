@@ -116,7 +116,6 @@ func outputResult(p *print.Printer, outputFormat string, user mongodbflex.Instan
 		table.AddSeparator()
 		table.AddRow("USERNAME", utils.PtrString(user.Username))
 		table.AddSeparator()
-		//TODO: check if this is ok
 		table.AddRow("ROLES", user.Roles)
 		table.AddSeparator()
 		table.AddRow("DATABASE", utils.PtrString(user.Database))

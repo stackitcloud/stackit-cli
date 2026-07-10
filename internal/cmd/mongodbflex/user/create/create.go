@@ -152,7 +152,6 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, user *mo
 		p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, utils.PtrString(user.Id))
 		p.Outputf("Username: %s\n", utils.PtrString(user.Username))
 		p.Outputf("Password: %s\n", utils.PtrString(user.Password))
-		//TODO: check if this is ok
 		p.Outputf("Roles: %v\n", user.Roles)
 		p.Outputf("Database: %s\n", utils.PtrString(user.Database))
 		p.Outputf("Host: %s\n", utils.PtrString(user.Host))

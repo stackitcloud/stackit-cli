@@ -223,7 +223,6 @@ func buildFlavorsTable(flavors []mongodbflex.InstanceFlavor) tables.Table {
 			utils.PtrString(f.Cpu),
 			utils.PtrString(f.Memory),
 			utils.PtrString(f.Description),
-			//TODO: check if this is ok
 			f.Categories,
 		)
 	}
