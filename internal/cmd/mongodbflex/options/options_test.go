@@ -17,7 +17,7 @@ type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 
-type mockClientSettings struct {
+type mockSettings struct {
 	listFlavorsFails  bool
 	listVersionsFails bool
 	listStoragesFails bool
@@ -27,7 +27,7 @@ type mockClientSettings struct {
 	listStoragesCalled bool
 }
 
-func newAPIClientMock(c *mockClientSettings) mongodbflex.DefaultAPI {
+func newAPIClientMock(c *mockSettings) mongodbflex.DefaultAPI {
 	return mongodbflex.DefaultAPIServiceMock{
 		ListFlavorsExecuteMock: utils.Ptr(func(_ mongodbflex.ApiListFlavorsRequest) (*mongodbflex.ListFlavorsResponse, error) {
 			c.listFlavorsCalled = true
@@ -179,9 +179,7 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 		description              string
 		model                    *inputModel
 		isValid                  bool
-		listFlavorsFails         bool
-		listVersionsFails        bool
-		listStoragesFails        bool
+		mockClientSettings       mockSettings
 		expectListFlavorsCalled  bool
 		expectListVersionsCalled bool
 		expectListStoragesCalled bool
@@ -224,28 +222,34 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 			expectListStoragesCalled: true,
 		},
 		{
-			description:              "list flavors fails",
-			model:                    fixtureInputModelAllTrue(),
-			isValid:                  false,
-			listFlavorsFails:         true,
+			description: "list flavors fails",
+			model:       fixtureInputModelAllTrue(),
+			isValid:     false,
+			mockClientSettings: mockSettings{
+				listFlavorsFails: true,
+			},
 			expectListFlavorsCalled:  true,
 			expectListVersionsCalled: false,
 			expectListStoragesCalled: false,
 		},
 		{
-			description:              "list versions fails",
-			model:                    fixtureInputModelAllTrue(),
-			isValid:                  false,
-			listVersionsFails:        true,
+			description: "list versions fails",
+			model:       fixtureInputModelAllTrue(),
+			isValid:     false,
+			mockClientSettings: mockSettings{
+				listVersionsFails: true,
+			},
 			expectListFlavorsCalled:  true,
 			expectListVersionsCalled: true,
 			expectListStoragesCalled: false,
 		},
 		{
-			description:              "list storages fails",
-			model:                    fixtureInputModelAllTrue(),
-			isValid:                  false,
-			listStoragesFails:        true,
+			description: "list storages fails",
+			model:       fixtureInputModelAllTrue(),
+			isValid:     false,
+			mockClientSettings: mockSettings{
+				listStoragesFails: true,
+			},
 			expectListFlavorsCalled:  true,
 			expectListVersionsCalled: true,
 			expectListStoragesCalled: true,
@@ -255,13 +259,8 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			params := testparams.NewTestParams()
-			settings := mockClientSettings{
-				listFlavorsFails:  tt.listFlavorsFails,
-				listVersionsFails: tt.listVersionsFails,
-				listStoragesFails: tt.listStoragesFails,
-			}
 
-			err := buildAndExecuteRequest(testCtx, params.Printer, tt.model, newAPIClientMock(&settings))
+			err := buildAndExecuteRequest(testCtx, params.Printer, tt.model, newAPIClientMock(&tt.mockClientSettings))
 			if err != nil && tt.isValid {
 				t.Fatalf("error building and executing request: %v", err)
 			}
@@ -272,14 +271,14 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 				return
 			}
 
-			if tt.expectListFlavorsCalled != settings.listFlavorsCalled {
-				t.Fatalf("expected listFlavorsCalled to be %v, got %v", tt.expectListFlavorsCalled, settings.listFlavorsCalled)
+			if tt.expectListFlavorsCalled != (tt.mockClientSettings).listFlavorsCalled {
+				t.Fatalf("expected listFlavorsCalled to be %v, got %v", tt.expectListFlavorsCalled, (tt.mockClientSettings).listFlavorsCalled)
 			}
-			if tt.expectListVersionsCalled != settings.listVersionsCalled {
-				t.Fatalf("expected listVersionsCalled to be %v, got %v", tt.expectListVersionsCalled, settings.listVersionsCalled)
+			if tt.expectListVersionsCalled != (tt.mockClientSettings).listVersionsCalled {
+				t.Fatalf("expected listVersionsCalled to be %v, got %v", tt.expectListVersionsCalled, (tt.mockClientSettings).listVersionsCalled)
 			}
-			if tt.expectListStoragesCalled != settings.listStoragesCalled {
-				t.Fatalf("expected listStoragesCalled to be %v, got %v", tt.expectListStoragesCalled, settings.listStoragesCalled)
+			if tt.expectListStoragesCalled != (tt.mockClientSettings).listStoragesCalled {
+				t.Fatalf("expected listStoragesCalled to be %v, got %v", tt.expectListStoragesCalled, (tt.mockClientSettings).listStoragesCalled)
 			}
 		})
 	}

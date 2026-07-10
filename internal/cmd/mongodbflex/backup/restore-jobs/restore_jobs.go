@@ -75,18 +75,15 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get restore jobs for MongoDB Flex instance %q: %w", instanceLabel, err)
 			}
-			if len(resp.Items) == 0 {
-				cmd.Printf("No restore jobs found for instance %q\n", instanceLabel)
-				return nil
-			}
-			restoreJobs := resp.Items
+
+			restoreJobs := resp.GetItems()
 
 			// Truncate output
 			if model.Limit != nil && len(restoreJobs) > int(*model.Limit) {
 				restoreJobs = restoreJobs[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, restoreJobs)
+			return outputResult(params.Printer, model.OutputFormat, instanceLabel, restoreJobs)
 		},
 	}
 
@@ -131,8 +128,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, restoreJobs []mongodbflex.RestoreInstanceStatus) error {
+func outputResult(p *print.Printer, outputFormat, instanceLabel string, restoreJobs []mongodbflex.RestoreInstanceStatus) error {
 	return p.OutputResult(outputFormat, restoreJobs, func() error {
+		if len(restoreJobs) == 0 {
+			p.Outputf("No restore jobs found for instance %q\n", instanceLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("ID", "BACKUP ID", "BACKUP INSTANCE ID", "DATE", "STATUS")
 		for i := range restoreJobs {

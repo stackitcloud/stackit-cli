@@ -245,12 +245,11 @@ func buildStoragesTable(storagesResp mongodbflex.ListStoragesResponse) tables.Ta
 	table := tables.NewTable()
 	table.SetTitle("Storages")
 	table.SetHeader("MINIMUM", "MAXIMUM", "STORAGE CLASS")
-	for i := range storages {
-		sc := storages[i]
+	for _, storageClass := range storages {
 		table.AddRow(
 			utils.PtrString(storagesResp.StorageRange.Min),
 			utils.PtrString(storagesResp.StorageRange.Max),
-			sc,
+			storageClass,
 		)
 	}
 	table.EnableAutoMergeOnColumns(1, 2, 3)

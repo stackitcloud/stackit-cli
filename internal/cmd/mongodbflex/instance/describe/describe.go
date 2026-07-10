@@ -121,8 +121,7 @@ func outputResult(p *print.Printer, outputFormat string, instance *mongodbflex.I
 		table.AddRow("VERSION", utils.PtrString(instance.Version))
 		table.AddSeparator()
 		if instance.HasAcl() {
-			aclsArray := instance.Acl.Items
-			acls := strings.Join(aclsArray, ",")
+			acls := strings.Join(instance.Acl.Items, ",")
 			table.AddRow("ACL", acls)
 			table.AddSeparator()
 		}

@@ -26,10 +26,9 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &mongodbflex.APIClient{DefaultAPI: &mongodbflex.DefaultAPIService{}}
 
 type mockSettings struct {
-	listFlavorsFails  bool
-	listFlavorsResp   *mongodbflex.ListFlavorsResponse
-	listStoragesFails bool
-	listStoragesResp  *mongodbflex.ListStoragesResponse
+	listFlavorsFails bool
+	listFlavorsResp  *mongodbflex.ListFlavorsResponse
+	listStoragesResp *mongodbflex.ListStoragesResponse
 }
 
 var testProjectId = uuid.NewString()
@@ -263,34 +262,33 @@ func TestParseInput(t *testing.T) {
 
 func TestBuildRequest(t *testing.T) {
 	tests := []struct {
-		description       string
-		model             *inputModel
-		expectedRequest   mongodbflex.ApiCreateInstanceRequest
-		listFlavorsFails  bool
-		listFlavorsResp   *mongodbflex.ListFlavorsResponse
-		listStoragesFails bool
-		listStoragesResp  *mongodbflex.ListStoragesResponse
-		isValid           bool
+		description        string
+		model              *inputModel
+		expectedRequest    mongodbflex.ApiCreateInstanceRequest
+		mockClientSettings mockSettings
+		isValid            bool
 	}{
 		{
 			description:     "base with flavor ID",
 			model:           fixtureInputModel(),
 			isValid:         true,
 			expectedRequest: fixtureRequest(),
-			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: []mongodbflex.InstanceFlavor{
-					{
-						Id:     utils.Ptr(testFlavorId),
-						Cpu:    utils.Ptr(int32(2)),
-						Memory: utils.Ptr(int32(4)),
+			mockClientSettings: mockSettings{
+				listFlavorsResp: &mongodbflex.ListFlavorsResponse{
+					Flavors: []mongodbflex.InstanceFlavor{
+						{
+							Id:     utils.Ptr(testFlavorId),
+							Cpu:    utils.Ptr(int32(2)),
+							Memory: utils.Ptr(int32(4)),
+						},
 					},
 				},
-			},
-			listStoragesResp: &mongodbflex.ListStoragesResponse{
-				StorageClasses: []string{"premium-perf4-mongodb"},
-				StorageRange: &mongodbflex.StorageRange{
-					Min: utils.Ptr(int64(10)),
-					Max: utils.Ptr(int64(100)),
+				listStoragesResp: &mongodbflex.ListStoragesResponse{
+					StorageClasses: []string{"premium-perf4-mongodb"},
+					StorageRange: &mongodbflex.StorageRange{
+						Min: utils.Ptr(int64(10)),
+						Max: utils.Ptr(int64(100)),
+					},
 				},
 			},
 		},
@@ -305,25 +303,27 @@ func TestBuildRequest(t *testing.T) {
 			),
 			isValid:         true,
 			expectedRequest: fixtureRequest(),
-			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: []mongodbflex.InstanceFlavor{
-					{
-						Id:     utils.Ptr(testFlavorId),
-						Cpu:    utils.Ptr(int32(2)),
-						Memory: utils.Ptr(int32(4)),
-					},
-					{
-						Id:     utils.Ptr("other-flavor"),
-						Cpu:    utils.Ptr(int32(1)),
-						Memory: utils.Ptr(int32(8)),
+			mockClientSettings: mockSettings{
+				listFlavorsResp: &mongodbflex.ListFlavorsResponse{
+					Flavors: []mongodbflex.InstanceFlavor{
+						{
+							Id:     utils.Ptr(testFlavorId),
+							Cpu:    utils.Ptr(int32(2)),
+							Memory: utils.Ptr(int32(4)),
+						},
+						{
+							Id:     utils.Ptr("other-flavor"),
+							Cpu:    utils.Ptr(int32(1)),
+							Memory: utils.Ptr(int32(8)),
+						},
 					},
 				},
-			},
-			listStoragesResp: &mongodbflex.ListStoragesResponse{
-				StorageClasses: []string{"premium-perf4-mongodb"},
-				StorageRange: &mongodbflex.StorageRange{
-					Min: utils.Ptr(int64(10)),
-					Max: utils.Ptr(int64(100)),
+				listStoragesResp: &mongodbflex.ListStoragesResponse{
+					StorageClasses: []string{"premium-perf4-mongodb"},
+					StorageRange: &mongodbflex.StorageRange{
+						Min: utils.Ptr(int64(10)),
+						Max: utils.Ptr(int64(100)),
+					},
 				},
 			},
 		},
@@ -335,20 +335,22 @@ func TestBuildRequest(t *testing.T) {
 				payload.Options = map[string]string{"type": "Single"}
 				payload.Replicas = int32(1)
 			})),
-			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: []mongodbflex.InstanceFlavor{
-					{
-						Id:     utils.Ptr(testFlavorId),
-						Cpu:    utils.Ptr(int32(2)),
-						Memory: utils.Ptr(int32(4)),
+			mockClientSettings: mockSettings{
+				listFlavorsResp: &mongodbflex.ListFlavorsResponse{
+					Flavors: []mongodbflex.InstanceFlavor{
+						{
+							Id:     utils.Ptr(testFlavorId),
+							Cpu:    utils.Ptr(int32(2)),
+							Memory: utils.Ptr(int32(4)),
+						},
 					},
 				},
-			},
-			listStoragesResp: &mongodbflex.ListStoragesResponse{
-				StorageClasses: []string{"premium-perf4-mongodb"},
-				StorageRange: &mongodbflex.StorageRange{
-					Min: utils.Ptr(int64(10)),
-					Max: utils.Ptr(int64(100)),
+				listStoragesResp: &mongodbflex.ListStoragesResponse{
+					StorageClasses: []string{"premium-perf4-mongodb"},
+					StorageRange: &mongodbflex.StorageRange{
+						Min: utils.Ptr(int64(10)),
+						Max: utils.Ptr(int64(100)),
+					},
 				},
 			},
 		},
@@ -360,20 +362,22 @@ func TestBuildRequest(t *testing.T) {
 				payload.Options = map[string]string{"type": "Sharded"}
 				payload.Replicas = int32(9)
 			})),
-			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: []mongodbflex.InstanceFlavor{
-					{
-						Id:     utils.Ptr(testFlavorId),
-						Cpu:    utils.Ptr(int32(2)),
-						Memory: utils.Ptr(int32(4)),
+			mockClientSettings: mockSettings{
+				listFlavorsResp: &mongodbflex.ListFlavorsResponse{
+					Flavors: []mongodbflex.InstanceFlavor{
+						{
+							Id:     utils.Ptr(testFlavorId),
+							Cpu:    utils.Ptr(int32(2)),
+							Memory: utils.Ptr(int32(4)),
+						},
 					},
 				},
-			},
-			listStoragesResp: &mongodbflex.ListStoragesResponse{
-				StorageClasses: []string{"premium-perf4-mongodb"},
-				StorageRange: &mongodbflex.StorageRange{
-					Min: utils.Ptr(int64(10)),
-					Max: utils.Ptr(int64(100)),
+				listStoragesResp: &mongodbflex.ListStoragesResponse{
+					StorageClasses: []string{"premium-perf4-mongodb"},
+					StorageRange: &mongodbflex.StorageRange{
+						Min: utils.Ptr(int64(10)),
+						Max: utils.Ptr(int64(100)),
+					},
 				},
 			},
 		},
@@ -386,8 +390,10 @@ func TestBuildRequest(t *testing.T) {
 					model.RAM = utils.Ptr(int32(4))
 				},
 			),
-			listFlavorsFails: true,
-			isValid:          false,
+			mockClientSettings: mockSettings{
+				listFlavorsFails: true,
+			},
+			isValid: false,
 		},
 		{
 			description: "flavor id not found",
@@ -398,17 +404,19 @@ func TestBuildRequest(t *testing.T) {
 					model.RAM = utils.Ptr(int32(9))
 				},
 			),
-			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: []mongodbflex.InstanceFlavor{
-					{
-						Id:     utils.Ptr(testFlavorId),
-						Cpu:    utils.Ptr(int32(2)),
-						Memory: utils.Ptr(int32(4)),
-					},
-					{
-						Id:     utils.Ptr("other-flavor"),
-						Cpu:    utils.Ptr(int32(1)),
-						Memory: utils.Ptr(int32(8)),
+			mockClientSettings: mockSettings{
+				listFlavorsResp: &mongodbflex.ListFlavorsResponse{
+					Flavors: []mongodbflex.InstanceFlavor{
+						{
+							Id:     utils.Ptr(testFlavorId),
+							Cpu:    utils.Ptr(int32(2)),
+							Memory: utils.Ptr(int32(4)),
+						},
+						{
+							Id:     utils.Ptr("other-flavor"),
+							Cpu:    utils.Ptr(int32(1)),
+							Memory: utils.Ptr(int32(8)),
+						},
 					},
 				},
 			},
@@ -423,8 +431,10 @@ func TestBuildRequest(t *testing.T) {
 					model.RAM = utils.Ptr(int32(4))
 				},
 			),
-			listFlavorsFails: true,
-			isValid:          false,
+			mockClientSettings: mockSettings{
+				listFlavorsFails: true,
+			},
+			isValid: false,
 		},
 		{
 			description: "invalid storage class",
@@ -433,20 +443,22 @@ func TestBuildRequest(t *testing.T) {
 					model.StorageClass = utils.Ptr("non-existing-class")
 				},
 			),
-			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: []mongodbflex.InstanceFlavor{
-					{
-						Id:     utils.Ptr(testFlavorId),
-						Cpu:    utils.Ptr(int32(2)),
-						Memory: utils.Ptr(int32(4)),
+			mockClientSettings: mockSettings{
+				listFlavorsResp: &mongodbflex.ListFlavorsResponse{
+					Flavors: []mongodbflex.InstanceFlavor{
+						{
+							Id:     utils.Ptr(testFlavorId),
+							Cpu:    utils.Ptr(int32(2)),
+							Memory: utils.Ptr(int32(4)),
+						},
 					},
 				},
-			},
-			listStoragesResp: &mongodbflex.ListStoragesResponse{
-				StorageClasses: []string{"premium-perf4-mongodb"},
-				StorageRange: &mongodbflex.StorageRange{
-					Min: utils.Ptr(int64(10)),
-					Max: utils.Ptr(int64(100)),
+				listStoragesResp: &mongodbflex.ListStoragesResponse{
+					StorageClasses: []string{"premium-perf4-mongodb"},
+					StorageRange: &mongodbflex.StorageRange{
+						Min: utils.Ptr(int64(10)),
+						Max: utils.Ptr(int64(100)),
+					},
 				},
 			},
 			isValid: false,
@@ -458,20 +470,22 @@ func TestBuildRequest(t *testing.T) {
 					model.StorageSize = utils.Ptr(int64(9))
 				},
 			),
-			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: []mongodbflex.InstanceFlavor{
-					{
-						Id:     utils.Ptr(testFlavorId),
-						Cpu:    utils.Ptr(int32(2)),
-						Memory: utils.Ptr(int32(4)),
+			mockClientSettings: mockSettings{
+				listFlavorsResp: &mongodbflex.ListFlavorsResponse{
+					Flavors: []mongodbflex.InstanceFlavor{
+						{
+							Id:     utils.Ptr(testFlavorId),
+							Cpu:    utils.Ptr(int32(2)),
+							Memory: utils.Ptr(int32(4)),
+						},
 					},
 				},
-			},
-			listStoragesResp: &mongodbflex.ListStoragesResponse{
-				StorageClasses: []string{"premium-perf4-mongodb"},
-				StorageRange: &mongodbflex.StorageRange{
-					Min: utils.Ptr(int64(10)),
-					Max: utils.Ptr(int64(100)),
+				listStoragesResp: &mongodbflex.ListStoragesResponse{
+					StorageClasses: []string{"premium-perf4-mongodb"},
+					StorageRange: &mongodbflex.StorageRange{
+						Min: utils.Ptr(int64(10)),
+						Max: utils.Ptr(int64(100)),
+					},
 				},
 			},
 			isValid: false,
@@ -480,13 +494,7 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			settings := mockSettings{
-				listFlavorsFails:  tt.listFlavorsFails,
-				listFlavorsResp:   tt.listFlavorsResp,
-				listStoragesFails: tt.listStoragesFails,
-				listStoragesResp:  tt.listStoragesResp,
-			}
-			request, err := buildRequest(testCtx, tt.model, newAPICLientMock(settings))
+			request, err := buildRequest(testCtx, tt.model, newAPICLientMock(tt.mockClientSettings))
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -495,7 +503,7 @@ func TestBuildRequest(t *testing.T) {
 			}
 
 			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest, mongodbflex.DefaultAPIService{}),
+				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
 				cmpopts.IgnoreFields(tt.expectedRequest, "ApiService"),
 			)
