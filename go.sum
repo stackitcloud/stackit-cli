@@ -612,8 +612,8 @@ github.com/stackitcloud/stackit-sdk-go/services/kms v1.11.0 h1:OrUaDypQNr1nOXZfV
 github.com/stackitcloud/stackit-sdk-go/services/kms v1.11.0/go.mod h1:pVaCmb1ZHAPGVRlSlBlVOjThp9Tb2sX9+nRX0M+d1KU=
 github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.14.0 h1:1dvL7tX91ziklayQmOupniE3jM4D5Nbtc0auNcx2p18=
 github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.14.0/go.mod h1:+Ld3dn648I+YKcBV3fEkYpDSr3fel421+LurJGywSBs=
-github.com/stackitcloud/stackit-sdk-go/services/logme v0.30.0 h1:csZlzmvAB+klgUQo7AjoGO+YkpdxRFY3yE5Y7SDeB5w=
-github.com/stackitcloud/stackit-sdk-go/services/logme v0.30.0/go.mod h1:JDOOYaGgcBts2x52nKPRMFgSZe7qqOFmfz1xIXCQgRY=
+github.com/stackitcloud/stackit-sdk-go/services/logme v1.0.1 h1:iteL61eMMPWT6872nF4Ko/tBU1IXemvS++XR09pj6NA=
+github.com/stackitcloud/stackit-sdk-go/services/logme v1.0.1/go.mod h1:JDOOYaGgcBts2x52nKPRMFgSZe7qqOFmfz1xIXCQgRY=
 github.com/stackitcloud/stackit-sdk-go/services/logs v0.5.2 h1:vr4atxFRT+EL+DqONMT5R44f7AzEMbePa9U7PEE0THU=
 github.com/stackitcloud/stackit-sdk-go/services/logs v0.5.2/go.mod h1:CAPsiTX7osAImfrG5RnIjaJ/Iz3QpoBKuH2fS346wuQ=
 github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.30.0 h1:LFIH1wAp633ZAJw/7H3F4nq1DZe0Qu3rlDeXhobZEZA=
@@ -622,8 +622,6 @@ github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.5.8 h1:S7t4wcT6SN
 github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.5.8/go.mod h1:CdrhFUsBO7/iJleCc2yQjDChIbG6YaxKNBQRNCjgcF4=
 github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.9.0 h1:T+ll3lS0Kn18d8hTOrVAMKcQrXiab+Cuj0cTnAYHmj0=
 github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.9.0/go.mod h1:QsPtoqAYvumyPU6ToX/5j1PbudN+VSTuvh6mp154ecM=
-github.com/stackitcloud/stackit-sdk-go/services/observability v0.17.0 h1:LGwCvvST0fwUgZ6bOxYIfu45qqTgv421ZS07UhKjZL8=
-github.com/stackitcloud/stackit-sdk-go/services/observability v0.17.0/go.mod h1:9KdrXC5JS30Ay3mR0adb3vNdhca+qxiy/cPF5P4wehQ=
 github.com/stackitcloud/stackit-sdk-go/services/observability v0.24.0 h1:KhuWPXr1hl8BFLGLSi6wjxh5o6OQXH9amfquMhYQROU=
 github.com/stackitcloud/stackit-sdk-go/services/observability v0.24.0/go.mod h1:0fEZQHm729mBdvg4sNrAhM6KmHROHJSeS2FwCMRk46k=
 github.com/stackitcloud/stackit-sdk-go/services/opensearch v0.24.6 h1:oTVx1+O177Ojn8OvXIOUbRSwtx7L59jhxDPrZEQFOfQ=
