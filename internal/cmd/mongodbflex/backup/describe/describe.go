@@ -119,10 +119,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 }
 
 func outputResult(p *print.Printer, outputFormat, restoreStatus string, backup *mongodbflex.Backup) error {
-	if backup == nil {
-		return fmt.Errorf("API response is nil")
-	}
 	return p.OutputResult(outputFormat, backup, func() error {
+		if backup == nil {
+			return fmt.Errorf("API response is nil")
+		}
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(backup.Id))
 		table.AddSeparator()

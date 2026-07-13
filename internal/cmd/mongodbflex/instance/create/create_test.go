@@ -80,10 +80,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		InstanceName:   "example-name",
 		ACL:            []string{"0.0.0.0/0"},
 		BackupSchedule: "0 0/6 * * *",
-		FlavorId:       utils.Ptr(testFlavorId),
+		FlavorId:       testFlavorId,
 		StorageClass:   utils.Ptr("premium-perf4-mongodb"),
 		StorageSize:    utils.Ptr(int64(10)),
-		Version:        utils.Ptr("6.0"),
+		Version:        "6.0",
 		Type:           utils.Ptr("Replica"),
 	}
 	for _, mod := range mods {
@@ -156,7 +156,7 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.FlavorId = nil
+				model.FlavorId = ""
 				model.CPU = utils.Ptr(int32(2))
 				model.RAM = utils.Ptr(int32(4))
 			}),
@@ -216,7 +216,7 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Version = nil
+				model.Version = ""
 			}),
 		},
 		{
@@ -294,7 +294,7 @@ func TestBuildRequest(t *testing.T) {
 			description: "with CPU and RAM",
 			model: fixtureInputModel(
 				func(model *inputModel) {
-					model.FlavorId = nil
+					model.FlavorId = ""
 					model.CPU = utils.Ptr(int32(2))
 					model.RAM = utils.Ptr(int32(4))
 				},
@@ -383,7 +383,7 @@ func TestBuildRequest(t *testing.T) {
 			description: "get flavors fails",
 			model: fixtureInputModel(
 				func(model *inputModel) {
-					model.FlavorId = nil
+					model.FlavorId = ""
 					model.CPU = utils.Ptr(int32(2))
 					model.RAM = utils.Ptr(int32(4))
 				},
@@ -397,7 +397,7 @@ func TestBuildRequest(t *testing.T) {
 			description: "flavor id not found",
 			model: fixtureInputModel(
 				func(model *inputModel) {
-					model.FlavorId = nil
+					model.FlavorId = ""
 					model.CPU = utils.Ptr(int32(5))
 					model.RAM = utils.Ptr(int32(9))
 				},
@@ -424,7 +424,7 @@ func TestBuildRequest(t *testing.T) {
 			description: "get storages fails",
 			model: fixtureInputModel(
 				func(model *inputModel) {
-					model.FlavorId = nil
+					model.FlavorId = ""
 					model.CPU = utils.Ptr(int32(2))
 					model.RAM = utils.Ptr(int32(4))
 				},

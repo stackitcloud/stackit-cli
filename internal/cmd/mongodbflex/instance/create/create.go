@@ -54,12 +54,12 @@ type inputModel struct {
 	InstanceName   string
 	ACL            []string
 	BackupSchedule string
-	FlavorId       *string
+	FlavorId       string
 	CPU            *int32
 	RAM            *int32
 	StorageClass   *string
 	StorageSize    *int64
-	Version        *string
+	Version        string
 	Type           *string
 }
 
@@ -107,12 +107,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Fill in version, if needed
-			if model.Version == nil {
+			if model.Version == "" {
 				version, err := mongodbflexUtils.GetLatestMongoDBVersion(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region)
 				if err != nil {
 					return fmt.Errorf("get latest MongoDB version: %w", err)
 				}
-				model.Version = &version
+				model.Version = version
 			}
 
 			// Call API
@@ -168,16 +168,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	storageSize := flags.FlagWithDefaultToInt64Value(p, cmd, storageSizeFlag)
 
-	flavorId := flags.FlagToStringPointer(p, cmd, flavorIdFlag)
+	flavorId := flags.FlagToStringValue(p, cmd, flavorIdFlag)
 	cpu := flags.FlagToInt32Pointer(p, cmd, cpuFlag)
 	ram := flags.FlagToInt32Pointer(p, cmd, ramFlag)
 
-	if flavorId == nil && (cpu == nil || ram == nil) {
+	if flavorId == "" && (cpu == nil || ram == nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
 			Cmd: cmd,
 		}
 	}
-	if flavorId != nil && (cpu != nil || ram != nil) {
+	if flavorId != "" && (cpu != nil || ram != nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
 			Cmd: cmd,
 		}
@@ -193,7 +193,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		RAM:             ram,
 		StorageClass:    utils.Ptr(flags.FlagWithDefaultToStringValue(p, cmd, storageClassFlag)),
 		StorageSize:     &storageSize,
-		Version:         flags.FlagToStringPointer(p, cmd, versionFlag),
+		Version:         flags.FlagToStringValue(p, cmd, versionFlag),
 		Type:            typeFlag.Ptr(),
 	}
 
@@ -210,7 +210,7 @@ type MongoDBFlexClient interface {
 func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexClient) (mongodbflex.ApiCreateInstanceRequest, error) {
 	req := apiClient.CreateInstance(ctx, model.ProjectId, model.Region)
 
-	var flavorId *string
+	var flavorId string
 	var err error
 
 	flavors, err := apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Execute()
@@ -218,8 +218,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 		return req, fmt.Errorf("get MongoDB Flex flavors: %w", err)
 	}
 
-	if model.FlavorId == nil {
-		flavorId, err = mongodbflexUtils.LoadFlavorId(*model.CPU, *model.RAM, &flavors.Flavors)
+	if model.FlavorId == "" {
+		foundFlavorId, err := mongodbflexUtils.LoadFlavorId(*model.CPU, *model.RAM, &flavors.Flavors)
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 			if !errors.As(err, &dsaInvalidPlanError) {
@@ -227,19 +227,20 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 			}
 			return req, err
 		}
+		flavorId = *foundFlavorId
 	} else {
-		err := mongodbflexUtils.ValidateFlavorId(*model.FlavorId, flavors.Flavors)
+		err := mongodbflexUtils.ValidateFlavorId(model.FlavorId, flavors.Flavors)
 		if err != nil {
 			return req, err
 		}
 		flavorId = model.FlavorId
 	}
 
-	storages, err := apiClient.ListStorages(ctx, model.ProjectId, *flavorId, model.Region).Execute()
+	storages, err := apiClient.ListStorages(ctx, model.ProjectId, flavorId, model.Region).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get MongoDB Flex storages: %w", err)
 	}
-	err = mongodbflexUtils.ValidateStorage(model.StorageClass, model.StorageSize, storages, *flavorId)
+	err = mongodbflexUtils.ValidateStorage(model.StorageClass, model.StorageSize, storages, flavorId)
 	if err != nil {
 		return req, err
 	}
@@ -253,13 +254,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 		Name:           model.InstanceName,
 		Acl:            mongodbflex.ACL{Items: model.ACL},
 		BackupSchedule: model.BackupSchedule,
-		FlavorId:       *flavorId,
+		FlavorId:       flavorId,
 		Replicas:       replicas,
 		Storage: mongodbflex.Storage{
 			Class: model.StorageClass,
 			Size:  model.StorageSize,
 		},
-		Version: *model.Version,
+		Version: model.Version,
 		Options: map[string]string{
 			"type": *model.Type,
 		},

@@ -92,11 +92,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex
 }
 
 func outputResult(p *print.Printer, outputFormat string, instance *mongodbflex.Instance) error {
-	if instance == nil {
-		return fmt.Errorf("instance is nil")
-	}
-
 	return p.OutputResult(outputFormat, instance, func() error {
+		if instance == nil {
+			return fmt.Errorf("instance is nil")
+		}
 		var instanceType string
 		if instance.HasReplicas() {
 			var err error
