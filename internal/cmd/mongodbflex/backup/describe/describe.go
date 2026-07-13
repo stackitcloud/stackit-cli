@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
+	mongodbflex "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -61,7 +61,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := mongoUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId, model.Region)
+			instanceLabel, err := mongoUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -75,13 +75,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("describe backup for MongoDB Flex instance: %w", err)
 			}
 
-			restoreJobs, err := apiClient.ListRestoreJobs(ctx, model.ProjectId, model.InstanceId, model.Region).Execute()
+			restoreJobs, err := apiClient.DefaultAPI.ListRestoreJobs(ctx, model.ProjectId, model.InstanceId, model.Region).Execute()
 			if err != nil {
 				return fmt.Errorf("get restore jobs for MongoDB Flex instance %q: %w", instanceLabel, err)
 			}
 
 			restoreJobState := mongoUtils.GetRestoreStatus(model.BackupId, restoreJobs)
-			return outputResult(params.Printer, model.OutputFormat, restoreJobState, *resp.Item)
+			return outputResult(params.Printer, model.OutputFormat, restoreJobState, resp.Item)
 		},
 	}
 	configureFlags(cmd)
@@ -114,12 +114,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex.APIClient) mongodbflex.ApiGetBackupRequest {
-	req := apiClient.GetBackup(ctx, model.ProjectId, model.InstanceId, model.BackupId, model.Region)
+	req := apiClient.DefaultAPI.GetBackup(ctx, model.ProjectId, model.InstanceId, model.BackupId, model.Region)
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat, restoreStatus string, backup mongodbflex.Backup) error {
+func outputResult(p *print.Printer, outputFormat, restoreStatus string, backup *mongodbflex.Backup) error {
 	return p.OutputResult(outputFormat, backup, func() error {
+		if backup == nil {
+			return fmt.Errorf("API response is nil")
+		}
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(backup.Id))
 		table.AddSeparator()

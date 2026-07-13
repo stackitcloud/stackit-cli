@@ -17,7 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
+	mongodbflex "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api"
 )
 
 const (
@@ -39,7 +39,7 @@ type inputModel struct {
 	InstanceId string
 	UserId     string
 	Database   *string
-	Roles      *[]string
+	Roles      []string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -66,13 +66,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := mongodbflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId, model.Region)
+			instanceLabel, err := mongodbflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
 			}
 
-			userLabel, err := mongodbflexUtils.GetUserName(ctx, apiClient, model.ProjectId, model.InstanceId, model.UserId, model.Region)
+			userLabel, err := mongodbflexUtils.GetUserName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.UserId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get user name: %v", err)
 				userLabel = model.UserId
@@ -105,6 +105,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(databaseFlag, "", "The database inside the MongoDB instance that the user has access to. If it does not exist, it will be created once the user writes to it")
 	roleFlag.Register(cmd)
 
+	cmd.MarkFlagsOneRequired(databaseFlag, roleFlag.Name())
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)
 }
@@ -118,11 +119,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	database := flags.FlagToStringPointer(p, cmd, databaseFlag)
-	roles := roleFlag.Ptr()
-
-	if database == nil && roles == nil {
-		return nil, &errors.EmptyUpdateError{}
-	}
+	roles := roleFlag.Get()
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
@@ -137,7 +134,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex.APIClient) mongodbflex.ApiPartialUpdateUserRequest {
-	req := apiClient.PartialUpdateUser(ctx, model.ProjectId, model.InstanceId, model.UserId, model.Region)
+	req := apiClient.DefaultAPI.PartialUpdateUser(ctx, model.ProjectId, model.InstanceId, model.UserId, model.Region)
 	req = req.PartialUpdateUserPayload(mongodbflex.PartialUpdateUserPayload{
 		Database: model.Database,
 		Roles:    model.Roles,

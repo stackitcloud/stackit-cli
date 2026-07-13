@@ -11,7 +11,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
+	mongodbflex "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api"
 )
 
 const (
@@ -21,7 +21,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &mongodbflex.APIClient{}
+var testClient = &mongodbflex.APIClient{DefaultAPI: &mongodbflex.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 var testUserId = uuid.NewString()
@@ -67,7 +67,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *mongodbflex.ApiPartialUpdateUserRequest)) mongodbflex.ApiPartialUpdateUserRequest {
-	request := testClient.PartialUpdateUser(testCtx, testProjectId, testInstanceId, testUserId, testRegion)
+	request := testClient.DefaultAPI.PartialUpdateUser(testCtx, testProjectId, testInstanceId, testUserId, testRegion)
 	request = request.PartialUpdateUserPayload(mongodbflex.PartialUpdateUserPayload{
 		Database: utils.Ptr("default"),
 	})
@@ -113,7 +113,7 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Roles = utils.Ptr([]string{"read"})
+				model.Roles = []string{"read"}
 			}),
 		},
 		{
@@ -220,10 +220,10 @@ func TestBuildRequest(t *testing.T) {
 			description: "update roles only",
 			model: fixtureInputModel(func(model *inputModel) {
 				model.Database = nil
-				model.Roles = &[]string{"default"}
+				model.Roles = []string{"default"}
 			}),
 			expectedRequest: fixtureRequest().PartialUpdateUserPayload(mongodbflex.PartialUpdateUserPayload{
-				Roles: &[]string{"default"},
+				Roles: []string{"default"},
 			}),
 		},
 	}
@@ -234,7 +234,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, mongodbflex.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

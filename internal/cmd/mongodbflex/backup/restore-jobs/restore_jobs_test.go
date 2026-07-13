@@ -12,7 +12,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
+	mongodbflex "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api"
 )
 
 const (
@@ -22,7 +22,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &mongodbflex.APIClient{}
+var testClient = &mongodbflex.APIClient{DefaultAPI: &mongodbflex.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 
@@ -56,7 +56,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *mongodbflex.ApiListRestoreJobsRequest)) mongodbflex.ApiListRestoreJobsRequest {
-	request := testClient.ListRestoreJobs(testCtx, testProjectId, testInstanceId, testRegion)
+	request := testClient.DefaultAPI.ListRestoreJobs(testCtx, testProjectId, testInstanceId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -166,7 +166,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, mongodbflex.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -177,8 +177,9 @@ func TestBuildRequest(t *testing.T) {
 
 func TestOutputResult(t *testing.T) {
 	type args struct {
-		outputFormat string
-		restoreJobs  []mongodbflex.RestoreInstanceStatus
+		outputFormat  string
+		instanceLabel string
+		restoreJobs   []mongodbflex.RestoreInstanceStatus
 	}
 	tests := []struct {
 		name    string
@@ -208,7 +209,7 @@ func TestOutputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.restoreJobs); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.instanceLabel, tt.args.restoreJobs); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

@@ -8,8 +8,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/wait"
+	mongodbflex "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api"
+	wait "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -51,15 +51,15 @@ var typeFlag = flags.StringEnumFlag(
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 
-	InstanceName   *string
-	ACL            *[]string
-	BackupSchedule *string
-	FlavorId       *string
-	CPU            *int64
-	RAM            *int64
+	InstanceName   string
+	ACL            []string
+	BackupSchedule string
+	FlavorId       string
+	CPU            *int32
+	RAM            *int32
 	StorageClass   *string
 	StorageSize    *int64
-	Version        *string
+	Version        string
 	Type           *string
 }
 
@@ -107,16 +107,16 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Fill in version, if needed
-			if model.Version == nil {
-				version, err := mongodbflexUtils.GetLatestMongoDBVersion(ctx, apiClient, model.ProjectId, model.Region)
+			if model.Version == "" {
+				version, err := mongodbflexUtils.GetLatestMongoDBVersion(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region)
 				if err != nil {
 					return fmt.Errorf("get latest MongoDB version: %w", err)
 				}
-				model.Version = &version
+				model.Version = version
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				return err
 			}
@@ -129,7 +129,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating instance", func() error {
-					_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId, model.Region).WaitWithContext(ctx)
+					_, err = wait.CreateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, instanceId, model.Region).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -149,8 +149,8 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.CIDRSliceFlag(), aclFlag, "The access control list (ACL). Must contain at least one valid subnet, for instance '0.0.0.0/0' for open access (discouraged), '1.2.3.0/24 for a public IP range of an organization, '1.2.3.4/32' for a single IP range, etc.")
 	cmd.Flags().String(backupScheduleFlag, defaultBackupSchedule, "Backup schedule")
 	cmd.Flags().String(flavorIdFlag, "", "ID of the flavor")
-	cmd.Flags().Int64(cpuFlag, 0, "Number of CPUs")
-	cmd.Flags().Int64(ramFlag, 0, "Amount of RAM (in GB)")
+	cmd.Flags().Int32(cpuFlag, 0, "Number of CPUs")
+	cmd.Flags().Int32(ramFlag, 0, "Amount of RAM (in GB)")
 	cmd.Flags().String(storageClassFlag, defaultStorageClass, "Storage class")
 	cmd.Flags().Int64(storageSizeFlag, defaultStorageSize, "Storage size (in GB)")
 	cmd.Flags().String(versionFlag, "", "MongoDB version. Defaults to the latest version available")
@@ -168,16 +168,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	storageSize := flags.FlagWithDefaultToInt64Value(p, cmd, storageSizeFlag)
 
-	flavorId := flags.FlagToStringPointer(p, cmd, flavorIdFlag)
-	cpu := flags.FlagToInt64Pointer(p, cmd, cpuFlag)
-	ram := flags.FlagToInt64Pointer(p, cmd, ramFlag)
+	flavorId := flags.FlagToStringValue(p, cmd, flavorIdFlag)
+	cpu := flags.FlagToInt32Pointer(p, cmd, cpuFlag)
+	ram := flags.FlagToInt32Pointer(p, cmd, ramFlag)
 
-	if flavorId == nil && (cpu == nil || ram == nil) {
+	if flavorId == "" && (cpu == nil || ram == nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
 			Cmd: cmd,
 		}
 	}
-	if flavorId != nil && (cpu != nil || ram != nil) {
+	if flavorId != "" && (cpu != nil || ram != nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
 			Cmd: cmd,
 		}
@@ -185,15 +185,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceName:    flags.FlagToStringPointer(p, cmd, instanceNameFlag),
-		ACL:             flags.FlagToStringSlicePointer(p, cmd, aclFlag),
-		BackupSchedule:  utils.Ptr(flags.FlagWithDefaultToStringValue(p, cmd, backupScheduleFlag)),
+		InstanceName:    flags.FlagToStringValue(p, cmd, instanceNameFlag),
+		ACL:             flags.FlagToStringSliceValue(p, cmd, aclFlag),
+		BackupSchedule:  flags.FlagWithDefaultToStringValue(p, cmd, backupScheduleFlag),
 		FlavorId:        flavorId,
 		CPU:             cpu,
 		RAM:             ram,
 		StorageClass:    utils.Ptr(flags.FlagWithDefaultToStringValue(p, cmd, storageClassFlag)),
 		StorageSize:     &storageSize,
-		Version:         flags.FlagToStringPointer(p, cmd, versionFlag),
+		Version:         flags.FlagToStringValue(p, cmd, versionFlag),
 		Type:            typeFlag.Ptr(),
 	}
 
@@ -203,23 +203,23 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 type MongoDBFlexClient interface {
 	CreateInstance(ctx context.Context, projectId, region string) mongodbflex.ApiCreateInstanceRequest
-	ListFlavorsExecute(ctx context.Context, projectId, region string) (*mongodbflex.ListFlavorsResponse, error)
-	ListStoragesExecute(ctx context.Context, projectId, flavorId, region string) (*mongodbflex.ListStoragesResponse, error)
+	ListFlavors(ctx context.Context, projectId, region string) mongodbflex.ApiListFlavorsRequest
+	ListStorages(ctx context.Context, projectId, flavorId, region string) mongodbflex.ApiListStoragesRequest
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexClient) (mongodbflex.ApiCreateInstanceRequest, error) {
 	req := apiClient.CreateInstance(ctx, model.ProjectId, model.Region)
 
-	var flavorId *string
+	var flavorId string
 	var err error
 
-	flavors, err := apiClient.ListFlavorsExecute(ctx, model.ProjectId, model.Region)
+	flavors, err := apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get MongoDB Flex flavors: %w", err)
 	}
 
-	if model.FlavorId == nil {
-		flavorId, err = mongodbflexUtils.LoadFlavorId(*model.CPU, *model.RAM, flavors.Flavors)
+	if model.FlavorId == "" {
+		foundFlavorId, err := mongodbflexUtils.LoadFlavorId(*model.CPU, *model.RAM, &flavors.Flavors)
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 			if !errors.As(err, &dsaInvalidPlanError) {
@@ -227,19 +227,20 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 			}
 			return req, err
 		}
+		flavorId = *foundFlavorId
 	} else {
-		err := mongodbflexUtils.ValidateFlavorId(*model.FlavorId, flavors.Flavors)
+		err := mongodbflexUtils.ValidateFlavorId(model.FlavorId, flavors.Flavors)
 		if err != nil {
 			return req, err
 		}
 		flavorId = model.FlavorId
 	}
 
-	storages, err := apiClient.ListStoragesExecute(ctx, model.ProjectId, *flavorId, model.Region)
+	storages, err := apiClient.ListStorages(ctx, model.ProjectId, flavorId, model.Region).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get MongoDB Flex storages: %w", err)
 	}
-	err = mongodbflexUtils.ValidateStorage(model.StorageClass, model.StorageSize, storages, *flavorId)
+	err = mongodbflexUtils.ValidateStorage(model.StorageClass, model.StorageSize, storages, flavorId)
 	if err != nil {
 		return req, err
 	}
@@ -251,18 +252,18 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 
 	req = req.CreateInstancePayload(mongodbflex.CreateInstancePayload{
 		Name:           model.InstanceName,
-		Acl:            &mongodbflex.CreateInstancePayloadAcl{Items: model.ACL},
+		Acl:            mongodbflex.ACL{Items: model.ACL},
 		BackupSchedule: model.BackupSchedule,
 		FlavorId:       flavorId,
-		Replicas:       &replicas,
-		Storage: &mongodbflex.Storage{
+		Replicas:       replicas,
+		Storage: mongodbflex.Storage{
 			Class: model.StorageClass,
 			Size:  model.StorageSize,
 		},
 		Version: model.Version,
-		Options: utils.Ptr(map[string]string{
+		Options: map[string]string{
 			"type": *model.Type,
-		}),
+		},
 	})
 	return req, nil
 }

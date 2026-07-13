@@ -11,7 +11,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
+	mongodbflex "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api"
 )
 
 const (
@@ -22,7 +22,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &mongodbflex.APIClient{}
+var testClient = &mongodbflex.APIClient{DefaultAPI: &mongodbflex.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 
@@ -65,7 +65,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *mongodbflex.ApiGetBackupRequest)) mongodbflex.ApiGetBackupRequest {
-	request := testClient.GetBackup(testCtx, testProjectId, testInstanceId, testBackupId, testRegion)
+	request := testClient.DefaultAPI.GetBackup(testCtx, testProjectId, testInstanceId, testBackupId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -187,7 +187,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, mongodbflex.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -199,7 +199,7 @@ func TestBuildRequest(t *testing.T) {
 func TestOutputResult(t *testing.T) {
 	type args struct {
 		outputFormat  string
-		backup        mongodbflex.Backup
+		backup        *mongodbflex.Backup
 		restoreStatus string
 	}
 	tests := []struct {
@@ -210,12 +210,12 @@ func TestOutputResult(t *testing.T) {
 		{
 			name:    "empty",
 			args:    args{},
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name: "set backup",
 			args: args{
-				backup: mongodbflex.Backup{},
+				backup: &mongodbflex.Backup{},
 			},
 			wantErr: false,
 		},

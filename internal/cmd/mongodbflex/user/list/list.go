@@ -18,7 +18,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
+	mongodbflex "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api"
 )
 
 const (
@@ -69,9 +69,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get MongoDB Flex users: %w", err)
 			}
-			users := utils.GetSliceFromPointer(resp.Items)
+			users := resp.Items
 
-			instanceLabel, err := mongodbflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, *model.InstanceId, model.Region)
+			instanceLabel, err := mongodbflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, *model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = *model.InstanceId
@@ -123,7 +123,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex.APIClient) mongodbflex.ApiListUsersRequest {
-	req := apiClient.ListUsers(ctx, model.ProjectId, *model.InstanceId, model.Region)
+	req := apiClient.DefaultAPI.ListUsers(ctx, model.ProjectId, *model.InstanceId, model.Region)
 	return req
 }
 

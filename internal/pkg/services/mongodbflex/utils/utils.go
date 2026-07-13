@@ -11,21 +11,21 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
+	mongodbflex "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api"
 )
 
 // The number of replicas is enforced by the API according to the instance type
-var instanceTypeToReplicas = map[string]int64{
+var instanceTypeToReplicas = map[string]int32{
 	"Single":  1,
 	"Replica": 3,
 	"Sharded": 9,
 }
 
 type MongoDBFlexClient interface {
-	ListVersionsExecute(ctx context.Context, projectId, region string) (*mongodbflex.ListVersionsResponse, error)
-	GetInstanceExecute(ctx context.Context, projectId, instanceId, region string) (*mongodbflex.InstanceResponse, error)
-	GetUserExecute(ctx context.Context, projectId, instanceId, userId, region string) (*mongodbflex.GetUserResponse, error)
-	ListRestoreJobsExecute(ctx context.Context, projectId string, instanceId, region string) (*mongodbflex.ListRestoreJobsResponse, error)
+	ListVersions(ctx context.Context, projectId, region string) mongodbflex.ApiListVersionsRequest
+	GetInstance(ctx context.Context, projectId, instanceId, region string) mongodbflex.ApiGetInstanceRequest
+	GetUser(ctx context.Context, projectId, instanceId, userId, region string) mongodbflex.ApiGetUserRequest
+	ListRestoreJobs(ctx context.Context, projectId string, instanceId, region string) mongodbflex.ApiListRestoreJobsRequest
 }
 
 func AvailableInstanceTypes() []string {
@@ -41,7 +41,7 @@ func AvailableInstanceTypes() []string {
 	return instanceTypes
 }
 
-func GetInstanceReplicas(instanceType string) (int64, error) {
+func GetInstanceReplicas(instanceType string) (int32, error) {
 	numReplicas, ok := instanceTypeToReplicas[instanceType]
 	if !ok {
 		return 0, fmt.Errorf("invalid instance type: %v", instanceType)
@@ -49,7 +49,7 @@ func GetInstanceReplicas(instanceType string) (int64, error) {
 	return numReplicas, nil
 }
 
-func GetInstanceType(numReplicas int64) (string, error) {
+func GetInstanceType(numReplicas int32) (string, error) {
 	for k, v := range instanceTypeToReplicas {
 		if v == numReplicas {
 			return k, nil
@@ -58,12 +58,12 @@ func GetInstanceType(numReplicas int64) (string, error) {
 	return "", fmt.Errorf("invalid number of replicas: %v", numReplicas)
 }
 
-func ValidateFlavorId(flavorId string, flavors *[]mongodbflex.InstanceFlavor) error {
+func ValidateFlavorId(flavorId string, flavors []mongodbflex.InstanceFlavor) error {
 	if flavors == nil {
 		return fmt.Errorf("nil flavors")
 	}
 
-	for _, f := range *flavors {
+	for _, f := range flavors {
 		if f.Id != nil && strings.EqualFold(*f.Id, flavorId) {
 			return nil
 		}
@@ -90,7 +90,7 @@ func ValidateStorage(storageClass *string, storageSize *int64, storages *mongodb
 		return nil
 	}
 
-	for _, sc := range *storages.StorageClasses {
+	for _, sc := range storages.StorageClasses {
 		if strings.EqualFold(*storageClass, sc) {
 			return nil
 		}
@@ -102,7 +102,7 @@ func ValidateStorage(storageClass *string, storageSize *int64, storages *mongodb
 	}
 }
 
-func LoadFlavorId(cpu, ram int64, flavors *[]mongodbflex.InstanceFlavor) (*string, error) {
+func LoadFlavorId(cpu, ram int32, flavors *[]mongodbflex.InstanceFlavor) (*string, error) {
 	if flavors == nil {
 		return nil, fmt.Errorf("nil flavors")
 	}
@@ -124,20 +124,19 @@ func LoadFlavorId(cpu, ram int64, flavors *[]mongodbflex.InstanceFlavor) (*strin
 }
 
 func GetLatestMongoDBVersion(ctx context.Context, apiClient MongoDBFlexClient, projectId, region string) (string, error) {
-	resp, err := apiClient.ListVersionsExecute(ctx, projectId, region)
+	resp, err := apiClient.ListVersions(ctx, projectId, region).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get MongoDB versions: %w", err)
 	}
-	versions := *resp.Versions
 
 	latestVersion := "0"
-	for i := range versions {
+	for i := range resp.Versions {
 		oldSemVer := fmt.Sprintf("v%s", latestVersion)
-		newSemVer := fmt.Sprintf("v%s", versions[i])
+		newSemVer := fmt.Sprintf("v%s", resp.Versions[i])
 		if semver.Compare(newSemVer, oldSemVer) != 1 {
 			continue
 		}
-		latestVersion = versions[i]
+		latestVersion = resp.Versions[i]
 	}
 	if latestVersion == "0" {
 		return "", fmt.Errorf("no MongoDB versions found")
@@ -146,7 +145,7 @@ func GetLatestMongoDBVersion(ctx context.Context, apiClient MongoDBFlexClient, p
 }
 
 func GetInstanceName(ctx context.Context, apiClient MongoDBFlexClient, projectId, instanceId, region string) (string, error) {
-	resp, err := apiClient.GetInstanceExecute(ctx, projectId, instanceId, region)
+	resp, err := apiClient.GetInstance(ctx, projectId, instanceId, region).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get MongoDB Flex instance: %w", err)
 	}
@@ -154,7 +153,7 @@ func GetInstanceName(ctx context.Context, apiClient MongoDBFlexClient, projectId
 }
 
 func GetUserName(ctx context.Context, apiClient MongoDBFlexClient, projectId, instanceId, userId, region string) (string, error) {
-	resp, err := apiClient.GetUserExecute(ctx, projectId, instanceId, userId, region)
+	resp, err := apiClient.GetUser(ctx, projectId, instanceId, userId, region).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get MongoDB Flex user: %w", err)
 	}
@@ -167,7 +166,7 @@ func GetRestoreStatus(backupId string, restoreJobs *mongodbflex.ListRestoreJobsR
 		return state
 	}
 
-	restoreJobsSlice := *restoreJobs.Items
+	restoreJobsSlice := restoreJobs.Items
 
 	// sort array by descending date
 	slices.SortFunc(restoreJobsSlice, func(i, j mongodbflex.RestoreInstanceStatus) int {
@@ -175,7 +174,7 @@ func GetRestoreStatus(backupId string, restoreJobs *mongodbflex.ListRestoreJobsR
 		return cmp.Compare(*j.Date, *i.Date)
 	})
 
-	for _, restoreJob := range *restoreJobs.Items {
+	for _, restoreJob := range restoreJobs.Items {
 		if *restoreJob.BackupID == backupId {
 			state = *restoreJob.Status
 			break

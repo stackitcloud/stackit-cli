@@ -10,14 +10,14 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
+	mongodbflex "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 
-type mongoDBFlexClientMocked struct {
+type mockSettings struct {
 	listFlavorsFails  bool
 	listVersionsFails bool
 	listStoragesFails bool
@@ -27,38 +27,40 @@ type mongoDBFlexClientMocked struct {
 	listStoragesCalled bool
 }
 
-func (c *mongoDBFlexClientMocked) ListFlavorsExecute(_ context.Context, _, _ string) (*mongodbflex.ListFlavorsResponse, error) {
-	c.listFlavorsCalled = true
-	if c.listFlavorsFails {
-		return nil, fmt.Errorf("list flavors failed")
+func newAPIClientMock(c *mockSettings) mongodbflex.DefaultAPI {
+	return mongodbflex.DefaultAPIServiceMock{
+		ListFlavorsExecuteMock: utils.Ptr(func(_ mongodbflex.ApiListFlavorsRequest) (*mongodbflex.ListFlavorsResponse, error) {
+			c.listFlavorsCalled = true
+			if c.listFlavorsFails {
+				return nil, fmt.Errorf("list flavors failed")
+			}
+			return utils.Ptr(mongodbflex.ListFlavorsResponse{
+				Flavors: []mongodbflex.InstanceFlavor{},
+			}), nil
+		}),
+		ListVersionsExecuteMock: utils.Ptr(func(_ mongodbflex.ApiListVersionsRequest) (*mongodbflex.ListVersionsResponse, error) {
+			c.listVersionsCalled = true
+			if c.listVersionsFails {
+				return nil, fmt.Errorf("list versions failed")
+			}
+			return utils.Ptr(mongodbflex.ListVersionsResponse{
+				Versions: []string{},
+			}), nil
+		}),
+		ListStoragesExecuteMock: utils.Ptr(func(_ mongodbflex.ApiListStoragesRequest) (*mongodbflex.ListStoragesResponse, error) {
+			c.listStoragesCalled = true
+			if c.listStoragesFails {
+				return nil, fmt.Errorf("list storages failed")
+			}
+			return utils.Ptr(mongodbflex.ListStoragesResponse{
+				StorageClasses: []string{},
+				StorageRange: &mongodbflex.StorageRange{
+					Min: utils.Ptr(int64(10)),
+					Max: utils.Ptr(int64(100)),
+				},
+			}), nil
+		}),
 	}
-	return utils.Ptr(mongodbflex.ListFlavorsResponse{
-		Flavors: utils.Ptr([]mongodbflex.InstanceFlavor{}),
-	}), nil
-}
-
-func (c *mongoDBFlexClientMocked) ListVersionsExecute(_ context.Context, _, _ string) (*mongodbflex.ListVersionsResponse, error) {
-	c.listVersionsCalled = true
-	if c.listVersionsFails {
-		return nil, fmt.Errorf("list versions failed")
-	}
-	return utils.Ptr(mongodbflex.ListVersionsResponse{
-		Versions: utils.Ptr([]string{}),
-	}), nil
-}
-
-func (c *mongoDBFlexClientMocked) ListStoragesExecute(_ context.Context, _, _, _ string) (*mongodbflex.ListStoragesResponse, error) {
-	c.listStoragesCalled = true
-	if c.listStoragesFails {
-		return nil, fmt.Errorf("list storages failed")
-	}
-	return utils.Ptr(mongodbflex.ListStoragesResponse{
-		StorageClasses: utils.Ptr([]string{}),
-		StorageRange: &mongodbflex.StorageRange{
-			Min: utils.Ptr(int64(10)),
-			Max: utils.Ptr(int64(100)),
-		},
-	}), nil
 }
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -177,9 +179,7 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 		description              string
 		model                    *inputModel
 		isValid                  bool
-		listFlavorsFails         bool
-		listVersionsFails        bool
-		listStoragesFails        bool
+		mockClientSettings       mockSettings
 		expectListFlavorsCalled  bool
 		expectListVersionsCalled bool
 		expectListStoragesCalled bool
@@ -222,28 +222,34 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 			expectListStoragesCalled: true,
 		},
 		{
-			description:              "list flavors fails",
-			model:                    fixtureInputModelAllTrue(),
-			isValid:                  false,
-			listFlavorsFails:         true,
+			description: "list flavors fails",
+			model:       fixtureInputModelAllTrue(),
+			isValid:     false,
+			mockClientSettings: mockSettings{
+				listFlavorsFails: true,
+			},
 			expectListFlavorsCalled:  true,
 			expectListVersionsCalled: false,
 			expectListStoragesCalled: false,
 		},
 		{
-			description:              "list versions fails",
-			model:                    fixtureInputModelAllTrue(),
-			isValid:                  false,
-			listVersionsFails:        true,
+			description: "list versions fails",
+			model:       fixtureInputModelAllTrue(),
+			isValid:     false,
+			mockClientSettings: mockSettings{
+				listVersionsFails: true,
+			},
 			expectListFlavorsCalled:  true,
 			expectListVersionsCalled: true,
 			expectListStoragesCalled: false,
 		},
 		{
-			description:              "list storages fails",
-			model:                    fixtureInputModelAllTrue(),
-			isValid:                  false,
-			listStoragesFails:        true,
+			description: "list storages fails",
+			model:       fixtureInputModelAllTrue(),
+			isValid:     false,
+			mockClientSettings: mockSettings{
+				listStoragesFails: true,
+			},
 			expectListFlavorsCalled:  true,
 			expectListVersionsCalled: true,
 			expectListStoragesCalled: true,
@@ -253,13 +259,8 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			params := testparams.NewTestParams()
-			client := &mongoDBFlexClientMocked{
-				listFlavorsFails:  tt.listFlavorsFails,
-				listVersionsFails: tt.listVersionsFails,
-				listStoragesFails: tt.listStoragesFails,
-			}
 
-			err := buildAndExecuteRequest(testCtx, params.Printer, tt.model, client)
+			err := buildAndExecuteRequest(testCtx, params.Printer, tt.model, newAPIClientMock(&tt.mockClientSettings))
 			if err != nil && tt.isValid {
 				t.Fatalf("error building and executing request: %v", err)
 			}
@@ -270,14 +271,14 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 				return
 			}
 
-			if tt.expectListFlavorsCalled != client.listFlavorsCalled {
-				t.Fatalf("expected listFlavorsCalled to be %v, got %v", tt.expectListFlavorsCalled, client.listFlavorsCalled)
+			if tt.expectListFlavorsCalled != (tt.mockClientSettings).listFlavorsCalled {
+				t.Fatalf("expected listFlavorsCalled to be %v, got %v", tt.expectListFlavorsCalled, (tt.mockClientSettings).listFlavorsCalled)
 			}
-			if tt.expectListVersionsCalled != client.listVersionsCalled {
-				t.Fatalf("expected listVersionsCalled to be %v, got %v", tt.expectListVersionsCalled, client.listVersionsCalled)
+			if tt.expectListVersionsCalled != (tt.mockClientSettings).listVersionsCalled {
+				t.Fatalf("expected listVersionsCalled to be %v, got %v", tt.expectListVersionsCalled, (tt.mockClientSettings).listVersionsCalled)
 			}
-			if tt.expectListStoragesCalled != client.listStoragesCalled {
-				t.Fatalf("expected listStoragesCalled to be %v, got %v", tt.expectListStoragesCalled, client.listStoragesCalled)
+			if tt.expectListStoragesCalled != (tt.mockClientSettings).listStoragesCalled {
+				t.Fatalf("expected listStoragesCalled to be %v, got %v", tt.expectListStoragesCalled, (tt.mockClientSettings).listStoragesCalled)
 			}
 		})
 	}

@@ -11,7 +11,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
+	mongodbflex "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api"
 )
 
 type testCtxKey struct{}
@@ -23,7 +23,7 @@ const (
 )
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &mongodbflex.APIClient{}
+var testClient = &mongodbflex.APIClient{DefaultAPI: &mongodbflex.DefaultAPIService{}}
 
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
@@ -61,10 +61,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRestoreRequest(mods ...func(request mongodbflex.ApiRestoreInstanceRequest)) mongodbflex.ApiRestoreInstanceRequest {
-	request := testClient.RestoreInstance(testCtx, testProjectId, testInstanceId, testRegion)
+	request := testClient.DefaultAPI.RestoreInstance(testCtx, testProjectId, testInstanceId, testRegion)
 	request = request.RestoreInstancePayload(mongodbflex.RestoreInstancePayload{
-		BackupId:   utils.Ptr(testBackupId),
-		InstanceId: utils.Ptr(testBackupInstanceId),
+		BackupId:   testBackupId,
+		InstanceId: testBackupInstanceId,
 	})
 	for _, mod := range mods {
 		mod(request)
@@ -73,10 +73,10 @@ func fixtureRestoreRequest(mods ...func(request mongodbflex.ApiRestoreInstanceRe
 }
 
 func fixtureCloneRequest(mods ...func(request mongodbflex.ApiCloneInstanceRequest)) mongodbflex.ApiCloneInstanceRequest {
-	request := testClient.CloneInstance(testCtx, testProjectId, testInstanceId, testRegion)
+	request := testClient.DefaultAPI.CloneInstance(testCtx, testProjectId, testInstanceId, testRegion)
 	request = request.CloneInstancePayload(mongodbflex.CloneInstancePayload{
 		Timestamp:  utils.Ptr(testTimestamp),
-		InstanceId: utils.Ptr(testBackupInstanceId),
+		InstanceId: testBackupInstanceId,
 	})
 	for _, mod := range mods {
 		mod(request)
@@ -195,7 +195,7 @@ func TestBuildRestoreRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx))
+				cmpopts.EquateComparable(testCtx, mongodbflex.DefaultAPIService{}))
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
 			}
@@ -225,7 +225,7 @@ func TestBuildCloneRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx))
+				cmpopts.EquateComparable(testCtx, mongodbflex.DefaultAPIService{}))
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
 			}

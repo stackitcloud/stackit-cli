@@ -11,7 +11,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
+	mongodbflex "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api"
 )
 
 const (
@@ -22,7 +22,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &mongodbflex.APIClient{}
+var testClient = &mongodbflex.APIClient{DefaultAPI: &mongodbflex.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 
@@ -58,11 +58,11 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 func fixturePayload(mods ...func(payload *mongodbflex.UpdateBackupSchedulePayload)) mongodbflex.UpdateBackupSchedulePayload {
 	payload := mongodbflex.UpdateBackupSchedulePayload{
 		BackupSchedule:                 utils.Ptr(testSchedule),
-		SnapshotRetentionDays:          utils.Ptr(int64(3)),
-		DailySnapshotRetentionDays:     utils.Ptr(int64(0)),
-		WeeklySnapshotRetentionWeeks:   utils.Ptr(int64(3)),
-		MonthlySnapshotRetentionMonths: utils.Ptr(int64(1)),
-		PointInTimeWindowHours:         utils.Ptr(int64(30)),
+		SnapshotRetentionDays:          utils.Ptr(int32(3)),
+		DailySnapshotRetentionDays:     utils.Ptr(int32(0)),
+		WeeklySnapshotRetentionWeeks:   utils.Ptr(int32(3)),
+		MonthlySnapshotRetentionMonths: utils.Ptr(int32(1)),
+		PointInTimeWindowHours:         utils.Ptr(int32(30)),
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -71,7 +71,7 @@ func fixturePayload(mods ...func(payload *mongodbflex.UpdateBackupSchedulePayloa
 }
 
 func fixtureUpdateBackupScheduleRequest(mods ...func(request *mongodbflex.ApiUpdateBackupScheduleRequest)) mongodbflex.ApiUpdateBackupScheduleRequest {
-	request := testClient.UpdateBackupSchedule(testCtx, testProjectId, testInstanceId, testRegion)
+	request := testClient.DefaultAPI.UpdateBackupSchedule(testCtx, testProjectId, testInstanceId, testRegion)
 	request = request.UpdateBackupSchedulePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -80,7 +80,7 @@ func fixtureUpdateBackupScheduleRequest(mods ...func(request *mongodbflex.ApiUpd
 }
 
 func fixtureGetInstanceRequest(mods ...func(request *mongodbflex.ApiGetInstanceRequest)) mongodbflex.ApiGetInstanceRequest {
-	request := testClient.GetInstance(testCtx, testProjectId, testInstanceId, testRegion)
+	request := testClient.DefaultAPI.GetInstance(testCtx, testProjectId, testInstanceId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -201,7 +201,7 @@ func TestBuildGetInstanceRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, mongodbflex.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -231,12 +231,12 @@ func TestBuildUpdateBackupScheduleRequest(t *testing.T) {
 					Region:    testRegion,
 				},
 				InstanceId:                utils.Ptr(testInstanceId),
-				DailySnaphotRetentionDays: utils.Ptr(int64(2)),
+				DailySnaphotRetentionDays: utils.Ptr(int32(2)),
 			},
 			instance: fixtureInstance(),
 			expectedRequest: fixtureUpdateBackupScheduleRequest().UpdateBackupSchedulePayload(
 				fixturePayload(func(payload *mongodbflex.UpdateBackupSchedulePayload) {
-					payload.DailySnapshotRetentionDays = utils.Ptr(int64(2))
+					payload.DailySnapshotRetentionDays = utils.Ptr(int32(2))
 				}),
 			),
 		},
@@ -249,19 +249,19 @@ func TestBuildUpdateBackupScheduleRequest(t *testing.T) {
 				},
 				InstanceId:                     utils.Ptr(testInstanceId),
 				BackupSchedule:                 utils.Ptr("0 0/6 5 2 1"),
-				DailySnaphotRetentionDays:      utils.Ptr(int64(2)),
-				WeeklySnapshotRetentionWeeks:   utils.Ptr(int64(2)),
-				MonthlySnapshotRetentionMonths: utils.Ptr(int64(2)),
-				SnapshotRetentionDays:          utils.Ptr(int64(2)),
+				DailySnaphotRetentionDays:      utils.Ptr(int32(2)),
+				WeeklySnapshotRetentionWeeks:   utils.Ptr(int32(2)),
+				MonthlySnapshotRetentionMonths: utils.Ptr(int32(2)),
+				SnapshotRetentionDays:          utils.Ptr(int32(2)),
 			},
 			instance: fixtureInstance(),
 			expectedRequest: fixtureUpdateBackupScheduleRequest().UpdateBackupSchedulePayload(
 				fixturePayload(func(payload *mongodbflex.UpdateBackupSchedulePayload) {
 					payload.BackupSchedule = utils.Ptr("0 0/6 5 2 1")
-					payload.DailySnapshotRetentionDays = utils.Ptr(int64(2))
-					payload.WeeklySnapshotRetentionWeeks = utils.Ptr(int64(2))
-					payload.MonthlySnapshotRetentionMonths = utils.Ptr(int64(2))
-					payload.SnapshotRetentionDays = utils.Ptr(int64(2))
+					payload.DailySnapshotRetentionDays = utils.Ptr(int32(2))
+					payload.WeeklySnapshotRetentionWeeks = utils.Ptr(int32(2))
+					payload.MonthlySnapshotRetentionMonths = utils.Ptr(int32(2))
+					payload.SnapshotRetentionDays = utils.Ptr(int32(2))
 				}),
 			),
 		},
@@ -285,7 +285,7 @@ func TestBuildUpdateBackupScheduleRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, mongodbflex.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

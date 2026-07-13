@@ -18,7 +18,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
+	mongodbflex "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api"
 )
 
 const (
@@ -87,16 +87,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex.APIClient) mongodbflex.ApiGetInstanceRequest {
-	req := apiClient.GetInstance(ctx, model.ProjectId, model.InstanceId, model.Region)
+	req := apiClient.DefaultAPI.GetInstance(ctx, model.ProjectId, model.InstanceId, model.Region)
 	return req
 }
 
 func outputResult(p *print.Printer, outputFormat string, instance *mongodbflex.Instance) error {
-	if instance == nil {
-		return fmt.Errorf("instance is nil")
-	}
-
 	return p.OutputResult(outputFormat, instance, func() error {
+		if instance == nil {
+			return fmt.Errorf("instance is nil")
+		}
 		var instanceType string
 		if instance.HasReplicas() {
 			var err error
@@ -121,8 +120,7 @@ func outputResult(p *print.Printer, outputFormat string, instance *mongodbflex.I
 		table.AddRow("VERSION", utils.PtrString(instance.Version))
 		table.AddSeparator()
 		if instance.HasAcl() {
-			aclsArray := *instance.Acl.Items
-			acls := strings.Join(aclsArray, ",")
+			acls := strings.Join(instance.Acl.Items, ",")
 			table.AddRow("ACL", acls)
 			table.AddSeparator()
 		}

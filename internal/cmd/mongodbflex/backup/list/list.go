@@ -18,7 +18,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
+	mongodbflex "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api"
 )
 
 const (
@@ -63,7 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := mongodbflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, *model.InstanceId, model.Region)
+			instanceLabel, err := mongodbflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, *model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = *model.InstanceId
@@ -75,9 +75,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get backups for MongoDB Flex instance %q: %w", instanceLabel, err)
 			}
-			backups := utils.GetSliceFromPointer(resp.Items)
+			backups := resp.Items
 
-			restoreJobs, err := apiClient.ListRestoreJobs(ctx, model.ProjectId, *model.InstanceId, model.Region).Execute()
+			restoreJobs, err := apiClient.DefaultAPI.ListRestoreJobs(ctx, model.ProjectId, *model.InstanceId, model.Region).Execute()
 			if err != nil {
 				return fmt.Errorf("get restore jobs for MongoDB Flex instance %q: %w", instanceLabel, err)
 			}
@@ -128,7 +128,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex.APIClient) mongodbflex.ApiListBackupsRequest {
-	req := apiClient.ListBackups(ctx, model.ProjectId, *model.InstanceId, model.Region)
+	req := apiClient.DefaultAPI.ListBackups(ctx, model.ProjectId, *model.InstanceId, model.Region)
 	return req
 }
 

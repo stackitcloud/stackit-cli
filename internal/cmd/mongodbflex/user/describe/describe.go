@@ -17,7 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/mongodbflex"
+	mongodbflex "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api"
 )
 
 const (
@@ -105,7 +105,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *mongodbflex.APIClient) mongodbflex.ApiGetUserRequest {
-	req := apiClient.GetUser(ctx, model.ProjectId, model.InstanceId, model.UserId, model.Region)
+	req := apiClient.DefaultAPI.GetUser(ctx, model.ProjectId, model.InstanceId, model.UserId, model.Region)
 	return req
 }
 
@@ -116,7 +116,7 @@ func outputResult(p *print.Printer, outputFormat string, user mongodbflex.Instan
 		table.AddSeparator()
 		table.AddRow("USERNAME", utils.PtrString(user.Username))
 		table.AddSeparator()
-		table.AddRow("ROLES", utils.PtrString(user.Roles))
+		table.AddRow("ROLES", user.Roles)
 		table.AddSeparator()
 		table.AddRow("DATABASE", utils.PtrString(user.Database))
 		table.AddSeparator()
