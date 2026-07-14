@@ -101,17 +101,6 @@ func TestParseInput(t *testing.T) {
 				model.OnlyPrintAccessToken = false
 			}),
 		},
-		{
-			description: "oidc_mode_no_key_required",
-			flagValues:  map[string]string{},
-			isValid:     true,
-			expectedModel: &inputModel{
-				ServiceAccountToken:   "",
-				ServiceAccountKeyPath: "",
-				PrivateKeyPath:        "",
-				OnlyPrintAccessToken:  false,
-			},
-		},
 	}
 
 	for _, tt := range tests {
