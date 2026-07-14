@@ -76,7 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("create OpenSearch credentials: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, model.ShowPassword, instanceLabel, resp)
+			return outputResult(params.Printer, *model, instanceLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -112,23 +112,26 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *opensearch.
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, showPassword bool, instanceLabel string, resp *opensearch.CredentialsResponse) error {
+func outputResult(p *print.Printer, model inputModel, instanceLabel string, resp *opensearch.CredentialsResponse) error {
+	if model.GlobalFlagModel == nil {
+		return fmt.Errorf("no global flags defined")
+	}
 	if resp == nil || resp.Raw == nil {
 		return fmt.Errorf("response or response content is nil")
 	}
 
-	if !showPassword {
+	if !model.ShowPassword {
 		resp.Raw.Credentials.Password = "hidden"
 	}
 
-	return p.OutputResult(outputFormat, resp, func() error {
+	return p.OutputResult(model.OutputFormat, resp, func() error {
 		p.Outputf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, resp.Id)
 		// The username field cannot be set by the user so we only display it if it's not returned empty
 		if resp.HasRaw() {
 			if username := resp.Raw.Credentials.Username; username != "" {
 				p.Outputf("Username: %s\n", username)
 			}
-			if !showPassword {
+			if !model.ShowPassword {
 				p.Outputf("Password: <hidden>\n")
 			} else {
 				p.Outputf("Password: %s\n", resp.Raw.Credentials.Password)

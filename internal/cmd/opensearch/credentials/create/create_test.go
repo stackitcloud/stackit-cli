@@ -169,8 +169,7 @@ func TestBuildRequest(t *testing.T) {
 
 func TestOutputResult(t *testing.T) {
 	type args struct {
-		outputFormat  string
-		showPassword  bool
+		model         inputModel
 		instanceLabel string
 		resp          *opensearch.CredentialsResponse
 	}
@@ -196,7 +195,10 @@ func TestOutputResult(t *testing.T) {
 		{
 			name: "empty response should not cause panic when password should be hidden",
 			args: args{
-				showPassword: false,
+				model: inputModel{
+					GlobalFlagModel: &globalflags.GlobalFlagModel{},
+					ShowPassword:    false,
+				},
 			},
 			wantErr: true,
 		},
@@ -209,6 +211,9 @@ func TestOutputResult(t *testing.T) {
 					},
 					Uri: "https://opensearch.example.com",
 				},
+				model: inputModel{
+					GlobalFlagModel: &globalflags.GlobalFlagModel{},
+				},
 			},
 			wantErr: false,
 		},
@@ -216,7 +221,7 @@ func TestOutputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.showPassword, tt.args.instanceLabel, tt.args.resp); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.model, tt.args.instanceLabel, tt.args.resp); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
