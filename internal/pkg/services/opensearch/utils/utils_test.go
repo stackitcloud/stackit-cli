@@ -13,12 +13,12 @@ import (
 
 var (
 	testProjectId     = uuid.NewString()
-	testRegion        = "eu01"
 	testInstanceId    = uuid.NewString()
 	testCredentialsId = uuid.NewString()
 )
 
 const (
+	testRegion              = "eu01"
 	testInstanceName        = "instance"
 	testCredentialsUsername = "username"
 )

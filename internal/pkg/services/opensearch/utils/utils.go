@@ -62,12 +62,7 @@ func LoadPlanId(planName, version string, offerings *opensearch.ListOfferingsRes
 	}
 }
 
-type OpenSearchClient interface {
-	GetInstance(ctx context.Context, projectId, region, instanceId string) opensearch.ApiGetInstanceRequest
-	GetCredentials(ctx context.Context, projectId, region, instanceId, credentialsId string) opensearch.ApiGetCredentialsRequest
-}
-
-func GetInstanceName(ctx context.Context, apiClient OpenSearchClient, projectId, region, instanceId string) (string, error) {
+func GetInstanceName(ctx context.Context, apiClient opensearch.DefaultAPI, projectId, region, instanceId string) (string, error) {
 	resp, err := apiClient.GetInstance(ctx, projectId, region, instanceId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get OpenSearch instance: %w", err)
@@ -75,8 +70,8 @@ func GetInstanceName(ctx context.Context, apiClient OpenSearchClient, projectId,
 	return resp.Name, nil
 }
 
-func GetCredentialsUsername(ctx context.Context, apiClient OpenSearchClient, projectId, region, instanceId, credentialsId string) (string, error) {
-	resp, err := apiClient.GetCredentials(ctx, projectId, instanceId, region, credentialsId).Execute()
+func GetCredentialsUsername(ctx context.Context, apiClient opensearch.DefaultAPI, projectId, region, instanceId, credentialsId string) (string, error) {
+	resp, err := apiClient.GetCredentials(ctx, projectId, region, instanceId, credentialsId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get OpenSearch credentials: %w", err)
 	}
