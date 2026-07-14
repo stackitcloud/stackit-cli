@@ -15,10 +15,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/opensearch/client"
 	opensearchUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/opensearch/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/opensearch"
+	opensearch "github.com/stackitcloud/stackit-sdk-go/services/opensearch/v2api"
 )
 
 const (
@@ -70,7 +69,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 			credentials := resp.GetCredentialsList()
 
-			instanceLabel, err := opensearchUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceLabel, err := opensearchUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -121,7 +120,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *opensearch.APIClient) opensearch.ApiListCredentialsRequest {
-	req := apiClient.ListCredentials(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.DefaultAPI.ListCredentials(ctx, model.ProjectId, model.Region, model.InstanceId)
 	return req
 }
 
@@ -136,7 +135,7 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, credenti
 		table.SetHeader("ID")
 		for i := range credentials {
 			c := credentials[i]
-			table.AddRow(utils.PtrString(c.Id))
+			table.AddRow(c.Id)
 		}
 		err := table.Display(p)
 		if err != nil {

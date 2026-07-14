@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/opensearch"
+	opensearch "github.com/stackitcloud/stackit-sdk-go/services/opensearch/v2api"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 var (
@@ -18,62 +18,64 @@ var (
 )
 
 const (
+	testRegion              = "eu01"
 	testInstanceName        = "instance"
 	testCredentialsUsername = "username"
 )
 
-type openSearchClientMocked struct {
+type mockSettings struct {
 	getInstanceFails    bool
 	getInstanceResp     *opensearch.Instance
 	getCredentialsFails bool
 	getCredentialsResp  *opensearch.CredentialsResponse
 }
 
-func (m *openSearchClientMocked) GetInstanceExecute(_ context.Context, _, _ string) (*opensearch.Instance, error) {
-	if m.getInstanceFails {
-		return nil, fmt.Errorf("could not get instance")
+func newAPIClientMock(m mockSettings) opensearch.DefaultAPI {
+	return opensearch.DefaultAPIServiceMock{
+		GetInstanceExecuteMock: utils.Ptr(func(_ opensearch.ApiGetInstanceRequest) (*opensearch.Instance, error) {
+			if m.getInstanceFails {
+				return nil, fmt.Errorf("could not get instance")
+			}
+			return m.getInstanceResp, nil
+		}),
+		GetCredentialsExecuteMock: utils.Ptr(func(_ opensearch.ApiGetCredentialsRequest) (*opensearch.CredentialsResponse, error) {
+			if m.getCredentialsFails {
+				return nil, fmt.Errorf("could not get user")
+			}
+			return m.getCredentialsResp, nil
+		}),
 	}
-	return m.getInstanceResp, nil
-}
-
-func (m *openSearchClientMocked) GetCredentialsExecute(_ context.Context, _, _, _ string) (*opensearch.CredentialsResponse, error) {
-	if m.getCredentialsFails {
-		return nil, fmt.Errorf("could not get user")
-	}
-	return m.getCredentialsResp, nil
 }
 
 func TestGetInstanceName(t *testing.T) {
 	tests := []struct {
-		description      string
-		getInstanceFails bool
-		getInstanceResp  *opensearch.Instance
-		isValid          bool
-		expectedOutput   string
+		description        string
+		mockClientSettings mockSettings
+		isValid            bool
+		expectedOutput     string
 	}{
 		{
 			description: "base",
-			getInstanceResp: &opensearch.Instance{
-				Name: utils.Ptr(testInstanceName),
+			mockClientSettings: mockSettings{
+				getInstanceResp: &opensearch.Instance{
+					Name: testInstanceName,
+				},
 			},
 			isValid:        true,
 			expectedOutput: testInstanceName,
 		},
 		{
-			description:      "get instance fails",
-			getInstanceFails: true,
-			isValid:          false,
+			description: "get instance fails",
+			mockClientSettings: mockSettings{
+				getInstanceFails: true,
+			},
+			isValid: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &openSearchClientMocked{
-				getInstanceFails: tt.getInstanceFails,
-				getInstanceResp:  tt.getInstanceResp,
-			}
-
-			output, err := GetInstanceName(context.Background(), client, testProjectId, testInstanceId)
+			output, err := GetInstanceName(context.Background(), newAPIClientMock(tt.mockClientSettings), testProjectId, testRegion, testInstanceId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -93,18 +95,19 @@ func TestGetInstanceName(t *testing.T) {
 
 func TestGetCredentialsUsername(t *testing.T) {
 	tests := []struct {
-		description         string
-		getCredentialsFails bool
-		getCredentialsResp  *opensearch.CredentialsResponse
-		isValid             bool
-		expectedOutput      string
+		description        string
+		mockClientSettings mockSettings
+		isValid            bool
+		expectedOutput     string
 	}{
 		{
 			description: "base",
-			getCredentialsResp: &opensearch.CredentialsResponse{
-				Raw: &opensearch.RawCredentials{
-					Credentials: &opensearch.Credentials{
-						Username: utils.Ptr(testCredentialsUsername),
+			mockClientSettings: mockSettings{
+				getCredentialsResp: &opensearch.CredentialsResponse{
+					Raw: &opensearch.RawCredentials{
+						Credentials: opensearch.Credentials{
+							Username: testCredentialsUsername,
+						},
 					},
 				},
 			},
@@ -112,20 +115,17 @@ func TestGetCredentialsUsername(t *testing.T) {
 			expectedOutput: testCredentialsUsername,
 		},
 		{
-			description:         "get credentials fails",
-			getCredentialsFails: true,
-			isValid:             false,
+			description: "get credentials fails",
+			mockClientSettings: mockSettings{
+				getCredentialsFails: true,
+			},
+			isValid: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &openSearchClientMocked{
-				getCredentialsFails: tt.getCredentialsFails,
-				getCredentialsResp:  tt.getCredentialsResp,
-			}
-
-			output, err := GetCredentialsUsername(context.Background(), client, testProjectId, testInstanceId, testCredentialsId)
+			output, err := GetCredentialsUsername(context.Background(), newAPIClientMock(tt.mockClientSettings), testProjectId, testRegion, testInstanceId, testCredentialsId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")

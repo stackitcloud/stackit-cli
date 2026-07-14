@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/opensearch"
+	opensearch "github.com/stackitcloud/stackit-sdk-go/services/opensearch/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -17,7 +17,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/opensearch/client"
 	opensearchUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/opensearch/utils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -58,7 +57,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := opensearchUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceLabel, err := opensearchUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -77,7 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("create OpenSearch credentials: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, model.ShowPassword, instanceLabel, resp)
+			return outputResult(params.Printer, *model, instanceLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -109,35 +108,38 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *opensearch.APIClient) opensearch.ApiCreateCredentialsRequest {
-	req := apiClient.CreateCredentials(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.DefaultAPI.CreateCredentials(ctx, model.ProjectId, model.Region, model.InstanceId)
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, showPassword bool, instanceLabel string, resp *opensearch.CredentialsResponse) error {
-	if resp == nil || resp.Raw == nil || resp.Raw.Credentials == nil || resp.Uri == nil {
+func outputResult(p *print.Printer, model inputModel, instanceLabel string, resp *opensearch.CredentialsResponse) error {
+	if model.GlobalFlagModel == nil {
+		return fmt.Errorf("no global flags defined")
+	}
+	if resp == nil || resp.Raw == nil {
 		return fmt.Errorf("response or response content is nil")
 	}
 
-	if !showPassword {
-		resp.Raw.Credentials.Password = utils.Ptr("hidden")
+	if !model.ShowPassword {
+		resp.Raw.Credentials.Password = "hidden"
 	}
 
-	return p.OutputResult(outputFormat, resp, func() error {
-		p.Outputf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, utils.PtrString(resp.Id))
+	return p.OutputResult(model.OutputFormat, resp, func() error {
+		p.Outputf("Created credentials for instance %q. Credentials ID: %s\n\n", instanceLabel, resp.Id)
 		// The username field cannot be set by the user so we only display it if it's not returned empty
-		if resp.HasRaw() && resp.Raw.Credentials != nil {
-			if username := resp.Raw.Credentials.Username; username != nil && *username != "" {
-				p.Outputf("Username: %s\n", *username)
+		if resp.HasRaw() {
+			if username := resp.Raw.Credentials.Username; username != "" {
+				p.Outputf("Username: %s\n", username)
 			}
-			if !showPassword {
+			if !model.ShowPassword {
 				p.Outputf("Password: <hidden>\n")
 			} else {
-				p.Outputf("Password: %s\n", utils.PtrString(resp.Raw.Credentials.Password))
+				p.Outputf("Password: %s\n", resp.Raw.Credentials.Password)
 			}
-			p.Outputf("Host: %s\n", utils.PtrString(resp.Raw.Credentials.Host))
-			p.Outputf("Port: %s\n", utils.PtrString(resp.Raw.Credentials.Port))
+			p.Outputf("Host: %s\n", resp.Raw.Credentials.Host)
+			p.Outputf("Port: %d\n", resp.Raw.Credentials.Port)
 		}
-		p.Outputf("URI: %s\n", *resp.Uri)
+		p.Outputf("URI: %s\n", resp.Uri)
 		return nil
 	})
 }

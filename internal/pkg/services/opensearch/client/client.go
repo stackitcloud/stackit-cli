@@ -6,9 +6,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/viper"
-	"github.com/stackitcloud/stackit-sdk-go/services/opensearch"
+	opensearch "github.com/stackitcloud/stackit-sdk-go/services/opensearch/v2api"
 )
 
 func ConfigureClient(p *print.Printer, cliVersion string) (*opensearch.APIClient, error) {
-	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.OpenSearchCustomEndpointKey), true, genericclient.CreateApiClient[*opensearch.APIClient](opensearch.NewAPIClient))
+	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.OpenSearchCustomEndpointKey), false, genericclient.CreateApiClient[*opensearch.APIClient](opensearch.NewAPIClient))
 }

@@ -21,8 +21,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/opensearch"
-	"github.com/stackitcloud/stackit-sdk-go/services/opensearch/wait"
+	opensearch "github.com/stackitcloud/stackit-sdk-go/services/opensearch/v2api"
+	wait "github.com/stackitcloud/stackit-sdk-go/services/opensearch/v2api/wait"
 )
 
 const (
@@ -32,7 +32,6 @@ const (
 	metricsFrequencyFlag     = "metrics-frequency"
 	metricsPrefixFlag        = "metrics-prefix"
 	monitoringInstanceIdFlag = "monitoring-instance-id"
-	pluginFlag               = "plugin"
 	sgwAclFlag               = "acl"
 	syslogFlag               = "syslog"
 	planIdFlag               = "plan-id"
@@ -40,21 +39,23 @@ const (
 	versionFlag              = "version"
 )
 
+var flagPlugins = flags.StringEnumSliceFlag("plugin", opensearch.AllowedInstanceParametersPluginsInnerEnumValues, "Plugins")
+
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	PlanName string
 	Version  string
 
-	InstanceName         *string
+	InstanceName         string
 	EnableMonitoring     *bool
 	Graphite             *string
-	MetricsFrequency     *int64
+	MetricsFrequency     *int32
 	MetricsPrefix        *string
 	MonitoringInstanceId *string
-	Plugin               *[]string
+	Plugin               []opensearch.InstanceParametersPluginsInner
 	SgwAcl               *[]string
-	Syslog               *[]string
-	PlanId               *string
+	Syslog               []string
+	PlanId               string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -100,7 +101,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 				if !errors.As(err, &dsaInvalidPlanError) {
@@ -112,12 +113,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("create OpenSearch instance: %w", err)
 			}
-			instanceId := *resp.InstanceId
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating instance", func() error {
-					_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
+					_, err = wait.CreateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, resp.InstanceId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -125,7 +125,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				}
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, model.Async, projectLabel, instanceId, resp)
+			return outputResult(params.Printer, model.OutputFormat, model.Async, projectLabel, resp.InstanceId, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -136,10 +136,10 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(instanceNameFlag, "n", "", "Instance name")
 	cmd.Flags().Bool(enableMonitoringFlag, false, "Enable monitoring")
 	cmd.Flags().String(graphiteFlag, "", "Graphite host")
-	cmd.Flags().Int64(metricsFrequencyFlag, 0, "Metrics frequency")
+	cmd.Flags().Int32(metricsFrequencyFlag, 0, "Metrics frequency")
 	cmd.Flags().String(metricsPrefixFlag, "", "Metrics prefix")
 	cmd.Flags().Var(flags.UUIDFlag(), monitoringInstanceIdFlag, "Monitoring instance ID")
-	cmd.Flags().StringSlice(pluginFlag, []string{}, "Plugin")
+	flagPlugins.Register(cmd)
 	cmd.Flags().Var(flags.CIDRSliceFlag(), sgwAclFlag, "List of IP networks in CIDR notation which are allowed to access this instance")
 	cmd.Flags().StringSlice(syslogFlag, []string{}, "Syslog")
 	cmd.Flags().Var(flags.UUIDFlag(), planIdFlag, "Plan ID")
@@ -156,16 +156,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	planId := flags.FlagToStringPointer(p, cmd, planIdFlag)
+	planId := flags.FlagToStringValue(p, cmd, planIdFlag)
 	planName := flags.FlagToStringValue(p, cmd, planNameFlag)
 	version := flags.FlagToStringValue(p, cmd, versionFlag)
 
-	if planId == nil && (planName == "" || version == "") {
+	if planId == "" && (planName == "" || version == "") {
 		return nil, &cliErr.DSAInputPlanError{
 			Cmd: cmd,
 		}
 	}
-	if planId != nil && (planName != "" || version != "") {
+	if planId != "" && (planName != "" || version != "") {
 		return nil, &cliErr.DSAInputPlanError{
 			Cmd: cmd,
 		}
@@ -173,15 +173,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel:      globalFlags,
-		InstanceName:         flags.FlagToStringPointer(p, cmd, instanceNameFlag),
+		InstanceName:         flags.FlagToStringValue(p, cmd, instanceNameFlag),
 		EnableMonitoring:     flags.FlagToBoolPointer(p, cmd, enableMonitoringFlag),
 		MonitoringInstanceId: flags.FlagToStringPointer(p, cmd, monitoringInstanceIdFlag),
 		Graphite:             flags.FlagToStringPointer(p, cmd, graphiteFlag),
-		MetricsFrequency:     flags.FlagToInt64Pointer(p, cmd, metricsFrequencyFlag),
+		MetricsFrequency:     flags.FlagToInt32Pointer(p, cmd, metricsFrequencyFlag),
 		MetricsPrefix:        flags.FlagToStringPointer(p, cmd, metricsPrefixFlag),
-		Plugin:               flags.FlagToStringSlicePointer(p, cmd, pluginFlag),
+		Plugin:               flagPlugins.Get(),
 		SgwAcl:               flags.FlagToStringSlicePointer(p, cmd, sgwAclFlag),
-		Syslog:               flags.FlagToStringSlicePointer(p, cmd, syslogFlag),
+		Syslog:               flags.FlagToStringSliceValue(p, cmd, syslogFlag),
 		PlanId:               planId,
 		PlanName:             planName,
 		Version:              version,
@@ -192,22 +192,22 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 type openSearchClient interface {
-	CreateInstance(ctx context.Context, projectId string) opensearch.ApiCreateInstanceRequest
-	ListOfferingsExecute(ctx context.Context, projectId string) (*opensearch.ListOfferingsResponse, error)
+	CreateInstance(ctx context.Context, projectId, region string) opensearch.ApiCreateInstanceRequest
+	ListOfferings(ctx context.Context, projectId, region string) opensearch.ApiListOfferingsRequest
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient openSearchClient) (opensearch.ApiCreateInstanceRequest, error) {
-	req := apiClient.CreateInstance(ctx, model.ProjectId)
+	req := apiClient.CreateInstance(ctx, model.ProjectId, model.Region)
 
-	var planId *string
+	var planId string
 	var err error
 
-	offerings, err := apiClient.ListOfferingsExecute(ctx, model.ProjectId)
+	offerings, err := apiClient.ListOfferings(ctx, model.ProjectId, model.Region).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get OpenSearch offerings: %w", err)
 	}
 
-	if model.PlanId == nil {
+	if model.PlanId == "" {
 		planId, err = opensearchUtils.LoadPlanId(model.PlanName, model.Version, offerings)
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
@@ -217,7 +217,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient openSearchCl
 			return req, err
 		}
 	} else {
-		err := opensearchUtils.ValidatePlanId(*model.PlanId, offerings)
+		err := opensearchUtils.ValidatePlanId(model.PlanId, offerings)
 		if err != nil {
 			return req, err
 		}

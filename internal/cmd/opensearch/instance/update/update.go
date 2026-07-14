@@ -20,8 +20,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/opensearch"
-	"github.com/stackitcloud/stackit-sdk-go/services/opensearch/wait"
+	opensearch "github.com/stackitcloud/stackit-sdk-go/services/opensearch/v2api"
+	wait "github.com/stackitcloud/stackit-sdk-go/services/opensearch/v2api/wait"
 )
 
 const (
@@ -33,12 +33,17 @@ const (
 	metricsFrequencyFlag     = "metrics-frequency"
 	metricsPrefixFlag        = "metrics-prefix"
 	monitoringInstanceIdFlag = "monitoring-instance-id"
-	pluginFlag               = "plugin"
 	sgwAclFlag               = "acl"
 	syslogFlag               = "syslog"
 	planIdFlag               = "plan-id"
 	planNameFlag             = "plan-name"
 	versionFlag              = "version"
+)
+
+var flagPlugins = flags.StringEnumSliceFlag(
+	"plugin",
+	opensearch.AllowedInstanceParametersPluginsInnerEnumValues,
+	"Plugins",
 )
 
 type inputModel struct {
@@ -49,12 +54,12 @@ type inputModel struct {
 
 	EnableMonitoring     *bool
 	Graphite             *string
-	MetricsFrequency     *int64
+	MetricsFrequency     *int32
 	MetricsPrefix        *string
 	MonitoringInstanceId *string
-	Plugin               *[]string
+	Plugin               []opensearch.InstanceParametersPluginsInner
 	SgwAcl               *[]string
-	Syslog               *[]string
+	Syslog               []string
 	PlanId               *string
 }
 
@@ -85,7 +90,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := opensearchUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.InstanceId)
+			instanceLabel, err := opensearchUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -98,7 +103,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 				if !errors.As(err, &dsaInvalidPlanError) {
@@ -115,7 +120,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Updating instance", func() error {
-					_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient, model.ProjectId, instanceId).WaitWithContext(ctx)
+					_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, instanceId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -138,10 +143,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(enableMonitoringFlag, false, "Enable monitoring")
 	cmd.Flags().String(graphiteFlag, "", "Graphite host")
-	cmd.Flags().Int64(metricsFrequencyFlag, 0, "Metrics frequency")
+	cmd.Flags().Int32(metricsFrequencyFlag, 0, "Metrics frequency")
 	cmd.Flags().String(metricsPrefixFlag, "", "Metrics prefix")
 	cmd.Flags().Var(flags.UUIDFlag(), monitoringInstanceIdFlag, "Monitoring instance ID")
-	cmd.Flags().StringSlice(pluginFlag, []string{}, "Plugin")
+	flagPlugins.Register(cmd)
 	cmd.Flags().Var(flags.CIDRSliceFlag(), sgwAclFlag, "List of IP networks in CIDR notation which are allowed to access this instance")
 	cmd.Flags().StringSlice(syslogFlag, []string{}, "Syslog")
 	cmd.Flags().Var(flags.UUIDFlag(), planIdFlag, "Plan ID")
@@ -160,11 +165,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	enableMonitoring := flags.FlagToBoolPointer(p, cmd, enableMonitoringFlag)
 	monitoringInstanceId := flags.FlagToStringPointer(p, cmd, monitoringInstanceIdFlag)
 	graphite := flags.FlagToStringPointer(p, cmd, graphiteFlag)
-	metricsFrequency := flags.FlagToInt64Pointer(p, cmd, metricsFrequencyFlag)
+	metricsFrequency := flags.FlagToInt32Pointer(p, cmd, metricsFrequencyFlag)
 	metricsPrefix := flags.FlagToStringPointer(p, cmd, metricsPrefixFlag)
-	plugin := flags.FlagToStringSlicePointer(p, cmd, pluginFlag)
+	plugin := flagPlugins.Get()
 	sgwAcl := flags.FlagToStringSlicePointer(p, cmd, sgwAclFlag)
-	syslog := flags.FlagToStringSlicePointer(p, cmd, syslogFlag)
+	syslog := flags.FlagToStringSliceValue(p, cmd, syslogFlag)
 	planId := flags.FlagToStringPointer(p, cmd, planIdFlag)
 	planName := flags.FlagToStringValue(p, cmd, planNameFlag)
 	version := flags.FlagToStringValue(p, cmd, versionFlag)
@@ -178,7 +183,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	if enableMonitoring == nil && monitoringInstanceId == nil && graphite == nil &&
 		metricsFrequency == nil && metricsPrefix == nil && plugin == nil &&
-		sgwAcl == nil && syslog == nil && planId == nil &&
+		sgwAcl == nil && planId == nil &&
 		planName == "" && version == "" {
 		return nil, &cliErr.EmptyUpdateError{}
 	}
@@ -204,23 +209,23 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 type openSearchClient interface {
-	PartialUpdateInstance(ctx context.Context, projectId, instanceId string) opensearch.ApiPartialUpdateInstanceRequest
-	ListOfferingsExecute(ctx context.Context, projectId string) (*opensearch.ListOfferingsResponse, error)
+	PartialUpdateInstance(ctx context.Context, projectId, region, instanceId string) opensearch.ApiPartialUpdateInstanceRequest
+	ListOfferings(ctx context.Context, projectId, region string) opensearch.ApiListOfferingsRequest
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient openSearchClient) (opensearch.ApiPartialUpdateInstanceRequest, error) {
-	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 
 	var planId *string
 	var err error
 
-	offerings, err := apiClient.ListOfferingsExecute(ctx, model.ProjectId)
+	offerings, err := apiClient.ListOfferings(ctx, model.ProjectId, model.Region).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get OpenSearch offerings: %w", err)
 	}
 
 	if model.PlanId == nil && model.PlanName != "" && model.Version != "" {
-		planId, err = opensearchUtils.LoadPlanId(model.PlanName, model.Version, offerings)
+		foundPlanId, err := opensearchUtils.LoadPlanId(model.PlanName, model.Version, offerings)
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 			if !errors.As(err, &dsaInvalidPlanError) {
@@ -228,13 +233,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient openSearchCl
 			}
 			return req, err
 		}
-	} else {
+		planId = &foundPlanId
+	} else if model.PlanId != nil {
 		// planId is not required for update operation
-		if model.PlanId != nil {
-			err := opensearchUtils.ValidatePlanId(*model.PlanId, offerings)
-			if err != nil {
-				return req, err
-			}
+		err := opensearchUtils.ValidatePlanId(*model.PlanId, offerings)
+		if err != nil {
+			return req, err
 		}
 		planId = model.PlanId
 	}

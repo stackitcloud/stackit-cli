@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/opensearch"
+	opensearch "github.com/stackitcloud/stackit-sdk-go/services/opensearch/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -115,7 +115,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *opensearch.APIClient) opensearch.ApiListInstancesRequest {
-	req := apiClient.ListInstances(ctx, model.ProjectId)
+	req := apiClient.DefaultAPI.ListInstances(ctx, model.ProjectId, model.Region)
 	return req
 }
 
@@ -132,9 +132,9 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, instances
 			instance := instances[i]
 			table.AddRow(
 				utils.PtrString(instance.InstanceId),
-				utils.PtrString(instance.Name),
-				utils.PtrString(instance.LastOperation.Type),
-				utils.PtrString(instance.LastOperation.State),
+				instance.Name,
+				instance.LastOperation.Type,
+				instance.LastOperation.State,
 			)
 		}
 		err := table.Display(p)

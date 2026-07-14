@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/opensearch"
+	opensearch "github.com/stackitcloud/stackit-sdk-go/services/opensearch/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -18,7 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/opensearch/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -115,7 +114,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *opensearch.APIClient) opensearch.ApiListOfferingsRequest {
-	req := apiClient.ListOfferings(ctx, model.ProjectId)
+	req := apiClient.DefaultAPI.ListOfferings(ctx, model.ProjectId, model.Region)
 	return req
 }
 
@@ -131,14 +130,14 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, plans []o
 		for i := range plans {
 			o := plans[i]
 			if o.Plans != nil {
-				for j := range *o.Plans {
-					plan := (*o.Plans)[j]
+				for j := range o.Plans {
+					plan := o.Plans[j]
 					table.AddRow(
-						utils.PtrString(o.Name),
-						utils.PtrString(o.Version),
-						utils.PtrString(plan.Id),
-						utils.PtrString(plan.Name),
-						utils.PtrString(plan.Description),
+						o.Name,
+						o.Version,
+						plan.Id,
+						plan.Name,
+						plan.Description,
 					)
 				}
 			}

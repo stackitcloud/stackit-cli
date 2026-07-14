@@ -7,24 +7,27 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/opensearch"
+	opensearch "github.com/stackitcloud/stackit-sdk-go/services/opensearch/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 type testCtxKey struct{}
 
-var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &opensearch.APIClient{}
-var testProjectId = uuid.NewString()
-var testInstanceId = uuid.NewString()
+var (
+	testCtx        = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient     = &opensearch.APIClient{DefaultAPI: &opensearch.DefaultAPIService{}}
+	testProjectId  = uuid.NewString()
+	testRegion     = "eu01"
+	testInstanceId = uuid.NewString()
+)
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
 		instanceIdFlag:            testInstanceId,
 	}
 	for _, mod := range mods {
@@ -37,6 +40,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId: testInstanceId,
@@ -48,7 +52,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *opensearch.ApiCreateCredentialsRequest)) opensearch.ApiCreateCredentialsRequest {
-	request := testClient.CreateCredentials(testCtx, testProjectId, testInstanceId)
+	request := testClient.DefaultAPI.CreateCredentials(testCtx, testProjectId, testRegion, testInstanceId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -154,7 +158,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, opensearch.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -165,8 +169,7 @@ func TestBuildRequest(t *testing.T) {
 
 func TestOutputResult(t *testing.T) {
 	type args struct {
-		outputFormat  string
-		showPassword  bool
+		model         inputModel
 		instanceLabel string
 		resp          *opensearch.CredentialsResponse
 	}
@@ -181,40 +184,20 @@ func TestOutputResult(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "set no raw in response",
-			args: args{
-				resp: &opensearch.CredentialsResponse{
-					Uri: utils.Ptr("https://opensearch.example.com"),
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "set empty raw in response",
-			args: args{
-				resp: &opensearch.CredentialsResponse{
-					Raw: &opensearch.RawCredentials{},
-					Uri: utils.Ptr("https://opensearch.example.com"),
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "set raw but no uri in response",
-			args: args{
-				resp: &opensearch.CredentialsResponse{
-					Raw: &opensearch.RawCredentials{
-						Credentials: &opensearch.Credentials{},
-					},
-				},
-			},
-			wantErr: true,
-		},
-		{
 			name: "set uri but no raw in response",
 			args: args{
 				resp: &opensearch.CredentialsResponse{
-					Uri: utils.Ptr("https://opensearch.example.com"),
+					Uri: "https://opensearch.example.com",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "empty response should not cause panic when password should be hidden",
+			args: args{
+				model: inputModel{
+					GlobalFlagModel: &globalflags.GlobalFlagModel{},
+					ShowPassword:    false,
 				},
 			},
 			wantErr: true,
@@ -224,9 +207,12 @@ func TestOutputResult(t *testing.T) {
 			args: args{
 				resp: &opensearch.CredentialsResponse{
 					Raw: &opensearch.RawCredentials{
-						Credentials: &opensearch.Credentials{},
+						Credentials: opensearch.Credentials{},
 					},
-					Uri: utils.Ptr("https://opensearch.example.com"),
+					Uri: "https://opensearch.example.com",
+				},
+				model: inputModel{
+					GlobalFlagModel: &globalflags.GlobalFlagModel{},
 				},
 			},
 			wantErr: false,
@@ -235,7 +221,7 @@ func TestOutputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.showPassword, tt.args.instanceLabel, tt.args.resp); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.model, tt.args.instanceLabel, tt.args.resp); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
