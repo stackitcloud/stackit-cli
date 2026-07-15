@@ -14,7 +14,7 @@ stackit beta vpn gateway status GATEWAY_ID [flags]
 
 ```
   Show the status of the gateway with the ID "xxx"
-  $ stackit beta vpn gateway describe xxx
+  $ stackit beta vpn gateway status xxx
 ```
 
 ### Options
