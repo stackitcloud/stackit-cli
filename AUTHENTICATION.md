@@ -114,7 +114,14 @@ Using this flow is less secure since the token is long-lived. You can provide th
    - Navigate to `Service Accounts` → Select account → `Federated Identity Providers`
    - [Configure a Federated Identity Provider](https://docs.stackit.cloud/platform/access-and-identity/service-accounts/how-tos/manage-service-account-federations/#create-a-federated-identity-provider) and the required assertions. For detailed assertion configuration per platform, see the [Terraform provider WIF guide](https://github.com/stackitcloud/terraform-provider-stackit/blob/main/docs/guides/workload_identity_federation.md).
 
-2. Configure authentication using environment variables:
+2. Configure authentication for `stackit auth activate-service-account` using one of the options below:
+
+   - Explicit flag: `--use-oidc` (takes precedence)
+   - Environment variable: `STACKIT_USE_OIDC=1`
+
+   If both are provided, the explicit flag value is used.
+
+   Example using environment variables:
 
    ```bash
    STACKIT_USE_OIDC=1

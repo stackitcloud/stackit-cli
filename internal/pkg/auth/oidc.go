@@ -22,6 +22,16 @@ func IsOIDCEnabled() bool {
 	return os.Getenv(EnvUseOIDC) == "1"
 }
 
+// IsOIDCEnabledWithOverride resolves OIDC mode using explicit input first and env fallback.
+// If useOIDC is not nil, its value is used directly; otherwise STACKIT_USE_OIDC is evaluated.
+func IsOIDCEnabledWithOverride(useOIDC *bool) bool {
+	if useOIDC != nil {
+		return *useOIDC
+	}
+
+	return IsOIDCEnabled()
+}
+
 func OIDCServiceAccountEmail() string {
 	return os.Getenv(EnvServiceAccountEmail)
 }

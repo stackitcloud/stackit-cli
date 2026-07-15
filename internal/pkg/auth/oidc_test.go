@@ -10,6 +10,10 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 )
 
+func boolPtr(v bool) *bool {
+	return &v
+}
+
 func TestIsEnabled(t *testing.T) {
 	tests := []struct {
 		value    string
@@ -38,6 +42,45 @@ func TestIsEnabled_Unset(t *testing.T) {
 	t.Setenv(auth.EnvUseOIDC, "")
 	if auth.IsOIDCEnabled() {
 		t.Error("IsOIDCEnabled() = true, want false when env var is empty")
+	}
+}
+
+func TestIsOIDCEnabledWithOverride(t *testing.T) {
+	tests := []struct {
+		description string
+		envUseOIDC  string
+		override    *bool
+		expected    bool
+	}{
+		{
+			description: "uses env when override is nil",
+			envUseOIDC:  "1",
+			override:    nil,
+			expected:    true,
+		},
+		{
+			description: "override true wins over env false",
+			envUseOIDC:  "0",
+			override:    boolPtr(true),
+			expected:    true,
+		},
+		{
+			description: "override false wins over env true",
+			envUseOIDC:  "1",
+			override:    boolPtr(false),
+			expected:    false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			t.Setenv(auth.EnvUseOIDC, tt.envUseOIDC)
+
+			got := auth.IsOIDCEnabledWithOverride(tt.override)
+			if got != tt.expected {
+				t.Errorf("IsOIDCEnabledWithOverride() = %v, want %v", got, tt.expected)
+			}
+		})
 	}
 }
 

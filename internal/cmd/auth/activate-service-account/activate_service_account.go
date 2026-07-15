@@ -25,6 +25,7 @@ const (
 	serviceAccountTokenFlag   = "service-account-token"
 	serviceAccountKeyPathFlag = "service-account-key-path"
 	privateKeyPathFlag        = "private-key-path"
+	useOIDCFlag               = "use-oidc"
 	onlyPrintAccessTokenFlag  = "only-print-access-token" // #nosec G101
 )
 
@@ -32,6 +33,7 @@ type inputModel struct {
 	ServiceAccountToken   string
 	ServiceAccountKeyPath string
 	PrivateKeyPath        string
+	UseOIDC               *bool
 	OnlyPrintAccessToken  bool
 }
 
@@ -60,8 +62,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				"$ stackit auth activate-service-account --service-account-token my-service-account-token --only-print-access-token",
 			),
 			examples.NewExample(
-				`Authenticate via Workload Identity Federation (OIDC) and print the short-lived access token. Set STACKIT_USE_OIDC=1 and STACKIT_SERVICE_ACCOUNT_EMAIL; no service account key file is required.`,
-				"$ STACKIT_USE_OIDC=1 STACKIT_SERVICE_ACCOUNT_EMAIL=ci@sa.stackit.cloud stackit auth activate-service-account --only-print-access-token",
+				`Authenticate via Workload Identity Federation (OIDC) and print the short-lived access token. Use --use-oidc to explicitly enable OIDC (takes precedence over STACKIT_USE_OIDC); no service account key file is required.`,
+				"$ STACKIT_SERVICE_ACCOUNT_EMAIL=ci@sa.stackit.cloud stackit auth activate-service-account --use-oidc --only-print-access-token",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -71,7 +73,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// use workload identity federation (OIDC) if enabled; no key file required
-			if auth.IsOIDCEnabled() {
+			if auth.IsOIDCEnabledWithOverride(model.UseOIDC) {
 				return runOIDCMode(params, model)
 			}
 
@@ -124,6 +126,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(serviceAccountTokenFlag, "", "Service account long-lived access token")
 	cmd.Flags().String(serviceAccountKeyPathFlag, "", "Service account key path")
 	cmd.Flags().String(privateKeyPathFlag, "", "RSA private key path. It takes precedence over the private key included in the service account key, if present")
+	cmd.Flags().Bool(useOIDCFlag, false, "Use Workload Identity Federation (OIDC). If set, this takes precedence over STACKIT_USE_OIDC")
 	cmd.Flags().Bool(onlyPrintAccessTokenFlag, false, "If this is set to true the credentials are not stored in either the keyring or a file")
 }
 
@@ -133,6 +136,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		ServiceAccountKeyPath: flags.FlagToStringValue(p, cmd, serviceAccountKeyPathFlag),
 		PrivateKeyPath:        flags.FlagToStringValue(p, cmd, privateKeyPathFlag),
 		OnlyPrintAccessToken:  flags.FlagToBoolValue(p, cmd, onlyPrintAccessTokenFlag),
+	}
+	if cmd.Flags().Changed(useOIDCFlag) {
+		useOIDC := flags.FlagToBoolValue(p, cmd, useOIDCFlag)
+		model.UseOIDC = &useOIDC
 	}
 
 	p.DebugInputModel(model)
