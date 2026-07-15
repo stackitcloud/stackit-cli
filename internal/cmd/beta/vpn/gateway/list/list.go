@@ -98,7 +98,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	if limit != nil && *limit < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    limitFlag,
-			Details: "must be grater than 0",
+			Details: "must be greater than 0",
 		}
 	}
 
