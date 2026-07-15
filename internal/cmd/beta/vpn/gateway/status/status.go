@@ -37,7 +37,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Show the status of the gateway with the ID "xxx"`,
-				"$ stackit beta vpn gateway describe xxx",
+				"$ stackit beta vpn gateway status xxx",
 			),
 		),
 		RunE: func(cmd *cobra.Command, inputArgs []string) error {
