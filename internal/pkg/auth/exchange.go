@@ -16,6 +16,11 @@ func ExchangeToken(ctx context.Context, idpClient *http.Client, accessToken, res
 		return "", fmt.Errorf("get idp token endpoint: %w", err)
 	}
 
+	return ExchangeTokenWithEndpoint(ctx, idpClient, tokenEndpoint, accessToken, resource)
+}
+
+// ExchangeTokenWithEndpoint exchanges an access token without reading authentication storage.
+func ExchangeTokenWithEndpoint(ctx context.Context, idpClient *http.Client, tokenEndpoint, accessToken, resource string) (string, error) {
 	req, err := buildRequestToExchangeTokens(ctx, tokenEndpoint, accessToken, resource)
 	if err != nil {
 		return "", fmt.Errorf("build request: %w", err)
