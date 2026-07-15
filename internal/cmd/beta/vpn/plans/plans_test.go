@@ -15,8 +15,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
-var regionFlag = globalflags.RegionFlag
-
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
@@ -28,8 +26,8 @@ var testLimit int64 = 10
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		// Project ID is not necessary for this request
-		regionFlag: testRegion,
-		limitFlag:  strconv.FormatInt(testLimit, 10),
+		globalflags.RegionFlag: testRegion,
+		limitFlag:              strconv.FormatInt(testLimit, 10),
 	}
 	for _, mod := range mods {
 		mod(flagValues)

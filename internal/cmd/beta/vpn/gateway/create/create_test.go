@@ -15,9 +15,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
-var regionFlag = globalflags.RegionFlag
-
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
@@ -36,8 +33,8 @@ var testBgpOverrideAdvertisedRoutes = "10.10.10.10/32"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag: testProjectId,
-		regionFlag:    testRegion,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
 
 		availabilityZoneTunnel1Flag:     testAvailabilityZoneTunnel1,
 		availabilityZoneTunnel2Flag:     testAvailabilityZoneTunnel2,
