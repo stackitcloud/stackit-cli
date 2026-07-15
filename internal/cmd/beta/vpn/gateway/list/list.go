@@ -67,9 +67,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Truncate output
-			items := utils.GetSliceFromPointer(&resp.Gateways)
-			if model.Limit != nil && len(items) > int(*model.Limit) {
-				items = items[:*model.Limit]
+			if model.Limit != nil && len(resp.Gateways) > int(*model.Limit) {
+				resp.Gateways = resp.Gateways[:*model.Limit]
 			}
 
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
@@ -77,7 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, items, projectLabel)
+			return outputResult(params.Printer, model.OutputFormat, resp.Gateways, projectLabel)
 		},
 	}
 	configureFlags(cmd)

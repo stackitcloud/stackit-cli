@@ -62,12 +62,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Truncate output
-			items := utils.GetSliceFromPointer(&resp.Plans)
-			if model.Limit != nil && len(items) > int(*model.Limit) {
-				items = items[:*model.Limit]
+			if model.Limit != nil && len(resp.Plans) > int(*model.Limit) {
+				resp.Plans = resp.Plans[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, items, model.Region)
+			return outputResult(params.Printer, model.OutputFormat, resp.Plans, model.Region)
 		},
 	}
 	configureFlags(cmd)

@@ -63,7 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			performanceClasses := utils.GetSliceFromPointer(&resp.PerformanceClasses)
+			performanceClasses := resp.PerformanceClasses
 
 			return outputResult(params.Printer, model.OutputFormat, projectLabel, performanceClasses)
 		},
