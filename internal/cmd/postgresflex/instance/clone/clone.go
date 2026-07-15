@@ -18,8 +18,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex/wait"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	wait "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api/wait"
 )
 
 const (
@@ -72,7 +72,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId)
+			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -85,7 +85,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				return err
 			}
@@ -98,7 +98,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Cloning instance", func() error {
-					_, err = wait.CreateInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.Region, instanceId).WaitWithContext(ctx)
+					_, err = wait.CreateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, instanceId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -151,18 +151,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-type PostgreSQLFlexClient interface {
-	CloneInstance(ctx context.Context, projectId, region, instanceId string) postgresflex.ApiCloneInstanceRequest
-	GetInstanceExecute(ctx context.Context, projectId, region, instanceId string) (*postgresflex.InstanceResponse, error)
-	ListStoragesExecute(ctx context.Context, projectId, region, flavorId string) (*postgresflex.ListStoragesResponse, error)
-}
-
-func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFlexClient) (postgresflex.ApiCloneInstanceRequest, error) {
+func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex.DefaultAPI) (postgresflex.ApiCloneInstanceRequest, error) {
 	req := apiClient.CloneInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 
 	var storages *postgresflex.ListStoragesResponse
 	if model.StorageClass != nil || model.StorageSize != nil {
-		currentInstance, err := apiClient.GetInstanceExecute(ctx, model.ProjectId, model.Region, model.InstanceId)
+		currentInstance, err := apiClient.GetInstance(ctx, model.ProjectId, model.Region, model.InstanceId).Execute()
 		if err != nil {
 			return req, fmt.Errorf("get PostgreSQL Flex instance: %w", err)
 		}
@@ -170,7 +164,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFl
 		currentInstanceStorageClass := currentInstance.Item.Storage.Class
 		currentInstanceStorageSize := currentInstance.Item.Storage.Size
 
-		storages, err = apiClient.ListStoragesExecute(ctx, model.ProjectId, model.Region, *validationFlavorId)
+		storages, err = apiClient.ListStorages(ctx, model.ProjectId, model.Region, *validationFlavorId).Execute()
 		if err != nil {
 			return req, fmt.Errorf("get PostgreSQL Flex storages: %w", err)
 		}
@@ -196,11 +190,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFl
 }
 
 func outputResult(p *print.Printer, outputFormat string, async bool, instanceLabel, instanceId string, resp *postgresflex.CloneInstanceResponse) error {
-	if resp == nil {
-		return fmt.Errorf("response not set")
-	}
-
 	return p.OutputResult(outputFormat, resp, func() error {
+		if resp == nil {
+			return fmt.Errorf("response not set")
+		}
 		operationState := "Cloned"
 		if async {
 			operationState = "Triggered cloning of"

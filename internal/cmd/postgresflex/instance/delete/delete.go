@@ -18,8 +18,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex/wait"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	wait "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api/wait"
 )
 
 const (
@@ -65,7 +65,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId)
+			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -77,7 +77,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			toDelete, toForceDelete, err := getNextOperations(ctx, model, apiClient)
+			toDelete, toForceDelete, err := getNextOperations(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				return err
 			}
@@ -93,7 +93,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				// Wait for async operation, if async mode not enabled
 				if !model.Async {
 					err := spinner.Run(params.Printer, "Deleting instance", func() error {
-						_, err = wait.DeleteInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId).WaitWithContext(ctx)
+						_, err = wait.DeleteInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId).WaitWithContext(ctx)
 						return err
 					})
 					if err != nil {
@@ -113,7 +113,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				// Wait for async operation, if async mode not enabled
 				if !model.Async {
 					err := spinner.Run(params.Printer, "Forcing deletion of instance", func() error {
-						_, err = wait.ForceDeleteInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId).WaitWithContext(ctx)
+						_, err = wait.ForceDeleteInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId).WaitWithContext(ctx)
 						return err
 					})
 					if err != nil {
@@ -163,22 +163,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildDeleteRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiDeleteInstanceRequest {
-	req := apiClient.DeleteInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
+	req := apiClient.DefaultAPI.DeleteInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 	return req
 }
 
 func buildForceDeleteRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiForceDeleteInstanceRequest {
-	req := apiClient.ForceDeleteInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
+	req := apiClient.DefaultAPI.ForceDeleteInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 	return req
 }
 
-type PostgreSQLFlexClient interface {
-	GetInstanceExecute(ctx context.Context, projectId, region, instanceId string) (*postgresflex.InstanceResponse, error)
-	ListVersionsExecute(ctx context.Context, projectId, region string) (*postgresflex.ListVersionsResponse, error)
-	GetUserExecute(ctx context.Context, projectId, region, instanceId, userId string) (*postgresflex.GetUserResponse, error)
-}
-
-func getNextOperations(ctx context.Context, model *inputModel, apiClient PostgreSQLFlexClient) (toDelete, toForceDelete bool, err error) {
+func getNextOperations(ctx context.Context, model *inputModel, apiClient postgresflex.DefaultAPI) (toDelete, toForceDelete bool, err error) {
 	instanceStatus, err := postgresflexUtils.GetInstanceStatus(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId)
 	if err != nil {
 		return false, false, fmt.Errorf("get PostgreSQL Flex instance status: %w", err)

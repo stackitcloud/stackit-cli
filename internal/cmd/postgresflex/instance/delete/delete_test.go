@@ -12,37 +12,32 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex/wait"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	wait "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api/wait"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &postgresflex.APIClient{}
+var testClient = &postgresflex.APIClient{DefaultAPI: &postgresflex.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 var testRegion = "eu01"
 
-type postgresFlexClientMocked struct {
+type mockSettings struct {
 	getInstanceFails bool
 	getInstanceResp  *postgresflex.InstanceResponse
 }
 
-func (c *postgresFlexClientMocked) GetInstanceExecute(_ context.Context, _, _, _ string) (*postgresflex.InstanceResponse, error) {
-	if c.getInstanceFails {
-		return nil, fmt.Errorf("get instance failed")
+func newAPIMockClient(c mockSettings) postgresflex.DefaultAPI {
+	return postgresflex.DefaultAPIServiceMock{
+		GetInstanceExecuteMock: utils.Ptr(func(_ postgresflex.ApiGetInstanceRequest) (*postgresflex.InstanceResponse, error) {
+			if c.getInstanceFails {
+				return nil, fmt.Errorf("get instance failed")
+			}
+			return c.getInstanceResp, nil
+		}),
 	}
-	return c.getInstanceResp, nil
-}
-
-func (c *postgresFlexClientMocked) ListVersionsExecute(_ context.Context, _, _ string) (*postgresflex.ListVersionsResponse, error) {
-	// Not used in testing
-	return nil, nil
-}
-func (c *postgresFlexClientMocked) GetUserExecute(_ context.Context, _, _, _, _ string) (*postgresflex.GetUserResponse, error) {
-	// Not used in testing
-	return nil, nil
 }
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
@@ -82,7 +77,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureDeleteRequest(mods ...func(request *postgresflex.ApiDeleteInstanceRequest)) postgresflex.ApiDeleteInstanceRequest {
-	request := testClient.DeleteInstance(testCtx, testProjectId, testRegion, testInstanceId)
+	request := testClient.DefaultAPI.DeleteInstance(testCtx, testProjectId, testRegion, testInstanceId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -90,7 +85,7 @@ func fixtureDeleteRequest(mods ...func(request *postgresflex.ApiDeleteInstanceRe
 }
 
 func fixtureForceDeleteRequest(mods ...func(request *postgresflex.ApiForceDeleteInstanceRequest)) postgresflex.ApiForceDeleteInstanceRequest {
-	request := testClient.ForceDeleteInstance(testCtx, testProjectId, testRegion, testInstanceId)
+	request := testClient.DefaultAPI.ForceDeleteInstance(testCtx, testProjectId, testRegion, testInstanceId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -194,7 +189,7 @@ func TestBuildDeleteRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, postgresflex.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -222,7 +217,7 @@ func TestBuildForceDeleteRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, postgresflex.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -237,8 +232,7 @@ func TestCheckIfInstanceIsDeleted(t *testing.T) {
 		model                 *inputModel
 		expectedToDelete      bool
 		expectedToForceDelete bool
-		getInstanceResponse   *postgresflex.InstanceResponse
-		getInstanceFails      bool
+		mockClientSettings    mockSettings
 		isValid               bool
 	}{
 		{
@@ -246,9 +240,11 @@ func TestCheckIfInstanceIsDeleted(t *testing.T) {
 			model:                 fixtureInputModel(),
 			expectedToDelete:      true,
 			expectedToForceDelete: false,
-			getInstanceResponse: &postgresflex.InstanceResponse{
-				Item: &postgresflex.Instance{
-					Status: utils.Ptr(wait.InstanceStateSuccess),
+			mockClientSettings: mockSettings{
+				getInstanceResp: &postgresflex.InstanceResponse{
+					Item: &postgresflex.Instance{
+						Status: utils.Ptr(wait.InstanceStateSuccess),
+					},
 				},
 			},
 			isValid: true,
@@ -260,9 +256,11 @@ func TestCheckIfInstanceIsDeleted(t *testing.T) {
 			}),
 			expectedToDelete:      true,
 			expectedToForceDelete: true,
-			getInstanceResponse: &postgresflex.InstanceResponse{
-				Item: &postgresflex.Instance{
-					Status: utils.Ptr(wait.InstanceStateSuccess),
+			mockClientSettings: mockSettings{
+				getInstanceResp: &postgresflex.InstanceResponse{
+					Item: &postgresflex.Instance{
+						Status: utils.Ptr(wait.InstanceStateSuccess),
+					},
 				},
 			},
 			isValid: true,
@@ -274,9 +272,11 @@ func TestCheckIfInstanceIsDeleted(t *testing.T) {
 			}),
 			expectedToDelete:      false,
 			expectedToForceDelete: true,
-			getInstanceResponse: &postgresflex.InstanceResponse{
-				Item: &postgresflex.Instance{
-					Status: utils.Ptr(wait.InstanceStateDeleted),
+			mockClientSettings: mockSettings{
+				getInstanceResp: &postgresflex.InstanceResponse{
+					Item: &postgresflex.Instance{
+						Status: utils.Ptr(wait.InstanceStateDeleted),
+					},
 				},
 			},
 			isValid: true,
@@ -284,29 +284,28 @@ func TestCheckIfInstanceIsDeleted(t *testing.T) {
 		{
 			description: "delete instance state Deleted",
 			model:       fixtureInputModel(),
-			getInstanceResponse: &postgresflex.InstanceResponse{
-				Item: &postgresflex.Instance{
-					Status: utils.Ptr(wait.InstanceStateDeleted),
+			mockClientSettings: mockSettings{
+				getInstanceResp: &postgresflex.InstanceResponse{
+					Item: &postgresflex.Instance{
+						Status: utils.Ptr(wait.InstanceStateDeleted),
+					},
 				},
 			},
 			isValid: false,
 		},
 		{
-			description:      "delete instance get instance fails",
-			model:            fixtureInputModel(),
-			getInstanceFails: true,
-			isValid:          false,
+			description: "delete instance get instance fails",
+			model:       fixtureInputModel(),
+			mockClientSettings: mockSettings{
+				getInstanceFails: true,
+			},
+			isValid: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &postgresFlexClientMocked{
-				getInstanceResp:  tt.getInstanceResponse,
-				getInstanceFails: tt.getInstanceFails,
-			}
-
-			toDelete, toForceDelete, err := getNextOperations(testCtx, tt.model, client)
+			toDelete, toForceDelete, err := getNextOperations(testCtx, tt.model, newAPIMockClient(tt.mockClientSettings))
 			if err != nil {
 				if !tt.isValid {
 					return

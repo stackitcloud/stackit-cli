@@ -20,7 +20,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
 )
 
 const (
@@ -89,18 +89,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiGetInstanceRequest {
-	req := apiClient.GetInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
+	req := apiClient.DefaultAPI.GetInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 	return req
 }
 
 func outputResult(p *print.Printer, outputFormat string, instance *postgresflex.Instance) error {
-	if instance == nil {
-		return fmt.Errorf("no response passed")
-	}
 	return p.OutputResult(outputFormat, instance, func() error {
+		if instance == nil {
+			return fmt.Errorf("no response passed")
+		}
 		acls := ""
 		if instance.HasAcl() && instance.Acl.HasItems() {
-			acls = utils.JoinStringPtr(instance.Acl.Items, ",")
+			acls = utils.JoinStringPtr(&instance.Acl.Items, ",")
 		}
 
 		instanceType, err := postgresflexUtils.GetInstanceType(utils.PtrValue(instance.Replicas))

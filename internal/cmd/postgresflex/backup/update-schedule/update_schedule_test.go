@@ -6,18 +6,17 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &postgresflex.APIClient{}
+var testClient = &postgresflex.APIClient{DefaultAPI: &postgresflex.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 var testSchedule = "0 0 * * *"
@@ -43,8 +42,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		InstanceId:     utils.Ptr(testInstanceId),
-		BackupSchedule: &testSchedule,
+		InstanceId:     testInstanceId,
+		BackupSchedule: testSchedule,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -54,7 +53,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 func fixturePayload(mods ...func(payload *postgresflex.UpdateBackupSchedulePayload)) postgresflex.UpdateBackupSchedulePayload {
 	payload := postgresflex.UpdateBackupSchedulePayload{
-		BackupSchedule: utils.Ptr(testSchedule),
+		BackupSchedule: testSchedule,
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -63,7 +62,7 @@ func fixturePayload(mods ...func(payload *postgresflex.UpdateBackupSchedulePaylo
 }
 
 func fixtureRequest(mods ...func(request *postgresflex.ApiUpdateBackupScheduleRequest)) postgresflex.ApiUpdateBackupScheduleRequest {
-	request := testClient.UpdateBackupSchedule(testCtx, testProjectId, testRegion, testInstanceId)
+	request := testClient.DefaultAPI.UpdateBackupSchedule(testCtx, testProjectId, testRegion, testInstanceId)
 	request = request.UpdateBackupSchedulePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -167,9 +166,9 @@ func TestBuildRequest(t *testing.T) {
 					ProjectId: testProjectId,
 					Region:    testRegion,
 				},
-				InstanceId: utils.Ptr(testInstanceId),
+				InstanceId: testInstanceId,
 			},
-			expectedRequest: testClient.UpdateBackupSchedule(testCtx, testProjectId, testRegion, testInstanceId).
+			expectedRequest: testClient.DefaultAPI.UpdateBackupSchedule(testCtx, testProjectId, testRegion, testInstanceId).
 				UpdateBackupSchedulePayload(postgresflex.UpdateBackupSchedulePayload{}),
 		},
 	}
@@ -180,7 +179,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, postgresflex.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 
@@ -68,7 +68,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get PostgreSQL Flex instances: %w", err)
 			}
-			if resp.Items == nil || len(*resp.Items) == 0 {
+			if len(resp.Items) == 0 {
 				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
@@ -77,7 +77,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				params.Printer.Info("No instances found for project %q\n", projectLabel)
 				return nil
 			}
-			instances := *resp.Items
+			instances := resp.Items
 
 			// Truncate output
 			if model.Limit != nil && len(instances) > int(*model.Limit) {
@@ -120,7 +120,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiListInstancesRequest {
-	req := apiClient.ListInstances(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.ListInstances(ctx, model.ProjectId, model.Region)
 	return req
 }
 
