@@ -100,6 +100,7 @@ func TestTokenFunc_StaticToken(t *testing.T) {
 	t.Setenv(auth.EnvGitHubRequestToken, "")
 	t.Setenv(auth.EnvAzureOIDCRequestURI, "")
 	t.Setenv(auth.EnvAzureAccessToken, "")
+	t.Setenv(auth.EnvFederatedTokenFile, "")
 
 	fn, err := auth.OIDCTokenFunc()
 	if err != nil {
@@ -123,6 +124,7 @@ func TestTokenFunc_GitHubActions(t *testing.T) {
 	defer srv.Close()
 
 	t.Setenv(auth.EnvServiceAccountFederatedToken, "")
+	t.Setenv(auth.EnvFederatedTokenFile, "")
 	t.Setenv(auth.EnvGitHubRequestURL, srv.URL)
 	t.Setenv(auth.EnvGitHubRequestToken, "gh-bearer-token")
 	t.Setenv(auth.EnvAzureOIDCRequestURI, "")
@@ -151,6 +153,7 @@ func TestTokenFunc_AzureDevOps(t *testing.T) {
 	defer srv.Close()
 
 	t.Setenv(auth.EnvServiceAccountFederatedToken, "")
+	t.Setenv(auth.EnvFederatedTokenFile, "")
 	t.Setenv(auth.EnvGitHubRequestURL, "")
 	t.Setenv(auth.EnvGitHubRequestToken, "")
 	t.Setenv(auth.EnvAzureOIDCRequestURI, srv.URL)
@@ -172,6 +175,7 @@ func TestTokenFunc_AzureDevOps(t *testing.T) {
 func TestTokenFunc_NoSource(t *testing.T) {
 	// All env vars absent → must return an actionable error, no panic.
 	t.Setenv(auth.EnvServiceAccountFederatedToken, "")
+	t.Setenv(auth.EnvFederatedTokenFile, "")
 	t.Setenv(auth.EnvGitHubRequestURL, "")
 	t.Setenv(auth.EnvGitHubRequestToken, "")
 	t.Setenv(auth.EnvAzureOIDCRequestURI, "")
@@ -186,6 +190,7 @@ func TestTokenFunc_NoSource(t *testing.T) {
 func TestTokenFunc_GitHubURL_NoToken(t *testing.T) {
 	// URL present but token absent → should fall through to Azure / error.
 	t.Setenv(auth.EnvServiceAccountFederatedToken, "")
+	t.Setenv(auth.EnvFederatedTokenFile, "")
 	t.Setenv(auth.EnvGitHubRequestURL, "https://example.com")
 	t.Setenv(auth.EnvGitHubRequestToken, "")
 	t.Setenv(auth.EnvAzureOIDCRequestURI, "")

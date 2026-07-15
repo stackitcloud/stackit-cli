@@ -12,6 +12,7 @@ const (
 	EnvUseOIDC                      = "STACKIT_USE_OIDC"
 	EnvServiceAccountEmail          = "STACKIT_SERVICE_ACCOUNT_EMAIL"
 	EnvServiceAccountFederatedToken = "STACKIT_SERVICE_ACCOUNT_FEDERATED_TOKEN" //nolint:gosec // linter false positive
+	EnvFederatedTokenFile           = "STACKIT_FEDERATED_TOKEN_FILE"
 	EnvGitHubRequestURL             = "ACTIONS_ID_TOKEN_REQUEST_URL"
 	EnvGitHubRequestToken           = "ACTIONS_ID_TOKEN_REQUEST_TOKEN" //nolint:gosec // linter false positive
 	EnvAzureOIDCRequestURI          = "SYSTEM_OIDCREQUESTURI"
@@ -38,8 +39,8 @@ func OIDCServiceAccountEmail() string {
 
 // TokenFunc returns the OIDCTokenFunc to use for Workload Identity Federation.
 // It checks the following token sources in order: STACKIT_SERVICE_ACCOUNT_FEDERATED_TOKEN,
-// GitHub Actions (ACTIONS_ID_TOKEN_REQUEST_URL + ACTIONS_ID_TOKEN_REQUEST_TOKEN), and
-// Azure DevOps (SYSTEM_OIDCREQUESTURI + SYSTEM_ACCESSTOKEN).
+// STACKIT_FEDERATED_TOKEN_FILE, GitHub Actions (ACTIONS_ID_TOKEN_REQUEST_URL +
+// ACTIONS_ID_TOKEN_REQUEST_TOKEN), and Azure DevOps (SYSTEM_OIDCREQUESTURI + SYSTEM_ACCESSTOKEN).
 // Returns an error if no source is detected.
 func OIDCTokenFunc() (oidcadapters.OIDCTokenFunc, error) {
 	// static token provided directly via env var
@@ -47,6 +48,11 @@ func OIDCTokenFunc() (oidcadapters.OIDCTokenFunc, error) {
 		return func(_ context.Context) (string, error) {
 			return token, nil
 		}, nil
+	}
+
+	// token read from filesystem path via env var
+	if tokenFilePath := os.Getenv(EnvFederatedTokenFile); tokenFilePath != "" {
+		return oidcadapters.ReadJWTFromFileSystem(tokenFilePath), nil
 	}
 
 	// GitHub Actions
@@ -65,10 +71,10 @@ func OIDCTokenFunc() (oidcadapters.OIDCTokenFunc, error) {
 
 	return nil, fmt.Errorf(
 		"%s is enabled but no OIDC token source was detected\n"+
-			"Provide the token via %s, or run in a supported CI environment:\n"+
+			"Provide the token via %s or %s, or run in a supported CI environment:\n"+
 			"  - GitHub Actions: grant 'id-token: write' permission; %s and %s are set automatically by the runner\n"+
 			"  - Azure DevOps:   pass 'SYSTEM_ACCESSTOKEN: $(System.AccessToken)' in your pipeline step",
-		EnvUseOIDC, EnvServiceAccountFederatedToken,
+		EnvUseOIDC, EnvServiceAccountFederatedToken, EnvFederatedTokenFile,
 		EnvGitHubRequestURL, EnvGitHubRequestToken,
 	)
 }

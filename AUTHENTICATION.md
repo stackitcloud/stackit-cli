@@ -128,4 +128,6 @@ Using this flow is less secure since the token is long-lived. You can provide th
    STACKIT_SERVICE_ACCOUNT_EMAIL=my-sa@sa.stackit.cloud
    # Optional: provide the OIDC token directly instead of auto-detecting it from the CI environment
    STACKIT_SERVICE_ACCOUNT_FEDERATED_TOKEN=<oidc-token>
+   # Optional: provide a file path containing the OIDC token
+   STACKIT_FEDERATED_TOKEN_FILE=/path/to/oidc-token.jwt
    ```

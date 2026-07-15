@@ -204,4 +204,3 @@ func TestStoreCustomEndpointFlags(t *testing.T) {
 		})
 	}
 }
-
