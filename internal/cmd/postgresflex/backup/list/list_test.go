@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 
 	"github.com/google/go-cmp/cmp"
@@ -176,8 +177,9 @@ func TestBuildRequest(t *testing.T) {
 
 func Test_outputResult(t *testing.T) {
 	type args struct {
-		outputFormat string
-		backups      []postgresflex.Backup
+		outputFormat  string
+		instanceLabel string
+		backups       []postgresflex.Backup
 	}
 	tests := []struct {
 		name    string
@@ -185,8 +187,8 @@ func Test_outputResult(t *testing.T) {
 		wantErr bool
 	}{
 		{"empty", args{}, false},
-		{"standard", args{outputFormat: "", backups: []postgresflex.Backup{}}, false},
-		{"complete", args{outputFormat: "", backups: []postgresflex.Backup{
+		{"standard", args{outputFormat: "", instanceLabel: "label", backups: []postgresflex.Backup{}}, false},
+		{"complete", args{outputFormat: "", instanceLabel: "label", backups: []postgresflex.Backup{
 			{
 				EndTime:   utils.Ptr(time.Now().Format(time.RFC3339)),
 				Id:        utils.Ptr("id"),
@@ -211,7 +213,7 @@ func Test_outputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.backups); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.instanceLabel, tt.args.backups); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

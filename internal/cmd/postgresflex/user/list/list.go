@@ -69,15 +69,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get PostgreSQL Flex users: %w", err)
 			}
-			if len(resp.Items) == 0 {
-				instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
-					instanceLabel = model.InstanceId
-				}
-				params.Printer.Info("No users found for instance %q\n", instanceLabel)
-				return nil
-			}
 			users := resp.Items
 
 			// Truncate output
@@ -85,7 +76,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				users = users[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, users)
+			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+				instanceLabel = model.InstanceId
+			}
+			return outputResult(params.Printer, model.OutputFormat, instanceLabel, users)
 		},
 	}
 
@@ -130,8 +126,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresfle
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, users []postgresflex.ListUsersResponseItem) error {
+func outputResult(p *print.Printer, outputFormat, instanceLabel string, users []postgresflex.ListUsersResponseItem) error {
 	return p.OutputResult(outputFormat, users, func() error {
+		if len(users) == 0 {
+			p.Outputf("No users found for instance %q\n", instanceLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("ID", "USERNAME")
 		for i := range users {

@@ -80,10 +80,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get backups for PostgreSQL Flex instance %q: %w", instanceLabel, err)
 			}
-			if len(resp.Items) == 0 {
-				params.Printer.Outputf("No backups found for instance %q", instanceLabel)
-				return nil
-			}
 			backups := resp.Items
 
 			// Truncate output
@@ -91,7 +87,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				backups = backups[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, backups)
+			return outputResult(params.Printer, model.OutputFormat, instanceLabel, backups)
 		},
 	}
 
@@ -133,8 +129,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresfle
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, backups []postgresflex.Backup) error {
+func outputResult(p *print.Printer, outputFormat, instanceLabel string, backups []postgresflex.Backup) error {
 	return p.OutputResult(outputFormat, backups, func() error {
+		if len(backups) == 0 {
+			p.Outputf("No backups found for instance %q", instanceLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("ID", "CREATED AT", "EXPIRES AT", "BACKUP SIZE")
 		for i := range backups {

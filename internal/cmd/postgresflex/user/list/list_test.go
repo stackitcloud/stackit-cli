@@ -167,8 +167,9 @@ func TestBuildRequest(t *testing.T) {
 
 func Test_outputResult(t *testing.T) {
 	type args struct {
-		outputFormat string
-		users        []postgresflex.ListUsersResponseItem
+		outputFormat  string
+		instanceLabel string
+		users         []postgresflex.ListUsersResponseItem
 	}
 	tests := []struct {
 		name    string
@@ -177,7 +178,7 @@ func Test_outputResult(t *testing.T) {
 	}{
 		{"empty", args{}, false},
 		{"standard", args{users: []postgresflex.ListUsersResponseItem{{}}}, false},
-		{"complete", args{users: []postgresflex.ListUsersResponseItem{{
+		{"complete", args{instanceLabel: "label", users: []postgresflex.ListUsersResponseItem{{
 			Id:       new(string),
 			Username: new(string),
 		}}}, false},
@@ -185,7 +186,7 @@ func Test_outputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.users); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.instanceLabel, tt.args.users); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

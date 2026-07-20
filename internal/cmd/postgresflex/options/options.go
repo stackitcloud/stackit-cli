@@ -230,8 +230,7 @@ func buildStoragesTable(storagesResp postgresflex.ListStoragesResponse) tables.T
 	table := tables.NewTable()
 	table.SetTitle("Storages")
 	table.SetHeader("MINIMUM", "MAXIMUM", "STORAGE CLASS")
-	for i := range storagesResp.StorageClasses {
-		sc := storagesResp.StorageClasses[i]
+	for _, sc := range storagesResp.StorageClasses {
 		table.AddRow(
 			utils.PtrString(storagesResp.StorageRange.Min),
 			utils.PtrString(storagesResp.StorageRange.Max),

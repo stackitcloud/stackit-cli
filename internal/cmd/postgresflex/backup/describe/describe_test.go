@@ -250,17 +250,40 @@ func Test_outputResult(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{"empty", args{}, true},
-		{"standard", args{outputFormat: "", backup: &postgresflex.Backup{StartTime: utils.Ptr(time.Now().Format(time.RFC3339))}}, false},
-		{"complete", args{outputFormat: "", backup: &postgresflex.Backup{
-			EndTime:   utils.Ptr(time.Now().Format(time.RFC3339)),
-			Id:        utils.Ptr("id"),
-			Labels:    []string{"foo", "bar", "baz"},
-			Name:      utils.Ptr("name"),
-			Options:   &map[string]string{"test1": "test1", "test2": "test2"},
-			Size:      utils.Ptr(int64(42)),
-			StartTime: utils.Ptr(time.Now().Format(time.RFC3339)),
-		}}, false},
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: true,
+		},
+		{
+			name: "standard",
+			args: args{
+				outputFormat: "",
+				backup: &postgresflex.Backup{
+					StartTime: utils.Ptr(time.Now().Format(time.RFC3339)),
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "complete",
+			args: args{
+				outputFormat: "",
+				backup: &postgresflex.Backup{
+					EndTime: utils.Ptr(time.Now().Format(time.RFC3339)),
+					Id:      utils.Ptr("id"),
+					Labels: []string{"foo",
+						"bar",
+						"baz",
+					},
+					Name:      utils.Ptr("name"),
+					Options:   &map[string]string{"test1": "test1", "test2": "test2"},
+					Size:      utils.Ptr(int64(42)),
+					StartTime: utils.Ptr(time.Now().Format(time.RFC3339)),
+				},
+			},
+			wantErr: false,
+		},
 	}
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
