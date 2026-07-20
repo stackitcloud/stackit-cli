@@ -66,6 +66,7 @@ stackit config unset [flags]
       --sqlserverflex-custom-endpoint                       SQLServer Flex API base URL. If unset, uses the default base URL
       --token-custom-endpoint                               Custom token endpoint of the Service Account API, which is used to request access tokens when the service account authentication is activated. Not relevant for user authentication.
       --verbosity                                           Verbosity of the CLI
+      --vpn-custom-endpoint                                 VPN API base URL. If unset, uses the default base URL
 ```
 
 ### SEE ALSO

@@ -1,19 +1,26 @@
-## stackit beta vpn
+## stackit beta vpn gateway status
 
-Provides functionality for VPN
+Shows the status of a gateway
 
 ### Synopsis
 
-Provides functionality for VPN.
+Shows the status of a gateway.
 
 ```
-stackit beta vpn [flags]
+stackit beta vpn gateway status GATEWAY_ID [flags]
+```
+
+### Examples
+
+```
+  Show the status of the gateway with the ID "xxx"
+  $ stackit beta vpn gateway status xxx
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta vpn"
+  -h, --help   Help for "stackit beta vpn gateway status"
 ```
 
 ### Options inherited from parent commands
@@ -29,9 +36,5 @@ stackit beta vpn [flags]
 
 ### SEE ALSO
 
-* [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
-* [stackit beta vpn connection](./stackit_beta_vpn_connection.md)	 - Provides functionality for VPN connections
 * [stackit beta vpn gateway](./stackit_beta_vpn_gateway.md)	 - Provides functionality for VPN gateway
-* [stackit beta vpn plans](./stackit_beta_vpn_plans.md)	 - Lists all available plans
-* [stackit beta vpn quotas](./stackit_beta_vpn_quotas.md)	 - Lists all vpn quotas
 

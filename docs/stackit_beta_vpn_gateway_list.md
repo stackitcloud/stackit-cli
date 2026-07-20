@@ -1,19 +1,30 @@
-## stackit beta vpn
+## stackit beta vpn gateway list
 
-Provides functionality for VPN
+Lists all vpn gateways
 
 ### Synopsis
 
-Provides functionality for VPN.
+Lists all vpn gateways.
 
 ```
-stackit beta vpn [flags]
+stackit beta vpn gateway list [flags]
+```
+
+### Examples
+
+```
+  List all vpn gateways
+  $ stackit beta vpn gateway list
+
+  List up to 4 vpn gateways
+  $ stackit beta vpn gateway list --limit 4
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta vpn"
+  -h, --help        Help for "stackit beta vpn gateway list"
+      --limit int   Maximum number of entries to list
 ```
 
 ### Options inherited from parent commands
@@ -29,9 +40,5 @@ stackit beta vpn [flags]
 
 ### SEE ALSO
 
-* [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
-* [stackit beta vpn connection](./stackit_beta_vpn_connection.md)	 - Provides functionality for VPN connections
 * [stackit beta vpn gateway](./stackit_beta_vpn_gateway.md)	 - Provides functionality for VPN gateway
-* [stackit beta vpn plans](./stackit_beta_vpn_plans.md)	 - Lists all available plans
-* [stackit beta vpn quotas](./stackit_beta_vpn_quotas.md)	 - Lists all vpn quotas
 

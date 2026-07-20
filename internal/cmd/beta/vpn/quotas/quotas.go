@@ -1,38 +1,44 @@
-package list
+package quotas
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
-	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
+
+	vpn "github.com/stackitcloud/stackit-sdk-go/services/vpn/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sfs/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/vpn/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+)
+
+const (
+	limitFlag = "limit"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
+	Limit *int64
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "list",
-		Short: "Lists all performances classes available",
-		Long:  "Lists all performances classes available.",
+		Use:   "quotas",
+		Short: "Lists all vpn quotas",
+		Long:  "Lists all vpn quotas.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all performances classes`,
-				"$ stackit beta sfs performance-class list",
+				`List all vpn quotas`,
+				"$ stackit beta vpn quotas",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -49,26 +55,26 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			resp, err := buildRequest(ctx, apiClient).Execute()
+			req := buildRequest(ctx, model, apiClient)
+			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("list performance-class: %w", err)
+				return fmt.Errorf("list vpn quotas: %w", err)
 			}
 
-			// Get projectLabel
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-			if err != nil {
-				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-				projectLabel = model.ProjectId
-			} else if projectLabel == "" {
+			if err != nil || projectLabel == "" {
 				projectLabel = model.ProjectId
 			}
 
-			performanceClasses := resp.PerformanceClasses
-
-			return outputResult(params.Printer, model.OutputFormat, projectLabel, performanceClasses)
+			return outputResult(params.Printer, model.OutputFormat, resp, projectLabel)
 		},
 	}
+	configureFlags(cmd)
 	return cmd
+}
+
+func configureFlags(cmd *cobra.Command) {
+	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
@@ -77,34 +83,38 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		return nil, &errors.ProjectIdError{}
 	}
 
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
+	if limit != nil && *limit < 1 {
+		return nil, &errors.FlagValidationError{
+			Flag:    limitFlag,
+			Details: "must be greater than 0",
+		}
+	}
+
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
+		Limit:           limit,
 	}
 
 	p.DebugInputModel(model)
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, apiClient *sfs.APIClient) sfs.ApiListPerformanceClassesRequest {
-	return apiClient.DefaultAPI.ListPerformanceClasses(ctx)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *vpn.APIClient) vpn.ApiListQuotasRequest {
+	return apiClient.DefaultAPI.ListQuotas(ctx, model.ProjectId, model.Region)
 }
 
-func outputResult(p *print.Printer, outputFormat, projectLabel string, performanceClasses []sfs.PerformanceClass) error {
-	return p.OutputResult(outputFormat, performanceClasses, func() error {
-		if len(performanceClasses) == 0 {
-			p.Outputf("No performance classes found for project %q\n", projectLabel)
+func outputResult(p *print.Printer, outputFormat string, quota *vpn.QuotaListResponse, projectLabel string) error {
+	return p.OutputResult(outputFormat, quota, func() error {
+		if quota == nil {
+			p.Info("No quotas for %q\n", projectLabel)
 			return nil
 		}
 
 		table := tables.NewTable()
-		table.SetHeader("NAME", "IOPS", "THROUGHPUT")
-		for _, performanceClass := range performanceClasses {
-			table.AddRow(
-				utils.PtrString(performanceClass.Name),
-				utils.PtrString(performanceClass.Iops),
-				utils.PtrString(performanceClass.Throughput),
-			)
-		}
+		table.SetHeader("NAME", "LIMIT", "CURRENT USAGE")
+
+		table.AddRow("Gateway Instances", quota.Quotas.Gateways.Limit, quota.Quotas.Gateways.Usage)
 		p.Outputln(table.Render())
 		return nil
 	})
