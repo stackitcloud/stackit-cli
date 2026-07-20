@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
 )
 
 var (
@@ -25,7 +25,7 @@ const (
 	testRegion       = "eu01"
 )
 
-type postgresFlexClientMocked struct {
+type mockSettings struct {
 	listVersionsFails bool
 	listVersionsResp  *postgresflex.ListVersionsResponse
 	getInstanceFails  bool
@@ -34,25 +34,27 @@ type postgresFlexClientMocked struct {
 	getUserResp       *postgresflex.GetUserResponse
 }
 
-func (m *postgresFlexClientMocked) ListVersionsExecute(_ context.Context, _, _ string) (*postgresflex.ListVersionsResponse, error) {
-	if m.listVersionsFails {
-		return nil, fmt.Errorf("could not list versions")
+func newAPIMockClient(s mockSettings) postgresflex.DefaultAPI {
+	return postgresflex.DefaultAPIServiceMock{
+		ListVersionsExecuteMock: utils.Ptr(func(_ postgresflex.ApiListVersionsRequest) (*postgresflex.ListVersionsResponse, error) {
+			if s.listVersionsFails {
+				return nil, fmt.Errorf("could not list versions")
+			}
+			return s.listVersionsResp, nil
+		}),
+		GetInstanceExecuteMock: utils.Ptr(func(_ postgresflex.ApiGetInstanceRequest) (*postgresflex.InstanceResponse, error) {
+			if s.getInstanceFails {
+				return nil, fmt.Errorf("could not get instance")
+			}
+			return s.getInstanceResp, nil
+		}),
+		GetUserExecuteMock: utils.Ptr(func(_ postgresflex.ApiGetUserRequest) (*postgresflex.GetUserResponse, error) {
+			if s.getUserFails {
+				return nil, fmt.Errorf("could not get user")
+			}
+			return s.getUserResp, nil
+		}),
 	}
-	return m.listVersionsResp, nil
-}
-
-func (m *postgresFlexClientMocked) GetInstanceExecute(_ context.Context, _, _, _ string) (*postgresflex.InstanceResponse, error) {
-	if m.getInstanceFails {
-		return nil, fmt.Errorf("could not get instance")
-	}
-	return m.getInstanceResp, nil
-}
-
-func (m *postgresFlexClientMocked) GetUserExecute(_ context.Context, _, _, _, _ string) (*postgresflex.GetUserResponse, error) {
-	if m.getUserFails {
-		return nil, fmt.Errorf("could not get user")
-	}
-	return m.getUserResp, nil
 }
 
 func TestValidateStorage(t *testing.T) {
@@ -68,7 +70,7 @@ func TestValidateStorage(t *testing.T) {
 			storageClass: utils.Ptr("foo"),
 			storageSize:  utils.Ptr(int64(10)),
 			storages: &postgresflex.ListStoragesResponse{
-				StorageClasses: &[]string{"bar-1", "bar-2", "foo"},
+				StorageClasses: []string{"bar-1", "bar-2", "foo"},
 				StorageRange: &postgresflex.StorageRange{
 					Min: utils.Ptr(int64(5)),
 					Max: utils.Ptr(int64(20)),
@@ -88,7 +90,7 @@ func TestValidateStorage(t *testing.T) {
 			storageClass: utils.Ptr("foo"),
 			storageSize:  utils.Ptr(int64(1)),
 			storages: &postgresflex.ListStoragesResponse{
-				StorageClasses: &[]string{"bar-1", "bar-2", "foo"},
+				StorageClasses: []string{"bar-1", "bar-2", "foo"},
 				StorageRange: &postgresflex.StorageRange{
 					Min: utils.Ptr(int64(5)),
 					Max: utils.Ptr(int64(20)),
@@ -101,7 +103,7 @@ func TestValidateStorage(t *testing.T) {
 			storageClass: utils.Ptr("foo"),
 			storageSize:  utils.Ptr(int64(200)),
 			storages: &postgresflex.ListStoragesResponse{
-				StorageClasses: &[]string{"bar-1", "bar-2", "foo"},
+				StorageClasses: []string{"bar-1", "bar-2", "foo"},
 				StorageRange: &postgresflex.StorageRange{
 					Min: utils.Ptr(int64(5)),
 					Max: utils.Ptr(int64(20)),
@@ -114,7 +116,7 @@ func TestValidateStorage(t *testing.T) {
 			storageClass: utils.Ptr("foo"),
 			storageSize:  utils.Ptr(int64(5)),
 			storages: &postgresflex.ListStoragesResponse{
-				StorageClasses: &[]string{"bar-1", "bar-2", "foo"},
+				StorageClasses: []string{"bar-1", "bar-2", "foo"},
 				StorageRange: &postgresflex.StorageRange{
 					Min: utils.Ptr(int64(5)),
 					Max: utils.Ptr(int64(20)),
@@ -127,7 +129,7 @@ func TestValidateStorage(t *testing.T) {
 			storageClass: utils.Ptr("foo"),
 			storageSize:  utils.Ptr(int64(20)),
 			storages: &postgresflex.ListStoragesResponse{
-				StorageClasses: &[]string{"bar-1", "bar-2", "foo"},
+				StorageClasses: []string{"bar-1", "bar-2", "foo"},
 				StorageRange: &postgresflex.StorageRange{
 					Min: utils.Ptr(int64(5)),
 					Max: utils.Ptr(int64(20)),
@@ -140,7 +142,7 @@ func TestValidateStorage(t *testing.T) {
 			storageClass: utils.Ptr("foo"),
 			storageSize:  utils.Ptr(int64(10)),
 			storages: &postgresflex.ListStoragesResponse{
-				StorageClasses: &[]string{"bar-1", "bar-2", "bar-3"},
+				StorageClasses: []string{"bar-1", "bar-2", "bar-3"},
 				StorageRange: &postgresflex.StorageRange{
 					Min: utils.Ptr(int64(5)),
 					Max: utils.Ptr(int64(20)),
@@ -167,13 +169,13 @@ func TestValidateFlavorId(t *testing.T) {
 	tests := []struct {
 		description string
 		flavorId    string
-		flavors     *[]postgresflex.Flavor
+		flavors     []postgresflex.Flavor
 		isValid     bool
 	}{
 		{
 			description: "base",
 			flavorId:    "foo",
-			flavors: &[]postgresflex.Flavor{
+			flavors: []postgresflex.Flavor{
 				{Id: utils.Ptr("bar-1")},
 				{Id: utils.Ptr("bar-2")},
 				{Id: utils.Ptr("foo")},
@@ -189,13 +191,13 @@ func TestValidateFlavorId(t *testing.T) {
 		{
 			description: "no flavors",
 			flavorId:    "foo",
-			flavors:     &[]postgresflex.Flavor{},
+			flavors:     []postgresflex.Flavor{},
 			isValid:     false,
 		},
 		{
 			description: "nil flavor id",
 			flavorId:    "foo",
-			flavors: &[]postgresflex.Flavor{
+			flavors: []postgresflex.Flavor{
 				{Id: utils.Ptr("bar-1")},
 				{Id: nil},
 				{Id: utils.Ptr("foo")},
@@ -205,7 +207,7 @@ func TestValidateFlavorId(t *testing.T) {
 		{
 			description: "invalid flavor",
 			flavorId:    "foo",
-			flavors: &[]postgresflex.Flavor{
+			flavors: []postgresflex.Flavor{
 				{Id: utils.Ptr("bar-1")},
 				{Id: utils.Ptr("bar-2")},
 				{Id: utils.Ptr("bar-3")},
@@ -232,7 +234,7 @@ func TestLoadFlavorId(t *testing.T) {
 		description    string
 		cpu            int64
 		ram            int64
-		flavors        *[]postgresflex.Flavor
+		flavors        []postgresflex.Flavor
 		isValid        bool
 		expectedOutput *string
 	}{
@@ -240,7 +242,7 @@ func TestLoadFlavorId(t *testing.T) {
 			description: "base",
 			cpu:         2,
 			ram:         4,
-			flavors: &[]postgresflex.Flavor{
+			flavors: []postgresflex.Flavor{
 				{
 					Id:     utils.Ptr("bar-1"),
 					Cpu:    utils.Ptr(int64(2)),
@@ -271,14 +273,14 @@ func TestLoadFlavorId(t *testing.T) {
 			description: "no flavors",
 			cpu:         2,
 			ram:         4,
-			flavors:     &[]postgresflex.Flavor{},
+			flavors:     []postgresflex.Flavor{},
 			isValid:     false,
 		},
 		{
 			description: "flavors with details missing",
 			cpu:         2,
 			ram:         4,
-			flavors: &[]postgresflex.Flavor{
+			flavors: []postgresflex.Flavor{
 				{
 					Id:     utils.Ptr("bar-1"),
 					Cpu:    nil,
@@ -302,7 +304,7 @@ func TestLoadFlavorId(t *testing.T) {
 			description: "match with nil id",
 			cpu:         2,
 			ram:         4,
-			flavors: &[]postgresflex.Flavor{
+			flavors: []postgresflex.Flavor{
 				{
 					Id:     utils.Ptr("bar-1"),
 					Cpu:    utils.Ptr(int64(2)),
@@ -325,7 +327,7 @@ func TestLoadFlavorId(t *testing.T) {
 			description: "invalid settings",
 			cpu:         2,
 			ram:         4,
-			flavors: &[]postgresflex.Flavor{
+			flavors: []postgresflex.Flavor{
 				{
 					Id:     utils.Ptr("bar-1"),
 					Cpu:    utils.Ptr(int64(2)),
@@ -368,29 +370,34 @@ func TestLoadFlavorId(t *testing.T) {
 
 func TestGetLatestPostgreSQLVersion(t *testing.T) {
 	tests := []struct {
-		description       string
-		listVersionsFails bool
-		listVersionsResp  *postgresflex.ListVersionsResponse
-		isValid           bool
-		expectedOutput    string
+		description        string
+		mockClientSettings mockSettings
+		isValid            bool
+		expectedOutput     string
 	}{
 		{
 			description: "base",
-			listVersionsResp: &postgresflex.ListVersionsResponse{
-				Versions: &[]string{"8", "10", "9"},
+			mockClientSettings: mockSettings{
+				listVersionsResp: &postgresflex.ListVersionsResponse{
+					Versions: []string{"8", "10", "9"},
+				},
 			},
 			isValid:        true,
 			expectedOutput: "10",
 		},
 		{
-			description:       "get instance fails",
-			listVersionsFails: true,
-			isValid:           false,
+			description: "get instance fails",
+			mockClientSettings: mockSettings{
+				listVersionsFails: true,
+			},
+			isValid: false,
 		},
 		{
 			description: "no versions",
-			listVersionsResp: &postgresflex.ListVersionsResponse{
-				Versions: &[]string{},
+			mockClientSettings: mockSettings{
+				listVersionsResp: &postgresflex.ListVersionsResponse{
+					Versions: []string{},
+				},
 			},
 			isValid: false,
 		},
@@ -398,12 +405,7 @@ func TestGetLatestPostgreSQLVersion(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &postgresFlexClientMocked{
-				listVersionsFails: tt.listVersionsFails,
-				listVersionsResp:  tt.listVersionsResp,
-			}
-
-			output, err := GetLatestPostgreSQLVersion(context.Background(), client, testProjectId, testRegion)
+			output, err := GetLatestPostgreSQLVersion(context.Background(), newAPIMockClient(tt.mockClientSettings), testProjectId, testRegion)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -423,37 +425,35 @@ func TestGetLatestPostgreSQLVersion(t *testing.T) {
 
 func TestGetInstanceName(t *testing.T) {
 	tests := []struct {
-		description      string
-		getInstanceFails bool
-		getInstanceResp  *postgresflex.InstanceResponse
-		isValid          bool
-		expectedOutput   string
+		description        string
+		mockClientSettings mockSettings
+		isValid            bool
+		expectedOutput     string
 	}{
 		{
 			description: "base",
-			getInstanceResp: &postgresflex.InstanceResponse{
-				Item: &postgresflex.Instance{
-					Name: utils.Ptr(testInstanceName),
+			mockClientSettings: mockSettings{
+				getInstanceResp: &postgresflex.InstanceResponse{
+					Item: &postgresflex.Instance{
+						Name: utils.Ptr(testInstanceName),
+					},
 				},
 			},
 			isValid:        true,
 			expectedOutput: testInstanceName,
 		},
 		{
-			description:      "get instance fails",
-			getInstanceFails: true,
-			isValid:          false,
+			description: "get instance fails",
+			mockClientSettings: mockSettings{
+				getInstanceFails: true,
+			},
+			isValid: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &postgresFlexClientMocked{
-				getInstanceFails: tt.getInstanceFails,
-				getInstanceResp:  tt.getInstanceResp,
-			}
-
-			output, err := GetInstanceName(context.Background(), client, testProjectId, testRegion, testInstanceId)
+			output, err := GetInstanceName(context.Background(), newAPIMockClient(tt.mockClientSettings), testProjectId, testRegion, testInstanceId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -473,37 +473,35 @@ func TestGetInstanceName(t *testing.T) {
 
 func TestGetInstanceStatus(t *testing.T) {
 	tests := []struct {
-		description      string
-		getInstanceFails bool
-		getInstanceResp  *postgresflex.InstanceResponse
-		isValid          bool
-		expectedOutput   string
+		description        string
+		mockClientSettings mockSettings
+		isValid            bool
+		expectedOutput     string
 	}{
 		{
 			description: "base",
-			getInstanceResp: &postgresflex.InstanceResponse{
-				Item: &postgresflex.Instance{
-					Status: utils.Ptr(testStatus),
+			mockClientSettings: mockSettings{
+				getInstanceResp: &postgresflex.InstanceResponse{
+					Item: &postgresflex.Instance{
+						Status: utils.Ptr(testStatus),
+					},
 				},
 			},
 			isValid:        true,
 			expectedOutput: testStatus,
 		},
 		{
-			description:      "get instance fails",
-			getInstanceFails: true,
-			isValid:          false,
+			description: "get instance fails",
+			mockClientSettings: mockSettings{
+				getInstanceFails: true,
+			},
+			isValid: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &postgresFlexClientMocked{
-				getInstanceFails: tt.getInstanceFails,
-				getInstanceResp:  tt.getInstanceResp,
-			}
-
-			output, err := GetInstanceStatus(context.Background(), client, testProjectId, testRegion, testInstanceId)
+			output, err := GetInstanceStatus(context.Background(), newAPIMockClient(tt.mockClientSettings), testProjectId, testRegion, testInstanceId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -523,37 +521,35 @@ func TestGetInstanceStatus(t *testing.T) {
 
 func TestGetUserName(t *testing.T) {
 	tests := []struct {
-		description    string
-		getUserFails   bool
-		getUserResp    *postgresflex.GetUserResponse
-		isValid        bool
-		expectedOutput string
+		description        string
+		mockClientSettings mockSettings
+		isValid            bool
+		expectedOutput     string
 	}{
 		{
 			description: "base",
-			getUserResp: &postgresflex.GetUserResponse{
-				Item: &postgresflex.UserResponse{
-					Username: utils.Ptr(testUserName),
+			mockClientSettings: mockSettings{
+				getUserResp: &postgresflex.GetUserResponse{
+					Item: &postgresflex.UserResponse{
+						Username: utils.Ptr(testUserName),
+					},
 				},
 			},
 			isValid:        true,
 			expectedOutput: testUserName,
 		},
 		{
-			description:  "get user fails",
-			getUserFails: true,
-			isValid:      false,
+			description: "get user fails",
+			mockClientSettings: mockSettings{
+				getUserFails: true,
+			},
+			isValid: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &postgresFlexClientMocked{
-				getUserFails: tt.getUserFails,
-				getUserResp:  tt.getUserResp,
-			}
-
-			output, err := GetUserName(context.Background(), client, testProjectId, testRegion, testInstanceId, testUserId)
+			output, err := GetUserName(context.Background(), newAPIMockClient(tt.mockClientSettings), testProjectId, testRegion, testInstanceId, testUserId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -574,7 +570,7 @@ func TestGetUserName(t *testing.T) {
 func TestGetInstanceType(t *testing.T) {
 	tests := []struct {
 		description    string
-		numReplicas    int64
+		numReplicas    int32
 		expectedOutput string
 		isValid        bool
 	}{

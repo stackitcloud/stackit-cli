@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -29,7 +29,7 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 
-	InstanceId *string
+	InstanceId string
 	Limit      *int64
 }
 
@@ -69,23 +69,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get PostgreSQL Flex users: %w", err)
 			}
-			if resp.Items == nil || len(*resp.Items) == 0 {
-				instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.Region, *model.InstanceId)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
-					instanceLabel = *model.InstanceId
-				}
-				params.Printer.Info("No users found for instance %q\n", instanceLabel)
-				return nil
-			}
-			users := *resp.Items
+			users := resp.Items
 
 			// Truncate output
 			if model.Limit != nil && len(users) > int(*model.Limit) {
 				users = users[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, users)
+			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+				instanceLabel = model.InstanceId
+			}
+			return outputResult(params.Printer, model.OutputFormat, instanceLabel, users)
 		},
 	}
 
@@ -117,7 +113,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceId:      flags.FlagToStringPointer(p, cmd, instanceIdFlag),
+		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
 		Limit:           flags.FlagToInt64Pointer(p, cmd, limitFlag),
 	}
 
@@ -126,12 +122,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiListUsersRequest {
-	req := apiClient.ListUsers(ctx, model.ProjectId, model.Region, *model.InstanceId)
+	req := apiClient.DefaultAPI.ListUsers(ctx, model.ProjectId, model.Region, model.InstanceId)
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, users []postgresflex.ListUsersResponseItem) error {
+func outputResult(p *print.Printer, outputFormat, instanceLabel string, users []postgresflex.ListUsersResponseItem) error {
 	return p.OutputResult(outputFormat, users, func() error {
+		if len(users) == 0 {
+			p.Outputf("No users found for instance %q\n", instanceLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("ID", "USERNAME")
 		for i := range users {
