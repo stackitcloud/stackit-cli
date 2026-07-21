@@ -4,15 +4,15 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverupdate"
+	serverupdate "github.com/stackitcloud/stackit-sdk-go/services/serverupdate/v2api"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 )
 
 const (
@@ -22,7 +22,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &serverupdate.APIClient{}
+var testClient = &serverupdate.APIClient{DefaultAPI: &serverupdate.DefaultAPIService{}}
 
 var testProjectId = uuid.NewString()
 var testServerId = uuid.NewString()
@@ -48,7 +48,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		ServerId:          testServerId,
-		MaintenanceWindow: int64(13),
+		MaintenanceWindow: int32(13),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -57,7 +57,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *serverupdate.ApiCreateUpdateRequest)) serverupdate.ApiCreateUpdateRequest {
-	request := testClient.CreateUpdate(testCtx, testProjectId, testServerId, testRegion)
+	request := testClient.DefaultAPI.CreateUpdate(testCtx, testProjectId, testServerId, testRegion)
 	request = request.CreateUpdatePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -67,7 +67,7 @@ func fixtureRequest(mods ...func(request *serverupdate.ApiCreateUpdateRequest)) 
 
 func fixturePayload(mods ...func(payload *serverupdate.CreateUpdatePayload)) serverupdate.CreateUpdatePayload {
 	payload := serverupdate.CreateUpdatePayload{
-		MaintenanceWindow: utils.Ptr(int64(13)),
+		MaintenanceWindow: int32(13),
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -162,7 +162,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, serverupdate.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -175,7 +175,7 @@ func TestOutputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
 		serverLabel  string
-		resp         serverupdate.Update
+		resp         *serverupdate.Update
 	}
 	tests := []struct {
 		name    string
@@ -183,9 +183,20 @@ func TestOutputResult(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "empty",
-			args:    args{},
+			name: "empty",
+			args: args{
+				outputFormat: print.PrettyOutputFormat,
+				resp:         &serverupdate.Update{},
+			},
 			wantErr: false,
+		},
+		{
+			name: "nil",
+			args: args{
+				outputFormat: print.PrettyOutputFormat,
+				resp:         nil,
+			},
+			wantErr: true,
 		},
 	}
 	params := testparams.NewTestParams()

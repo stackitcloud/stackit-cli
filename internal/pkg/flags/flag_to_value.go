@@ -207,6 +207,17 @@ func FlagWithDefaultToInt64Value(p *print.Printer, cmd *cobra.Command, flag stri
 	return value
 }
 
+// Returns the int32 value set on the flag. If no value is set, returns the flag's default value.
+// Returns 0 if the flag value can not be converted to int32 or if the flag does not exist.
+func FlagWithDefaultToInt32Value(p *print.Printer, cmd *cobra.Command, flag string) int32 {
+	value, err := cmd.Flags().GetInt32(flag)
+	if err != nil {
+		p.Debug(print.ErrorLevel, "convert flag with default to Int32 value: %v", err)
+		return 0
+	}
+	return value
+}
+
 // Returns the string value set on the flag. If no value is set, returns the flag's default value.
 // Returns nil if the flag value can not be converted to string or if the flag does not exist.
 func FlagWithDefaultToStringValue(p *print.Printer, cmd *cobra.Command, flag string) string {
