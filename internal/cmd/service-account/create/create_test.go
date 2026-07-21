@@ -4,15 +4,14 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/serviceaccount"
+	serviceaccount "github.com/stackitcloud/stackit-sdk-go/services/serviceaccount/v2api"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -20,7 +19,7 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &serviceaccount.APIClient{}
+var testClient = &serviceaccount.APIClient{DefaultAPI: &serviceaccount.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -40,7 +39,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		Name: utils.Ptr("example"),
+		Name: "example",
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -49,9 +48,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *serviceaccount.ApiCreateServiceAccountRequest)) serviceaccount.ApiCreateServiceAccountRequest {
-	request := testClient.CreateServiceAccount(testCtx, testProjectId)
+	request := testClient.DefaultAPI.CreateServiceAccount(testCtx, testProjectId)
 	request = request.CreateServiceAccountPayload(serviceaccount.CreateServiceAccountPayload{
-		Name: utils.Ptr("example"),
+		Name: "example",
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -90,7 +89,7 @@ func TestParseInput(t *testing.T) {
 					ProjectId: testProjectId,
 					Verbosity: globalflags.VerbosityDefault,
 				},
-				Name: utils.Ptr(""),
+				Name: "",
 			},
 		},
 		{
@@ -142,7 +141,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, serviceaccount.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

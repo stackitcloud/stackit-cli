@@ -16,7 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serviceaccount"
+	serviceaccount "github.com/stackitcloud/stackit-sdk-go/services/serviceaccount/v2api"
 )
 
 const (
@@ -112,6 +112,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceaccount.APIClient) serviceaccount.ApiDeleteServiceAccountKeyRequest {
-	req := apiClient.DeleteServiceAccountKey(ctx, model.ProjectId, model.ServiceAccountEmail, model.KeyId)
+	req := apiClient.DefaultAPI.DeleteServiceAccountKey(ctx, model.ProjectId, model.ServiceAccountEmail, model.KeyId)
 	return req
 }
