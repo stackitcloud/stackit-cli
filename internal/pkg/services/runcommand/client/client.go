@@ -6,7 +6,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/viper"
-	"github.com/stackitcloud/stackit-sdk-go/services/runcommand"
+	runcommand "github.com/stackitcloud/stackit-sdk-go/services/runcommand/v2api"
 )
 
 func ConfigureClient(p *print.Printer, cliVersion string) (*runcommand.APIClient, error) {

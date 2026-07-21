@@ -5,19 +5,20 @@ import (
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/runcommand"
+	runcommand "github.com/stackitcloud/stackit-sdk-go/services/runcommand/v2api"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &runcommand.APIClient{}
+var testClient = &runcommand.APIClient{DefaultAPI: &runcommand.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testServerId = uuid.NewString()
 
@@ -65,7 +66,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *runcommand.ApiGetCommandRequest)) runcommand.ApiGetCommandRequest {
-	request := testClient.GetCommand(testCtx, testProjectId, testRegion, testServerId, testCommandId)
+	request := testClient.DefaultAPI.GetCommand(testCtx, testProjectId, testRegion, testServerId, testCommandId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -189,7 +190,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, runcommand.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -201,7 +202,7 @@ func TestBuildRequest(t *testing.T) {
 func TestOutputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
-		command      runcommand.CommandDetails
+		command      *runcommand.CommandDetails
 	}
 	tests := []struct {
 		name    string
@@ -209,9 +210,20 @@ func TestOutputResult(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "empty",
-			args:    args{},
+			name: "empty",
+			args: args{
+				outputFormat: print.PrettyOutputFormat,
+				command:      &runcommand.CommandDetails{},
+			},
 			wantErr: false,
+		},
+		{
+			name: "command is nil",
+			args: args{
+				outputFormat: print.PrettyOutputFormat,
+				command:      nil,
+			},
+			wantErr: true,
 		},
 	}
 	params := testparams.NewTestParams()
