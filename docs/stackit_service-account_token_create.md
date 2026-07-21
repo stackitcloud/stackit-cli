@@ -25,9 +25,9 @@ stackit service-account token create [flags]
 ### Options
 
 ```
-  -e, --email string   Service account email
-  -h, --help           Help for "stackit service-account token create"
-      --ttl-days int   How long (in days) the new access token is valid (default 90)
+  -e, --email string     Service account email
+  -h, --help             Help for "stackit service-account token create"
+      --ttl-days int32   How long (in days) the new access token is valid (default 90)
 ```
 
 ### Options inherited from parent commands

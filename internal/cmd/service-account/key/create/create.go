@@ -18,7 +18,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serviceaccount"
+	serviceaccount "github.com/stackitcloud/stackit-sdk-go/services/serviceaccount/v2api"
 )
 
 const (
@@ -86,7 +86,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("create service account key: %w", err)
 			}
 
-			params.Printer.Info("Created key for service account %s with ID %q\n", model.ServiceAccountEmail, *resp.Id)
+			params.Printer.Outputf("Created key for service account %s with ID %q\n", model.ServiceAccountEmail, resp.Id)
 
 			key, err := json.MarshalIndent(resp, "", "  ")
 			if err != nil {
@@ -144,7 +144,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceaccount.APIClient, now time.Time) serviceaccount.ApiCreateServiceAccountKeyRequest {
-	req := apiClient.CreateServiceAccountKey(ctx, model.ProjectId, model.ServiceAccountEmail)
+	req := apiClient.DefaultAPI.CreateServiceAccountKey(ctx, model.ProjectId, model.ServiceAccountEmail)
 
 	var validUntil *time.Time
 	validUntil = nil

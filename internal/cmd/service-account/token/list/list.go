@@ -6,6 +6,9 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
+	"github.com/spf13/cobra"
+	serviceaccount "github.com/stackitcloud/stackit-sdk-go/services/serviceaccount/v2api"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -14,10 +17,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serviceaccount"
 )
 
 const (
@@ -72,18 +71,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list tokens metadata: %w", err)
 			}
-			tokensMetadata := *resp.Items
-			if len(tokensMetadata) == 0 {
-				params.Printer.Info("No tokens found for service account with email %q\n", model.ServiceAccountEmail)
-				return nil
-			}
+			tokensMetadata := resp.Items
 
 			// Truncate output
 			if model.Limit != nil && len(tokensMetadata) > int(*model.Limit) {
 				tokensMetadata = tokensMetadata[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, tokensMetadata)
+			return outputResult(params.Printer, model.OutputFormat, model.ServiceAccountEmail, tokensMetadata)
 		},
 	}
 
@@ -132,21 +127,26 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceaccount.APIClient) serviceaccount.ApiListAccessTokensRequest {
-	req := apiClient.ListAccessTokens(ctx, model.ProjectId, model.ServiceAccountEmail)
+	req := apiClient.DefaultAPI.ListAccessTokens(ctx, model.ProjectId, model.ServiceAccountEmail)
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, tokensMetadata []serviceaccount.AccessTokenMetadata) error {
+func outputResult(p *print.Printer, outputFormat, serviceAccountEmail string, tokensMetadata []serviceaccount.AccessTokenMetadata) error {
 	return p.OutputResult(outputFormat, tokensMetadata, func() error {
+		if len(tokensMetadata) == 0 {
+			p.Outputf("No tokens found for service account with email %q\n", serviceAccountEmail)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "ACTIVE", "CREATED_AT", "VALID_UNTIL")
 		for i := range tokensMetadata {
 			t := tokensMetadata[i]
 			table.AddRow(
-				utils.PtrString(t.Id),
-				utils.PtrString(t.Active),
-				utils.PtrString(t.CreatedAt),
-				utils.PtrString(t.ValidUntil),
+				t.Id,
+				t.Active,
+				t.CreatedAt,
+				t.ValidUntil,
 			)
 		}
 		err := table.Display(p)

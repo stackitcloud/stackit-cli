@@ -13,7 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serviceaccount"
+	serviceaccount "github.com/stackitcloud/stackit-sdk-go/services/serviceaccount/v2api"
 )
 
 const (
@@ -54,7 +54,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get JWKS: %w", err)
 			}
-			jwks := *resp.Keys
+			jwks := resp.Keys
 			if len(jwks) == 0 {
 				params.Printer.Info("Empty JWKS for service account %s\n", model.Email)
 				return nil
@@ -79,7 +79,7 @@ func parseInput(p *print.Printer, _ *cobra.Command, inputArgs []string) (*inputM
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceaccount.APIClient) serviceaccount.ApiGetJWKSRequest {
-	req := apiClient.GetJWKS(ctx, model.Email)
+	req := apiClient.DefaultAPI.GetJWKS(ctx, model.Email)
 	return req
 }
 
