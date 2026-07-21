@@ -11,13 +11,13 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
+	authorization "github.com/stackitcloud/stackit-sdk-go/services/authorization/v2api"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &authorization.APIClient{}
+var testClient = &authorization.APIClient{DefaultAPI: &authorization.DefaultAPIService{}}
 var testOrganizationID = "some-organization-id"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -34,7 +34,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{Verbosity: globalflags.VerbosityDefault},
-		OrganizationId:  utils.Ptr(testOrganizationID),
+		OrganizationId:  testOrganizationID,
 		Limit:           utils.Ptr(int64(10)),
 	}
 	for _, mod := range mods {
@@ -44,7 +44,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *authorization.ApiListRolesRequest)) authorization.ApiListRolesRequest {
-	request := testClient.ListRoles(testCtx, organizationResourceType, testOrganizationID)
+	request := testClient.DefaultAPI.ListRoles(testCtx, organizationResourceType, testOrganizationID)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -119,7 +119,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, authorization.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -130,8 +130,9 @@ func TestBuildRequest(t *testing.T) {
 
 func TestOutputResult(t *testing.T) {
 	type args struct {
-		outputFormat string
-		roles        []authorization.Role
+		outputFormat   string
+		organizationId string
+		roles          []authorization.Role
 	}
 	tests := []struct {
 		name    string
@@ -161,7 +162,7 @@ func TestOutputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputRolesResult(params.Printer, tt.args.outputFormat, tt.args.roles); (err != nil) != tt.wantErr {
+			if err := outputRolesResult(params.Printer, tt.args.outputFormat, tt.args.organizationId, tt.args.roles); (err != nil) != tt.wantErr {
 				t.Errorf("outputRolesResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

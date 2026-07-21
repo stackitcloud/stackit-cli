@@ -11,7 +11,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
+	authorization "github.com/stackitcloud/stackit-sdk-go/services/authorization/v2api"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -19,7 +19,7 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &authorization.APIClient{}
+var testClient = &authorization.APIClient{DefaultAPI: &authorization.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testSubject = "someone@domain.com"
 var testRole = "reader"
@@ -52,7 +52,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		Subject: testSubject,
-		Role:    utils.Ptr(testRole),
+		Role:    testRole,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -61,15 +61,15 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *authorization.ApiRemoveMembersRequest)) authorization.ApiRemoveMembersRequest {
-	request := testClient.RemoveMembers(testCtx, testProjectId)
+	request := testClient.DefaultAPI.RemoveMembers(testCtx, testProjectId)
 	request = request.RemoveMembersPayload(authorization.RemoveMembersPayload{
-		Members: utils.Ptr([]authorization.Member{
+		Members: []authorization.Member{
 			{
-				Subject: &testSubject,
-				Role:    &testRole,
+				Subject: testSubject,
+				Role:    testRole,
 			},
-		}),
-		ResourceType: utils.Ptr(projectResourceType),
+		},
+		ResourceType: projectResourceType,
 		ForceRemove:  utils.Ptr(false),
 	})
 
@@ -157,15 +157,15 @@ func TestBuildRequest(t *testing.T) {
 			model: fixtureInputModel(func(model *inputModel) {
 				model.Force = true
 			}),
-			expectedRequest: testClient.RemoveMembers(testCtx, testProjectId).
+			expectedRequest: testClient.DefaultAPI.RemoveMembers(testCtx, testProjectId).
 				RemoveMembersPayload(authorization.RemoveMembersPayload{
-					Members: utils.Ptr([]authorization.Member{
+					Members: []authorization.Member{
 						{
-							Subject: &testSubject,
-							Role:    &testRole,
+							Subject: testSubject,
+							Role:    testRole,
 						},
-					}),
-					ResourceType: utils.Ptr(projectResourceType),
+					},
+					ResourceType: projectResourceType,
 					ForceRemove:  utils.Ptr(true),
 				}),
 		},
@@ -177,7 +177,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, authorization.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

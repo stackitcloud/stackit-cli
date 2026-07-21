@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
+	authorization "github.com/stackitcloud/stackit-sdk-go/services/authorization/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,7 +15,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/authorization/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -30,9 +29,9 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 
-	OrganizationId *string
+	OrganizationId string
 	Subject        string
-	Role           *string
+	Role           string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -59,7 +58,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			prompt := fmt.Sprintf("Are you sure you want to add the %s role to %s on organization with ID %q?", *model.Role, model.Subject, *model.OrganizationId)
+			prompt := fmt.Sprintf("Are you sure you want to add the %s role to %s on organization with ID %q?", model.Role, model.Subject, model.OrganizationId)
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -101,9 +100,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		OrganizationId:  flags.FlagToStringPointer(p, cmd, organizationIdFlag),
+		OrganizationId:  flags.FlagToStringValue(p, cmd, organizationIdFlag),
 		Subject:         subject,
-		Role:            flags.FlagToStringPointer(p, cmd, roleFlag),
+		Role:            flags.FlagToStringValue(p, cmd, roleFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -111,15 +110,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *authorization.APIClient) authorization.ApiAddMembersRequest {
-	req := apiClient.AddMembers(ctx, *model.OrganizationId)
+	req := apiClient.DefaultAPI.AddMembers(ctx, model.OrganizationId)
 	req = req.AddMembersPayload(authorization.AddMembersPayload{
-		Members: utils.Ptr([]authorization.Member{
+		Members: []authorization.Member{
 			{
-				Subject: utils.Ptr(model.Subject),
+				Subject: model.Subject,
 				Role:    model.Role,
 			},
-		}),
-		ResourceType: utils.Ptr(organizationResourceType),
+		},
+		ResourceType: organizationResourceType,
 	})
 	return req
 }

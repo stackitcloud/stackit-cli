@@ -6,6 +6,9 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
+	"github.com/spf13/cobra"
+	authorization "github.com/stackitcloud/stackit-sdk-go/services/authorization/v2api"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -14,10 +17,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/authorization/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
 )
 
 const (
@@ -33,7 +32,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 
 	Subject string
-	Role    *string
+	Role    string
 	Force   bool
 }
 
@@ -74,7 +73,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			prompt := fmt.Sprintf("Are you sure you want to remove the role %q from %s on project %q?", *model.Role, model.Subject, projectLabel)
+			prompt := fmt.Sprintf("Are you sure you want to remove the role %q from %s on project %q?", model.Role, model.Subject, projectLabel)
 			if model.Force {
 				prompt = fmt.Sprintf("%s This will also remove other roles of the subject that would stop the removal of the requested role", prompt)
 			}
@@ -90,7 +89,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("remove member: %w", err)
 			}
 
-			params.Printer.Info("Removed the role %q from %s on project %q\n", utils.PtrString(model.Role), model.Subject, projectLabel)
+			params.Printer.Info("Removed the role %q from %s on project %q\n", model.Role, model.Subject, projectLabel)
 			return nil
 		},
 	}
@@ -117,7 +116,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Subject:         subject,
-		Role:            flags.FlagToStringPointer(p, cmd, roleFlag),
+		Role:            flags.FlagToStringValue(p, cmd, roleFlag),
 		Force:           flags.FlagToBoolValue(p, cmd, forceFlag),
 	}
 
@@ -126,15 +125,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *authorization.APIClient) authorization.ApiRemoveMembersRequest {
-	req := apiClient.RemoveMembers(ctx, model.ProjectId)
+	req := apiClient.DefaultAPI.RemoveMembers(ctx, model.ProjectId)
 	payload := authorization.RemoveMembersPayload{
-		Members: utils.Ptr([]authorization.Member{
+		Members: []authorization.Member{
 			{
-				Subject: utils.Ptr(model.Subject),
+				Subject: model.Subject,
 				Role:    model.Role,
 			},
-		}),
-		ResourceType: utils.Ptr(projectResourceType),
+		},
+		ResourceType: projectResourceType,
 	}
 	payload.ForceRemove = &model.Force
 	req = req.RemoveMembersPayload(payload)
