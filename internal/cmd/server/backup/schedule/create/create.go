@@ -8,6 +8,9 @@ import (
 
 	iaasClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 
+	"github.com/spf13/cobra"
+	serverbackup "github.com/stackitcloud/stackit-sdk-go/services/serverbackup/v2api"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -16,10 +19,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/serverbackup/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverbackup"
 )
 
 const (
@@ -44,7 +43,7 @@ type inputModel struct {
 	Enabled               bool
 	Rrule                 string
 	BackupName            string
-	BackupRetentionPeriod int64
+	BackupRetentionPeriod int32
 	BackupVolumeIds       []string
 }
 
@@ -114,7 +113,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().VarP(flags.UUIDFlag(), serverIdFlag, "s", "Server ID")
 	cmd.Flags().StringP(backupScheduleNameFlag, "n", "", "Backup schedule name")
 	cmd.Flags().StringP(backupNameFlag, "b", "", "Backup name")
-	cmd.Flags().Int64P(backupRetentionPeriodFlag, "d", defaultRetentionPeriod, "Backup retention period (in days)")
+	cmd.Flags().Int32P(backupRetentionPeriodFlag, "d", defaultRetentionPeriod, "Backup retention period (in days)")
 	cmd.Flags().BoolP(enabledFlag, "e", defaultEnabled, "Is the server backup schedule enabled")
 	cmd.Flags().StringP(rruleFlag, "r", defaultRrule, "Backup RRULE (recurrence rule)")
 	cmd.Flags().VarP(flags.UUIDSliceFlag(), backupVolumeIdsFlag, "i", "Backup volume IDs, as comma separated UUID values.")
@@ -132,7 +131,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	model := inputModel{
 		GlobalFlagModel:       globalFlags,
 		ServerId:              flags.FlagToStringValue(p, cmd, serverIdFlag),
-		BackupRetentionPeriod: flags.FlagWithDefaultToInt64Value(p, cmd, backupRetentionPeriodFlag),
+		BackupRetentionPeriod: flags.FlagWithDefaultToInt32Value(p, cmd, backupRetentionPeriodFlag),
 		BackupScheduleName:    flags.FlagToStringValue(p, cmd, backupScheduleNameFlag),
 		BackupName:            flags.FlagToStringValue(p, cmd, backupNameFlag),
 		Rrule:                 flags.FlagWithDefaultToStringValue(p, cmd, rruleFlag),
@@ -145,19 +144,19 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient) (serverbackup.ApiCreateBackupScheduleRequest, error) {
-	req := apiClient.CreateBackupSchedule(ctx, model.ProjectId, model.ServerId, model.Region)
+	req := apiClient.DefaultAPI.CreateBackupSchedule(ctx, model.ProjectId, model.ServerId, model.Region)
 	backupProperties := serverbackup.BackupProperties{
-		Name:            &model.BackupName,
-		RetentionPeriod: &model.BackupRetentionPeriod,
-		VolumeIds:       &model.BackupVolumeIds,
+		Name:            model.BackupName,
+		RetentionPeriod: model.BackupRetentionPeriod,
+		VolumeIds:       model.BackupVolumeIds,
 	}
 	if model.BackupVolumeIds == nil {
 		backupProperties.VolumeIds = nil
 	}
 	req = req.CreateBackupSchedulePayload(serverbackup.CreateBackupSchedulePayload{
-		Enabled:          &model.Enabled,
-		Name:             &model.BackupScheduleName,
-		Rrule:            &model.Rrule,
+		Enabled:          model.Enabled,
+		Name:             model.BackupScheduleName,
+		Rrule:            model.Rrule,
 		BackupProperties: &backupProperties,
 	})
 	return req, nil
@@ -165,7 +164,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbacku
 
 func outputResult(p *print.Printer, outputFormat, serverLabel string, resp serverbackup.BackupSchedule) error {
 	return p.OutputResult(outputFormat, resp, func() error {
-		p.Outputf("Created server backup schedule for server %s. Backup Schedule ID: %s\n", serverLabel, utils.PtrString(resp.Id))
+		p.Outputf("Created server backup schedule for server %s. Backup Schedule ID: %d\n", serverLabel, resp.Id)
 		return nil
 	})
 }

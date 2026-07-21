@@ -4,21 +4,20 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverbackup"
+	serverbackup "github.com/stackitcloud/stackit-sdk-go/services/serverbackup/v2api"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &serverbackup.APIClient{}
+var testClient = &serverbackup.APIClient{DefaultAPI: &serverbackup.DefaultAPIService{}}
 
 var testProjectId = uuid.NewString()
 var testServerId = uuid.NewString()
@@ -55,7 +54,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		Enabled:               defaultEnabled,
 		Rrule:                 defaultRrule,
 		BackupName:            "example-backup-name",
-		BackupRetentionPeriod: int64(14),
+		BackupRetentionPeriod: int32(14),
 		BackupVolumeIds:       []string{testVolumeId},
 	}
 	for _, mod := range mods {
@@ -65,7 +64,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *serverbackup.ApiCreateBackupScheduleRequest)) serverbackup.ApiCreateBackupScheduleRequest {
-	request := testClient.CreateBackupSchedule(testCtx, testProjectId, testServerId, testRegion)
+	request := testClient.DefaultAPI.CreateBackupSchedule(testCtx, testProjectId, testServerId, testRegion)
 	request = request.CreateBackupSchedulePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -75,13 +74,13 @@ func fixtureRequest(mods ...func(request *serverbackup.ApiCreateBackupScheduleRe
 
 func fixturePayload(mods ...func(payload *serverbackup.CreateBackupSchedulePayload)) serverbackup.CreateBackupSchedulePayload {
 	payload := serverbackup.CreateBackupSchedulePayload{
-		Name:    utils.Ptr("example-backup-schedule-name"),
-		Enabled: utils.Ptr(defaultEnabled),
-		Rrule:   utils.Ptr("DTSTART;TZID=Europe/Sofia:20200803T023000 RRULE:FREQ=DAILY;INTERVAL=1"),
+		Name:    "example-backup-schedule-name",
+		Enabled: defaultEnabled,
+		Rrule:   "DTSTART;TZID=Europe/Sofia:20200803T023000 RRULE:FREQ=DAILY;INTERVAL=1",
 		BackupProperties: &serverbackup.BackupProperties{
-			Name:            utils.Ptr("example-backup-name"),
-			RetentionPeriod: utils.Ptr(int64(14)),
-			VolumeIds:       utils.Ptr([]string{testVolumeId}),
+			Name:            "example-backup-name",
+			RetentionPeriod: int32(14),
+			VolumeIds:       []string{testVolumeId},
 		},
 	}
 	for _, mod := range mods {
@@ -175,7 +174,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, serverbackup.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

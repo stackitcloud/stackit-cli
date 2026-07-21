@@ -16,7 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverbackup"
+	serverbackup "github.com/stackitcloud/stackit-sdk-go/services/serverbackup/v2api"
 )
 
 const (
@@ -101,6 +101,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient) serverbackup.ApiDeleteBackupRequest {
-	req := apiClient.DeleteBackup(ctx, model.ProjectId, model.ServerId, model.Region, model.BackupId)
+	req := apiClient.DefaultAPI.DeleteBackup(ctx, model.ProjectId, model.ServerId, model.Region, model.BackupId)
 	return req
 }

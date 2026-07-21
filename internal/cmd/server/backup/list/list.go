@@ -9,7 +9,7 @@ import (
 	iaasClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverbackup"
+	serverbackup "github.com/stackitcloud/stackit-sdk-go/services/serverbackup/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -124,7 +124,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient) serverbackup.ApiListBackupsRequest {
-	req := apiClient.ListBackups(ctx, model.ProjectId, model.ServerId, model.Region)
+	req := apiClient.DefaultAPI.ListBackups(ctx, model.ProjectId, model.ServerId, model.Region)
 	return req
 }
 
@@ -134,24 +134,23 @@ func outputResult(p *print.Printer, outputFormat, serverLabel string, backups []
 			p.Outputf("No backups found for server %s\n", serverLabel)
 			return nil
 		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "SIZE (GB)", "STATUS", "CREATED AT", "EXPIRES AT", "LAST RESTORED AT", "VOLUME BACKUPS")
-		for i := range backups {
-			s := backups[i]
-
-			lastRestored := utils.PtrStringDefault(s.LastRestoredAt, "")
+		for _, s := range backups {
 			var volBackups int
 			if s.VolumeBackups != nil {
-				volBackups = len(*s.VolumeBackups)
+				volBackups = len(s.VolumeBackups)
 			}
+
 			table.AddRow(
-				utils.PtrString(s.Id),
-				utils.PtrString(s.Name),
+				s.Id,
+				s.Name,
 				utils.PtrString(s.Size),
-				utils.PtrString(s.Status),
-				utils.PtrString(s.CreatedAt),
-				utils.PtrString(s.ExpireAt),
-				lastRestored,
+				s.Status,
+				s.CreatedAt,
+				s.ExpireAt,
+				utils.PtrString(s.LastRestoredAt),
 				volBackups,
 			)
 		}

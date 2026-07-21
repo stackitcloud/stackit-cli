@@ -17,7 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverbackup"
+	serverbackup "github.com/stackitcloud/stackit-sdk-go/services/serverbackup/v2api"
 )
 
 const (
@@ -97,28 +97,28 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient) serverbackup.ApiGetBackupScheduleRequest {
-	req := apiClient.GetBackupSchedule(ctx, model.ProjectId, model.ServerId, model.Region, model.BackupScheduleId)
+	req := apiClient.DefaultAPI.GetBackupSchedule(ctx, model.ProjectId, model.ServerId, model.Region, model.BackupScheduleId)
 	return req
 }
 
 func outputResult(p *print.Printer, outputFormat string, schedule serverbackup.BackupSchedule) error {
 	return p.OutputResult(outputFormat, schedule, func() error {
 		table := tables.NewTable()
-		table.AddRow("SCHEDULE ID", utils.PtrString(schedule.Id))
+		table.AddRow("SCHEDULE ID", schedule.Id)
 		table.AddSeparator()
-		table.AddRow("SCHEDULE NAME", utils.PtrString(schedule.Name))
+		table.AddRow("SCHEDULE NAME", schedule.Name)
 		table.AddSeparator()
-		table.AddRow("ENABLED", utils.PtrString(schedule.Enabled))
+		table.AddRow("ENABLED", schedule.Enabled)
 		table.AddSeparator()
-		table.AddRow("RRULE", utils.PtrString(schedule.Rrule))
+		table.AddRow("RRULE", schedule.Rrule)
 		table.AddSeparator()
 		if schedule.BackupProperties != nil {
-			table.AddRow("BACKUP NAME", utils.PtrString(schedule.BackupProperties.Name))
+			table.AddRow("BACKUP NAME", schedule.BackupProperties.Name)
 			table.AddSeparator()
-			table.AddRow("BACKUP RETENTION DAYS", utils.PtrString(schedule.BackupProperties.RetentionPeriod))
+			table.AddRow("BACKUP RETENTION DAYS", schedule.BackupProperties.RetentionPeriod)
 			table.AddSeparator()
 			ids := schedule.BackupProperties.VolumeIds
-			table.AddRow("BACKUP VOLUME IDS", utils.JoinStringPtr(ids, "\n"))
+			table.AddRow("BACKUP VOLUME IDS", utils.JoinStringPtr(&ids, "\n"))
 		}
 		err := table.Display(p)
 		if err != nil {

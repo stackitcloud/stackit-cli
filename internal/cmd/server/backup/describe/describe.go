@@ -18,7 +18,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverbackup"
+	serverbackup "github.com/stackitcloud/stackit-sdk-go/services/serverbackup/v2api"
 )
 
 const (
@@ -65,7 +65,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("read server backup: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, *resp)
+			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -98,24 +98,28 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient) serverbackup.ApiGetBackupRequest {
-	req := apiClient.GetBackup(ctx, model.ProjectId, model.ServerId, model.Region, model.BackupId)
+	req := apiClient.DefaultAPI.GetBackup(ctx, model.ProjectId, model.ServerId, model.Region, model.BackupId)
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, backup serverbackup.Backup) error {
+func outputResult(p *print.Printer, outputFormat string, backup *serverbackup.Backup) error {
 	return p.OutputResult(outputFormat, backup, func() error {
+		if backup == nil {
+			return fmt.Errorf("backup is nil")
+		}
+
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(backup.Id))
+		table.AddRow("ID", backup.Id)
 		table.AddSeparator()
-		table.AddRow("NAME", utils.PtrString(backup.Name))
+		table.AddRow("NAME", backup.Name)
 		table.AddSeparator()
 		table.AddRow("SIZE (GB)", utils.PtrString(backup.Size))
 		table.AddSeparator()
-		table.AddRow("STATUS", utils.PtrString(backup.Status))
+		table.AddRow("STATUS", backup.Status)
 		table.AddSeparator()
-		table.AddRow("CREATED AT", utils.PtrString(backup.CreatedAt))
+		table.AddRow("CREATED AT", backup.CreatedAt)
 		table.AddSeparator()
-		table.AddRow("EXPIRES AT", utils.PtrString(backup.ExpireAt))
+		table.AddRow("EXPIRES AT", backup.ExpireAt)
 		table.AddSeparator()
 
 		lastRestored := utils.PtrStringDefault(backup.LastRestoredAt, "")
@@ -123,7 +127,7 @@ func outputResult(p *print.Printer, outputFormat string, backup serverbackup.Bac
 		table.AddSeparator()
 		volBackups := ""
 		if backups := backup.VolumeBackups; backups != nil {
-			volBackups = strconv.Itoa(len(*backups))
+			volBackups = strconv.Itoa(len(backups))
 		}
 		table.AddRow("VOLUME BACKUPS", volBackups)
 		table.AddSeparator()
