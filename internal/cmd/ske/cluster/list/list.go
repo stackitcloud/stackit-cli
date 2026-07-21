@@ -73,7 +73,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			resp, err := req.Execute()
 			if err != nil {
 				// Check if SKE is enabled for this project
-				enabled, enabledErr := serviceEnablementUtils.ProjectEnabled(ctx, serviceEnablementApiClient, model.ProjectId, model.Region)
+				enabled, enabledErr := serviceEnablementUtils.ProjectEnabled(ctx, serviceEnablementApiClient.DefaultAPI, model.ProjectId, model.Region)
 				if enabledErr != nil {
 					return fmt.Errorf("check if project is enabled failed: %w", enabledErr)
 				}
