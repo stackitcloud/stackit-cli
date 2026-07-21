@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/viper"
 	"github.com/zalando/go-keyring"
@@ -13,10 +14,6 @@ import (
 )
 
 var testTokenCustomEndpoint = "token_url"
-
-func boolPtr(v bool) *bool {
-	return &v
-}
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
@@ -37,7 +34,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		ServiceAccountToken:   "token",
 		ServiceAccountKeyPath: "sa_key",
 		PrivateKeyPath:        "private_key",
-		UseOIDC:               boolPtr(true),
+		UseOIDC:               utils.Ptr(true),
 		OnlyPrintAccessToken:  true,
 	}
 	for _, mod := range mods {
@@ -97,7 +94,7 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.UseOIDC = boolPtr(true)
+				model.UseOIDC = utils.Ptr(true)
 			}),
 		},
 		{
@@ -107,7 +104,7 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.UseOIDC = boolPtr(false)
+				model.UseOIDC = utils.Ptr(false)
 			}),
 		},
 		{

@@ -8,11 +8,8 @@ import (
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
-
-func boolPtr(v bool) *bool {
-	return &v
-}
 
 func TestIsEnabled(t *testing.T) {
 	tests := []struct {
@@ -61,13 +58,13 @@ func TestIsOIDCEnabledWithOverride(t *testing.T) {
 		{
 			description: "override true wins over env false",
 			envUseOIDC:  "0",
-			override:    boolPtr(true),
+			override:    utils.Ptr(true),
 			expected:    true,
 		},
 		{
 			description: "override false wins over env true",
 			envUseOIDC:  "1",
-			override:    boolPtr(false),
+			override:    utils.Ptr(false),
 			expected:    false,
 		},
 	}
