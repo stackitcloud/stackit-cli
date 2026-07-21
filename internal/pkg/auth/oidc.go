@@ -12,7 +12,7 @@ const (
 	EnvUseOIDC                      = "STACKIT_USE_OIDC"
 	EnvServiceAccountEmail          = "STACKIT_SERVICE_ACCOUNT_EMAIL"
 	EnvServiceAccountFederatedToken = "STACKIT_SERVICE_ACCOUNT_FEDERATED_TOKEN" //nolint:gosec // linter false positive
-	EnvFederatedTokenFile           = "STACKIT_FEDERATED_TOKEN_FILE"
+	EnvFederatedTokenFile           = "STACKIT_FEDERATED_TOKEN_FILE"            //nolint:gosec // linter false positive
 	EnvGitHubRequestURL             = "ACTIONS_ID_TOKEN_REQUEST_URL"
 	EnvGitHubRequestToken           = "ACTIONS_ID_TOKEN_REQUEST_TOKEN" //nolint:gosec // linter false positive
 	EnvAzureOIDCRequestURI          = "SYSTEM_OIDCREQUESTURI"
