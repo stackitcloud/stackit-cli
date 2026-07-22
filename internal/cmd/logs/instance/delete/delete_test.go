@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/logs"
+	logs "github.com/stackitcloud/stackit-sdk-go/services/logs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
@@ -21,7 +21,7 @@ type testCtxKey struct{}
 
 var (
 	testCtx        = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient     = &logs.APIClient{}
+	testClient     = &logs.APIClient{DefaultAPI: &logs.DefaultAPIService{}}
 	testProjectId  = uuid.NewString()
 	testInstanceId = uuid.NewString()
 )
@@ -67,7 +67,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 // Request
 func fixtureRequest(mods ...func(request *logs.ApiDeleteLogsInstanceRequest)) logs.ApiDeleteLogsInstanceRequest {
-	request := testClient.DeleteLogsInstance(testCtx, testProjectId, testRegion, testInstanceId)
+	request := testClient.DefaultAPI.DeleteLogsInstance(testCtx, testProjectId, testRegion, testInstanceId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -165,7 +165,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, logs.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

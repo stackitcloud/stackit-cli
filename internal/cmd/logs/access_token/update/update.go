@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/logs"
+	logs "github.com/stackitcloud/stackit-sdk-go/services/logs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
@@ -66,7 +66,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Get the display name for confirmation
-			instanceLabel, err := logUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId)
+			instanceLabel, err := logUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get Logs instance: %v", err)
 			}
@@ -75,7 +75,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Get the display name for confirmation
-			accessTokenLabel, err := logUtils.GetAccessTokenName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId, model.AccessTokenId)
+			accessTokenLabel, err := logUtils.GetAccessTokenName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId, model.AccessTokenId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get access token: %v", err)
 			}
@@ -134,7 +134,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *logs.APIClient) logs.ApiUpdateAccessTokenRequest {
-	req := apiClient.UpdateAccessToken(ctx, model.ProjectId, model.Region, model.InstanceId, model.AccessTokenId)
+	req := apiClient.DefaultAPI.UpdateAccessToken(ctx, model.ProjectId, model.Region, model.InstanceId, model.AccessTokenId)
 
 	payload := logs.UpdateAccessTokenPayload{
 		DisplayName: model.DisplayName,

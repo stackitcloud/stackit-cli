@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/logs"
+	logs "github.com/stackitcloud/stackit-sdk-go/services/logs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
@@ -31,7 +31,7 @@ type testCtxKey struct{}
 
 var (
 	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient    = &logs.APIClient{}
+	testClient    = &logs.APIClient{DefaultAPI: &logs.DefaultAPIService{}}
 	testProjectId = uuid.NewString()
 )
 
@@ -61,8 +61,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		DisplayName:   utils.Ptr(testDisplayName),
 		Description:   utils.Ptr(testDescription),
-		RetentionDays: utils.Ptr(int64(testRetentionDays)),
-		ACL:           utils.Ptr([]string{testAcl}),
+		RetentionDays: utils.Ptr(int32(testRetentionDays)),
+		ACL:           []string{testAcl},
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -72,12 +72,12 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 // Request
 func fixtureRequest(mods ...func(request *logs.ApiCreateLogsInstanceRequest)) logs.ApiCreateLogsInstanceRequest {
-	request := testClient.CreateLogsInstance(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.CreateLogsInstance(testCtx, testProjectId, testRegion)
 	request = request.CreateLogsInstancePayload(logs.CreateLogsInstancePayload{
-		DisplayName:   utils.Ptr(testDisplayName),
+		DisplayName:   testDisplayName,
 		Description:   utils.Ptr(testDescription),
-		RetentionDays: utils.Ptr(int64(testRetentionDays)),
-		Acl:           utils.Ptr([]string{testAcl}),
+		RetentionDays: testRetentionDays,
+		Acl:           []string{testAcl},
 	})
 
 	for _, mod := range mods {
@@ -179,8 +179,8 @@ func TestBuildRequest(t *testing.T) {
 				model.ACL = nil
 			}),
 			expectedRequest: fixtureRequest().CreateLogsInstancePayload(logs.CreateLogsInstancePayload{
-				DisplayName:   utils.Ptr(testDisplayName),
-				RetentionDays: utils.Ptr(int64(testRetentionDays)),
+				DisplayName:   testDisplayName,
+				RetentionDays: int32(testRetentionDays),
 				Description:   nil,
 				Acl:           nil,
 			}),
@@ -192,7 +192,7 @@ func TestBuildRequest(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
 			diff := cmp.Diff(tt.expectedRequest, request,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, logs.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
