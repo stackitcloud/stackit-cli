@@ -10,5 +10,5 @@ import (
 )
 
 func ConfigureClient(p *print.Printer, cliVersion string) (*ske.APIClient, error) {
-	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.SKECustomEndpointKey), false, genericclient.CreateApiClient[*ske.APIClient](ske.NewAPIClient))
+	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.SKECustomEndpointKey), false, ske.NewAPIClient)
 }
