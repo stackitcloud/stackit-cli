@@ -16,7 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverbackup"
+	serverbackup "github.com/stackitcloud/stackit-sdk-go/services/serverbackup/v2api"
 )
 
 const (
@@ -109,9 +109,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient) serverbackup.ApiRestoreVolumeBackupRequest {
-	req := apiClient.RestoreVolumeBackup(ctx, model.ProjectId, model.ServerId, model.Region, model.BackupId, model.VolumeBackupId)
+	req := apiClient.DefaultAPI.RestoreVolumeBackup(ctx, model.ProjectId, model.ServerId, model.Region, model.BackupId, model.VolumeBackupId)
 	payload := serverbackup.RestoreVolumeBackupPayload{
-		RestoreVolumeId: &model.RestoreVolumeId,
+		RestoreVolumeId: model.RestoreVolumeId,
 	}
 	req = req.RestoreVolumeBackupPayload(payload)
 	return req

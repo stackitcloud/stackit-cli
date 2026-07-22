@@ -6,9 +6,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/viper"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverbackup"
+	serverbackup "github.com/stackitcloud/stackit-sdk-go/services/serverbackup/v2api"
 )
 
 func ConfigureClient(p *print.Printer, cliVersion string) (*serverbackup.APIClient, error) {
-	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.ServerBackupCustomEndpointKey), true, genericclient.CreateApiClient[*serverbackup.APIClient](serverbackup.NewAPIClient))
+	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.ServerBackupCustomEndpointKey), false, genericclient.CreateApiClient[*serverbackup.APIClient](serverbackup.NewAPIClient))
 }

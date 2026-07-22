@@ -9,7 +9,7 @@ import (
 	iaasClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverbackup"
+	serverbackup "github.com/stackitcloud/stackit-sdk-go/services/serverbackup/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -124,7 +124,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient) serverbackup.ApiListBackupSchedulesRequest {
-	req := apiClient.ListBackupSchedules(ctx, model.ProjectId, model.ServerId, model.Region)
+	req := apiClient.DefaultAPI.ListBackupSchedules(ctx, model.ProjectId, model.ServerId, model.Region)
 	return req
 }
 
@@ -143,16 +143,16 @@ func outputResult(p *print.Printer, outputFormat, serverLabel string, schedules 
 			retentionPeriod := ""
 			ids := ""
 			if s.BackupProperties != nil {
-				backupName = utils.PtrString(s.BackupProperties.Name)
-				retentionPeriod = utils.PtrString(s.BackupProperties.RetentionPeriod)
+				backupName = s.BackupProperties.Name
+				retentionPeriod = string(s.BackupProperties.RetentionPeriod)
 
-				ids = utils.JoinStringPtr(s.BackupProperties.VolumeIds, ",")
+				ids = utils.JoinStringPtr(&s.BackupProperties.VolumeIds, ",")
 			}
 			table.AddRow(
-				utils.PtrString(s.Id),
-				utils.PtrString(s.Name),
-				utils.PtrString(s.Enabled),
-				utils.PtrString(s.Rrule),
+				s.Id,
+				s.Name,
+				s.Enabled,
+				s.Rrule,
 				backupName,
 				retentionPeriod,
 				ids,
