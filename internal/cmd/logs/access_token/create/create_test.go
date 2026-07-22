@@ -216,7 +216,6 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(tt.expectedRequest, request,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx, logs.DefaultAPIService{}),
-				cmpopts.EquateEmpty(),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
