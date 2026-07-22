@@ -99,7 +99,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			exists, err := skeUtils.ClusterExists(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ClusterName)
 			if err != nil {
 				// Check if the project is enabled
-				enabled, enabledErr := serviceEnablementUtils.ProjectEnabled(ctx, serviceEnablementApiClient, model.ProjectId, model.Region)
+				enabled, enabledErr := serviceEnablementUtils.ProjectEnabled(ctx, serviceEnablementApiClient.DefaultAPI, model.ProjectId, model.Region)
 				if enabledErr != nil {
 					return fmt.Errorf("check if project is enabled failed: %w", enabledErr)
 				}

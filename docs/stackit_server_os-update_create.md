@@ -23,9 +23,9 @@ stackit server os-update create [flags]
 ### Options
 
 ```
-  -h, --help                     Help for "stackit server os-update create"
-  -m, --maintenance-window int   Maintenance window (in hours, 1-24) (default 23)
-  -s, --server-id string         Server ID
+  -h, --help                       Help for "stackit server os-update create"
+  -m, --maintenance-window int32   Maintenance window (in hours, 1-24) (default 23)
+  -s, --server-id string           Server ID
 ```
 
 ### Options inherited from parent commands
