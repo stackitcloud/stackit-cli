@@ -12,7 +12,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/logs"
+	logs "github.com/stackitcloud/stackit-sdk-go/services/logs/v1api"
 )
 
 const (
@@ -23,7 +23,7 @@ type testCtxKey struct{}
 
 var (
 	testCtx    = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient = &logs.APIClient{}
+	testClient = &logs.APIClient{DefaultAPI: &logs.DefaultAPIService{}}
 
 	testProjectId  = uuid.NewString()
 	testInstanceId = uuid.NewString()
@@ -61,7 +61,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *logs.ApiListAccessTokensRequest)) logs.ApiListAccessTokensRequest {
-	request := testClient.ListAccessTokens(testCtx, testProjectId, testRegion, testInstanceId)
+	request := testClient.DefaultAPI.ListAccessTokens(testCtx, testProjectId, testRegion, testInstanceId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -171,7 +171,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, logs.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -196,16 +196,16 @@ func TestOutputResult(t *testing.T) {
 			args: args{
 				accessTokens: []logs.AccessToken{
 					{
-						Id: utils.Ptr(uuid.NewString()),
-						Permissions: utils.Ptr([]string{
-							"read",
-							"write",
-						}),
-						DisplayName: utils.Ptr("Token"),
+						Id: uuid.NewString(),
+						Permissions: []logs.PermissionsInner{
+							logs.PERMISSIONSINNER_READ,
+							logs.PERMISSIONSINNER_WRITE,
+						},
+						DisplayName: "Token",
 						AccessToken: utils.Ptr("Secret access token"),
-						Creator:     utils.Ptr(uuid.NewString()),
-						Expires:     utils.Ptr(false),
-						Status:      utils.Ptr(logs.ACCESSTOKENSTATUS_ACTIVE),
+						Creator:     uuid.NewString(),
+						Expires:     false,
+						Status:      logs.ACCESSTOKENSTATUS_ACTIVE,
 					},
 				},
 			},

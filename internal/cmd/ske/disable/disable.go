@@ -17,8 +17,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serviceenablement"
-	"github.com/stackitcloud/stackit-sdk-go/services/serviceenablement/wait"
+	serviceenablement "github.com/stackitcloud/stackit-sdk-go/services/serviceenablement/v2api"
+	"github.com/stackitcloud/stackit-sdk-go/services/serviceenablement/v2api/wait"
 )
 
 type inputModel struct {
@@ -71,7 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Disabling SKE", func() error {
-					_, err = wait.DisableServiceWaitHandler(ctx, apiClient, model.Region, model.ProjectId, utils.SKEServiceId).WaitWithContext(ctx)
+					_, err = wait.DisableServiceWaitHandler(ctx, apiClient.DefaultAPI, model.Region, model.ProjectId, utils.SKEServiceId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -105,6 +105,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceenablement.APIClient) serviceenablement.ApiDisableServiceRegionalRequest {
-	req := apiClient.DisableServiceRegional(ctx, model.Region, model.ProjectId, utils.SKEServiceId)
+	req := apiClient.DefaultAPI.DisableServiceRegional(ctx, model.Region, model.ProjectId, utils.SKEServiceId)
 	return req
 }

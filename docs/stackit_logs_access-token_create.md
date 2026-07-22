@@ -30,7 +30,7 @@ stackit logs access-token create [flags]
       --display-name string   Display name for the access token
   -h, --help                  Help for "stackit logs access-token create"
       --instance-id string    ID of the Logs instance
-      --lifetime int          Lifetime of the access token in days [1 - 180]
+      --lifetime int32        Lifetime of the access token in days [1 - 180]
       --permissions strings   Permissions of the access token ["read" "write"]
 ```
 

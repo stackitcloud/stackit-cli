@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/logs"
+	logs "github.com/stackitcloud/stackit-sdk-go/services/logs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -35,7 +35,7 @@ type inputModel struct {
 	InstanceId  string
 	Description *string
 	DisplayName string
-	Lifetime    *int64
+	Lifetime    *int32
 	Permissions []string
 }
 
@@ -80,7 +80,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			instanceLabel, err := logsUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId)
+			instanceLabel, err := logsUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -110,7 +110,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "ID of the Logs instance")
 	cmd.Flags().String(displayNameFlag, "", "Display name for the access token")
 	cmd.Flags().String(descriptionFlag, "", "Description of the access token")
-	cmd.Flags().Int64(lifetimeFlag, 0, "Lifetime of the access token in days [1 - 180]")
+	cmd.Flags().Int32(lifetimeFlag, 0, "Lifetime of the access token in days [1 - 180]")
 	cmd.Flags().StringSlice(permissionsFlag, []string{}, `Permissions of the access token ["read" "write"]`)
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag, displayNameFlag, permissionsFlag)
@@ -128,7 +128,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		DisplayName:     flags.FlagToStringValue(p, cmd, displayNameFlag),
 		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
-		Lifetime:        flags.FlagToInt64Pointer(p, cmd, lifetimeFlag),
+		Lifetime:        flags.FlagToInt32Pointer(p, cmd, lifetimeFlag),
 		Permissions:     flags.FlagToStringSliceValue(p, cmd, permissionsFlag),
 	}
 
@@ -137,13 +137,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *logs.APIClient) logs.ApiCreateAccessTokenRequest {
-	req := apiClient.CreateAccessToken(ctx, model.ProjectId, model.Region, model.InstanceId)
-
+	req := apiClient.DefaultAPI.CreateAccessToken(ctx, model.ProjectId, model.Region, model.InstanceId)
 	return req.CreateAccessTokenPayload(logs.CreateAccessTokenPayload{
 		Description: model.Description,
-		DisplayName: &model.DisplayName,
+		DisplayName: model.DisplayName,
 		Lifetime:    model.Lifetime,
-		Permissions: &model.Permissions,
+		Permissions: utils.Map(model.Permissions, func(t string) logs.PermissionsInner {
+			return logs.PermissionsInner(t)
+		}),
 	})
 }
 
@@ -152,7 +153,7 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, accessTo
 		return fmt.Errorf("access token cannot be nil")
 	}
 	return p.OutputResult(outputFormat, accessToken, func() error {
-		p.Outputf("Created access token for Logs instance %q.\n\nID: %s\nToken: %s\n", instanceLabel, utils.PtrValue(accessToken.Id), utils.PtrValue(accessToken.AccessToken))
+		p.Outputf("Created access token for Logs instance %q.\n\nID: %s\nToken: %s\n", instanceLabel, accessToken.Id, utils.PtrValue(accessToken.AccessToken))
 		return nil
 	})
 }
