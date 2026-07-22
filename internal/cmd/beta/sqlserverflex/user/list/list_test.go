@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -55,7 +55,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *sqlserverflex.ApiListUsersRequest)) sqlserverflex.ApiListUsersRequest {
-	request := testClient.DefaultAPI.ListUsers(testCtx, testProjectId, testInstanceId, testRegion)
+	request := testClient.DefaultAPI.ListUsers(testCtx, testProjectId, testRegion, testInstanceId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -171,7 +171,7 @@ func TestOutputResult(t *testing.T) {
 	type args struct {
 		outputFormat  string
 		instanceLabel string
-		users         []sqlserverflex.InstanceListUser
+		users         []sqlserverflex.ListUser
 	}
 	tests := []struct {
 		name    string
@@ -186,7 +186,7 @@ func TestOutputResult(t *testing.T) {
 		{
 			name: "empty user in the users slice",
 			args: args{
-				users: []sqlserverflex.InstanceListUser{{}},
+				users: []sqlserverflex.ListUser{{}},
 			},
 			wantErr: false,
 		},

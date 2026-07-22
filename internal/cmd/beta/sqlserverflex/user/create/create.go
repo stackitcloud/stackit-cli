@@ -8,7 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -18,7 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/client"
 	sqlserverflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/utils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -88,7 +87,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("create SQLServer Flex user: %w", err)
 			}
-			user := resp.Item
+			user := resp
 
 			return outputResult(params.Printer, model, instanceLabel, user)
 		},
@@ -125,7 +124,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiCreateUserRequest {
-	req := apiClient.DefaultAPI.CreateUser(ctx, model.ProjectId, model.InstanceId, model.Region)
+	req := apiClient.DefaultAPI.CreateUser(ctx, model.ProjectId, model.Region, model.InstanceId)
 
 	req = req.CreateUserPayload(sqlserverflex.CreateUserPayload{
 		Username: model.Username,
@@ -134,25 +133,23 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverfl
 	return req
 }
 
-func outputResult(p *print.Printer, model *inputModel, instanceLabel string, user *sqlserverflex.SingleUser) error {
+func outputResult(p *print.Printer, model *inputModel, instanceLabel string, user *sqlserverflex.CreateUserResponse) error {
 	if user == nil {
 		return fmt.Errorf("user response is empty")
 	}
 	return p.OutputResult(model.OutputFormat, user, func() error {
-		p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, utils.PtrString(user.Id))
-		p.Outputf("Username: %s\n", utils.PtrString(user.Username))
-		p.Outputf("Password: %s\n", utils.PtrString(user.Password))
+		p.Outputf("Created user for instance %q. User ID: %d\n\n", instanceLabel, user.Id)
+		p.Outputf("Username: %s\n", user.Username)
+		p.Outputf("Password: %s\n", user.Password)
 		if len(user.Roles) != 0 {
 			p.Outputf("Roles: [%v]\n", strings.Join(user.Roles, ", "))
 		}
-		if user.Host != nil && *user.Host != "" {
-			p.Outputf("Host: %s\n", *user.Host)
+		if user.Host != "" {
+			p.Outputf("Host: %s\n", user.Host)
 		}
-		if user.Port != nil {
-			p.Outputf("Port: %d\n", *user.Port)
-		}
-		if user.Uri != nil && *user.Uri != "" {
-			p.Outputf("URI: %s\n", *user.Uri)
+		p.Outputf("Port: %d\n", user.Port)
+		if user.Uri != "" {
+			p.Outputf("URI: %s\n", user.Uri)
 		}
 
 		return nil

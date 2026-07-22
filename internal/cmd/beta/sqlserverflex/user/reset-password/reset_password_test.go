@@ -2,12 +2,13 @@ package resetpassword
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -21,12 +22,12 @@ var testClient = &sqlserverflex.APIClient{DefaultAPI: &sqlserverflex.DefaultAPIS
 
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
-var testUserId = "my-user-id"
+var testUserId = int64(123123)
 var testRegion = "eu01"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
-		testUserId,
+		fmt.Sprintf("%d", testUserId),
 	}
 	for _, mod := range mods {
 		mod(argValues)
@@ -63,7 +64,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *sqlserverflex.ApiResetUserRequest)) sqlserverflex.ApiResetUserRequest {
-	request := testClient.DefaultAPI.ResetUser(testCtx, testProjectId, testInstanceId, testUserId, testRegion)
+	request := testClient.DefaultAPI.ResetUser(testCtx, testProjectId, testRegion, testInstanceId, testUserId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -193,7 +194,7 @@ func TestOutputResult(t *testing.T) {
 		outputFormat  string
 		userLabel     string
 		instanceLabel string
-		user          *sqlserverflex.SingleUser
+		user          *sqlserverflex.ResetUserResponse
 	}
 	tests := []struct {
 		name    string
@@ -208,7 +209,7 @@ func TestOutputResult(t *testing.T) {
 		{
 			name: "only user as argument",
 			args: args{
-				user: &sqlserverflex.SingleUser{},
+				user: &sqlserverflex.ResetUserResponse{},
 			},
 			wantErr: false,
 		},

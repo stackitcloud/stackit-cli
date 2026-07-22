@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -17,7 +17,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -98,35 +97,26 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiGetDatabaseRequest {
-	req := apiClient.DefaultAPI.GetDatabase(ctx, model.ProjectId, model.InstanceId, model.DatabaseName, model.Region)
+	req := apiClient.DefaultAPI.GetDatabase(ctx, model.ProjectId, model.Region, model.InstanceId, model.DatabaseName)
 	return req
 }
 
 func outputResult(p *print.Printer, outputFormat string, resp *sqlserverflex.GetDatabaseResponse) error {
-	if resp == nil || resp.Database == nil {
+	if resp == nil {
 		return fmt.Errorf("database response is empty")
 	}
 
 	return p.OutputResult(outputFormat, resp, func() error {
-		database := resp.Database
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(database.Id))
+		table.AddRow("ID", resp.Id)
 		table.AddSeparator()
-		table.AddRow("NAME", utils.PtrString(database.Name))
+		table.AddRow("NAME", resp.Name)
 		table.AddSeparator()
-		if database.Options != nil {
-			if database.Options.CompatibilityLevel != nil {
-				table.AddRow("COMPATIBILITY LEVEL", *database.Options.CompatibilityLevel)
-				table.AddSeparator()
-			}
-			if database.Options.Owner != nil {
-				table.AddRow("OWNER", *database.Options.Owner)
-				table.AddSeparator()
-			}
-			if database.Options.CollationName != nil {
-				table.AddRow("COLLATION", *database.Options.CollationName)
-			}
-		}
+		table.AddRow("COMPATIBILITY LEVEL", resp.CompatibilityLevel)
+		table.AddSeparator()
+		table.AddRow("OWNER", resp.Owner)
+		table.AddSeparator()
+		table.AddRow("COLLATION", resp.CollationName)
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

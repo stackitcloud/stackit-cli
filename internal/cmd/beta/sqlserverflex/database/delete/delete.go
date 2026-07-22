@@ -16,7 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 
 	"github.com/spf13/cobra"
-	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
 )
 
 const (
@@ -107,6 +107,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiDeleteDatabaseRequest {
-	req := apiClient.DefaultAPI.DeleteDatabase(ctx, model.ProjectId, model.InstanceId, model.DatabaseName, model.Region)
+	req := apiClient.DefaultAPI.DeleteDatabase(ctx, model.ProjectId, model.Region, model.InstanceId, model.DatabaseName)
 	return req
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -154,7 +154,7 @@ func TestOutputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
 		projectLabel string
-		instances    []sqlserverflex.InstanceListInstance
+		instances    []sqlserverflex.ListInstance
 	}
 	tests := []struct {
 		name    string
@@ -169,7 +169,7 @@ func TestOutputResult(t *testing.T) {
 		{
 			name: "empty instance in instances slice",
 			args: args{
-				instances: []sqlserverflex.InstanceListInstance{{}},
+				instances: []sqlserverflex.ListInstance{{}},
 			},
 			wantErr: false,
 		},

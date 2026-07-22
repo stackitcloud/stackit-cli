@@ -3,9 +3,13 @@ package describe
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
+	"github.com/spf13/cobra"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -15,10 +19,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/spf13/cobra"
-	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
 )
 
 const (
@@ -31,7 +31,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 
 	InstanceId string
-	UserId     string
+	UserId     int64
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -72,7 +72,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("get SQLServer Flex user: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, resp.Item)
+			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
 
@@ -88,7 +88,11 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	userId := inputArgs[0]
+	userIdStr := inputArgs[0]
+	userId, err := strconv.ParseInt(userIdStr, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id %q: %w", userIdStr, err)
+	}
 
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
@@ -106,36 +110,34 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiGetUserRequest {
-	req := apiClient.DefaultAPI.GetUser(ctx, model.ProjectId, model.InstanceId, model.UserId, model.Region)
+	req := apiClient.DefaultAPI.GetUser(ctx, model.ProjectId, model.Region, model.InstanceId, model.UserId)
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, user *sqlserverflex.UserResponseUser) error {
+func outputResult(p *print.Printer, outputFormat string, user *sqlserverflex.GetUserResponse) error {
 	if user == nil {
 		return fmt.Errorf("user response is empty")
 	}
 
 	return p.OutputResult(outputFormat, user, func() error {
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(user.Id))
+		table.AddRow("ID", user.Id)
 		table.AddSeparator()
-		table.AddRow("USERNAME", utils.PtrString(user.Username))
+		table.AddRow("USERNAME", user.Username)
 		if len(user.Roles) != 0 {
 			table.AddSeparator()
 			table.AddRow("ROLES", strings.Join(user.Roles, "\n"))
 		}
-		if user.DefaultDatabase != nil && *user.DefaultDatabase != "" {
+		if user.DefaultDatabase != "" {
 			table.AddSeparator()
-			table.AddRow("DATABASE", *user.DefaultDatabase)
+			table.AddRow("DATABASE", user.DefaultDatabase)
 		}
-		if user.Host != nil && *user.Host != "" {
+		if user.Host != "" {
 			table.AddSeparator()
-			table.AddRow("HOST", *user.Host)
+			table.AddRow("HOST", user.Host)
 		}
-		if user.Port != nil {
-			table.AddSeparator()
-			table.AddRow("PORT", *user.Port)
-		}
+		table.AddSeparator()
+		table.AddRow("PORT", user.Port)
 
 		err := table.Display(p)
 		if err != nil {

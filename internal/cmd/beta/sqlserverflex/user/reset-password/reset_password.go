@@ -3,8 +3,12 @@ package resetpassword
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
+	"github.com/spf13/cobra"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -14,10 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/client"
 	sqlserverflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/utils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/spf13/cobra"
-	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
 )
 
 const (
@@ -30,7 +30,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 
 	InstanceId string
-	UserId     string
+	UserId     int64
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -69,7 +69,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			userLabel, err := sqlserverflexUtils.GetUserName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.UserId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get user name: %v", err)
-				userLabel = model.UserId
+				userLabel = fmt.Sprintf("%d", model.UserId)
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to reset the password of user %q of instance %q? (This cannot be undone)", userLabel, instanceLabel)
@@ -85,7 +85,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("reset SQLServer Flex user password: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, userLabel, instanceLabel, user.Item)
+			return outputResult(params.Printer, model.OutputFormat, userLabel, instanceLabel, user)
 		},
 	}
 
@@ -101,7 +101,11 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	userId := inputArgs[0]
+	userIdStr := inputArgs[0]
+	userId, err := strconv.ParseInt(userIdStr, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id %q: %w", userIdStr, err)
+	}
 
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
@@ -119,21 +123,21 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiResetUserRequest {
-	req := apiClient.DefaultAPI.ResetUser(ctx, model.ProjectId, model.InstanceId, model.UserId, model.Region)
+	req := apiClient.DefaultAPI.ResetUser(ctx, model.ProjectId, model.Region, model.InstanceId, model.UserId)
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat, userLabel, instanceLabel string, user *sqlserverflex.SingleUser) error {
+func outputResult(p *print.Printer, outputFormat, userLabel, instanceLabel string, user *sqlserverflex.ResetUserResponse) error {
 	if user == nil {
 		return fmt.Errorf("single user response is empty")
 	}
 
 	return p.OutputResult(outputFormat, user, func() error {
 		p.Outputf("Reset password for user %q of instance %q\n\n", userLabel, instanceLabel)
-		p.Outputf("Username: %s\n", utils.PtrString(user.Username))
-		p.Outputf("New password: %s\n", utils.PtrString(user.Password))
-		if user.Uri != nil && *user.Uri != "" {
-			p.Outputf("New URI: %s\n", *user.Uri)
+		p.Outputf("Username: %s\n", user.Username)
+		p.Outputf("New password: %s\n", user.Password)
+		if user.Uri != "" {
+			p.Outputf("New URI: %s\n", user.Uri)
 		}
 		return nil
 	})

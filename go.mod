@@ -36,7 +36,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.2.7
 	github.com/stackitcloud/stackit-sdk-go/services/ske v1.11.0
-	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.11.0
+	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.16.0
 	github.com/stackitcloud/stackit-sdk-go/services/vpn v0.14.0
 	github.com/zalando/go-keyring v0.2.8
 	golang.org/x/mod v0.34.0
