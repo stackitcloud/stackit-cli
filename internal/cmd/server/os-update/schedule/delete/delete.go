@@ -15,7 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/serverosupdate/client"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverupdate"
+	serverupdate "github.com/stackitcloud/stackit-sdk-go/services/serverupdate/v2api"
 )
 
 const (
@@ -100,6 +100,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdate.APIClient) serverupdate.ApiDeleteUpdateScheduleRequest {
-	req := apiClient.DeleteUpdateSchedule(ctx, model.ProjectId, model.ServerId, model.ScheduleId, model.Region)
+	req := apiClient.DefaultAPI.DeleteUpdateSchedule(ctx, model.ProjectId, model.ServerId, model.ScheduleId, model.Region)
 	return req
 }

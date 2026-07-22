@@ -9,7 +9,7 @@ import (
 	iaasClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverupdate"
+	serverupdate "github.com/stackitcloud/stackit-sdk-go/services/serverupdate/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -20,7 +20,6 @@ import (
 	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/serverosupdate/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -125,7 +124,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdate.APIClient) serverupdate.ApiListUpdateSchedulesRequest {
-	req := apiClient.ListUpdateSchedules(ctx, model.ProjectId, model.ServerId, model.Region)
+	req := apiClient.DefaultAPI.ListUpdateSchedules(ctx, model.ProjectId, model.ServerId, model.Region)
 	return req
 }
 
@@ -140,11 +139,11 @@ func outputResult(p *print.Printer, outputFormat, serverLabel string, schedules 
 		for i := range schedules {
 			s := schedules[i]
 			table.AddRow(
-				utils.PtrString(s.Id),
-				utils.PtrString(s.Name),
-				utils.PtrString(s.Enabled),
-				utils.PtrString(s.Rrule),
-				utils.PtrString(s.MaintenanceWindow),
+				s.Id,
+				s.Name,
+				s.Enabled,
+				s.Rrule,
+				s.MaintenanceWindow,
 			)
 		}
 		err := table.Display(p)

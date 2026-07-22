@@ -8,6 +8,9 @@ import (
 
 	iaasClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 
+	"github.com/spf13/cobra"
+	serverupdate "github.com/stackitcloud/stackit-sdk-go/services/serverupdate/v2api"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -16,10 +19,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/serverosupdate/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverupdate"
 )
 
 const (
@@ -32,7 +31,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 
 	ServerId          string
-	MaintenanceWindow int64
+	MaintenanceWindow int32
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -90,7 +89,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("create Server os-update: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, serverLabel, *resp)
+			return outputResult(params.Printer, model.OutputFormat, serverLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -99,7 +98,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().VarP(flags.UUIDFlag(), serverIdFlag, "s", "Server ID")
-	cmd.Flags().Int64P(maintenanceWindowFlag, "m", defaultMaintenanceWindow, "Maintenance window (in hours, 1-24)")
+	cmd.Flags().Int32P(maintenanceWindowFlag, "m", defaultMaintenanceWindow, "Maintenance window (in hours, 1-24)")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
@@ -111,7 +110,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	model := inputModel{
 		GlobalFlagModel:   globalFlags,
 		ServerId:          flags.FlagToStringValue(p, cmd, serverIdFlag),
-		MaintenanceWindow: flags.FlagWithDefaultToInt64Value(p, cmd, maintenanceWindowFlag),
+		MaintenanceWindow: flags.FlagWithDefaultToInt32Value(p, cmd, maintenanceWindowFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -119,17 +118,21 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdate.APIClient) (serverupdate.ApiCreateUpdateRequest, error) {
-	req := apiClient.CreateUpdate(ctx, model.ProjectId, model.ServerId, model.Region)
+	req := apiClient.DefaultAPI.CreateUpdate(ctx, model.ProjectId, model.ServerId, model.Region)
 	payload := serverupdate.CreateUpdatePayload{
-		MaintenanceWindow: &model.MaintenanceWindow,
+		MaintenanceWindow: model.MaintenanceWindow,
 	}
 	req = req.CreateUpdatePayload(payload)
 	return req, nil
 }
 
-func outputResult(p *print.Printer, outputFormat, serverLabel string, resp serverupdate.Update) error {
+func outputResult(p *print.Printer, outputFormat, serverLabel string, resp *serverupdate.Update) error {
 	return p.OutputResult(outputFormat, resp, func() error {
-		p.Outputf("Triggered creation of server os-update for server %s. Update ID: %s\n", serverLabel, utils.PtrString(resp.Id))
+		if resp == nil {
+			return fmt.Errorf("response is nil")
+		}
+
+		p.Outputf("Triggered creation of server os-update for server %s. Update ID: %d\n", serverLabel, resp.Id)
 		return nil
 	})
 }

@@ -11,7 +11,9 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverupdate"
+	serverupdate "github.com/stackitcloud/stackit-sdk-go/services/serverupdate/v2api"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 )
 
 const (
@@ -21,7 +23,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &serverupdate.APIClient{}
+var testClient = &serverupdate.APIClient{DefaultAPI: &serverupdate.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testServerId = uuid.NewString()
 var testUpdateId = uuid.NewString()
@@ -65,7 +67,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *serverupdate.ApiGetUpdateRequest)) serverupdate.ApiGetUpdateRequest {
-	request := testClient.GetUpdate(testCtx, testProjectId, testServerId, testUpdateId, testRegion)
+	request := testClient.DefaultAPI.GetUpdate(testCtx, testProjectId, testServerId, testUpdateId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -159,7 +161,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, serverupdate.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -171,7 +173,7 @@ func TestBuildRequest(t *testing.T) {
 func TestOutputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
-		update       serverupdate.Update
+		update       *serverupdate.Update
 	}
 	tests := []struct {
 		name    string
@@ -179,9 +181,20 @@ func TestOutputResult(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "empty",
-			args:    args{},
+			name: "empty",
+			args: args{
+				outputFormat: print.PrettyOutputFormat,
+				update:       &serverupdate.Update{},
+			},
 			wantErr: false,
+		},
+		{
+			name: "nil",
+			args: args{
+				outputFormat: print.PrettyOutputFormat,
+				update:       nil,
+			},
+			wantErr: true,
 		},
 	}
 	params := testparams.NewTestParams()

@@ -17,7 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/serverosupdate/client"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverupdate"
+	serverupdate "github.com/stackitcloud/stackit-sdk-go/services/serverupdate/v2api"
 )
 
 const (
@@ -108,6 +108,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdate.APIClient) serverupdate.ApiDisableServiceResourceRequest {
-	req := apiClient.DisableServiceResource(ctx, model.ProjectId, model.ServerId, model.Region)
+	req := apiClient.DefaultAPI.DisableServiceResource(ctx, model.ProjectId, model.ServerId, model.Region)
 	return req
 }
