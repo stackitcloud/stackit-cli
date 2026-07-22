@@ -9,7 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -20,31 +20,30 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &postgresflex.APIClient{}
+var testClient = &postgresflex.APIClient{DefaultAPI: &postgresflex.DefaultAPIService{}}
 
-type postgresFlexClientMocked struct {
+type mockSettings struct {
 	listStoragesFails bool
 	listStoragesResp  *postgresflex.ListStoragesResponse
 	getInstanceFails  bool
 	getInstanceResp   *postgresflex.InstanceResponse
 }
 
-func (c *postgresFlexClientMocked) CloneInstance(ctx context.Context, projectId, region, instanceId string) postgresflex.ApiCloneInstanceRequest {
-	return testClient.CloneInstance(ctx, projectId, region, instanceId)
-}
-
-func (c *postgresFlexClientMocked) GetInstanceExecute(_ context.Context, _, _, _ string) (*postgresflex.InstanceResponse, error) {
-	if c.getInstanceFails {
-		return nil, fmt.Errorf("get instance failed")
+func newAPIMockClient(c mockSettings) postgresflex.DefaultAPI {
+	return &postgresflex.DefaultAPIServiceMock{
+		GetInstanceExecuteMock: utils.Ptr(func(_ postgresflex.ApiGetInstanceRequest) (*postgresflex.InstanceResponse, error) {
+			if c.getInstanceFails {
+				return nil, fmt.Errorf("get instance failed")
+			}
+			return c.getInstanceResp, nil
+		}),
+		ListStoragesExecuteMock: utils.Ptr(func(_ postgresflex.ApiListStoragesRequest) (*postgresflex.ListStoragesResponse, error) {
+			if c.listStoragesFails {
+				return nil, fmt.Errorf("list storages failed")
+			}
+			return c.listStoragesResp, nil
+		}),
 	}
-	return c.getInstanceResp, nil
-}
-
-func (c *postgresFlexClientMocked) ListStoragesExecute(_ context.Context, _, _, _ string) (*postgresflex.ListStoragesResponse, error) {
-	if c.listStoragesFails {
-		return nil, fmt.Errorf("list storages failed")
-	}
-	return c.listStoragesResp, nil
 }
 
 var testProjectId = uuid.NewString()
@@ -138,7 +137,7 @@ func fixtureStandardInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *postgresflex.ApiCloneInstanceRequest)) postgresflex.ApiCloneInstanceRequest {
-	request := testClient.CloneInstance(testCtx, testProjectId, testRegion, testInstanceId)
+	request := testClient.DefaultAPI.CloneInstance(testCtx, testProjectId, testRegion, testInstanceId)
 	request = request.CloneInstancePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -316,14 +315,11 @@ func TestBuildRequest(t *testing.T) {
 	recoveryTimestampString := testRecoveryTimestamp.Format(recoveryDateFormat)
 
 	tests := []struct {
-		description       string
-		model             *inputModel
-		expectedRequest   postgresflex.ApiCloneInstanceRequest
-		getInstanceFails  bool
-		getInstanceResp   *postgresflex.InstanceResponse
-		listStoragesFails bool
-		listStoragesResp  *postgresflex.ListStoragesResponse
-		isValid           bool
+		description        string
+		model              *inputModel
+		expectedRequest    postgresflex.ApiCloneInstanceRequest
+		mockClientSettings mockSettings
+		isValid            bool
 	}{
 		{
 			description:     "base",
@@ -337,25 +333,27 @@ func TestBuildRequest(t *testing.T) {
 				model.StorageClass = utils.Ptr("class")
 			}),
 			isValid: true,
-			getInstanceResp: &postgresflex.InstanceResponse{
-				Item: &postgresflex.Instance{
-					Flavor: &postgresflex.Flavor{
-						Id: utils.Ptr(testFlavorId),
+			mockClientSettings: mockSettings{
+				getInstanceResp: &postgresflex.InstanceResponse{
+					Item: &postgresflex.Instance{
+						Flavor: &postgresflex.Flavor{
+							Id: utils.Ptr(testFlavorId),
+						},
+						Storage: &postgresflex.Storage{
+							Class: utils.Ptr(testStorageClass),
+							Size:  utils.Ptr(testStorageSize),
+						},
 					},
-					Storage: &postgresflex.Storage{
-						Class: utils.Ptr(testStorageClass),
-						Size:  utils.Ptr(testStorageSize),
+				},
+				listStoragesResp: &postgresflex.ListStoragesResponse{
+					StorageClasses: []string{"class"},
+					StorageRange: &postgresflex.StorageRange{
+						Min: utils.Ptr(int64(10)),
+						Max: utils.Ptr(int64(100)),
 					},
 				},
 			},
-			listStoragesResp: &postgresflex.ListStoragesResponse{
-				StorageClasses: &[]string{"class"},
-				StorageRange: &postgresflex.StorageRange{
-					Min: utils.Ptr(int64(10)),
-					Max: utils.Ptr(int64(100)),
-				},
-			},
-			expectedRequest: testClient.CloneInstance(testCtx, testProjectId, testRegion, testInstanceId).
+			expectedRequest: testClient.DefaultAPI.CloneInstance(testCtx, testProjectId, testRegion, testInstanceId).
 				CloneInstancePayload(postgresflex.CloneInstancePayload{
 					Class:     utils.Ptr("class"),
 					Timestamp: utils.Ptr(recoveryTimestampString),
@@ -368,25 +366,27 @@ func TestBuildRequest(t *testing.T) {
 				model.StorageSize = utils.Ptr(int64(10))
 			}),
 			isValid: true,
-			getInstanceResp: &postgresflex.InstanceResponse{
-				Item: &postgresflex.Instance{
-					Flavor: &postgresflex.Flavor{
-						Id: utils.Ptr(testFlavorId),
+			mockClientSettings: mockSettings{
+				getInstanceResp: &postgresflex.InstanceResponse{
+					Item: &postgresflex.Instance{
+						Flavor: &postgresflex.Flavor{
+							Id: utils.Ptr(testFlavorId),
+						},
+						Storage: &postgresflex.Storage{
+							Class: utils.Ptr(testStorageClass),
+							Size:  utils.Ptr(testStorageSize),
+						},
 					},
-					Storage: &postgresflex.Storage{
-						Class: utils.Ptr(testStorageClass),
-						Size:  utils.Ptr(testStorageSize),
+				},
+				listStoragesResp: &postgresflex.ListStoragesResponse{
+					StorageClasses: []string{"class"},
+					StorageRange: &postgresflex.StorageRange{
+						Min: utils.Ptr(int64(10)),
+						Max: utils.Ptr(int64(100)),
 					},
 				},
 			},
-			listStoragesResp: &postgresflex.ListStoragesResponse{
-				StorageClasses: &[]string{"class"},
-				StorageRange: &postgresflex.StorageRange{
-					Min: utils.Ptr(int64(10)),
-					Max: utils.Ptr(int64(100)),
-				},
-			},
-			expectedRequest: testClient.CloneInstance(testCtx, testProjectId, testRegion, testInstanceId).
+			expectedRequest: testClient.DefaultAPI.CloneInstance(testCtx, testProjectId, testRegion, testInstanceId).
 				CloneInstancePayload(postgresflex.CloneInstancePayload{
 					Class:     utils.Ptr("class"),
 					Size:      utils.Ptr(int64(10)),
@@ -401,8 +401,10 @@ func TestBuildRequest(t *testing.T) {
 					model.RecoveryDate = utils.Ptr(recoveryTimestampString)
 				},
 			),
-			getInstanceFails: true,
-			isValid:          false,
+			mockClientSettings: mockSettings{
+				getInstanceFails: true,
+			},
+			isValid: false,
 		},
 		{
 			description: "invalid storage class",
@@ -411,22 +413,24 @@ func TestBuildRequest(t *testing.T) {
 					model.StorageClass = utils.Ptr("non-existing-class")
 				},
 			),
-			getInstanceResp: &postgresflex.InstanceResponse{
-				Item: &postgresflex.Instance{
-					Flavor: &postgresflex.Flavor{
-						Id: utils.Ptr(testFlavorId),
-					},
-					Storage: &postgresflex.Storage{
-						Class: utils.Ptr(testStorageClass),
-						Size:  utils.Ptr(testStorageSize),
+			mockClientSettings: mockSettings{
+				getInstanceResp: &postgresflex.InstanceResponse{
+					Item: &postgresflex.Instance{
+						Flavor: &postgresflex.Flavor{
+							Id: utils.Ptr(testFlavorId),
+						},
+						Storage: &postgresflex.Storage{
+							Class: utils.Ptr(testStorageClass),
+							Size:  utils.Ptr(testStorageSize),
+						},
 					},
 				},
-			},
-			listStoragesResp: &postgresflex.ListStoragesResponse{
-				StorageClasses: &[]string{"class"},
-				StorageRange: &postgresflex.StorageRange{
-					Min: utils.Ptr(int64(10)),
-					Max: utils.Ptr(int64(100)),
+				listStoragesResp: &postgresflex.ListStoragesResponse{
+					StorageClasses: []string{"class"},
+					StorageRange: &postgresflex.StorageRange{
+						Min: utils.Ptr(int64(10)),
+						Max: utils.Ptr(int64(100)),
+					},
 				},
 			},
 			isValid: false,
@@ -438,22 +442,24 @@ func TestBuildRequest(t *testing.T) {
 					model.StorageSize = utils.Ptr(int64(9))
 				},
 			),
-			getInstanceResp: &postgresflex.InstanceResponse{
-				Item: &postgresflex.Instance{
-					Flavor: &postgresflex.Flavor{
-						Id: utils.Ptr(testFlavorId),
-					},
-					Storage: &postgresflex.Storage{
-						Class: utils.Ptr(testStorageClass),
-						Size:  utils.Ptr(testStorageSize),
+			mockClientSettings: mockSettings{
+				getInstanceResp: &postgresflex.InstanceResponse{
+					Item: &postgresflex.Instance{
+						Flavor: &postgresflex.Flavor{
+							Id: utils.Ptr(testFlavorId),
+						},
+						Storage: &postgresflex.Storage{
+							Class: utils.Ptr(testStorageClass),
+							Size:  utils.Ptr(testStorageSize),
+						},
 					},
 				},
-			},
-			listStoragesResp: &postgresflex.ListStoragesResponse{
-				StorageClasses: &[]string{"class"},
-				StorageRange: &postgresflex.StorageRange{
-					Min: utils.Ptr(int64(10)),
-					Max: utils.Ptr(int64(100)),
+				listStoragesResp: &postgresflex.ListStoragesResponse{
+					StorageClasses: []string{"class"},
+					StorageRange: &postgresflex.StorageRange{
+						Min: utils.Ptr(int64(10)),
+						Max: utils.Ptr(int64(100)),
+					},
 				},
 			},
 			isValid: false,
@@ -462,13 +468,7 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &postgresFlexClientMocked{
-				getInstanceFails:  tt.getInstanceFails,
-				getInstanceResp:   tt.getInstanceResp,
-				listStoragesFails: tt.listStoragesFails,
-				listStoragesResp:  tt.listStoragesResp,
-			}
-			request, err := buildRequest(testCtx, tt.model, client)
+			request, err := buildRequest(testCtx, tt.model, newAPIMockClient(tt.mockClientSettings))
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -479,6 +479,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),
+				cmpopts.IgnoreFields(tt.expectedRequest, "ApiService"),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

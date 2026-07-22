@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverupdate"
+	serverupdate "github.com/stackitcloud/stackit-sdk-go/services/serverupdate/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -64,7 +64,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("read server os-update: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, *resp)
+			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -97,16 +97,20 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdate.APIClient) serverupdate.ApiGetUpdateRequest {
-	req := apiClient.GetUpdate(ctx, model.ProjectId, model.ServerId, model.UpdateId, model.Region)
+	req := apiClient.DefaultAPI.GetUpdate(ctx, model.ProjectId, model.ServerId, model.UpdateId, model.Region)
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, update serverupdate.Update) error {
+func outputResult(p *print.Printer, outputFormat string, update *serverupdate.Update) error {
 	return p.OutputResult(outputFormat, update, func() error {
+		if update == nil {
+			return fmt.Errorf("update is nil")
+		}
+
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(update.Id))
+		table.AddRow("ID", update.Id)
 		table.AddSeparator()
-		table.AddRow("STATUS", utils.PtrString(update.Status))
+		table.AddRow("STATUS", update.Status)
 		table.AddSeparator()
 		installedUpdates := utils.PtrStringDefault(update.InstalledUpdates, "n/a")
 		table.AddRow("INSTALLED UPDATES", installedUpdates)
@@ -114,7 +118,7 @@ func outputResult(p *print.Printer, outputFormat string, update serverupdate.Upd
 		failedUpdates := utils.PtrStringDefault(update.FailedUpdates, "n/a")
 		table.AddRow("FAILED UPDATES", failedUpdates)
 
-		table.AddRow("START DATE", utils.PtrString(update.StartDate))
+		table.AddRow("START DATE", update.StartDate)
 		table.AddSeparator()
 		table.AddRow("END DATE", utils.PtrString(update.EndDate))
 		table.AddSeparator()

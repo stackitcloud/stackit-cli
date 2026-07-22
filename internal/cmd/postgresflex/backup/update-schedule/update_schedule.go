@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -27,8 +27,8 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 
-	InstanceId     *string
-	BackupSchedule *string
+	InstanceId     string
+	BackupSchedule string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -57,10 +57,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.Region, *model.InstanceId)
+			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
-				instanceLabel = *model.InstanceId
+				instanceLabel = model.InstanceId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update backup schedule of instance %q?", instanceLabel)
@@ -100,13 +100,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	return &inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceId:      flags.FlagToStringPointer(p, cmd, instanceIdFlag),
-		BackupSchedule:  flags.FlagToStringPointer(p, cmd, scheduleFlag),
+		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
+		BackupSchedule:  flags.FlagToStringValue(p, cmd, scheduleFlag),
 	}, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiUpdateBackupScheduleRequest {
-	req := apiClient.UpdateBackupSchedule(ctx, model.ProjectId, model.Region, *model.InstanceId)
+	req := apiClient.DefaultAPI.UpdateBackupSchedule(ctx, model.ProjectId, model.Region, model.InstanceId)
 	req = req.UpdateBackupSchedulePayload(postgresflex.UpdateBackupSchedulePayload{
 		BackupSchedule: model.BackupSchedule,
 	})

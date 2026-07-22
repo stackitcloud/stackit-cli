@@ -20,7 +20,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
 )
 
 const (
@@ -68,7 +68,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.Region, *model.InstanceId)
+			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, *model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = *model.InstanceId
@@ -80,18 +80,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get backups for PostgreSQL Flex instance %q: %w", instanceLabel, err)
 			}
-			if resp.Items == nil || len(*resp.Items) == 0 {
-				params.Printer.Outputf("No backups found for instance %q", instanceLabel)
-				return nil
-			}
-			backups := *resp.Items
+			backups := resp.Items
 
 			// Truncate output
 			if model.Limit != nil && len(backups) > int(*model.Limit) {
 				backups = backups[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, backups)
+			return outputResult(params.Printer, model.OutputFormat, instanceLabel, backups)
 		},
 	}
 
@@ -129,12 +125,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiListBackupsRequest {
-	req := apiClient.ListBackups(ctx, model.ProjectId, model.Region, *model.InstanceId)
+	req := apiClient.DefaultAPI.ListBackups(ctx, model.ProjectId, model.Region, *model.InstanceId)
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, backups []postgresflex.Backup) error {
+func outputResult(p *print.Printer, outputFormat, instanceLabel string, backups []postgresflex.Backup) error {
 	return p.OutputResult(outputFormat, backups, func() error {
+		if len(backups) == 0 {
+			p.Outputf("No backups found for instance %q", instanceLabel)
+			return nil
+		}
 		table := tables.NewTable()
 		table.SetHeader("ID", "CREATED AT", "EXPIRES AT", "BACKUP SIZE")
 		for i := range backups {

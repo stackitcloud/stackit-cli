@@ -4,21 +4,20 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/runcommand"
+	runcommand "github.com/stackitcloud/stackit-sdk-go/services/runcommand/v2api"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &runcommand.APIClient{}
+var testClient = &runcommand.APIClient{DefaultAPI: &runcommand.DefaultAPIService{}}
 
 var testProjectId = uuid.NewString()
 var testServerId = uuid.NewString()
@@ -59,7 +58,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *runcommand.ApiCreateCommandRequest)) runcommand.ApiCreateCommandRequest {
-	request := testClient.CreateCommand(testCtx, testProjectId, testServerId, testRegion)
+	request := testClient.DefaultAPI.CreateCommand(testCtx, testProjectId, testServerId, testRegion)
 	request = request.CreateCommandPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -69,7 +68,7 @@ func fixtureRequest(mods ...func(request *runcommand.ApiCreateCommandRequest)) r
 
 func fixturePayload(mods ...func(payload *runcommand.CreateCommandPayload)) runcommand.CreateCommandPayload {
 	payload := runcommand.CreateCommandPayload{
-		CommandTemplateName: utils.Ptr("RunShellScript"),
+		CommandTemplateName: "RunShellScript",
 		Parameters:          &map[string]string{"script": "'echo hello'"},
 	}
 	for _, mod := range mods {
@@ -170,7 +169,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, runcommand.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
