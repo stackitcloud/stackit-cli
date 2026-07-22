@@ -65,7 +65,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		InstanceID:    testInstanceId,
 		DisplayName:   utils.Ptr("name"),
-		ACL:           utils.Ptr([]string{"0.0.0.0/0"}),
+		ACL:           []string{"0.0.0.0/0"},
 		RetentionDays: utils.Ptr(int32(60)),
 		Description:   utils.Ptr("Example"),
 	}
@@ -159,7 +159,7 @@ func TestParseInput(t *testing.T) {
 				},
 				InstanceID:    testInstanceId,
 				DisplayName:   utils.Ptr("display-name"),
-				ACL:           utils.Ptr([]string{"0.0.0.0/24"}),
+				ACL:           []string{"0.0.0.0/24"},
 				RetentionDays: utils.Ptr(int32(60)),
 				Description:   utils.Ptr("description"),
 			},

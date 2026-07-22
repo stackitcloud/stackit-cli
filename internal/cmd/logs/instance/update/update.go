@@ -35,7 +35,7 @@ type inputModel struct {
 	InstanceID    string
 	DisplayName   *string
 	RetentionDays *int32
-	ACL           *[]string
+	ACL           []string
 	Description   *string
 }
 
@@ -121,7 +121,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	displayName := flags.FlagToStringPointer(p, cmd, displayNameFlag)
 	retentionDays := flags.FlagToInt32Pointer(p, cmd, retentionDaysFlag)
-	acl := flags.FlagToStringSlicePointer(p, cmd, aclFlag)
+	acl := flags.FlagToStringSliceValue(p, cmd, aclFlag)
 	description := flags.FlagToStringPointer(p, cmd, descriptionFlag)
 
 	if displayName == nil && retentionDays == nil && acl == nil && description == nil {
@@ -146,7 +146,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *logs.APICli
 
 	req = req.UpdateLogsInstancePayload(logs.UpdateLogsInstancePayload{
 		DisplayName:   model.DisplayName,
-		Acl:           utils.PtrValue(model.ACL),
+		Acl:           model.ACL,
 		RetentionDays: model.RetentionDays,
 		Description:   model.Description,
 	})
