@@ -263,6 +263,17 @@ func TestGetPublicIp(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "nil network interface",
+			args: args{
+				getPublicIpResp: &iaas.PublicIp{
+					Ip:               utils.Ptr("1.2.3.4"),
+					NetworkInterface: *iaas.NewNullableString(nil),
+				},
+			},
+			wantPublicIp:           "1.2.3.4",
+			wantAssociatedResource: "",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
