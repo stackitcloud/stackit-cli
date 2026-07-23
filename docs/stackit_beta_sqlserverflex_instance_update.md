@@ -25,11 +25,11 @@ stackit beta sqlserverflex instance update INSTANCE_ID [flags]
 ```
       --acl strings              Lists of IP networks in CIDR notation which are allowed to access this instance (default [])
       --backup-schedule string   Backup schedule
-      --cpu int32                Number of CPUs
+      --cpu int                  Number of CPUs
       --flavor-id string         ID of the flavor
   -h, --help                     Help for "stackit beta sqlserverflex instance update"
   -n, --name string              Instance name
-      --ram int32                Amount of RAM (in GB)
+      --ram int                  Amount of RAM (in GB)
       --version string           Version
 ```
 

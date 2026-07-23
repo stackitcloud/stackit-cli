@@ -131,8 +131,8 @@ func TestParseInputWithOptions[T any](t *testing.T, cmdFactory func(*types.CmdPa
 	if !isValid {
 		t.Fatalf("did not fail on invalid input")
 	}
-	diff := cmp.Diff(model, expectedModel, opts.cmpOptions...)
+	diff := cmp.Diff(expectedModel, model, opts.cmpOptions...)
 	if diff != "" {
-		t.Fatalf("Data does not match: %s", diff)
+		t.Fatalf("Data does not match (-expected, +actual): %s", diff)
 	}
 }

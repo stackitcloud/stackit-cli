@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -55,7 +55,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *sqlserverflex.ApiCreateUserRequest)) sqlserverflex.ApiCreateUserRequest {
-	request := testClient.DefaultAPI.CreateUser(testCtx, testProjectId, testInstanceId, testRegion)
+	request := testClient.DefaultAPI.CreateUser(testCtx, testProjectId, testRegion, testInstanceId)
 	request = request.CreateUserPayload(sqlserverflex.CreateUserPayload{
 		Username: "johndoe",
 		Roles:    []string{"read"},
@@ -186,7 +186,7 @@ func TestOutputResult(t *testing.T) {
 	type args struct {
 		model         *inputModel
 		instanceLabel string
-		user          *sqlserverflex.SingleUser
+		user          *sqlserverflex.CreateUserResponse
 	}
 	tests := []struct {
 		name    string
@@ -202,7 +202,7 @@ func TestOutputResult(t *testing.T) {
 			name: "user as argument",
 			args: args{
 				model: fixtureInputModel(),
-				user:  &sqlserverflex.SingleUser{},
+				user:  &sqlserverflex.CreateUserResponse{},
 			},
 			wantErr: false,
 		},

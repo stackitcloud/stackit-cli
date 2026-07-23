@@ -13,15 +13,12 @@ stackit beta sqlserverflex instance create [flags]
 ### Examples
 
 ```
-  Create a SQLServer Flex instance with name "my-instance" and specify flavor by CPU and RAM. Other parameters are set to default values
-  $ stackit beta sqlserverflex instance create --name my-instance --cpu 1 --ram 4
-
   Create a SQLServer Flex instance with name "my-instance" and specify flavor by ID. Other parameters are set to default values.
   The flavor ID can be retrieved by running "$ stackit beta sqlserverflex options --flavors"
-  $ stackit beta sqlserverflex instance create --name my-instance --flavor-id xxx
+  $ stackit beta sqlserverflex instance create --name my-instance --flavor-id xxx --backup-schedule "0 1-3 * * *" --retention-days 30 --storage-class premium-perf2-stackit --storage-size 10 --version 2022
 
   Create a SQLServer Flex instance with name "my-instance", specify flavor by CPU and RAM, set storage size to 20 GB, and restrict access to a specific range of IP addresses. Other parameters are set to default values
-  $ stackit beta sqlserverflex instance create --name my-instance --cpu 1 --ram 4 --storage-size 20 --acl 1.2.3.0/24
+  $ stackit beta sqlserverflex instance create --name my-instance --cpu 1 --ram 4 --storage-size 20 --backup-schedule "0 1-3 * * *" --retention-days 30 --storage-class premium-perf2-stackit --storage-size 10 --version 2022 --acl 1.2.3.0/24
 ```
 
 ### Options
@@ -29,13 +26,13 @@ stackit beta sqlserverflex instance create [flags]
 ```
       --acl strings              The access control list (ACL). Must contain at least one valid subnet, for instance '0.0.0.0/0' for open access (discouraged), '1.2.3.0/24 for a public IP range of an organization, '1.2.3.4/32' for a single IP range, etc. (default [])
       --backup-schedule string   Backup schedule
-      --cpu int32                Number of CPUs
+      --cpu int                  Number of CPUs
       --edition string           Edition of the SQLServer instance
       --flavor-id string         ID of the flavor
   -h, --help                     Help for "stackit beta sqlserverflex instance create"
   -n, --name string              Instance name
-      --ram int32                Amount of RAM (in GB)
-      --retention-days int       The days for how long the backup files should be stored before being cleaned up
+      --ram int                  Amount of RAM (in GB)
+      --retention-days int32     The days for how long the backup files should be stored before being cleaned up
       --storage-class string     Storage class
       --storage-size int         Storage size (in GB)
       --version string           SQLServer version

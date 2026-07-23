@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	sqlserverflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -17,7 +18,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
 )
 
 const (
@@ -61,8 +62,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("read SQLServer Flex instance: %w", err)
 			}
+			flavor, err := sqlserverflexUtils.GetFlavor(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, resp.FlavorId)
+			if err != nil {
+				return fmt.Errorf("get flavor: %w", err)
+			}
 
-			return outputResult(params.Printer, model.OutputFormat, resp.Item)
+			return outputResult(params.Printer, model.OutputFormat, resp, flavor)
 		},
 	}
 	return cmd
@@ -86,47 +91,39 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiGetInstanceRequest {
-	req := apiClient.DefaultAPI.GetInstance(ctx, model.ProjectId, model.InstanceId, model.Region)
+	req := apiClient.DefaultAPI.GetInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, instance *sqlserverflex.Instance) error {
+func outputResult(p *print.Printer, outputFormat string, instance *sqlserverflex.GetInstanceResponse, flavor *sqlserverflex.ListFlavors) error {
 	if instance == nil {
 		return fmt.Errorf("instance response is empty")
 	}
 
 	return p.OutputResult(outputFormat, instance, func() error {
-		var acls string
-		if instance.Acl != nil && instance.Acl.HasItems() {
-			aclsArray := instance.Acl.Items
-			acls = strings.Join(aclsArray, ",")
-		}
+		acls := strings.Join(instance.Network.Acl, ", ")
 
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(instance.Id))
+		table.AddRow("ID", instance.Id)
 		table.AddSeparator()
-		table.AddRow("NAME", utils.PtrString(instance.Name))
+		table.AddRow("NAME", instance.Name)
 		table.AddSeparator()
-		table.AddRow("STATUS", utils.PtrString(instance.Status))
+		table.AddRow("STATUS", instance.State)
 		table.AddSeparator()
-		if instance.Storage != nil {
-			table.AddRow("STORAGE SIZE (GB)", utils.PtrString(instance.Storage.Size))
-			table.AddSeparator()
-		}
-		table.AddRow("VERSION", utils.PtrString(instance.Version))
+		table.AddRow("STORAGE SIZE (GB)", utils.PtrString(instance.Storage.Size))
 		table.AddSeparator()
-		table.AddRow("BACKUP SCHEDULE (UTC)", utils.PtrString(instance.BackupSchedule))
+		table.AddRow("VERSION", instance.Version)
+		table.AddSeparator()
+		table.AddRow("BACKUP SCHEDULE (UTC)", instance.BackupSchedule)
 		table.AddSeparator()
 		table.AddRow("ACL", acls)
 		table.AddSeparator()
-		if instance.Flavor != nil {
-			table.AddRow("FLAVOR DESCRIPTION", utils.PtrString(instance.Flavor.Description))
-			table.AddSeparator()
-			table.AddRow("CPU", utils.PtrString(instance.Flavor.Cpu))
-			table.AddSeparator()
-			table.AddRow("RAM (GB)", utils.PtrString(instance.Flavor.Memory))
-			table.AddSeparator()
-		}
+		table.AddRow("FLAVOR DESCRIPTION", flavor.Description)
+		table.AddSeparator()
+		table.AddRow("CPU", flavor.Cpu)
+		table.AddSeparator()
+		table.AddRow("RAM (GB)", flavor.Memory)
+		table.AddSeparator()
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

@@ -8,7 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -132,7 +132,7 @@ func fixtureStandardInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *sqlserverflex.ApiPartialUpdateInstanceRequest)) sqlserverflex.ApiPartialUpdateInstanceRequest {
-	request := testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testInstanceId, testRegion)
+	request := testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId)
 	request = request.PartialUpdateInstancePayload(sqlserverflex.PartialUpdateInstancePayload{})
 	for _, mod := range mods {
 		mod(&request)
@@ -192,8 +192,8 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureStandardInputModel(func(model *inputModel) {
 				model.FlavorId = nil
-				model.CPU = utils.Ptr(int32(2))
-				model.RAM = utils.Ptr(int32(4))
+				model.CPU = utils.Ptr(int64(2))
+				model.RAM = utils.Ptr(int64(4))
 			}),
 		},
 		{
@@ -364,15 +364,15 @@ func TestBuildRequest(t *testing.T) {
 			}),
 			isValid: true,
 			listFlavorsResp: &sqlserverflex.ListFlavorsResponse{
-				Flavors: []sqlserverflex.InstanceFlavorEntry{
+				Flavors: []sqlserverflex.ListFlavors{
 					{
-						Id:     utils.Ptr(testFlavorId),
-						Cpu:    utils.Ptr(int32(2)),
-						Memory: utils.Ptr(int32(4)),
+						Id:     testFlavorId,
+						Cpu:    int64(2),
+						Memory: int64(4),
 					},
 				},
 			},
-			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testInstanceId, testRegion).
+			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId).
 				PartialUpdateInstancePayload(sqlserverflex.PartialUpdateInstancePayload{
 					FlavorId: utils.Ptr(testFlavorId),
 				}),
@@ -380,20 +380,20 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "update flavor from cpu and ram",
 			model: fixtureRequiredInputModel(func(model *inputModel) {
-				model.CPU = utils.Ptr(int32(2))
-				model.RAM = utils.Ptr(int32(4))
+				model.CPU = utils.Ptr(int64(2))
+				model.RAM = utils.Ptr(int64(4))
 			}),
 			isValid: true,
 			listFlavorsResp: &sqlserverflex.ListFlavorsResponse{
-				Flavors: []sqlserverflex.InstanceFlavorEntry{
+				Flavors: []sqlserverflex.ListFlavors{
 					{
-						Id:     utils.Ptr(testFlavorId),
-						Cpu:    utils.Ptr(int32(2)),
-						Memory: utils.Ptr(int32(4)),
+						Id:     testFlavorId,
+						Cpu:    int64(2),
+						Memory: int64(4),
 					},
 				},
 			},
-			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testInstanceId, testRegion).
+			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId).
 				PartialUpdateInstancePayload(sqlserverflex.PartialUpdateInstancePayload{
 					FlavorId: utils.Ptr(testFlavorId),
 				}),
@@ -402,8 +402,8 @@ func TestBuildRequest(t *testing.T) {
 			description: "get flavors fails",
 			model: fixtureRequiredInputModel(
 				func(model *inputModel) {
-					model.CPU = utils.Ptr(int32(2))
-					model.RAM = utils.Ptr(int32(4))
+					model.CPU = utils.Ptr(int64(2))
+					model.RAM = utils.Ptr(int64(4))
 				},
 			),
 			listFlavorsFails: true,
@@ -413,21 +413,21 @@ func TestBuildRequest(t *testing.T) {
 			description: "flavor id not found",
 			model: fixtureRequiredInputModel(
 				func(model *inputModel) {
-					model.CPU = utils.Ptr(int32(5))
-					model.RAM = utils.Ptr(int32(9))
+					model.CPU = utils.Ptr(int64(5))
+					model.RAM = utils.Ptr(int64(9))
 				},
 			),
 			listFlavorsResp: &sqlserverflex.ListFlavorsResponse{
-				Flavors: []sqlserverflex.InstanceFlavorEntry{
+				Flavors: []sqlserverflex.ListFlavors{
 					{
-						Id:     utils.Ptr(testFlavorId),
-						Cpu:    utils.Ptr(int32(2)),
-						Memory: utils.Ptr(int32(4)),
+						Id:     testFlavorId,
+						Cpu:    int64(2),
+						Memory: int64(4),
 					},
 					{
-						Id:     utils.Ptr("other-flavor"),
-						Cpu:    utils.Ptr(int32(1)),
-						Memory: utils.Ptr(int32(8)),
+						Id:     "other-flavor",
+						Cpu:    int64(1),
+						Memory: int64(8),
 					},
 				},
 			},
@@ -438,7 +438,7 @@ func TestBuildRequest(t *testing.T) {
 			model: fixtureRequiredInputModel(
 				func(model *inputModel) {
 					model.FlavorId = nil
-					model.RAM = utils.Ptr(int32(4))
+					model.RAM = utils.Ptr(int64(4))
 				},
 			),
 			getInstanceFails: true,
@@ -449,8 +449,8 @@ func TestBuildRequest(t *testing.T) {
 			model: fixtureRequiredInputModel(
 				func(model *inputModel) {
 					model.FlavorId = nil
-					model.CPU = utils.Ptr(int32(2))
-					model.RAM = utils.Ptr(int32(4))
+					model.CPU = utils.Ptr(int64(2))
+					model.RAM = utils.Ptr(int64(4))
 				},
 			),
 			listFlavorsFails: true,
@@ -498,7 +498,7 @@ func TestOutputResult(t *testing.T) {
 	type args struct {
 		model         *inputModel
 		instanceLabel string
-		resp          *sqlserverflex.UpdateInstanceResponse
+		resp          *sqlserverflex.GetInstanceResponse
 	}
 	tests := []struct {
 		name    string
@@ -514,7 +514,7 @@ func TestOutputResult(t *testing.T) {
 			name: "instance as argument",
 			args: args{
 				model: fixtureRequiredInputModel(),
-				resp:  &sqlserverflex.UpdateInstanceResponse{},
+				resp:  &sqlserverflex.GetInstanceResponse{},
 			},
 			wantErr: false,
 		},

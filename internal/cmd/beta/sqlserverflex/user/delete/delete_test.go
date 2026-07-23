@@ -2,6 +2,7 @@ package delete
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -10,7 +11,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
 )
 
 type testCtxKey struct{}
@@ -20,12 +21,12 @@ var testClient = &sqlserverflex.APIClient{DefaultAPI: &sqlserverflex.DefaultAPIS
 
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
-var testUserId = "my-user-id"
+var testUserId = int64(123123)
 var testRegion = "eu01"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
-		testUserId,
+		fmt.Sprintf("%d", testUserId),
 	}
 	for _, mod := range mods {
 		mod(argValues)
@@ -62,7 +63,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *sqlserverflex.ApiDeleteUserRequest)) sqlserverflex.ApiDeleteUserRequest {
-	request := testClient.DefaultAPI.DeleteUser(testCtx, testProjectId, testInstanceId, testUserId, testRegion)
+	request := testClient.DefaultAPI.DeleteUser(testCtx, testProjectId, testRegion, testInstanceId, testUserId)
 	for _, mod := range mods {
 		mod(&request)
 	}

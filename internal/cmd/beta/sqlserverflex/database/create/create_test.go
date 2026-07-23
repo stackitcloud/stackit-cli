@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -67,12 +67,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *sqlserverflex.ApiCreateDatabaseRequest)) sqlserverflex.ApiCreateDatabaseRequest {
-	request := testClient.DefaultAPI.CreateDatabase(testCtx, testProjectId, testInstanceId, testRegion)
+	request := testClient.DefaultAPI.CreateDatabase(testCtx, testProjectId, testRegion, testInstanceId)
 	payload := sqlserverflex.CreateDatabasePayload{
-		Name: testDatabaseName,
-		Options: sqlserverflex.DatabaseDocumentationCreateDatabaseRequestOptions{
-			Owner: testOwner,
-		},
+		Name:  testDatabaseName,
+		Owner: testOwner,
 	}
 	request = request.CreateDatabasePayload(payload)
 	for _, mod := range mods {

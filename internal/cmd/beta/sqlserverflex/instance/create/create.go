@@ -20,20 +20,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
-	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api/wait"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
+	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api/wait"
 )
-
-// enforce implementation of interfaces
-var (
-	_ sqlServerFlexClient = sqlserverflex.APIClient{}.DefaultAPI
-)
-
-type sqlServerFlexClient interface {
-	CreateInstance(ctx context.Context, projectId string, region string) sqlserverflex.ApiCreateInstanceRequest
-	ListFlavors(ctx context.Context, projectId string, region string) sqlserverflex.ApiListFlavorsRequest
-	ListStorages(ctx context.Context, projectId, flavorId string, region string) sqlserverflex.ApiListStoragesRequest
-}
 
 const (
 	instanceNameFlag   = "name"
@@ -54,15 +43,14 @@ type inputModel struct {
 
 	InstanceName   string
 	ACL            []string
-	BackupSchedule *string
+	BackupSchedule string
 	FlavorId       *string
-	CPU            *int32
-	RAM            *int32
-	StorageClass   *string
+	CPU            *int64
+	RAM            *int64
+	StorageClass   string
 	StorageSize    *int64
-	Version        *string
-	Edition        *string
-	RetentionDays  *int64
+	Version        string
+	RetentionDays  *int32
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -73,19 +61,15 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a SQLServer Flex instance with name "my-instance" and specify flavor by CPU and RAM. Other parameters are set to default values`,
-				`$ stackit beta sqlserverflex instance create --name my-instance --cpu 1 --ram 4`),
-			examples.NewExample(
 				`Create a SQLServer Flex instance with name "my-instance" and specify flavor by ID. Other parameters are set to default values.
   The flavor ID can be retrieved by running "$ stackit beta sqlserverflex options --flavors"`,
-				`$ stackit beta sqlserverflex instance create --name my-instance --flavor-id xxx`),
+				`$ stackit beta sqlserverflex instance create --name my-instance --flavor-id xxx --backup-schedule "0 1-3 * * *" --retention-days 30 --storage-class premium-perf2-stackit --storage-size 10 --version 2022`),
 			examples.NewExample(
 				`Create a SQLServer Flex instance with name "my-instance", specify flavor by CPU and RAM, set storage size to 20 GB, and restrict access to a specific range of IP addresses. Other parameters are set to default values`,
-				`$ stackit beta sqlserverflex instance create --name my-instance --cpu 1 --ram 4 --storage-size 20 --acl 1.2.3.0/24`),
+				`$ stackit beta sqlserverflex instance create --name my-instance --cpu 1 --ram 4 --storage-size 20 --backup-schedule "0 1-3 * * *" --retention-days 30 --storage-class premium-perf2-stackit --storage-size 10 --version 2022 --acl 1.2.3.0/24`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -118,12 +102,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("create SQLServer Flex instance: %w", err)
 			}
-			instanceId := *resp.Id
+			instanceId := resp.Id
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating instance", func() error {
-					_, err = wait.CreateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, instanceId, model.Region).WaitWithContext(ctx)
+					_, err = wait.CreateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, instanceId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -143,15 +127,15 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.CIDRSliceFlag(), aclFlag, "The access control list (ACL). Must contain at least one valid subnet, for instance '0.0.0.0/0' for open access (discouraged), '1.2.3.0/24 for a public IP range of an organization, '1.2.3.4/32' for a single IP range, etc.")
 	cmd.Flags().String(backupScheduleFlag, "", "Backup schedule")
 	cmd.Flags().String(flavorIdFlag, "", "ID of the flavor")
-	cmd.Flags().Int32(cpuFlag, 0, "Number of CPUs")
-	cmd.Flags().Int32(ramFlag, 0, "Amount of RAM (in GB)")
+	cmd.Flags().Int64(cpuFlag, 0, "Number of CPUs")
+	cmd.Flags().Int64(ramFlag, 0, "Amount of RAM (in GB)")
 	cmd.Flags().Int64(storageSizeFlag, 0, "Storage size (in GB)")
 	cmd.Flags().String(storageClassFlag, "", "Storage class")
 	cmd.Flags().String(versionFlag, "", "SQLServer version")
 	cmd.Flags().String(editionFlag, "", "Edition of the SQLServer instance")
-	cmd.Flags().Int64(retentionDaysFlag, 0, "The days for how long the backup files should be stored before being cleaned up")
+	cmd.Flags().Int32(retentionDaysFlag, 0, "The days for how long the backup files should be stored before being cleaned up")
 
-	err := flags.MarkFlagsRequired(cmd, instanceNameFlag)
+	err := flags.MarkFlagsRequired(cmd, instanceNameFlag, backupScheduleFlag, retentionDaysFlag, storageClassFlag, storageSizeFlag, versionFlag)
 	cobra.CheckErr(err)
 }
 
@@ -162,8 +146,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	flavorId := flags.FlagToStringPointer(p, cmd, flavorIdFlag)
-	cpu := flags.FlagToInt32Pointer(p, cmd, cpuFlag)
-	ram := flags.FlagToInt32Pointer(p, cmd, ramFlag)
+	cpu := flags.FlagToInt64Pointer(p, cmd, cpuFlag)
+	ram := flags.FlagToInt64Pointer(p, cmd, ramFlag)
 
 	if flavorId == nil && (cpu == nil || ram == nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
@@ -182,25 +166,24 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		GlobalFlagModel: globalFlags,
 		InstanceName:    flags.FlagToStringValue(p, cmd, instanceNameFlag),
 		ACL:             flags.FlagToStringSliceValue(p, cmd, aclFlag),
-		BackupSchedule:  flags.FlagToStringPointer(p, cmd, backupScheduleFlag),
+		BackupSchedule:  flags.FlagToStringValue(p, cmd, backupScheduleFlag),
 		FlavorId:        flavorId,
 		CPU:             cpu,
 		RAM:             ram,
-		StorageClass:    flags.FlagToStringPointer(p, cmd, storageClassFlag),
+		StorageClass:    flags.FlagToStringValue(p, cmd, storageClassFlag),
 		StorageSize:     flags.FlagToInt64Pointer(p, cmd, storageSizeFlag),
-		Version:         flags.FlagToStringPointer(p, cmd, versionFlag),
-		Edition:         flags.FlagToStringPointer(p, cmd, editionFlag),
-		RetentionDays:   flags.FlagToInt64Pointer(p, cmd, retentionDaysFlag),
+		Version:         flags.FlagToStringValue(p, cmd, versionFlag),
+		RetentionDays:   flags.FlagToInt32Pointer(p, cmd, retentionDaysFlag),
 	}
 
 	p.DebugInputModel(model)
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient sqlServerFlexClient) (sqlserverflex.ApiCreateInstanceRequest, error) {
+func buildRequest(ctx context.Context, model *inputModel, apiClient sqlserverflex.DefaultAPI) (sqlserverflex.ApiCreateInstanceRequest, error) {
 	req := apiClient.CreateInstance(ctx, model.ProjectId, model.Region)
 
-	var flavorId *string
+	var flavorId string
 	var err error
 
 	flavors, err := apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Execute()
@@ -222,37 +205,31 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlServerFle
 		if err != nil {
 			return req, err
 		}
-		flavorId = model.FlavorId
+		flavorId = *model.FlavorId
 	}
 
-	storages, err := apiClient.ListStorages(ctx, model.ProjectId, *flavorId, model.Region).Execute()
+	storages, err := apiClient.ListStorages(ctx, model.ProjectId, model.Region, flavorId).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get SQLServer Flex storages: %w", err)
 	}
-	err = sqlserverflexUtils.ValidateStorage(model.StorageClass, model.StorageSize, storages, *flavorId)
+	err = sqlserverflexUtils.ValidateStorage(model.StorageClass, model.StorageSize, storages, flavorId)
 	if err != nil {
 		return req, err
 	}
 
-	var retentionDays *string
-	if model.RetentionDays != nil {
-		retentionDays = utils.Ptr(fmt.Sprintf("%d", *model.RetentionDays))
-	}
-
 	req = req.CreateInstancePayload(sqlserverflex.CreateInstancePayload{
-		Name:           model.InstanceName,
-		Acl:            &sqlserverflex.InstanceDocumentationACL{Items: model.ACL},
+		Name: model.InstanceName,
+		Network: sqlserverflex.CreateInstancePayloadNetwork{
+			Acl: model.ACL,
+		},
 		BackupSchedule: model.BackupSchedule,
-		FlavorId:       *flavorId,
-		Storage: &sqlserverflex.InstanceDocumentationStorage{
+		FlavorId:       flavorId,
+		Storage: sqlserverflex.StorageCreate{
 			Class: model.StorageClass,
-			Size:  model.StorageSize,
+			Size:  utils.PtrValue(model.StorageSize),
 		},
-		Version: model.Version,
-		Options: &sqlserverflex.InstanceDocumentationOptions{
-			Edition:       model.Edition,
-			RetentionDays: retentionDays,
-		},
+		Version:       sqlserverflex.InstanceVersion(model.Version),
+		RetentionDays: utils.PtrValue(model.RetentionDays),
 	})
 	return req, nil
 }
@@ -266,7 +243,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, utils.PtrString(resp.Id))
+		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, resp.Id)
 		return nil
 	})
 }
