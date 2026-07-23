@@ -39,8 +39,8 @@ func GetPublicIP(ctx context.Context, apiClient iaas.DefaultAPI, projectId, regi
 		return "", "", fmt.Errorf("get public ip: %w", err)
 	}
 	associatedResourceId := ""
-	if resp.NetworkInterface.IsSet() {
-		associatedResourceId = *resp.NetworkInterface.Get()
+	if networkInterface := resp.NetworkInterface.Get(); networkInterface != nil {
+		associatedResourceId = *networkInterface
 	}
 	return *resp.Ip, associatedResourceId, nil
 }
