@@ -201,3 +201,31 @@ func TestParseWellKnownConfig(t *testing.T) {
 		})
 	}
 }
+
+func TestParseWellKnownConfigWithoutStorage(t *testing.T) {
+	keyring.MockInit()
+	const existingEndpoint = "https://existing.stackit.cloud/oauth"
+	if err := SetAuthField(IDP_TOKEN_ENDPOINT, existingEndpoint); err != nil {
+		t.Fatalf("Set existing token endpoint: %v", err)
+	}
+	testClient := apiClientMocked{
+		false,
+		`{"issuer":"https://issuer.stackit.cloud/endpoint","authorization_endpoint":"https://auth.stackit.cloud/endpoint","token_endpoint":"https://token.stackit.cloud/endpoint"}`,
+	}
+
+	wellKnownConfig, err := parseWellKnownConfigurationWithStorage(&testClient, "", false)
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+	if wellKnownConfig.TokenEndpoint != "https://token.stackit.cloud/endpoint" {
+		t.Fatalf("Unexpected token endpoint %q", wellKnownConfig.TokenEndpoint)
+	}
+
+	storedTokenEndpoint, err := GetAuthField(IDP_TOKEN_ENDPOINT)
+	if err != nil {
+		t.Fatalf("Get stored token endpoint: %v", err)
+	}
+	if storedTokenEndpoint != existingEndpoint {
+		t.Fatalf("Expected token endpoint not to be changed, got %q", storedTokenEndpoint)
+	}
+}

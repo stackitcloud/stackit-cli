@@ -11,16 +11,21 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
 	clientauthenticationv1 "k8s.io/client-go/pkg/apis/clientauthentication/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/auth/exec"
 	"k8s.io/client-go/tools/clientcmd"
 
+	sdkAuth "github.com/stackitcloud/stackit-sdk-go/core/auth"
+	"github.com/stackitcloud/stackit-sdk-go/core/clients"
+	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -40,7 +45,13 @@ const (
 	refreshBeforeDuration      = 15 * time.Minute // 15 min
 	refreshTokenBeforeDuration = 5 * time.Minute  // 5 min
 
-	idpFlag = "idp"
+	idpFlag          = "idp"
+	clusterNameFlag  = "cluster-name"
+	organizationFlag = "organization-id"
+
+	envAccessToken            = "STACKIT_ACCESS_TOKEN"
+	envServiceAccountEmail    = "STACKIT_SERVICE_ACCOUNT_EMAIL"
+	defaultFederatedTokenPath = "/var/run/secrets/stackit.cloud/serviceaccount/token" //nolint:gosec // Public path, not a credential.
 )
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -66,13 +77,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				"Use the previously saved kubeconfig to authenticate to the SKE cluster, in this case with kubectl.",
 				"$ kubectl cluster-info",
 				"$ kubectl get pods"),
+			examples.NewExample(
+				"Configure an IdP exec provider for a Kubernetes client that does not provide cluster information. In an SKE workload, the CLI automatically uses the projected workload identity token.",
+				"$ stackit ske kubeconfig login --idp --cluster-name my-cluster --organization-id my-organization-id --project-id my-project-id --region eu01"),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
-
-			if err := cache.Init(); err != nil {
-				return fmt.Errorf("cache init failed: %w", err)
-			}
 
 			env := os.Getenv("KUBERNETES_EXEC_INFO")
 			if env == "" {
@@ -82,22 +92,33 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			idpMode := flags.FlagToBoolValue(params.Printer, cmd, idpFlag)
-			clusterConfig, err := parseClusterConfig(params.Printer, cmd, idpMode)
+			workloadIdentityMode := idpMode && os.Getenv(envAccessToken) == "" && workloadIdentityConfigured()
+			statelessIDPMode := idpMode && (workloadIdentityMode || os.Getenv(envAccessToken) != "")
+			if !statelessIDPMode {
+				if err := cache.Init(); err != nil {
+					return fmt.Errorf("cache init failed: %w", err)
+				}
+			}
+			clusterConfig, err := parseClusterConfig(params.Printer, cmd, idpMode, workloadIdentityMode, statelessIDPMode)
 			if err != nil {
 				return fmt.Errorf("parseClusterConfig: %w", err)
 			}
 
 			if idpMode {
-				accessToken, err := getAccessToken(params)
+				accessToken, err := getAccessToken(params, workloadIdentityMode)
 				if err != nil {
 					return err
+				}
+				tokenEndpoint, err := auth.GetIDPTokenEndpoint(params.Printer)
+				if err != nil {
+					return fmt.Errorf("get IDP token endpoint: %w", err)
 				}
 				idpClient := &http.Client{}
-				token, err := retrieveTokenFromIDP(ctx, idpClient, accessToken, clusterConfig)
+				token, err := retrieveTokenFromIDP(ctx, idpClient, tokenEndpoint, accessToken, clusterConfig, !statelessIDPMode)
 				if err != nil {
 					return err
 				}
-				return outputTokenKubeconfig(params.Printer, clusterConfig.cacheKey, token)
+				return outputTokenKubeconfig(params.Printer, clusterConfig.cacheKey, token, !statelessIDPMode)
 			}
 
 			// Configure API client
@@ -118,6 +139,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(idpFlag, false, "Use the STACKIT IdP for authentication to the cluster.")
+	cmd.Flags().String(clusterNameFlag, "", "SKE cluster name. Used when the Kubernetes exec request does not provide cluster information.")
+	cmd.Flags().String(organizationFlag, "", "Organization ID. Used in IdP mode when the Kubernetes exec request does not provide cluster information.")
 }
 
 type clusterConfig struct {
@@ -129,8 +152,8 @@ type clusterConfig struct {
 	cacheKey string
 }
 
-func parseClusterConfig(p *print.Printer, cmd *cobra.Command, idpMode bool) (*clusterConfig, error) {
-	obj, _, err := exec.LoadExecCredentialFromEnv()
+func parseClusterConfig(p *print.Printer, cmd *cobra.Command, idpMode, workloadIdentityMode, statelessIDPMode bool) (*clusterConfig, error) {
+	obj, err := loadExecCredentialFromEnv()
 	if err != nil {
 		return nil, fmt.Errorf("LoadExecCredentialFromEnv: %w", err)
 	}
@@ -148,31 +171,113 @@ func parseClusterConfig(p *print.Printer, cmd *cobra.Command, idpMode bool) (*cl
 	if !ok {
 		return nil, fmt.Errorf("conversion to ExecCredential failed")
 	}
-	if execCredential == nil || execCredential.Spec.Cluster == nil {
-		return nil, fmt.Errorf("ExecCredential contains not all needed fields")
+	if execCredential == nil {
+		return nil, fmt.Errorf("ExecCredential is empty")
 	}
 	clusterConfig := &clusterConfig{}
-	err = json.Unmarshal(execCredential.Spec.Cluster.Config.Raw, clusterConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unmarshal: %w", err)
+	clusterServer := ""
+	if execCredential.Spec.Cluster != nil {
+		clusterServer = execCredential.Spec.Cluster.Server
+		if len(execCredential.Spec.Cluster.Config.Raw) > 0 {
+			err = json.Unmarshal(execCredential.Spec.Cluster.Config.Raw, clusterConfig)
+			if err != nil {
+				return nil, fmt.Errorf("unmarshal: %w", err)
+			}
+		}
 	}
 
-	authEmail, err := auth.GetAuthEmail()
+	if clusterName := flags.FlagToStringValue(p, cmd, clusterNameFlag); clusterName != "" {
+		clusterConfig.ClusterName = clusterName
+	}
+	if organizationID := flags.FlagToStringValue(p, cmd, organizationFlag); organizationID != "" {
+		clusterConfig.OrganizationID = organizationID
+	}
+	globalFlags := globalflags.Parse(p, cmd)
+	if clusterConfig.STACKITProjectID == "" {
+		clusterConfig.STACKITProjectID = globalFlags.ProjectId
+	}
+	if clusterConfig.Region == "" {
+		clusterConfig.Region = globalFlags.Region
+	}
+
+	missingFields := missingClusterConfigFields(clusterConfig, idpMode)
+	if len(missingFields) > 0 {
+		return nil, fmt.Errorf("ExecCredential cluster configuration is incomplete; provide %s", strings.Join(missingFields, ", "))
+	}
+
+	authIdentity, err := getAuthIdentity(workloadIdentityMode, statelessIDPMode)
 	if err != nil {
-		return nil, fmt.Errorf("error getting auth email: %w", err)
+		return nil, fmt.Errorf("error getting auth identity: %w", err)
 	}
 	idpSuffix := ""
 	if idpMode {
 		idpSuffix = "\x00idp"
 	}
-	clusterConfig.cacheKey = fmt.Sprintf("ske-login-%x", sha256.Sum256([]byte(execCredential.Spec.Cluster.Server+"\x00"+authEmail+idpSuffix)))
-
-	// NOTE: Fallback if region is not set in the kubeconfig (this was the case in the past)
-	if clusterConfig.Region == "" {
-		clusterConfig.Region = globalflags.Parse(p, cmd).Region
+	clusterIdentity := clusterServer
+	if clusterIdentity == "" {
+		clusterIdentity = strings.Join([]string{
+			clusterConfig.OrganizationID,
+			clusterConfig.STACKITProjectID,
+			clusterConfig.Region,
+			clusterConfig.ClusterName,
+		}, "\x00")
 	}
+	clusterConfig.cacheKey = fmt.Sprintf("ske-login-%x", sha256.Sum256([]byte(clusterIdentity+"\x00"+authIdentity+idpSuffix)))
 
 	return clusterConfig, nil
+}
+
+func loadExecCredentialFromEnv() (runtime.Object, error) {
+	execInfo := os.Getenv("KUBERNETES_EXEC_INFO")
+	if execInfo == "" {
+		return nil, errors.New("KUBERNETES_EXEC_INFO env var is unset or empty")
+	}
+
+	// client-go's loader rejects requests without cluster information. Decode the
+	// v1 request directly when the Kubernetes client omits it.
+	var execCredential clientauthenticationv1.ExecCredential
+	if err := json.Unmarshal([]byte(execInfo), &execCredential); err == nil &&
+		execCredential.APIVersion == clientauthenticationv1.SchemeGroupVersion.String() &&
+		execCredential.Kind == "ExecCredential" && execCredential.Spec.Cluster == nil {
+		return &execCredential, nil
+	}
+
+	obj, _, err := exec.LoadExecCredential([]byte(execInfo))
+	if err != nil {
+		return nil, err
+	}
+	return obj, nil
+}
+
+func missingClusterConfigFields(config *clusterConfig, idpMode bool) []string {
+	missingFields := make([]string, 0, 4)
+	if config.ClusterName == "" {
+		missingFields = append(missingFields, "--cluster-name")
+	}
+	if config.STACKITProjectID == "" {
+		missingFields = append(missingFields, "--project-id")
+	}
+	if config.Region == "" {
+		missingFields = append(missingFields, "--region")
+	}
+	if idpMode && config.OrganizationID == "" {
+		missingFields = append(missingFields, "--organization-id")
+	}
+	return missingFields
+}
+
+func getAuthIdentity(workloadIdentityMode, statelessIDPMode bool) (string, error) {
+	if workloadIdentityMode {
+		email := os.Getenv(envServiceAccountEmail)
+		if email == "" {
+			return "", fmt.Errorf("%s is not set", envServiceAccountEmail)
+		}
+		return email, nil
+	}
+	if statelessIDPMode {
+		return "stateless-idp", nil
+	}
+	return auth.GetAuthEmail()
 }
 
 func retrieveLoginKubeconfig(ctx context.Context, apiClient *ske.APIClient, clusterConfig *clusterConfig) (*rest.Config, error) {
@@ -300,7 +405,20 @@ func parseLoginKubeConfigToExecCredential(kubeconfig *rest.Config) ([]byte, erro
 	return output, nil
 }
 
-func getAccessToken(params *types.CmdParams) (string, error) {
+func getAccessToken(params *types.CmdParams, workloadIdentityMode bool) (string, error) {
+	if workloadIdentityMode {
+		accessToken, err := getWorkloadIdentityAccessToken()
+		if err != nil {
+			params.Printer.Debug(print.ErrorLevel, "get workload identity access token: %v", err)
+			return "", fmt.Errorf("get workload identity access token: %w", err)
+		}
+		return accessToken, nil
+	}
+
+	if accessToken := os.Getenv(envAccessToken); accessToken != "" {
+		return accessToken, nil
+	}
+
 	userSessionExpired, err := auth.UserSessionExpired()
 	if err != nil {
 		return "", err
@@ -315,30 +433,53 @@ func getAccessToken(params *types.CmdParams) (string, error) {
 		return "", &cliErr.SessionExpiredError{}
 	}
 
-	err = auth.EnsureIDPTokenEndpoint(params.Printer)
-	if err != nil {
-		return "", err
-	}
-
 	return accessToken, nil
 }
 
-func retrieveTokenFromIDP(ctx context.Context, idpClient *http.Client, accessToken string, clusterConfig *clusterConfig) (string, error) {
+func workloadIdentityConfigured() bool {
+	if os.Getenv(envServiceAccountEmail) == "" {
+		return false
+	}
+	if os.Getenv(clients.FederatedTokenFileEnv) != "" {
+		return true
+	}
+	fileInfo, err := os.Stat(defaultFederatedTokenPath)
+	return err == nil && !fileInfo.IsDir()
+}
+
+func getWorkloadIdentityAccessToken() (string, error) {
+	roundTripper, err := sdkAuth.SetupAuth(&sdkConfig.Configuration{WorkloadIdentityFederation: true})
+	if err != nil {
+		return "", fmt.Errorf("configure workload identity federation: %w", err)
+	}
+	flow, ok := roundTripper.(interface {
+		GetAccessToken() (string, error)
+	})
+	if !ok {
+		return "", errors.New("configured authentication flow does not provide access tokens")
+	}
+	return flow.GetAccessToken()
+}
+
+func retrieveTokenFromIDP(ctx context.Context, idpClient *http.Client, tokenEndpoint, accessToken string, clusterConfig *clusterConfig, cacheEnabled bool) (string, error) {
 	resource := resourceForCluster(clusterConfig)
+	if !cacheEnabled {
+		return auth.ExchangeTokenWithEndpoint(ctx, idpClient, tokenEndpoint, accessToken, resource)
+	}
 
 	cachedToken := getCachedToken(clusterConfig.cacheKey)
 	if cachedToken == "" {
-		return exchangeAndCacheToken(ctx, idpClient, accessToken, resource, clusterConfig.cacheKey)
+		return exchangeAndCacheToken(ctx, idpClient, tokenEndpoint, accessToken, resource, clusterConfig.cacheKey)
 	}
 
 	expiry, err := auth.TokenExpirationTime(cachedToken)
 	if err != nil {
 		// token is expired or invalid, request new
 		_ = cache.DeleteObject(clusterConfig.cacheKey)
-		return exchangeAndCacheToken(ctx, idpClient, accessToken, resource, clusterConfig.cacheKey)
+		return exchangeAndCacheToken(ctx, idpClient, tokenEndpoint, accessToken, resource, clusterConfig.cacheKey)
 	} else if time.Now().Add(refreshTokenBeforeDuration).After(expiry) {
 		// token expires soon -> refresh
-		token, err := exchangeAndCacheToken(ctx, idpClient, accessToken, resource, clusterConfig.cacheKey)
+		token, err := exchangeAndCacheToken(ctx, idpClient, tokenEndpoint, accessToken, resource, clusterConfig.cacheKey)
 		// try to get a new one but use cache on failure
 		if err != nil {
 			return cachedToken, nil
@@ -367,8 +508,8 @@ func getCachedToken(key string) string {
 	return string(token)
 }
 
-func exchangeAndCacheToken(ctx context.Context, idpClient *http.Client, accessToken, resource, cacheKey string) (string, error) {
-	clusterToken, err := auth.ExchangeToken(ctx, idpClient, accessToken, resource)
+func exchangeAndCacheToken(ctx context.Context, idpClient *http.Client, tokenEndpoint, accessToken, resource, cacheKey string) (string, error) {
+	clusterToken, err := auth.ExchangeTokenWithEndpoint(ctx, idpClient, tokenEndpoint, accessToken, resource)
 	if err != nil {
 		return "", err
 	}
@@ -378,10 +519,12 @@ func exchangeAndCacheToken(ctx context.Context, idpClient *http.Client, accessTo
 	return clusterToken, err
 }
 
-func outputTokenKubeconfig(p *print.Printer, cacheKey, token string) error {
+func outputTokenKubeconfig(p *print.Printer, cacheKey, token string, cacheEnabled bool) error {
 	output, err := parseTokenToExecCredential(token)
 	if err != nil {
-		_ = cache.DeleteObject(cacheKey)
+		if cacheEnabled {
+			_ = cache.DeleteObject(cacheKey)
+		}
 		return fmt.Errorf("convert to ExecCredential: %w", err)
 	}
 

@@ -24,13 +24,18 @@ stackit ske kubeconfig login [flags]
   Use the previously saved kubeconfig to authenticate to the SKE cluster, in this case with kubectl.
   $ kubectl cluster-info
   $ kubectl get pods
+
+  Configure an IdP exec provider for a Kubernetes client that does not provide cluster information. In an SKE workload, the CLI automatically uses the projected workload identity token.
+  $ stackit ske kubeconfig login --idp --cluster-name my-cluster --organization-id my-organization-id --project-id my-project-id --region eu01
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit ske kubeconfig login"
-      --idp    Use the STACKIT IdP for authentication to the cluster.
+      --cluster-name string      SKE cluster name. Used when the Kubernetes exec request does not provide cluster information.
+  -h, --help                     Help for "stackit ske kubeconfig login"
+      --idp                      Use the STACKIT IdP for authentication to the cluster.
+      --organization-id string   Organization ID. Used in IdP mode when the Kubernetes exec request does not provide cluster information.
 ```
 
 ### Options inherited from parent commands
