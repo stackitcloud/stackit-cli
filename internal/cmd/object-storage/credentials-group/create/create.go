@@ -16,6 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/object-storage/utils"
 )
 
 const (
@@ -61,6 +62,16 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
+				// Check if the service is enabled for the given project
+				enabled, enabledErr := utils.ProjectEnabled(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region)
+				if enabledErr != nil {
+					return fmt.Errorf("check if Object Storage is enabled: %w", enabledErr)
+				}
+				if !enabled {
+					return &errors.ServiceDisabledError{
+						Service: "object-storage",
+					}
+				}
 				return fmt.Errorf("create Object Storage credentials group: %w", err)
 			}
 

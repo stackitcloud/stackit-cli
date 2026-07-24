@@ -61,20 +61,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			// Check if the project is enabled before trying to create
-			enabled, err := utils.ProjectEnabled(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region)
-			if err != nil {
-				return fmt.Errorf("check if Object Storage is enabled: %w", err)
-			}
-			if !enabled {
-				return &errors.ServiceDisabledError{
-					Service: "object-storage",
-				}
-			}
-
 			// Call API
 			_, err = buildRequest(ctx, model, apiClient).Execute()
 			if err != nil {
+				// Check if the service is enabled for the given project
+				enabled, enabledErr := utils.ProjectEnabled(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region)
+				if enabledErr != nil {
+					return fmt.Errorf("check if Object Storage is enabled: %w", enabledErr)
+				}
+				if !enabled {
+					return &errors.ServiceDisabledError{
+						Service: "object-storage",
+					}
+				}
 				return fmt.Errorf("delete object storage compliance lock: %w", err)
 			}
 
