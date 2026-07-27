@@ -10,7 +10,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverupdate"
+	serverupdate "github.com/stackitcloud/stackit-sdk-go/services/serverupdate/v2api"
 )
 
 const (
@@ -20,7 +20,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &serverupdate.APIClient{}
+var testClient = &serverupdate.APIClient{DefaultAPI: &serverupdate.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testServerId = uuid.NewString()
 
@@ -52,7 +52,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *serverupdate.ApiEnableServiceResourceRequest)) serverupdate.ApiEnableServiceResourceRequest {
-	request := testClient.EnableServiceResource(testCtx, testProjectId, testServerId, testRegion).EnableServiceResourcePayload(serverupdate.EnableServiceResourcePayload{})
+	request := testClient.DefaultAPI.EnableServiceResource(testCtx, testProjectId, testServerId, testRegion).EnableServiceResourcePayload(serverupdate.EnableServiceResourcePayload{})
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -134,7 +134,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, serverupdate.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

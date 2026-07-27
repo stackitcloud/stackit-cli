@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
+	authorization "github.com/stackitcloud/stackit-sdk-go/services/authorization/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -17,7 +17,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/authorization/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -30,7 +29,7 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 
-	OrganizationId *string
+	OrganizationId string
 	Limit          *int64
 }
 
@@ -70,18 +69,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get organization roles: %w", err)
 			}
-			roles := *resp.Roles
-			if len(roles) == 0 {
-				params.Printer.Info("No roles found for organization with ID %q\n", *model.OrganizationId)
-				return nil
-			}
+			roles := resp.Roles
 
 			// Truncate output
 			if model.Limit != nil && len(roles) > int(*model.Limit) {
 				roles = roles[:*model.Limit]
 			}
 
-			return outputRolesResult(params.Printer, model.OutputFormat, roles)
+			return outputRolesResult(params.Printer, model.OutputFormat, model.OrganizationId, roles)
 		},
 	}
 	configureFlags(cmd)
@@ -109,7 +104,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		OrganizationId:  flags.FlagToStringPointer(p, cmd, organizationIdFlag),
+		OrganizationId:  flags.FlagToStringValue(p, cmd, organizationIdFlag),
 		Limit:           flags.FlagToInt64Pointer(p, cmd, limitFlag),
 	}
 
@@ -118,23 +113,26 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *authorization.APIClient) authorization.ApiListRolesRequest {
-	return apiClient.ListRoles(ctx, organizationResourceType, *model.OrganizationId)
+	return apiClient.DefaultAPI.ListRoles(ctx, organizationResourceType, model.OrganizationId)
 }
 
-func outputRolesResult(p *print.Printer, outputFormat string, roles []authorization.Role) error {
+func outputRolesResult(p *print.Printer, outputFormat, organizationId string, roles []authorization.Role) error {
 	return p.OutputResult(outputFormat, roles, func() error {
+		if len(roles) == 0 {
+			p.Outputf("No roles found for organization with ID %q\n", organizationId)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("ROLE NAME", "ROLE DESCRIPTION", "PERMISSION NAME", "PERMISSION DESCRIPTION")
-		for i := range roles {
-			r := roles[i]
+		for _, r := range roles {
 			if r.Permissions != nil {
-				for j := range *r.Permissions {
-					p := (*r.Permissions)[j]
+				for _, p := range r.Permissions {
 					table.AddRow(
-						utils.PtrString(r.Name),
-						utils.PtrString(r.Description),
-						utils.PtrString(p.Name),
-						utils.PtrString(p.Description),
+						r.Name,
+						r.Description,
+						p.Name,
+						p.Description,
 					)
 				}
 				table.AddSeparator()

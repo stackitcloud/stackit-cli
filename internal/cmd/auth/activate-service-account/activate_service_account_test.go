@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/viper"
 	"github.com/zalando/go-keyring"
@@ -19,6 +20,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		serviceAccountTokenFlag:   "token",
 		serviceAccountKeyPathFlag: "sa_key",
 		privateKeyPathFlag:        "private_key",
+		useOIDCFlag:               "true",
 		onlyPrintAccessTokenFlag:  "true",
 	}
 	for _, mod := range mods {
@@ -32,6 +34,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		ServiceAccountToken:   "token",
 		ServiceAccountKeyPath: "sa_key",
 		PrivateKeyPath:        "private_key",
+		UseOIDC:               utils.Ptr(true),
 		OnlyPrintAccessToken:  true,
 	}
 	for _, mod := range mods {
@@ -65,6 +68,7 @@ func TestParseInput(t *testing.T) {
 				ServiceAccountToken:   "",
 				ServiceAccountKeyPath: "",
 				PrivateKeyPath:        "",
+				UseOIDC:               nil,
 			},
 		},
 		{
@@ -80,7 +84,28 @@ func TestParseInput(t *testing.T) {
 				ServiceAccountToken:   "",
 				ServiceAccountKeyPath: "",
 				PrivateKeyPath:        "",
+				UseOIDC:               nil,
 			},
+		},
+		{
+			description: "use_oidc_true",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[useOIDCFlag] = "true"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.UseOIDC = utils.Ptr(true)
+			}),
+		},
+		{
+			description: "use_oidc_false",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[useOIDCFlag] = "false"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.UseOIDC = utils.Ptr(false)
+			}),
 		},
 		{
 			description: "invalid_flag",
@@ -99,6 +124,18 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.OnlyPrintAccessToken = false
+			}),
+		},
+		{
+			description: "default value UseOIDC",
+			flagValues: fixtureFlagValues(
+				func(flagValues map[string]string) {
+					delete(flagValues, useOIDCFlag)
+				},
+			),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.UseOIDC = nil
 			}),
 		},
 	}

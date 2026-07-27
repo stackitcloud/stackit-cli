@@ -5,19 +5,15 @@ import (
 	"net/http"
 
 	"github.com/stackitcloud/stackit-sdk-go/core/oapierror"
-	"github.com/stackitcloud/stackit-sdk-go/services/serviceenablement"
+	serviceenablement "github.com/stackitcloud/stackit-sdk-go/services/serviceenablement/v2api"
 )
 
 const (
 	SKEServiceId = "cloud.stackit.ske"
 )
 
-type ServiceEnablementClient interface {
-	GetServiceStatusRegionalExecute(ctx context.Context, region, projectId, serviceId string) (*serviceenablement.ServiceStatus, error)
-}
-
-func ProjectEnabled(ctx context.Context, apiClient ServiceEnablementClient, projectId, region string) (bool, error) {
-	project, err := apiClient.GetServiceStatusRegionalExecute(ctx, region, projectId, SKEServiceId)
+func ProjectEnabled(ctx context.Context, apiClient serviceenablement.DefaultAPI, projectId, region string) (bool, error) {
+	project, err := apiClient.GetServiceStatusRegional(ctx, region, projectId, SKEServiceId).Execute()
 	if err != nil {
 		oapiErr, ok := err.(*oapierror.GenericOpenAPIError) //nolint:errorlint //complaining that error.As should be used to catch wrapped errors, but this error should not be wrapped
 		if !ok {

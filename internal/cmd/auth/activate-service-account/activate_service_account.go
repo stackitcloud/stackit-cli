@@ -25,6 +25,7 @@ const (
 	serviceAccountTokenFlag   = "service-account-token"
 	serviceAccountKeyPathFlag = "service-account-key-path"
 	privateKeyPathFlag        = "private-key-path"
+	useOIDCFlag               = "use-oidc"
 	onlyPrintAccessTokenFlag  = "only-print-access-token" // #nosec G101
 )
 
@@ -32,6 +33,7 @@ type inputModel struct {
 	ServiceAccountToken   string
 	ServiceAccountKeyPath string
 	PrivateKeyPath        string
+	UseOIDC               *bool
 	OnlyPrintAccessToken  bool
 }
 
@@ -59,11 +61,20 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				`Only print the corresponding access token by using the service account token. This access token can be stored as environment variable (STACKIT_ACCESS_TOKEN) in order to be used for all subsequent commands.`,
 				"$ stackit auth activate-service-account --service-account-token my-service-account-token --only-print-access-token",
 			),
+			examples.NewExample(
+				`Authenticate via Workload Identity Federation (OIDC) and print the short-lived access token. Use --use-oidc to explicitly enable OIDC (takes precedence over STACKIT_USE_OIDC); no service account key file is required.`,
+				"$ STACKIT_SERVICE_ACCOUNT_EMAIL=ci@sa.stackit.cloud stackit auth activate-service-account --use-oidc --only-print-access-token",
+			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
+			}
+
+			// use workload identity federation (OIDC) if enabled; no key file required
+			if auth.IsOIDCEnabledWithOverride(model.UseOIDC) {
+				return runOIDCMode(params, model)
 			}
 
 			tokenCustomEndpoint := viper.GetString(config.TokenCustomEndpointKey)
@@ -115,6 +126,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(serviceAccountTokenFlag, "", "Service account long-lived access token")
 	cmd.Flags().String(serviceAccountKeyPathFlag, "", "Service account key path")
 	cmd.Flags().String(privateKeyPathFlag, "", "RSA private key path. It takes precedence over the private key included in the service account key, if present")
+	cmd.Flags().Bool(useOIDCFlag, false, "Use Workload Identity Federation (OIDC). If set, this takes precedence over STACKIT_USE_OIDC")
 	cmd.Flags().Bool(onlyPrintAccessTokenFlag, false, "If this is set to true the credentials are not stored in either the keyring or a file")
 }
 
@@ -125,6 +137,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		PrivateKeyPath:        flags.FlagToStringValue(p, cmd, privateKeyPathFlag),
 		OnlyPrintAccessToken:  flags.FlagToBoolValue(p, cmd, onlyPrintAccessTokenFlag),
 	}
+	if cmd.Flags().Changed(useOIDCFlag) {
+		useOIDC := flags.FlagToBoolValue(p, cmd, useOIDCFlag)
+		model.UseOIDC = &useOIDC
+	}
 
 	p.DebugInputModel(model)
 	return &model, nil
@@ -132,4 +148,51 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 func storeCustomEndpoint(tokenCustomEndpoint string) error {
 	return auth.SetAuthField(auth.TOKEN_CUSTOM_ENDPOINT, tokenCustomEndpoint)
+}
+
+func runOIDCMode(params *types.CmdParams, model *inputModel) error {
+	email := auth.OIDCServiceAccountEmail()
+	if email == "" {
+		return fmt.Errorf(
+			"env var %s must be set when %s is enabled",
+			auth.EnvServiceAccountEmail, auth.EnvUseOIDC,
+		)
+	}
+
+	tokenFunc, err := auth.OIDCTokenFunc()
+	if err != nil {
+		return err
+	}
+
+	tokenCustomEndpoint := viper.GetString(config.TokenCustomEndpointKey)
+
+	wifCfg := &sdkConfig.Configuration{
+		WorkloadIdentityFederation:       true,
+		ServiceAccountEmail:              email,
+		ServiceAccountFederatedTokenFunc: tokenFunc,
+		TokenCustomUrl:                   tokenCustomEndpoint,
+	}
+
+	rt, err := sdkAuth.SetupAuth(wifCfg)
+	if err != nil {
+		params.Printer.Debug(print.ErrorLevel, "setup workload identity federation auth: %v", err)
+		return &cliErr.ActivateServiceAccountError{}
+	}
+
+	// credentials are never written to disk in OIDC mode
+	saEmail, accessToken, err := auth.AuthenticateServiceAccount(params.Printer, rt, true)
+	if err != nil {
+		var activateErr *cliErr.ActivateServiceAccountError
+		if !errors.As(err, &activateErr) {
+			return fmt.Errorf("authenticate service account via workload identity federation: %w", err)
+		}
+		return err
+	}
+
+	if model.OnlyPrintAccessToken {
+		params.Printer.Outputf("%s\n", accessToken)
+	} else {
+		params.Printer.Outputf("Authenticated via Workload Identity Federation.\nService account email: %s\n", saEmail)
+	}
+	return nil
 }

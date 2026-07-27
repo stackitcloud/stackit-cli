@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/runcommand"
+	runcommand "github.com/stackitcloud/stackit-sdk-go/services/runcommand/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -64,7 +64,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("read server command: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, *resp)
+			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -97,12 +97,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *runcommand.APIClient) runcommand.ApiGetCommandRequest {
-	req := apiClient.GetCommand(ctx, model.ProjectId, model.Region, model.ServerId, model.CommandId)
+	req := apiClient.DefaultAPI.GetCommand(ctx, model.ProjectId, model.Region, model.ServerId, model.CommandId)
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, command runcommand.CommandDetails) error {
+func outputResult(p *print.Printer, outputFormat string, command *runcommand.CommandDetails) error {
 	return p.OutputResult(outputFormat, command, func() error {
+		if command == nil {
+			return fmt.Errorf("command is nil")
+		}
+
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(command.Id))
 		table.AddSeparator()

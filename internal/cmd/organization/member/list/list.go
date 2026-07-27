@@ -8,7 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
+	authorization "github.com/stackitcloud/stackit-sdk-go/services/authorization/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -18,7 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/authorization/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -39,7 +38,7 @@ var sortByFlag = flags.StringEnumFlag(
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 
-	OrganizationId *string
+	OrganizationId string
 	Subject        *string
 	Limit          *int64
 	SortBy         string
@@ -81,18 +80,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list members: %w", err)
 			}
-			members := *resp.Members
-			if len(members) == 0 {
-				params.Printer.Info("No members found for organization with ID %q\n", *model.OrganizationId)
-				return nil
-			}
+			members := resp.Members
 
 			// Truncate output
 			if model.Limit != nil && len(members) > int(*model.Limit) {
 				members = members[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, model.SortBy, members)
+			return outputResult(params.Printer, model.OutputFormat, model.OrganizationId, model.SortBy, members)
 		},
 	}
 	configureFlags(cmd)
@@ -122,7 +117,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		OrganizationId:  flags.FlagToStringPointer(p, cmd, organizationIdFlag),
+		OrganizationId:  flags.FlagToStringValue(p, cmd, organizationIdFlag),
 		Subject:         flags.FlagToStringPointer(p, cmd, subjectFlag),
 		Limit:           flags.FlagToInt64Pointer(p, cmd, limitFlag),
 		SortBy:          sortByFlag.Get(),
@@ -133,20 +128,20 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *authorization.APIClient) authorization.ApiListMembersRequest {
-	req := apiClient.ListMembers(ctx, organizationResourceType, *model.OrganizationId)
+	req := apiClient.DefaultAPI.ListMembers(ctx, organizationResourceType, model.OrganizationId)
 	if model.Subject != nil {
 		req = req.Subject(*model.Subject)
 	}
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat, sortBy string, members []authorization.Member) error {
+func outputResult(p *print.Printer, outputFormat, organizationId, sortBy string, members []authorization.Member) error {
 	sortFn := func(i, j int) bool {
 		switch sortBy {
 		case "subject":
-			return *members[i].Subject < *members[j].Subject
+			return members[i].Subject < members[j].Subject
 		case "role":
-			return *members[i].Role < *members[j].Role
+			return members[i].Role < members[j].Role
 		default:
 			return false
 		}
@@ -154,6 +149,11 @@ func outputResult(p *print.Printer, outputFormat, sortBy string, members []autho
 	sort.SliceStable(members, sortFn)
 
 	return p.OutputResult(outputFormat, members, func() error {
+		if len(members) == 0 {
+			p.Outputf("No members found for organization with ID %q\n", organizationId)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("SUBJECT", "ROLE")
 		for i := range members {
@@ -162,7 +162,7 @@ func outputResult(p *print.Printer, outputFormat, sortBy string, members []autho
 			if i > 0 && sortFn(i-1, i) {
 				table.AddSeparator()
 			}
-			table.AddRow(utils.PtrString(m.Subject), utils.PtrString(m.Role))
+			table.AddRow(m.Subject, m.Role)
 		}
 
 		switch sortBy {

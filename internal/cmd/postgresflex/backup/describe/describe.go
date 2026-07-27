@@ -8,7 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -73,7 +73,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("describe backup for PostgreSQL Flex instance: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, *resp.Item)
+			return outputResult(params.Printer, model.OutputFormat, resp.Item)
 		},
 	}
 	configureFlags(cmd)
@@ -103,11 +103,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiGetBackupRequest {
-	req := apiClient.GetBackup(ctx, model.ProjectId, model.Region, model.InstanceId, model.BackupId)
+	req := apiClient.DefaultAPI.GetBackup(ctx, model.ProjectId, model.Region, model.InstanceId, model.BackupId)
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, backup postgresflex.Backup) error {
+func outputResult(p *print.Printer, outputFormat string, backup *postgresflex.Backup) error {
+	if backup == nil {
+		return fmt.Errorf("backup is nil")
+	}
 	if backup.StartTime == nil || *backup.StartTime == "" {
 		return fmt.Errorf("start time not defined")
 	}

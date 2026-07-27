@@ -6,18 +6,17 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &postgresflex.APIClient{}
+var testClient = &postgresflex.APIClient{DefaultAPI: &postgresflex.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 var testUserId = "12345"
@@ -55,7 +54,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		InstanceId: testInstanceId,
 		UserId:     testUserId,
-		Roles:      utils.Ptr([]string{"login"}),
+		Roles:      []string{"login"},
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -64,9 +63,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *postgresflex.ApiPartialUpdateUserRequest)) postgresflex.ApiPartialUpdateUserRequest {
-	request := testClient.PartialUpdateUser(testCtx, testProjectId, testRegion, testInstanceId, testUserId)
+	request := testClient.DefaultAPI.PartialUpdateUser(testCtx, testProjectId, testRegion, testInstanceId, testUserId)
 	request = request.PartialUpdateUserPayload(postgresflex.PartialUpdateUserPayload{
-		Roles: utils.Ptr([]string{"login"}),
+		Roles: []string{"login"},
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -192,7 +191,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, postgresflex.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

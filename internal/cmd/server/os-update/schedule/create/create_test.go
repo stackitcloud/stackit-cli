@@ -4,15 +4,14 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverupdate"
+	serverupdate "github.com/stackitcloud/stackit-sdk-go/services/serverupdate/v2api"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 )
 
 const (
@@ -22,7 +21,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &serverupdate.APIClient{}
+var testClient = &serverupdate.APIClient{DefaultAPI: &serverupdate.DefaultAPIService{}}
 
 var testProjectId = uuid.NewString()
 var testServerId = uuid.NewString()
@@ -54,7 +53,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		ScheduleName:      "example-schedule-name",
 		Enabled:           defaultEnabled,
 		Rrule:             defaultRrule,
-		MaintenanceWindow: int64(23),
+		MaintenanceWindow: int32(23),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -63,7 +62,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *serverupdate.ApiCreateUpdateScheduleRequest)) serverupdate.ApiCreateUpdateScheduleRequest {
-	request := testClient.CreateUpdateSchedule(testCtx, testProjectId, testServerId, testRegion)
+	request := testClient.DefaultAPI.CreateUpdateSchedule(testCtx, testProjectId, testServerId, testRegion)
 	request = request.CreateUpdateSchedulePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -73,10 +72,10 @@ func fixtureRequest(mods ...func(request *serverupdate.ApiCreateUpdateScheduleRe
 
 func fixturePayload(mods ...func(payload *serverupdate.CreateUpdateSchedulePayload)) serverupdate.CreateUpdateSchedulePayload {
 	payload := serverupdate.CreateUpdateSchedulePayload{
-		Name:              utils.Ptr("example-schedule-name"),
-		Enabled:           utils.Ptr(defaultEnabled),
-		Rrule:             utils.Ptr("DTSTART;TZID=Europe/Sofia:20200803T023000 RRULE:FREQ=DAILY;INTERVAL=1"),
-		MaintenanceWindow: utils.Ptr(int64(23)),
+		Name:              "example-schedule-name",
+		Enabled:           defaultEnabled,
+		Rrule:             "DTSTART;TZID=Europe/Sofia:20200803T023000 RRULE:FREQ=DAILY;INTERVAL=1",
+		MaintenanceWindow: int32(23),
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -169,7 +168,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, serverupdate.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

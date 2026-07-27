@@ -22,6 +22,10 @@ type tokenFlowInterface interface {
 	RoundTrip(*http.Request) (*http.Response, error)
 }
 
+type wifFlowInterface interface {
+	GetAccessToken() (string, error)
+}
+
 type keyFlowWithStorage struct {
 	keyFlow *clients.KeyFlow
 }
@@ -62,6 +66,17 @@ func AuthenticateServiceAccount(p *print.Printer, rt http.RoundTripper, disableW
 		authFlowType = AUTH_FLOW_SERVICE_ACCOUNT_TOKEN
 
 		authFields[ACCESS_TOKEN] = flow.GetConfig().ServiceAccountToken
+	case wifFlowInterface:
+		p.Debug(print.DebugLevel, "authenticating using workload identity federation")
+		authFlowType = AUTH_FLOW_SERVICE_ACCOUNT_KEY
+
+		accessToken, err := flow.GetAccessToken()
+		if err != nil {
+			p.Debug(print.ErrorLevel, "get workload identity access token: %v", err)
+			return "", "", &errors.ActivateServiceAccountError{}
+		}
+		authFields[ACCESS_TOKEN] = accessToken
+		disableWriting = true
 	default:
 		return "", "", fmt.Errorf("could not authenticate using any of the supported authentication flows (key and token): please report this issue")
 	}

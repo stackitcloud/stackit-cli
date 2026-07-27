@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -60,13 +60,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId)
+			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
 			}
 
-			userLabel, err := postgresflexUtils.GetUserName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId, model.UserId)
+			userLabel, err := postgresflexUtils.GetUserName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId, model.UserId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get user name: %v", err)
 				userLabel = model.UserId
@@ -119,15 +119,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiResetUserRequest {
-	req := apiClient.ResetUser(ctx, model.ProjectId, model.Region, model.InstanceId, model.UserId)
+	req := apiClient.DefaultAPI.ResetUser(ctx, model.ProjectId, model.Region, model.InstanceId, model.UserId)
 	return req
 }
 
 func outputResult(p *print.Printer, outputFormat, userLabel, instanceLabel string, user *postgresflex.ResetUserResponse) error {
-	if user == nil {
-		return fmt.Errorf("no response passed")
-	}
 	return p.OutputResult(outputFormat, user, func() error {
+		if user == nil {
+			return fmt.Errorf("no response passed")
+		}
 		p.Outputf("Reset password for user %q of instance %q\n\n", userLabel, instanceLabel)
 		if item := user.Item; item != nil {
 			p.Outputf("Username: %s\n", utils.PtrString(item.Username))
