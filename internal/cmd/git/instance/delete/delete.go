@@ -60,7 +60,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			instanceName, err := gitUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId)
 			if err != nil {
-				params.Printer.Debug(print.ErrorLevel, "get stackit git intance name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get stackit git instance name: %v", err)
 				instanceName = model.InstanceId
 			} else if instanceName == "" {
 				instanceName = model.InstanceId

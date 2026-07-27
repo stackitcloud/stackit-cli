@@ -247,7 +247,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 
 	replicas, err := mongodbflexUtils.GetInstanceReplicas(*model.Type)
 	if err != nil {
-		return req, fmt.Errorf("get MongoDB Flex intance type: %w", err)
+		return req, fmt.Errorf("get MongoDB Flex instance type: %w", err)
 	}
 
 	req = req.CreateInstancePayload(mongodbflex.CreateInstancePayload{

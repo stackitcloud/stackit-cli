@@ -102,7 +102,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if model.Overwrite {
 					prompt = fmt.Sprintf("Are you sure you want to create a kubeconfig for SKE cluster %q? This will OVERWRITE your current kubeconfig file, if it exists.", model.ClusterName)
 				} else {
-					prompt = fmt.Sprintf("Are you sure you want to update your kubeconfig for SKE cluster %q? This will update your kubeconfig file. \nIf the kubeconfig file does not exists, it will create a new one.", model.ClusterName)
+					prompt = fmt.Sprintf("Are you sure you want to update your kubeconfig for SKE cluster %q? This will update your kubeconfig file. \nIf the kubeconfig file does not exist, it will create a new one.", model.ClusterName)
 				}
 				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
