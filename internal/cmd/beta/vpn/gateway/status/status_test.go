@@ -8,8 +8,9 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	vpn "github.com/stackitcloud/stackit-sdk-go/services/vpn/v1api"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
