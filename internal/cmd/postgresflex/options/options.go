@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -37,9 +37,9 @@ type inputModel struct {
 }
 
 type options struct {
-	Flavors  *[]postgresflex.Flavor `json:"flavors,omitempty"`
-	Versions *[]string              `json:"versions,omitempty"`
-	Storages *flavorStorages        `json:"flavorStorages,omitempty"`
+	Flavors  []postgresflex.Flavor `json:"flavors,omitempty"`
+	Versions []string              `json:"versions,omitempty"`
+	Storages *flavorStorages       `json:"flavorStorages,omitempty"`
 }
 
 type flavorStorages struct {
@@ -78,7 +78,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			err = buildAndExecuteRequest(ctx, params.Printer, model, apiClient)
+			err = buildAndExecuteRequest(ctx, params.Printer, model, apiClient.DefaultAPI)
 			if err != nil {
 				return fmt.Errorf("get PostgreSQL Flex options: %w", err)
 			}
@@ -132,32 +132,26 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-type postgresFlexOptionsClient interface {
-	ListFlavorsExecute(ctx context.Context, projectId, region string) (*postgresflex.ListFlavorsResponse, error)
-	ListVersionsExecute(ctx context.Context, projectId, region string) (*postgresflex.ListVersionsResponse, error)
-	ListStoragesExecute(ctx context.Context, projectId, region, flavorId string) (*postgresflex.ListStoragesResponse, error)
-}
-
-func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputModel, apiClient postgresFlexOptionsClient) error {
+func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputModel, apiClient postgresflex.DefaultAPI) error {
 	var flavors *postgresflex.ListFlavorsResponse
 	var versions *postgresflex.ListVersionsResponse
 	var storages *postgresflex.ListStoragesResponse
 	var err error
 
 	if model.Flavors {
-		flavors, err = apiClient.ListFlavorsExecute(ctx, model.ProjectId, model.Region)
+		flavors, err = apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Execute()
 		if err != nil {
 			return fmt.Errorf("get PostgreSQL Flex flavors: %w", err)
 		}
 	}
 	if model.Versions {
-		versions, err = apiClient.ListVersionsExecute(ctx, model.ProjectId, model.Region)
+		versions, err = apiClient.ListVersions(ctx, model.ProjectId, model.Region).Execute()
 		if err != nil {
 			return fmt.Errorf("get PostgreSQL Flex versions: %w", err)
 		}
 	}
 	if model.Storages {
-		storages, err = apiClient.ListStoragesExecute(ctx, model.ProjectId, model.Region, *model.FlavorId)
+		storages, err = apiClient.ListStorages(ctx, model.ProjectId, model.Region, *model.FlavorId).Execute()
 		if err != nil {
 			return fmt.Errorf("get PostgreSQL Flex storages: %w", err)
 		}
@@ -186,13 +180,13 @@ func outputResult(p *print.Printer, model inputModel, flavors *postgresflex.List
 
 	return p.OutputResult(model.OutputFormat, options, func() error {
 		content := []tables.Table{}
-		if model.Flavors && len(*options.Flavors) != 0 {
-			content = append(content, buildFlavorsTable(*options.Flavors))
+		if model.Flavors && len(options.Flavors) != 0 {
+			content = append(content, buildFlavorsTable(options.Flavors))
 		}
-		if model.Versions && len(*options.Versions) != 0 {
-			content = append(content, buildVersionsTable(*options.Versions))
+		if model.Versions && len(options.Versions) != 0 {
+			content = append(content, buildVersionsTable(options.Versions))
 		}
-		if model.Storages && options.Storages.Storages != nil && len(*options.Storages.Storages.StorageClasses) > 0 {
+		if model.Storages && options.Storages.Storages != nil && len(options.Storages.Storages.StorageClasses) > 0 {
 			content = append(content, buildStoragesTable(*options.Storages.Storages))
 		}
 
@@ -233,12 +227,10 @@ func buildVersionsTable(versions []string) tables.Table {
 }
 
 func buildStoragesTable(storagesResp postgresflex.ListStoragesResponse) tables.Table {
-	storages := *storagesResp.StorageClasses
 	table := tables.NewTable()
 	table.SetTitle("Storages")
 	table.SetHeader("MINIMUM", "MAXIMUM", "STORAGE CLASS")
-	for i := range storages {
-		sc := storages[i]
+	for _, sc := range storagesResp.StorageClasses {
 		table.AddRow(
 			utils.PtrString(storagesResp.StorageRange.Min),
 			utils.PtrString(storagesResp.StorageRange.Max),

@@ -6,6 +6,9 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
+	"github.com/spf13/cobra"
+	serverupdate "github.com/stackitcloud/stackit-sdk-go/services/serverupdate/v2api"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,10 +18,6 @@ import (
 	iaasClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/serverosupdate/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverupdate"
 )
 
 const (
@@ -40,7 +39,7 @@ type inputModel struct {
 	ScheduleName      string
 	Enabled           bool
 	Rrule             string
-	MaintenanceWindow int64
+	MaintenanceWindow int32
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -108,7 +107,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().VarP(flags.UUIDFlag(), serverIdFlag, "s", "Server ID")
 	cmd.Flags().StringP(nameFlag, "n", "", "os-update schedule name")
-	cmd.Flags().Int64P(maintenanceWindowFlag, "d", defaultMaintenanceWindow, "os-update maintenance window (in hours, 1-24)")
+	cmd.Flags().Int32P(maintenanceWindowFlag, "d", defaultMaintenanceWindow, "os-update maintenance window (in hours, 1-24)")
 	cmd.Flags().BoolP(enabledFlag, "e", defaultEnabled, "Is the server os-update schedule enabled")
 	cmd.Flags().StringP(rruleFlag, "r", defaultRrule, "os-update RRULE (recurrence rule)")
 
@@ -125,7 +124,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	model := inputModel{
 		GlobalFlagModel:   globalFlags,
 		ServerId:          flags.FlagToStringValue(p, cmd, serverIdFlag),
-		MaintenanceWindow: flags.FlagWithDefaultToInt64Value(p, cmd, maintenanceWindowFlag),
+		MaintenanceWindow: flags.FlagWithDefaultToInt32Value(p, cmd, maintenanceWindowFlag),
 		ScheduleName:      flags.FlagToStringValue(p, cmd, nameFlag),
 		Rrule:             flags.FlagWithDefaultToStringValue(p, cmd, rruleFlag),
 		Enabled:           flags.FlagToBoolValue(p, cmd, enabledFlag),
@@ -136,19 +135,19 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdate.APIClient) (serverupdate.ApiCreateUpdateScheduleRequest, error) {
-	req := apiClient.CreateUpdateSchedule(ctx, model.ProjectId, model.ServerId, model.Region)
+	req := apiClient.DefaultAPI.CreateUpdateSchedule(ctx, model.ProjectId, model.ServerId, model.Region)
 	req = req.CreateUpdateSchedulePayload(serverupdate.CreateUpdateSchedulePayload{
-		Enabled:           &model.Enabled,
-		Name:              &model.ScheduleName,
-		Rrule:             &model.Rrule,
-		MaintenanceWindow: &model.MaintenanceWindow,
+		Enabled:           model.Enabled,
+		Name:              model.ScheduleName,
+		Rrule:             model.Rrule,
+		MaintenanceWindow: model.MaintenanceWindow,
 	})
 	return req, nil
 }
 
 func outputResult(p *print.Printer, outputFormat, serverLabel string, resp serverupdate.UpdateSchedule) error {
 	return p.OutputResult(outputFormat, resp, func() error {
-		p.Outputf("Created server os-update schedule for server %s. os-update Schedule ID: %s\n", serverLabel, utils.PtrString(resp.Id))
+		p.Outputf("Created server os-update schedule for server %s. os-update Schedule ID: %d\n", serverLabel, resp.Id)
 		return nil
 	})
 }

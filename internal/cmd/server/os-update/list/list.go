@@ -3,7 +3,6 @@ package list
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
@@ -20,7 +19,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverupdate"
+	serverupdate "github.com/stackitcloud/stackit-sdk-go/services/serverupdate/v2api"
 )
 
 const (
@@ -124,7 +123,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdate.APIClient) serverupdate.ApiListUpdatesRequest {
-	req := apiClient.ListUpdates(ctx, model.ProjectId, model.ServerId, model.Region)
+	req := apiClient.DefaultAPI.ListUpdates(ctx, model.ProjectId, model.ServerId, model.Region)
 	return req
 }
 
@@ -143,20 +142,20 @@ func outputResult(p *print.Printer, outputFormat, serverLabel string, updates []
 
 			installed := "n/a"
 			if s.InstalledUpdates != nil {
-				installed = strconv.FormatInt(*s.InstalledUpdates, 10)
+				installed = utils.PtrString(s.InstalledUpdates)
 			}
 
 			failed := "n/a"
 			if s.FailedUpdates != nil {
-				failed = strconv.FormatInt(*s.FailedUpdates, 10)
+				failed = utils.PtrString(s.FailedUpdates)
 			}
 
 			table.AddRow(
-				utils.PtrString(s.Id),
-				utils.PtrString(s.Status),
+				s.Id,
+				s.Status,
 				installed,
 				failed,
-				utils.PtrString(s.StartDate),
+				s.StartDate,
 				endDate,
 			)
 		}

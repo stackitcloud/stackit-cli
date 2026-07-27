@@ -6,6 +6,9 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
+	"github.com/spf13/cobra"
+	authorization "github.com/stackitcloud/stackit-sdk-go/services/authorization/v2api"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -14,10 +17,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/authorization/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
 )
 
 const (
@@ -32,7 +31,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 
 	Subject string
-	Role    *string
+	Role    string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -71,7 +70,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			prompt := fmt.Sprintf("Are you sure you want to add the role %q to %s on project %q?", *model.Role, model.Subject, projectLabel)
+			prompt := fmt.Sprintf("Are you sure you want to add the role %q to %s on project %q?", model.Role, model.Subject, projectLabel)
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -84,7 +83,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("add member: %w", err)
 			}
 
-			params.Printer.Info("Added the role %q to %s on project %q\n", utils.PtrString(model.Role), model.Subject, projectLabel)
+			params.Printer.Info("Added the role %q to %s on project %q\n", model.Role, model.Subject, projectLabel)
 			return nil
 		},
 	}
@@ -110,7 +109,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Subject:         subject,
-		Role:            flags.FlagToStringPointer(p, cmd, roleFlag),
+		Role:            flags.FlagToStringValue(p, cmd, roleFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -118,15 +117,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *authorization.APIClient) authorization.ApiAddMembersRequest {
-	req := apiClient.AddMembers(ctx, model.ProjectId)
+	req := apiClient.DefaultAPI.AddMembers(ctx, model.ProjectId)
 	req = req.AddMembersPayload(authorization.AddMembersPayload{
-		Members: utils.Ptr([]authorization.Member{
+		Members: []authorization.Member{
 			{
-				Subject: utils.Ptr(model.Subject),
+				Subject: model.Subject,
 				Role:    model.Role,
 			},
-		}),
-		ResourceType: utils.Ptr(projectResourceType),
+		},
+		ResourceType: projectResourceType,
 	})
 	return req
 }

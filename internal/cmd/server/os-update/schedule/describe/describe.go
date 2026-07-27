@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverupdate"
+	serverupdate "github.com/stackitcloud/stackit-sdk-go/services/serverupdate/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -17,7 +17,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/serverosupdate/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -97,22 +96,22 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdate.APIClient) serverupdate.ApiGetUpdateScheduleRequest {
-	req := apiClient.GetUpdateSchedule(ctx, model.ProjectId, model.ServerId, model.ScheduleId, model.Region)
+	req := apiClient.DefaultAPI.GetUpdateSchedule(ctx, model.ProjectId, model.ServerId, model.ScheduleId, model.Region)
 	return req
 }
 
 func outputResult(p *print.Printer, outputFormat string, schedule serverupdate.UpdateSchedule) error {
 	return p.OutputResult(outputFormat, schedule, func() error {
 		table := tables.NewTable()
-		table.AddRow("SCHEDULE ID", utils.PtrString(schedule.Id))
+		table.AddRow("SCHEDULE ID", schedule.Id)
 		table.AddSeparator()
-		table.AddRow("SCHEDULE NAME", utils.PtrString(schedule.Name))
+		table.AddRow("SCHEDULE NAME", schedule.Name)
 		table.AddSeparator()
-		table.AddRow("ENABLED", utils.PtrString(schedule.Enabled))
+		table.AddRow("ENABLED", schedule.Enabled)
 		table.AddSeparator()
-		table.AddRow("RRULE", utils.PtrString(schedule.Rrule))
+		table.AddRow("RRULE", schedule.Rrule)
 		table.AddSeparator()
-		table.AddRow("MAINTENANCE WINDOW", utils.PtrString(schedule.MaintenanceWindow))
+		table.AddRow("MAINTENANCE WINDOW", schedule.MaintenanceWindow)
 		table.AddSeparator()
 
 		err := table.Display(p)

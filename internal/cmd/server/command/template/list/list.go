@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/runcommand"
+	runcommand "github.com/stackitcloud/stackit-sdk-go/services/runcommand/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -104,7 +104,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, _ *inputModel, apiClient *runcommand.APIClient) runcommand.ApiListCommandTemplatesRequest {
-	req := apiClient.ListCommandTemplates(ctx)
+	req := apiClient.DefaultAPI.ListCommandTemplates(ctx)
 	return req
 }
 
@@ -116,12 +116,10 @@ func outputResult(p *print.Printer, outputFormat string, templates []runcommand.
 		}
 		table := tables.NewTable()
 		table.SetHeader("NAME", "OS TYPE", "TITLE")
-		for i := range templates {
-			s := templates[i]
-
+		for _, s := range templates {
 			var osType string
-			if s.OsType != nil && len(*s.OsType) > 0 {
-				osType = utils.JoinStringPtr(s.OsType, ",")
+			if len(s.OsType) > 0 {
+				osType = utils.JoinStringPtr(&s.OsType, ",")
 			}
 
 			table.AddRow(

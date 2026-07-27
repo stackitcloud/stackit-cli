@@ -8,7 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
+	authorization "github.com/stackitcloud/stackit-sdk-go/services/authorization/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -19,7 +19,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/authorization/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -80,15 +79,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list members: %w", err)
 			}
-			members := *resp.Members
-			if len(members) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-					projectLabel = model.ProjectId
-				}
-				params.Printer.Info("No members found for project %q\n", projectLabel)
-				return nil
+			members := resp.Members
+
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
 
 			// Truncate output
@@ -96,7 +92,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				members = members[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, *model, members)
+			return outputResult(params.Printer, *model, projectLabel, members)
 		},
 	}
 	configureFlags(cmd)
@@ -135,23 +131,23 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *authorization.APIClient) authorization.ApiListMembersRequest {
-	req := apiClient.ListMembers(ctx, projectResourceType, model.ProjectId)
+	req := apiClient.DefaultAPI.ListMembers(ctx, projectResourceType, model.ProjectId)
 	if model.Subject != nil {
 		req = req.Subject(*model.Subject)
 	}
 	return req
 }
 
-func outputResult(p *print.Printer, model inputModel, members []authorization.Member) error {
+func outputResult(p *print.Printer, model inputModel, projectLabel string, members []authorization.Member) error {
 	if model.GlobalFlagModel == nil {
 		return fmt.Errorf("globalflags are empty")
 	}
 	sortFn := func(i, j int) bool {
 		switch model.SortBy {
 		case "subject":
-			return utils.PtrString(members[i].Subject) < utils.PtrString(members[j].Subject)
+			return members[i].Subject < members[j].Subject
 		case "role":
-			return utils.PtrString(members[i].Role) < utils.PtrString(members[j].Role)
+			return members[i].Role < members[j].Role
 		default:
 			return false
 		}
@@ -159,6 +155,10 @@ func outputResult(p *print.Printer, model inputModel, members []authorization.Me
 	sort.SliceStable(members, sortFn)
 
 	return p.OutputResult(model.OutputFormat, members, func() error {
+		if len(members) == 0 {
+			p.Outputf("No members found for project %q\n", projectLabel)
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("SUBJECT", "ROLE")
 		for i := range members {
@@ -167,7 +167,7 @@ func outputResult(p *print.Printer, model inputModel, members []authorization.Me
 			if i > 0 && sortFn(i-1, i) {
 				table.AddSeparator()
 			}
-			table.AddRow(utils.PtrString(m.Subject), utils.PtrString(m.Role))
+			table.AddRow(m.Subject, m.Role)
 		}
 
 		switch model.SortBy {

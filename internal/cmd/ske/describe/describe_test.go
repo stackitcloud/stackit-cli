@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/serviceenablement"
+	serviceenablement "github.com/stackitcloud/stackit-sdk-go/services/serviceenablement/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	serviceEnablementUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/service-enablement/utils"
@@ -19,9 +19,10 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &serviceenablement.APIClient{}
+var testClient = &serviceenablement.APIClient{DefaultAPI: &serviceenablement.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
-var testRegion = "eu01"
+
+const testRegion = "eu01"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
@@ -49,7 +50,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *serviceenablement.ApiGetServiceStatusRegionalRequest)) serviceenablement.ApiGetServiceStatusRegionalRequest {
-	request := testClient.GetServiceStatusRegional(testCtx, testRegion, testProjectId, serviceEnablementUtils.SKEServiceId) //nolint:staticcheck //command will be removed in a later update
+	request := testClient.DefaultAPI.GetServiceStatusRegional(testCtx, testRegion, testProjectId, serviceEnablementUtils.SKEServiceId) //nolint:staticcheck //command will be removed in a later update
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -125,7 +126,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, serviceenablement.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

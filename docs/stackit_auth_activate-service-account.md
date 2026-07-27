@@ -26,6 +26,9 @@ stackit auth activate-service-account [flags]
 
   Only print the corresponding access token by using the service account token. This access token can be stored as environment variable (STACKIT_ACCESS_TOKEN) in order to be used for all subsequent commands.
   $ stackit auth activate-service-account --service-account-token my-service-account-token --only-print-access-token
+
+  Authenticate via Workload Identity Federation (OIDC) and print the short-lived access token. Use --use-oidc to explicitly enable OIDC (takes precedence over STACKIT_USE_OIDC); no service account key file is required.
+  $ STACKIT_SERVICE_ACCOUNT_EMAIL=ci@sa.stackit.cloud stackit auth activate-service-account --use-oidc --only-print-access-token
 ```
 
 ### Options
@@ -36,6 +39,7 @@ stackit auth activate-service-account [flags]
       --private-key-path string           RSA private key path. It takes precedence over the private key included in the service account key, if present
       --service-account-key-path string   Service account key path
       --service-account-token string      Service account long-lived access token
+      --use-oidc                          Use Workload Identity Federation (OIDC). If set, this takes precedence over STACKIT_USE_OIDC
 ```
 
 ### Options inherited from parent commands

@@ -12,7 +12,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/logs"
+	logs "github.com/stackitcloud/stackit-sdk-go/services/logs/v1api"
 )
 
 const (
@@ -26,7 +26,7 @@ type testCtxKey struct{}
 
 var (
 	testCtx        = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient     = &logs.APIClient{}
+	testClient     = &logs.APIClient{DefaultAPI: &logs.DefaultAPIService{}}
 	testProjectId  = uuid.NewString()
 	testInstanceId = uuid.NewString()
 )
@@ -59,7 +59,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		InstanceId:  testInstanceId,
 		Description: utils.Ptr(testDescription),
 		DisplayName: testDisplayName,
-		Lifetime:    utils.Ptr(int64(0)),
+		Lifetime:    utils.Ptr(int32(0)),
 		Permissions: []string{
 			"read",
 			"write",
@@ -72,7 +72,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *logs.ApiCreateAccessTokenRequest)) logs.ApiCreateAccessTokenRequest {
-	request := testClient.CreateAccessToken(testCtx, testProjectId, testRegion, testInstanceId)
+	request := testClient.DefaultAPI.CreateAccessToken(testCtx, testProjectId, testRegion, testInstanceId)
 	request = request.CreateAccessTokenPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -82,13 +82,13 @@ func fixtureRequest(mods ...func(request *logs.ApiCreateAccessTokenRequest)) log
 
 func fixturePayload(mods ...func(payload *logs.CreateAccessTokenPayload)) logs.CreateAccessTokenPayload {
 	payload := logs.CreateAccessTokenPayload{
-		DisplayName: utils.Ptr(testDisplayName),
+		DisplayName: testDisplayName,
 		Description: utils.Ptr(testDescription),
-		Lifetime:    utils.Ptr(int64(0)),
-		Permissions: utils.Ptr([]string{
-			"read",
-			"write",
-		}),
+		Lifetime:    utils.Ptr(int32(0)),
+		Permissions: []logs.PermissionsInner{
+			logs.PERMISSIONSINNER_READ,
+			logs.PERMISSIONSINNER_WRITE,
+		},
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -215,7 +215,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(tt.expectedRequest, request,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, logs.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -240,16 +240,16 @@ func TestOutputResult(t *testing.T) {
 			args: args{
 				instanceLabel: "",
 				accessToken: utils.Ptr(logs.AccessToken{
-					Id: utils.Ptr(uuid.NewString()),
-					Permissions: utils.Ptr([]string{
-						"read",
-						"write",
-					}),
-					DisplayName: utils.Ptr("Token"),
+					Id: uuid.NewString(),
+					Permissions: []logs.PermissionsInner{
+						logs.PERMISSIONSINNER_READ,
+						logs.PERMISSIONSINNER_WRITE,
+					},
+					DisplayName: "Token",
 					AccessToken: utils.Ptr("Secret access token"),
-					Creator:     utils.Ptr(uuid.NewString()),
-					Expires:     utils.Ptr(false),
-					Status:      utils.Ptr(logs.ACCESSTOKENSTATUS_ACTIVE),
+					Creator:     uuid.NewString(),
+					Expires:     false,
+					Status:      logs.ACCESSTOKENSTATUS_ACTIVE,
 				}),
 			},
 			wantErr: false,

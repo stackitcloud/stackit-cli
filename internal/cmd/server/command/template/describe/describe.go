@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/runcommand"
+	runcommand "github.com/stackitcloud/stackit-sdk-go/services/runcommand/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -97,7 +97,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *runcommand.APIClient) runcommand.ApiGetCommandTemplateRequest {
-	req := apiClient.GetCommandTemplate(ctx, model.ProjectId, model.ServerId, model.CommandTemplateName, model.Region)
+	req := apiClient.DefaultAPI.GetCommandTemplate(ctx, model.ProjectId, model.ServerId, model.CommandTemplateName, model.Region)
 	return req
 }
 
@@ -111,7 +111,7 @@ func outputResult(p *print.Printer, outputFormat string, commandTemplate runcomm
 		table.AddRow("DESCRIPTION", utils.PtrString(commandTemplate.Description))
 		table.AddSeparator()
 		if commandTemplate.OsType != nil {
-			table.AddRow("OS TYPE", utils.JoinStringPtr(commandTemplate.OsType, "\n"))
+			table.AddRow("OS TYPE", utils.JoinStringPtr(&commandTemplate.OsType, "\n"))
 			table.AddSeparator()
 		}
 		if commandTemplate.ParametersSchema != nil {

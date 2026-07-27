@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serviceenablement"
+	serviceenablement "github.com/stackitcloud/stackit-sdk-go/services/serviceenablement/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -75,7 +75,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceenablement.APIClient) serviceenablement.ApiGetServiceStatusRegionalRequest {
-	req := apiClient.GetServiceStatusRegional(ctx, model.Region, model.ProjectId, skeUtils.SKEServiceId)
+	req := apiClient.DefaultAPI.GetServiceStatusRegional(ctx, model.Region, model.ProjectId, skeUtils.SKEServiceId)
 	return req
 }
 

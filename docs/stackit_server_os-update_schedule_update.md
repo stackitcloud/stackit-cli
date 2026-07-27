@@ -20,12 +20,12 @@ stackit server os-update schedule update SCHEDULE_ID [flags]
 ### Options
 
 ```
-  -e, --enabled                  Is the server os-update schedule enabled (default true)
-  -h, --help                     Help for "stackit server os-update schedule update"
-  -d, --maintenance-window int   Maintenance window (in hours, 1-24) (default 23)
-  -n, --name string              os-update schedule name
-  -r, --rrule string             os-update RRULE (recurrence rule) (default "DTSTART;TZID=Europe/Sofia:20200803T023000 RRULE:FREQ=DAILY;INTERVAL=1")
-  -s, --server-id string         Server ID
+  -e, --enabled                    Is the server os-update schedule enabled (default true)
+  -h, --help                       Help for "stackit server os-update schedule update"
+  -d, --maintenance-window int32   Maintenance window (in hours, 1-24) (default 23)
+  -n, --name string                os-update schedule name
+  -r, --rrule string               os-update RRULE (recurrence rule) (default "DTSTART;TZID=Europe/Sofia:20200803T023000 RRULE:FREQ=DAILY;INTERVAL=1")
+  -s, --server-id string           Server ID
 ```
 
 ### Options inherited from parent commands

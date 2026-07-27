@@ -19,8 +19,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex/wait"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	wait "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api/wait"
 )
 
 const (
@@ -48,7 +48,7 @@ type inputModel struct {
 
 	InstanceId     string
 	InstanceName   *string
-	ACL            *[]string
+	ACL            []string
 	BackupSchedule *string
 	FlavorId       *string
 	CPU            *int64
@@ -87,7 +87,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId)
+			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -100,7 +100,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				return err
 			}
@@ -113,7 +113,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Updating instance", func() error {
-					_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.Region, instanceId).WaitWithContext(ctx)
+					_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, instanceId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -153,7 +153,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	flavorId := flags.FlagToStringPointer(p, cmd, flavorIdFlag)
 	cpu := flags.FlagToInt64Pointer(p, cmd, cpuFlag)
 	ram := flags.FlagToInt64Pointer(p, cmd, ramFlag)
-	acl := flags.FlagToStringSlicePointer(p, cmd, aclFlag)
+	acl := flags.FlagToStringSliceValue(p, cmd, aclFlag)
 	backupSchedule := flags.FlagToStringPointer(p, cmd, backupScheduleFlag)
 	storageClass := flags.FlagToStringPointer(p, cmd, storageClassFlag)
 	storageSize := flags.FlagToInt64Pointer(p, cmd, storageSizeFlag)
@@ -191,20 +191,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-type PostgreSQLFlexClient interface {
-	PartialUpdateInstance(ctx context.Context, projectId, region, instanceId string) postgresflex.ApiPartialUpdateInstanceRequest
-	GetInstanceExecute(ctx context.Context, projectId, region, instanceId string) (*postgresflex.InstanceResponse, error)
-	ListFlavorsExecute(ctx context.Context, projectId, region string) (*postgresflex.ListFlavorsResponse, error)
-	ListStoragesExecute(ctx context.Context, projectId, region, flavorId string) (*postgresflex.ListStoragesResponse, error)
-}
-
-func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFlexClient) (postgresflex.ApiPartialUpdateInstanceRequest, error) {
+func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex.DefaultAPI) (postgresflex.ApiPartialUpdateInstanceRequest, error) {
 	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 
 	var flavorId *string
 	var err error
 
-	flavors, err := apiClient.ListFlavorsExecute(ctx, model.ProjectId, model.Region)
+	flavors, err := apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get PostgreSQL Flex flavors: %w", err)
 	}
@@ -213,7 +206,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFl
 		ram := model.RAM
 		cpu := model.CPU
 		if model.RAM == nil || model.CPU == nil {
-			currentInstance, err := apiClient.GetInstanceExecute(ctx, model.ProjectId, model.Region, model.InstanceId)
+			currentInstance, err := apiClient.GetInstance(ctx, model.ProjectId, model.Region, model.InstanceId).Execute()
 			if err != nil {
 				return req, fmt.Errorf("get PostgreSQL Flex instance: %w", err)
 			}
@@ -244,13 +237,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFl
 	if model.StorageClass != nil || model.StorageSize != nil {
 		validationFlavorId := flavorId
 		if validationFlavorId == nil {
-			currentInstance, err := apiClient.GetInstanceExecute(ctx, model.ProjectId, model.Region, model.InstanceId)
+			currentInstance, err := apiClient.GetInstance(ctx, model.ProjectId, model.Region, model.InstanceId).Execute()
 			if err != nil {
 				return req, fmt.Errorf("get PostgreSQL Flex instance: %w", err)
 			}
 			validationFlavorId = currentInstance.Item.Flavor.Id
 		}
-		storages, err = apiClient.ListStoragesExecute(ctx, model.ProjectId, model.Region, *validationFlavorId)
+		storages, err = apiClient.ListStorages(ctx, model.ProjectId, model.Region, *validationFlavorId).Execute()
 		if err != nil {
 			return req, fmt.Errorf("get PostgreSQL Flex storages: %w", err)
 		}
@@ -273,7 +266,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient PostgreSQLFl
 		}
 	}
 
-	var replicas *int64
+	var replicas *int32
 	var payloadOptions *map[string]string
 	if model.Type != nil {
 		replicasInt, err := postgresflexUtils.GetInstanceReplicas(*model.Type)

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/logs"
+	logs "github.com/stackitcloud/stackit-sdk-go/services/logs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
@@ -16,7 +16,7 @@ import (
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/logs/client"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/logs/wait"
+	"github.com/stackitcloud/stackit-sdk-go/services/logs/v1api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
@@ -36,8 +36,8 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 
 	DisplayName   *string
-	RetentionDays *int64
-	ACL           *[]string
+	RetentionDays *int32
+	ACL           []string
 	Description   *string
 }
 
@@ -88,9 +88,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
-			if err != nil {
-				return err
-			}
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create Logs instance: %w", err)
@@ -98,15 +95,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if resp == nil {
 				return fmt.Errorf("create Logs instance: empty response from API")
 			}
-			if resp.Id == nil {
-				return fmt.Errorf("create Logs instance: instance id missing in response")
-			}
-			instanceId := *resp.Id
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating instance", func() error {
-					_, err = wait.CreateLogsInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.Region, instanceId).WaitWithContext(ctx)
+					_, err = wait.CreateLogsInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, resp.Id).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -125,7 +118,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(displayNameFlag, "", "Display name")
 	cmd.Flags().String(descriptionFlag, "", "Description")
 	cmd.Flags().StringSlice(aclFlag, []string{}, "Access control list")
-	cmd.Flags().Int64(retentionDaysFlag, 0, "The days for how long the logs should be stored before being cleaned up")
+	cmd.Flags().Int32(retentionDaysFlag, 0, "The days for how long the logs should be stored before being cleaned up")
 
 	err := flags.MarkFlagsRequired(cmd, displayNameFlag, retentionDaysFlag)
 	cobra.CheckErr(err)
@@ -140,9 +133,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		DisplayName:     flags.FlagToStringPointer(p, cmd, displayNameFlag),
-		RetentionDays:   flags.FlagToInt64Pointer(p, cmd, retentionDaysFlag),
+		RetentionDays:   flags.FlagToInt32Pointer(p, cmd, retentionDaysFlag),
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
-		ACL:             flags.FlagToStringSlicePointer(p, cmd, aclFlag),
+		ACL:             flags.FlagToStringSliceValue(p, cmd, aclFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -150,12 +143,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *logs.APIClient) logs.ApiCreateLogsInstanceRequest {
-	req := apiClient.CreateLogsInstance(ctx, model.ProjectId, model.Region)
-
+	req := apiClient.DefaultAPI.CreateLogsInstance(ctx, model.ProjectId, model.Region)
 	req = req.CreateLogsInstancePayload(logs.CreateLogsInstancePayload{
-		DisplayName:   model.DisplayName,
+		DisplayName:   utils.PtrString(model.DisplayName),
 		Description:   model.Description,
-		RetentionDays: model.RetentionDays,
+		RetentionDays: utils.PtrValue(model.RetentionDays),
 		Acl:           model.ACL,
 	})
 	return req
@@ -173,7 +165,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
-		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, utils.PtrString(resp.Id))
+		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, resp.Id)
 		return nil
 	})
 }

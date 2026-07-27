@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -40,7 +40,7 @@ type inputModel struct {
 
 	InstanceId string
 	Username   *string
-	Roles      *[]string
+	Roles      []string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -75,7 +75,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId)
+			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -121,7 +121,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		GlobalFlagModel: globalFlags,
 		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
 		Username:        flags.FlagToStringPointer(p, cmd, usernameFlag),
-		Roles:           roleFlag.Ptr(),
+		Roles:           roleFlag.Get(),
 	}
 
 	p.DebugInputModel(model)
@@ -129,7 +129,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiCreateUserRequest {
-	req := apiClient.CreateUser(ctx, model.ProjectId, model.Region, model.InstanceId)
+	req := apiClient.DefaultAPI.CreateUser(ctx, model.ProjectId, model.Region, model.InstanceId)
 	req = req.CreateUserPayload(postgresflex.CreateUserPayload{
 		Username: model.Username,
 		Roles:    model.Roles,
@@ -147,7 +147,7 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, resp *po
 			p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, utils.PtrString(user.Id))
 			p.Outputf("Username: %s\n", utils.PtrString(user.Username))
 			p.Outputf("Password: %s\n", utils.PtrString(user.Password))
-			p.Outputf("Roles: %v\n", utils.PtrString(user.Roles))
+			p.Outputf("Roles: %v\n", user.Roles)
 			p.Outputf("Host: %s\n", utils.PtrString(user.Host))
 			p.Outputf("Port: %s\n", utils.PtrString(user.Port))
 			p.Outputf("URI: %s\n", utils.PtrString(user.Uri))

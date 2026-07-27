@@ -18,7 +18,7 @@ import (
 	serverbackupUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/serverbackup/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverbackup"
+	serverbackup "github.com/stackitcloud/stackit-sdk-go/services/serverbackup/v2api"
 )
 
 const (
@@ -65,7 +65,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				}
 			}
 
-			canDisable, err := serverbackupUtils.CanDisableBackupService(ctx, apiClient, model.ProjectId, model.ServerId, model.Region)
+			canDisable, err := serverbackupUtils.CanDisableBackupService(ctx, apiClient.DefaultAPI, model.ProjectId, model.ServerId, model.Region)
 			if err != nil {
 				return err
 			}
@@ -118,6 +118,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient) serverbackup.ApiDisableServiceResourceRequest {
-	req := apiClient.DisableServiceResource(ctx, model.ProjectId, model.ServerId, model.Region)
+	req := apiClient.DefaultAPI.DisableServiceResource(ctx, model.ProjectId, model.ServerId, model.Region)
 	return req
 }

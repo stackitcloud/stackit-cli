@@ -2,7 +2,6 @@ package update
 
 import (
 	"context"
-	"strconv"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -12,24 +11,24 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverupdate"
+	serverupdate "github.com/stackitcloud/stackit-sdk-go/services/serverupdate/v2api"
 )
 
 const (
 	testRegion     = "eu02"
-	testScheduleId = "5"
+	testScheduleId = int32(5)
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &serverupdate.APIClient{}
+var testClient = &serverupdate.APIClient{DefaultAPI: &serverupdate.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testServerId = uuid.NewString()
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
-		testScheduleId,
+		string(testScheduleId),
 	}
 	for _, mod := range mods {
 		mod(argValues)
@@ -60,12 +59,12 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		ScheduleId:        testScheduleId,
+		ScheduleId:        string(testScheduleId),
 		ServerId:          testServerId,
 		ScheduleName:      utils.Ptr("example-schedule-name"),
 		Enabled:           utils.Ptr(defaultEnabled),
 		Rrule:             utils.Ptr(defaultRrule),
-		MaintenanceWindow: utils.Ptr(int64(23)),
+		MaintenanceWindow: utils.Ptr(int32(23)),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -74,13 +73,12 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureUpdateSchedule(mods ...func(schedule *serverupdate.UpdateSchedule)) *serverupdate.UpdateSchedule {
-	id, _ := strconv.ParseInt(testScheduleId, 10, 64)
 	schedule := &serverupdate.UpdateSchedule{
-		Name:              utils.Ptr("example-schedule-name"),
-		Id:                utils.Ptr(id),
-		Enabled:           utils.Ptr(defaultEnabled),
-		Rrule:             utils.Ptr(defaultRrule),
-		MaintenanceWindow: utils.Ptr(int64(23)),
+		Name:              "example-schedule-name",
+		Id:                testScheduleId,
+		Enabled:           defaultEnabled,
+		Rrule:             defaultRrule,
+		MaintenanceWindow: int32(23),
 	}
 	for _, mod := range mods {
 		mod(schedule)
@@ -90,10 +88,10 @@ func fixtureUpdateSchedule(mods ...func(schedule *serverupdate.UpdateSchedule)) 
 
 func fixturePayload(mods ...func(payload *serverupdate.UpdateUpdateSchedulePayload)) serverupdate.UpdateUpdateSchedulePayload {
 	payload := serverupdate.UpdateUpdateSchedulePayload{
-		Name:              utils.Ptr("example-schedule-name"),
-		Enabled:           utils.Ptr(defaultEnabled),
-		Rrule:             utils.Ptr("DTSTART;TZID=Europe/Sofia:20200803T023000 RRULE:FREQ=DAILY;INTERVAL=1"),
-		MaintenanceWindow: utils.Ptr(int64(23)),
+		Name:              "example-schedule-name",
+		Enabled:           defaultEnabled,
+		Rrule:             "DTSTART;TZID=Europe/Sofia:20200803T023000 RRULE:FREQ=DAILY;INTERVAL=1",
+		MaintenanceWindow: int32(23),
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -102,7 +100,7 @@ func fixturePayload(mods ...func(payload *serverupdate.UpdateUpdateSchedulePaylo
 }
 
 func fixtureRequest(mods ...func(request *serverupdate.ApiUpdateUpdateScheduleRequest)) serverupdate.ApiUpdateUpdateScheduleRequest {
-	request := testClient.UpdateUpdateSchedule(testCtx, testProjectId, testServerId, testScheduleId, testRegion)
+	request := testClient.DefaultAPI.UpdateUpdateSchedule(testCtx, testProjectId, testServerId, string(testScheduleId), testRegion)
 	request = request.UpdateUpdateSchedulePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
@@ -259,7 +257,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, serverupdate.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

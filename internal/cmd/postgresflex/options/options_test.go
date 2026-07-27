@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -20,7 +20,7 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testProjectId = uuid.NewString()
 
-type postgresFlexClientMocked struct {
+type mockSettings struct {
 	listFlavorsFails  bool
 	listVersionsFails bool
 	listStoragesFails bool
@@ -30,38 +30,40 @@ type postgresFlexClientMocked struct {
 	listStoragesCalled bool
 }
 
-func (c *postgresFlexClientMocked) ListFlavorsExecute(_ context.Context, _, _ string) (*postgresflex.ListFlavorsResponse, error) {
-	c.listFlavorsCalled = true
-	if c.listFlavorsFails {
-		return nil, fmt.Errorf("list flavors failed")
+func newAPIClientMock(c *mockSettings) postgresflex.DefaultAPI {
+	return postgresflex.DefaultAPIServiceMock{
+		ListFlavorsExecuteMock: utils.Ptr(func(_ postgresflex.ApiListFlavorsRequest) (*postgresflex.ListFlavorsResponse, error) {
+			c.listFlavorsCalled = true
+			if c.listFlavorsFails {
+				return nil, fmt.Errorf("list flavors failed")
+			}
+			return utils.Ptr(postgresflex.ListFlavorsResponse{
+				Flavors: []postgresflex.Flavor{},
+			}), nil
+		}),
+		ListVersionsExecuteMock: utils.Ptr(func(_ postgresflex.ApiListVersionsRequest) (*postgresflex.ListVersionsResponse, error) {
+			c.listVersionsCalled = true
+			if c.listVersionsFails {
+				return nil, fmt.Errorf("list versions failed")
+			}
+			return utils.Ptr(postgresflex.ListVersionsResponse{
+				Versions: []string{},
+			}), nil
+		}),
+		ListStoragesExecuteMock: utils.Ptr(func(_ postgresflex.ApiListStoragesRequest) (*postgresflex.ListStoragesResponse, error) {
+			c.listStoragesCalled = true
+			if c.listStoragesFails {
+				return nil, fmt.Errorf("list storages failed")
+			}
+			return utils.Ptr(postgresflex.ListStoragesResponse{
+				StorageClasses: []string{},
+				StorageRange: &postgresflex.StorageRange{
+					Min: utils.Ptr(int64(10)),
+					Max: utils.Ptr(int64(100)),
+				},
+			}), nil
+		}),
 	}
-	return utils.Ptr(postgresflex.ListFlavorsResponse{
-		Flavors: utils.Ptr([]postgresflex.Flavor{}),
-	}), nil
-}
-
-func (c *postgresFlexClientMocked) ListVersionsExecute(_ context.Context, _, _ string) (*postgresflex.ListVersionsResponse, error) {
-	c.listVersionsCalled = true
-	if c.listVersionsFails {
-		return nil, fmt.Errorf("list versions failed")
-	}
-	return utils.Ptr(postgresflex.ListVersionsResponse{
-		Versions: utils.Ptr([]string{}),
-	}), nil
-}
-
-func (c *postgresFlexClientMocked) ListStoragesExecute(_ context.Context, _, _, _ string) (*postgresflex.ListStoragesResponse, error) {
-	c.listStoragesCalled = true
-	if c.listStoragesFails {
-		return nil, fmt.Errorf("list storages failed")
-	}
-	return utils.Ptr(postgresflex.ListStoragesResponse{
-		StorageClasses: utils.Ptr([]string{}),
-		StorageRange: &postgresflex.StorageRange{
-			Min: utils.Ptr(int64(10)),
-			Max: utils.Ptr(int64(100)),
-		},
-	}), nil
 }
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -187,9 +189,7 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 		description              string
 		model                    *inputModel
 		isValid                  bool
-		listFlavorsFails         bool
-		listVersionsFails        bool
-		listStoragesFails        bool
+		mockClientSettings       mockSettings
 		expectListFlavorsCalled  bool
 		expectListVersionsCalled bool
 		expectListStoragesCalled bool
@@ -232,28 +232,34 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 			expectListStoragesCalled: true,
 		},
 		{
-			description:              "list flavors fails",
-			model:                    fixtureInputModelAllTrue(),
-			isValid:                  false,
-			listFlavorsFails:         true,
+			description: "list flavors fails",
+			model:       fixtureInputModelAllTrue(),
+			isValid:     false,
+			mockClientSettings: mockSettings{
+				listFlavorsFails: true,
+			},
 			expectListFlavorsCalled:  true,
 			expectListVersionsCalled: false,
 			expectListStoragesCalled: false,
 		},
 		{
-			description:              "list versions fails",
-			model:                    fixtureInputModelAllTrue(),
-			isValid:                  false,
-			listVersionsFails:        true,
+			description: "list versions fails",
+			model:       fixtureInputModelAllTrue(),
+			isValid:     false,
+			mockClientSettings: mockSettings{
+				listVersionsFails: true,
+			},
 			expectListFlavorsCalled:  true,
 			expectListVersionsCalled: true,
 			expectListStoragesCalled: false,
 		},
 		{
-			description:              "list storages fails",
-			model:                    fixtureInputModelAllTrue(),
-			isValid:                  false,
-			listStoragesFails:        true,
+			description: "list storages fails",
+			model:       fixtureInputModelAllTrue(),
+			isValid:     false,
+			mockClientSettings: mockSettings{
+				listStoragesFails: true,
+			},
 			expectListFlavorsCalled:  true,
 			expectListVersionsCalled: true,
 			expectListStoragesCalled: true,
@@ -263,12 +269,7 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			params := testparams.NewTestParams()
-			client := &postgresFlexClientMocked{
-				listFlavorsFails:  tt.listFlavorsFails,
-				listVersionsFails: tt.listVersionsFails,
-				listStoragesFails: tt.listStoragesFails,
-			}
-
+			client := newAPIClientMock(&tt.mockClientSettings)
 			err := buildAndExecuteRequest(testCtx, params.Printer, tt.model, client)
 			if err != nil && tt.isValid {
 				t.Fatalf("error building and executing request: %v", err)
@@ -280,14 +281,14 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 				return
 			}
 
-			if tt.expectListFlavorsCalled != client.listFlavorsCalled {
-				t.Fatalf("expected listFlavorsCalled to be %v, got %v", tt.expectListFlavorsCalled, client.listFlavorsCalled)
+			if tt.expectListFlavorsCalled != tt.mockClientSettings.listFlavorsCalled {
+				t.Fatalf("expected listFlavorsCalled to be %v, got %v", tt.expectListFlavorsCalled, tt.mockClientSettings.listFlavorsCalled)
 			}
-			if tt.expectListVersionsCalled != client.listVersionsCalled {
-				t.Fatalf("expected listVersionsCalled to be %v, got %v", tt.expectListVersionsCalled, client.listVersionsCalled)
+			if tt.expectListVersionsCalled != tt.mockClientSettings.listVersionsCalled {
+				t.Fatalf("expected listVersionsCalled to be %v, got %v", tt.expectListVersionsCalled, tt.mockClientSettings.listVersionsCalled)
 			}
-			if tt.expectListStoragesCalled != client.listStoragesCalled {
-				t.Fatalf("expected listStoragesCalled to be %v, got %v", tt.expectListStoragesCalled, client.listStoragesCalled)
+			if tt.expectListStoragesCalled != tt.mockClientSettings.listStoragesCalled {
+				t.Fatalf("expected listStoragesCalled to be %v, got %v", tt.expectListStoragesCalled, tt.mockClientSettings.listStoragesCalled)
 			}
 		})
 	}
@@ -317,13 +318,13 @@ func Test_outputResult(t *testing.T) {
 			args{
 				model: inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{}, Flavors: false, Versions: false, Storages: false, FlavorId: new(string)},
 				flavors: &postgresflex.ListFlavorsResponse{
-					Flavors: &[]postgresflex.Flavor{},
+					Flavors: []postgresflex.Flavor{},
 				},
 				versions: &postgresflex.ListVersionsResponse{
-					Versions: &[]string{},
+					Versions: []string{},
 				},
 				storages: &postgresflex.ListStoragesResponse{
-					StorageClasses: &[]string{},
+					StorageClasses: []string{},
 					StorageRange:   &postgresflex.StorageRange{},
 				},
 			},
