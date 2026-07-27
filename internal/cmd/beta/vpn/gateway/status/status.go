@@ -115,18 +115,20 @@ func outputResult(p *print.Printer, outputFormat, gatewayId, projectLabel string
 			mainTable,
 		}
 		for _, tunnel := range gateway.Tunnels {
-			ts = append(ts, tunnelTable(tunnel))
+			ts = append(ts, tunnelTable(tunnel)...)
 		}
 
 		return tables.DisplayTables(p, ts)
 	})
 }
 
-func tunnelTable(tunnel vpn.VPNTunnels) tables.Table {
+func tunnelTable(tunnel vpn.VPNTunnels) []tables.Table {
 	title := "Tunnel"
 	if tunnel.Name != nil {
 		title = string(*tunnel.Name)
 	}
+
+	tunnelTables := []tables.Table{}
 
 	table := tables.NewTable()
 	table.SetTitle(title)
@@ -138,44 +140,42 @@ func tunnelTable(tunnel vpn.VPNTunnels) tables.Table {
 	table.AddSeparator()
 	table.AddRow("STATE", tunnel.GetInstanceState())
 
+	tunnelTables = append(tunnelTables, table)
+
 	if tunnel.BgpStatus.IsSet() {
-		table.AddSeparator()
-		routeString := ""
+		bgpRoutesTable := tables.NewTable()
+		bgpRoutesTable.SetTitle(title + " - BGP Routes")
+		bgpRoutesTable.SetHeader("Network", "Origin", "Path", "Peer ID", "Weight")
 		for _, route := range tunnel.BgpStatus.Get().Routes {
-			if route.Network != "" {
-				routeString += fmt.Sprintf("Network: %s; ", route.Network)
-			}
-			if route.Origin != "" {
-				routeString += fmt.Sprintf("Origin: %s; ", route.Origin)
-			}
-			if route.Path != "" {
-				routeString += fmt.Sprintf("Path: %s; ", route.Path)
-			}
-			if route.PeerId != "" {
-				routeString += fmt.Sprintf("PeerId: %s; ", route.PeerId)
-			}
-			routeString += fmt.Sprintf("Weight: %d\n", route.Weight)
+			bgpRoutesTable.AddRow(
+				route.Network,
+				route.Origin,
+				route.Path,
+				route.PeerId,
+				route.Weight,
+			)
+			bgpRoutesTable.AddSeparator()
 		}
-		table.AddRow("BGP Routes", routeString)
-		table.AddSeparator()
-		bgpPeers := ""
+		tunnelTables = append(tunnelTables, bgpRoutesTable)
+
+		bgpPeersTable := tables.NewTable()
+		bgpPeersTable.SetTitle(title + " - BGP Peers")
+		bgpPeersTable.SetHeader("Peer Uptime", "Remote IP", "STATE", "Local ASN", "PfxRcd", "PfxSnt", "RemoteAs")
+
 		for _, peer := range tunnel.BgpStatus.Get().Peers {
-			if peer.PeerUptime != "" {
-				bgpPeers += fmt.Sprintf("PeerUptime: %s; ", peer.PeerUptime)
-			}
-			if peer.RemoteIP != "" {
-				bgpPeers += fmt.Sprintf("RemoteIP: %s; ", peer.RemoteIP)
-			}
-			if peer.State != "" {
-				bgpPeers += fmt.Sprintf("State: %s; ", peer.State)
-			}
-			bgpPeers += fmt.Sprintf("LocalAsn: %d; ", peer.LocalAs)
-			bgpPeers += fmt.Sprintf("PfxRcd: %d; ", peer.PfxRcd)
-			bgpPeers += fmt.Sprintf("PfxSnt: %d; ", peer.PfxSnt)
-			bgpPeers += fmt.Sprintf("RemoteAs: %d\n", peer.RemoteAs)
+			bgpPeersTable.AddRow(
+				peer.PeerUptime,
+				peer.RemoteIP,
+				peer.State,
+				peer.LocalAs,
+				peer.PfxRcd,
+				peer.PfxSnt,
+				peer.RemoteAs,
+			)
+			bgpPeersTable.AddSeparator()
 		}
-		table.AddRow("BGP Peers", bgpPeers)
+		tunnelTables = append(tunnelTables, bgpPeersTable)
 	}
 
-	return table
+	return tunnelTables
 }

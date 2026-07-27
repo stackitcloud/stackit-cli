@@ -2,15 +2,17 @@ package status
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	vpn "github.com/stackitcloud/stackit-sdk-go/services/vpn/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 )
 
@@ -196,12 +198,118 @@ func TestOutputResult(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "set response",
+			args: args{
+				gateway: &vpn.GatewayStatusResponse{
+					Id:            utils.Ptr(testGatewayId),
+					Connections:   []vpn.ConnectionStatusResponse{},
+					DisplayName:   utils.Ptr("test"),
+					ErrorMessage:  nil,
+					GatewayStatus: utils.Ptr(vpn.GATEWAYSTATUS_READY),
+					Tunnels: []vpn.VPNTunnels{
+						{
+							BgpStatus: *vpn.NewNullableBGPStatus(&vpn.BGPStatus{
+								Peers: []vpn.BGPStatusPeers{
+									{
+										LocalAs:    23,
+										PeerUptime: "~10s",
+										PfxRcd:     3,
+										PfxSnt:     5,
+										RemoteAs:   224,
+										RemoteIP:   "1.1.1.1",
+										State:      "Healthy",
+									},
+									{
+										LocalAs:    25,
+										PeerUptime: "~14s",
+										PfxRcd:     1,
+										PfxSnt:     99,
+										RemoteAs:   4,
+										RemoteIP:   "2.2.2.2",
+										State:      "Unhealthy",
+									},
+								},
+								Routes: []vpn.BGPStatusRoutes{
+									{
+										Network: "home",
+										Origin:  "root",
+										Path:    "~/",
+										PeerId:  "5",
+										Weight:  1,
+									},
+									{
+										Network: "remote",
+										Origin:  "internet",
+										Path:    "/path/",
+										PeerId:  "3",
+										Weight:  44,
+									},
+								},
+							}),
+							InstanceState:     utils.Ptr(vpn.GATEWAYSTATUS_READY),
+							InternalNextHopIP: utils.Ptr("1.2.3.4"),
+							Name:              utils.Ptr(vpn.VPNTUNNELSNAME_TUNNEL1),
+							PublicIP:          utils.Ptr("9.9.9.9"),
+						},
+						{
+							BgpStatus: *vpn.NewNullableBGPStatus(&vpn.BGPStatus{
+								Peers: []vpn.BGPStatusPeers{
+									{
+										LocalAs:    23,
+										PeerUptime: "~10s",
+										PfxRcd:     3,
+										PfxSnt:     5,
+										RemoteAs:   224,
+										RemoteIP:   "1.1.1.1",
+										State:      "Healthy",
+									},
+									{
+										LocalAs:    25,
+										PeerUptime: "~14s",
+										PfxRcd:     1,
+										PfxSnt:     99,
+										RemoteAs:   4,
+										RemoteIP:   "2.2.2.2",
+										State:      "Unhealthy",
+									},
+								},
+								Routes: []vpn.BGPStatusRoutes{
+									{
+										Network: "home",
+										Origin:  "root",
+										Path:    "~/",
+										PeerId:  "5",
+										Weight:  1,
+									},
+									{
+										Network: "remote",
+										Origin:  "internet",
+										Path:    "/path/",
+										PeerId:  "3",
+										Weight:  44,
+									},
+								},
+							}),
+							InstanceState:     utils.Ptr(vpn.GATEWAYSTATUS_PENDING),
+							InternalNextHopIP: utils.Ptr("4.4.4.4"),
+							Name:              utils.Ptr(vpn.VPNTUNNELSNAME_TUNNEL2),
+							PublicIP:          utils.Ptr("3.3.3.3"),
+						},
+					},
+				},
+			},
+		},
 	}
-	params := testparams.NewTestParams()
+	printer := print.NewPrinter(
+		os.Stdin,
+		os.Stdout,
+		os.Stderr,
+	)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.projectLabel, tt.args.gatewayId, tt.args.gateway); (err != nil) != tt.wantErr {
+			if err := outputResult(printer, tt.args.outputFormat, tt.args.projectLabel, tt.args.gatewayId, tt.args.gateway); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
