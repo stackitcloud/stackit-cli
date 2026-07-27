@@ -50,7 +50,7 @@ type inputModel struct {
 	StorageClass   string
 	StorageSize    *int64
 	Version        string
-	RetentionDays  *int32
+	RetentionDays  int32
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -173,7 +173,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		StorageClass:    flags.FlagToStringValue(p, cmd, storageClassFlag),
 		StorageSize:     flags.FlagToInt64Pointer(p, cmd, storageSizeFlag),
 		Version:         flags.FlagToStringValue(p, cmd, versionFlag),
-		RetentionDays:   flags.FlagToInt32Pointer(p, cmd, retentionDaysFlag),
+		RetentionDays:   flags.FlagWithDefaultToInt32Value(p, cmd, retentionDaysFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -229,7 +229,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlserverfle
 			Size:  utils.PtrValue(model.StorageSize),
 		},
 		Version:       sqlserverflex.InstanceVersion(model.Version),
-		RetentionDays: utils.PtrValue(model.RetentionDays),
+		RetentionDays: model.RetentionDays,
 	})
 	return req, nil
 }

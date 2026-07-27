@@ -128,11 +128,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverfl
 }
 
 func outputResult(p *print.Printer, outputFormat, userLabel, instanceLabel string, user *sqlserverflex.ResetUserResponse) error {
-	if user == nil {
-		return fmt.Errorf("single user response is empty")
-	}
-
 	return p.OutputResult(outputFormat, user, func() error {
+		if user == nil {
+			return fmt.Errorf("single user response is empty")
+		}
+
 		p.Outputf("Reset password for user %q of instance %q\n\n", userLabel, instanceLabel)
 		p.Outputf("Username: %s\n", user.Username)
 		p.Outputf("New password: %s\n", user.Password)

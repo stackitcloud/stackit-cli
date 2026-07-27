@@ -96,11 +96,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverfl
 }
 
 func outputResult(p *print.Printer, outputFormat string, instance *sqlserverflex.GetInstanceResponse, flavor *sqlserverflex.ListFlavors) error {
-	if instance == nil {
-		return fmt.Errorf("instance response is empty")
-	}
-
 	return p.OutputResult(outputFormat, instance, func() error {
+		if instance == nil {
+			return fmt.Errorf("instance response is empty")
+		}
+
 		acls := strings.Join(instance.Network.Acl, ", ")
 
 		table := tables.NewTable()

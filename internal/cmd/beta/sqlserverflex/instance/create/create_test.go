@@ -84,7 +84,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		StorageClass:   "storage-class",
 		StorageSize:    utils.Ptr(int64(10)),
 		Version:        "6.0",
-		RetentionDays:  utils.Ptr(int32(32)),
+		RetentionDays:  32,
 	}
 	for _, mod := range mods {
 		mod(model)

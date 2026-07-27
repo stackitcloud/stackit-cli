@@ -102,11 +102,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverfl
 }
 
 func outputResult(p *print.Printer, outputFormat string, resp *sqlserverflex.GetDatabaseResponse) error {
-	if resp == nil {
-		return fmt.Errorf("database response is empty")
-	}
-
 	return p.OutputResult(outputFormat, resp, func() error {
+		if resp == nil {
+			return fmt.Errorf("database response is empty")
+		}
+
 		table := tables.NewTable()
 		table.AddRow("ID", resp.Id)
 		table.AddSeparator()

@@ -87,9 +87,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("create SQLServer Flex user: %w", err)
 			}
-			user := resp
 
-			return outputResult(params.Printer, model, instanceLabel, user)
+			return outputResult(params.Printer, model, instanceLabel, resp)
 		},
 	}
 
@@ -134,10 +133,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverfl
 }
 
 func outputResult(p *print.Printer, model *inputModel, instanceLabel string, user *sqlserverflex.CreateUserResponse) error {
-	if user == nil {
-		return fmt.Errorf("user response is empty")
-	}
 	return p.OutputResult(model.OutputFormat, user, func() error {
+		if user == nil {
+			return fmt.Errorf("user response is empty")
+		}
 		p.Outputf("Created user for instance %q. User ID: %d\n\n", instanceLabel, user.Id)
 		p.Outputf("Username: %s\n", user.Username)
 		p.Outputf("Password: %s\n", user.Password)
