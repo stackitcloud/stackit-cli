@@ -1,35 +1,33 @@
 ## stackit beta edge-cloud token create
 
-Creates a token for an edge instance
+Creates a token for an Edge Cloud instance
 
 ### Synopsis
 
 Creates a token for a STACKIT Edge Cloud (STEC) instance.
 
-An expiration time can be set for the token. The expiration time is set in seconds(s), minutes(m), hours(h), days(d) or months(M). Default is 3600 seconds.
+An expiration time can be set for the token. The expiration time is set in seconds(s), minutes(m), hours(h), days(d) or months(M). Default is 3600(1h) seconds.
 Note: the format for the duration is <value><unit>, e.g. 30d for 30 days. You may not combine units.
 
 ```
-stackit beta edge-cloud token create [flags]
+stackit beta edge-cloud token create token for INSTANCE_ID [flags]
 ```
 
 ### Examples
 
 ```
-  Create a token for the edge instance with id "xxx".
-  $ stackit beta edge-cloud token create --id "xxx"
+  Create a token for the Edge Cloud instance with instance ID "xxx".
+  $ stackit beta edge-cloud token create xxx
 
-  Create a token for the edge instance with name "xxx". The token will be valid for one day.
-  $ stackit beta edge-cloud token create --name "xxx" --expiration 1d
+  Create a token for the Edge Cloud instance with instance ID "xxx". The token will be valid for one day.
+  $ stackit beta edge-cloud token create xxx --expiration 1d
 ```
 
 ### Options
 
 ```
-  -e, --expiration string   Expiration time for the kubeconfig, e.g. 5d. By default, the token is valid for 1h.
+  -e, --expiration string   Expiration time for the token, e.g. 5d. By default, the token is valid for 1h.
   -h, --help                Help for "stackit beta edge-cloud token create"
-  -i, --id string           The project-unique identifier of this instance.
-  -n, --name string         The displayed name to distinguish multiple instances.
 ```
 
 ### Options inherited from parent commands
@@ -45,5 +43,5 @@ stackit beta edge-cloud token create [flags]
 
 ### SEE ALSO
 
-* [stackit beta edge-cloud token](./stackit_beta_edge-cloud_token.md)	 - Provides functionality for edge service token.
+* [stackit beta edge-cloud token](./stackit_beta_edge-cloud_token.md)	 - Provides functionality for Edge Cloud service token.
 

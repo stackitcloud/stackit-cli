@@ -1,6 +1,6 @@
 ## stackit beta edge-cloud token
 
-Provides functionality for edge service token.
+Provides functionality for Edge Cloud service token.
 
 ### Synopsis
 
@@ -29,6 +29,6 @@ stackit beta edge-cloud token [flags]
 
 ### SEE ALSO
 
-* [stackit beta edge-cloud](./stackit_beta_edge-cloud.md)	 - Provides functionality for edge services.
-* [stackit beta edge-cloud token create](./stackit_beta_edge-cloud_token_create.md)	 - Creates a token for an edge instance
+* [stackit beta edge-cloud](./stackit_beta_edge-cloud.md)	 - Provides functionality for Edge Cloud services.
+* [stackit beta edge-cloud token create](./stackit_beta_edge-cloud_token_create.md)	 - Creates a token for an Edge Cloud instance
 

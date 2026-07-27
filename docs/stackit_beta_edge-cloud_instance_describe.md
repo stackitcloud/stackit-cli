@@ -1,31 +1,29 @@
 ## stackit beta edge-cloud instance describe
 
-Describes an edge instance
+Describes an Edge Cloud instance
 
 ### Synopsis
 
 Describes a STACKIT Edge Cloud (STEC) instance.
 
 ```
-stackit beta edge-cloud instance describe [flags]
+stackit beta edge-cloud instance describe INSTANCE_ID [flags]
 ```
 
 ### Examples
 
 ```
-  Describe an edge instance with id "xxx"
-  $ stackit beta edge-cloud instance describe --id <ID>
+  Describe an Edge Cloud instance with ID "xxx"
+  $ stackit beta edge-cloud instance describe xxx
 
-  Describe an edge instance with name "xxx"
-  $ stackit beta edge-cloud instance describe --name <NAME>
+  Get details of an Edge Cloud instance with ID "xxx" in JSON format
+  $ stackit beta edge-cloud instance describe xxx --output-format json
 ```
 
 ### Options
 
 ```
-  -h, --help          Help for "stackit beta edge-cloud instance describe"
-  -i, --id string     The project-unique identifier of this instance.
-  -n, --name string   The displayed name to distinguish multiple instances.
+  -h, --help   Help for "stackit beta edge-cloud instance describe"
 ```
 
 ### Options inherited from parent commands
@@ -41,5 +39,5 @@ stackit beta edge-cloud instance describe [flags]
 
 ### SEE ALSO
 
-* [stackit beta edge-cloud instance](./stackit_beta_edge-cloud_instance.md)	 - Provides functionality for edge instances.
+* [stackit beta edge-cloud instance](./stackit_beta_edge-cloud_instance.md)	 - Provides functionality for Edge Cloud instances.
 

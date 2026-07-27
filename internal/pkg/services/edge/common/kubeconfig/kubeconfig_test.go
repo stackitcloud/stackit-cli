@@ -1,6 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
-// SPDX-FileCopyrightText: 2025 STACKIT GmbH & Co. KG
-
 package kubeconfig
 
 import (

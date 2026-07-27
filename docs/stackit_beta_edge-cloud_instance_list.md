@@ -1,6 +1,6 @@
 ## stackit beta edge-cloud instance list
 
-Lists edge instances
+Lists Edge Cloud instances
 
 ### Synopsis
 
@@ -13,10 +13,10 @@ stackit beta edge-cloud instance list [flags]
 ### Examples
 
 ```
-  Lists all edge instances of a given project
+  Lists all Edge Cloud instances of a given project
   $ stackit beta edge-cloud instance list
 
-  Lists all edge instances of a given project and limits the output to two instances
+  Lists all Edge Cloud instances of a given project and limits the output to two instances
   $ stackit beta edge-cloud instance list --limit 2
 ```
 
@@ -40,5 +40,5 @@ stackit beta edge-cloud instance list [flags]
 
 ### SEE ALSO
 
-* [stackit beta edge-cloud instance](./stackit_beta_edge-cloud_instance.md)	 - Provides functionality for edge instances.
+* [stackit beta edge-cloud instance](./stackit_beta_edge-cloud_instance.md)	 - Provides functionality for Edge Cloud instances.
 

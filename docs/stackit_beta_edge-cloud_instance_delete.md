@@ -1,31 +1,26 @@
 ## stackit beta edge-cloud instance delete
 
-Deletes an edge instance
+Deletes an Edge Cloud instance
 
 ### Synopsis
 
 Deletes a STACKIT Edge Cloud (STEC) instance. The instance will be deleted permanently.
 
 ```
-stackit beta edge-cloud instance delete [flags]
+stackit beta edge-cloud instance delete INSTANCE_ID [flags]
 ```
 
 ### Examples
 
 ```
-  Delete an edge instance with id "xxx"
-  $ stackit beta edge-cloud instance delete --id "xxx"
-
-  Delete an edge instance with name "xxx"
-  $ stackit beta edge-cloud instance delete --name "xxx"
+  Delete an edge instance with ID "xxx"
+  $ stackit beta edge-cloud instance delete xxx
 ```
 
 ### Options
 
 ```
-  -h, --help          Help for "stackit beta edge-cloud instance delete"
-  -i, --id string     The project-unique identifier of this instance.
-  -n, --name string   The displayed name to distinguish multiple instances.
+  -h, --help   Help for "stackit beta edge-cloud instance delete"
 ```
 
 ### Options inherited from parent commands
@@ -41,5 +36,5 @@ stackit beta edge-cloud instance delete [flags]
 
 ### SEE ALSO
 
-* [stackit beta edge-cloud instance](./stackit_beta_edge-cloud_instance.md)	 - Provides functionality for edge instances.
+* [stackit beta edge-cloud instance](./stackit_beta_edge-cloud_instance.md)	 - Provides functionality for Edge Cloud instances.
 

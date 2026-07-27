@@ -1,6 +1,6 @@
 ## stackit beta edge-cloud kubeconfig
 
-Provides functionality for edge kubeconfig.
+Provides functionality for Edge Cloud kubeconfig.
 
 ### Synopsis
 
@@ -29,6 +29,6 @@ stackit beta edge-cloud kubeconfig [flags]
 
 ### SEE ALSO
 
-* [stackit beta edge-cloud](./stackit_beta_edge-cloud.md)	 - Provides functionality for edge services.
-* [stackit beta edge-cloud kubeconfig create](./stackit_beta_edge-cloud_kubeconfig_create.md)	 - Creates or updates a local kubeconfig file of an edge instance
+* [stackit beta edge-cloud](./stackit_beta_edge-cloud.md)	 - Provides functionality for Edge Cloud services.
+* [stackit beta edge-cloud kubeconfig create](./stackit_beta_edge-cloud_kubeconfig_create.md)	 - Creates or updates a local kubeconfig file of an Edge Cloud instance
 

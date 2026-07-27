@@ -1,6 +1,6 @@
 ## stackit beta edge-cloud instance
 
-Provides functionality for edge instances.
+Provides functionality for Edge Cloud instances.
 
 ### Synopsis
 
@@ -29,10 +29,10 @@ stackit beta edge-cloud instance [flags]
 
 ### SEE ALSO
 
-* [stackit beta edge-cloud](./stackit_beta_edge-cloud.md)	 - Provides functionality for edge services.
-* [stackit beta edge-cloud instance create](./stackit_beta_edge-cloud_instance_create.md)	 - Creates an edge instance
-* [stackit beta edge-cloud instance delete](./stackit_beta_edge-cloud_instance_delete.md)	 - Deletes an edge instance
-* [stackit beta edge-cloud instance describe](./stackit_beta_edge-cloud_instance_describe.md)	 - Describes an edge instance
-* [stackit beta edge-cloud instance list](./stackit_beta_edge-cloud_instance_list.md)	 - Lists edge instances
-* [stackit beta edge-cloud instance update](./stackit_beta_edge-cloud_instance_update.md)	 - Updates an edge instance
+* [stackit beta edge-cloud](./stackit_beta_edge-cloud.md)	 - Provides functionality for Edge Cloud services.
+* [stackit beta edge-cloud instance create](./stackit_beta_edge-cloud_instance_create.md)	 - Creates an Edge Cloud instance
+* [stackit beta edge-cloud instance delete](./stackit_beta_edge-cloud_instance_delete.md)	 - Deletes an Edge Cloud instance
+* [stackit beta edge-cloud instance describe](./stackit_beta_edge-cloud_instance_describe.md)	 - Describes an Edge Cloud instance
+* [stackit beta edge-cloud instance list](./stackit_beta_edge-cloud_instance_list.md)	 - Lists Edge Cloud instances
+* [stackit beta edge-cloud instance update](./stackit_beta_edge-cloud_instance_update.md)	 - Updates an Edge Cloud instance
 

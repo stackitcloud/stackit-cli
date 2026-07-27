@@ -1,6 +1,6 @@
 ## stackit beta edge-cloud
 
-Provides functionality for edge services.
+Provides functionality for Edge Cloud services.
 
 ### Synopsis
 
@@ -30,8 +30,8 @@ stackit beta edge-cloud [flags]
 ### SEE ALSO
 
 * [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
-* [stackit beta edge-cloud instance](./stackit_beta_edge-cloud_instance.md)	 - Provides functionality for edge instances.
-* [stackit beta edge-cloud kubeconfig](./stackit_beta_edge-cloud_kubeconfig.md)	 - Provides functionality for edge kubeconfig.
-* [stackit beta edge-cloud plans](./stackit_beta_edge-cloud_plans.md)	 - Provides functionality for edge service plans.
-* [stackit beta edge-cloud token](./stackit_beta_edge-cloud_token.md)	 - Provides functionality for edge service token.
+* [stackit beta edge-cloud instance](./stackit_beta_edge-cloud_instance.md)	 - Provides functionality for Edge Cloud instances.
+* [stackit beta edge-cloud kubeconfig](./stackit_beta_edge-cloud_kubeconfig.md)	 - Provides functionality for Edge Cloud kubeconfig.
+* [stackit beta edge-cloud plans](./stackit_beta_edge-cloud_plans.md)	 - Provides functionality for Edge Cloud service plans.
+* [stackit beta edge-cloud token](./stackit_beta_edge-cloud_token.md)	 - Provides functionality for Edge Cloud service token.
 
