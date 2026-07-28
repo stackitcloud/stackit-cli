@@ -8,7 +8,6 @@ import (
 
 	"github.com/spf13/cobra"
 	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api"
-	wait "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -23,11 +22,6 @@ import (
 const (
 	areaIdArg          = "AREA_ID"
 	organizationIdFlag = "organization-id"
-
-	deprecationMessage = "The regional network area configuration %q for the area %q still exists.\n" +
-		"The regional configuration of the network area was moved to the new command group `$ stackit network-area region`.\n" +
-		"The regional area will be automatically deleted. This behavior is deprecated and will be removed after April 2026.\n" +
-		"Use in the future the command `$ stackit network-area region delete` to delete the regional network area and afterwards delete the network-area with the command `$ stackit network-area delete`.\n"
 )
 
 type inputModel struct {
@@ -74,23 +68,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
-			}
-
-			// Check if the network area has a regional configuration
-			regionalArea, err := apiClient.DefaultAPI.GetNetworkAreaRegion(ctx, *model.OrganizationId, model.AreaId, model.Region).Execute()
-			if err != nil {
-				params.Printer.Debug(print.ErrorLevel, "get regional area: %v", err)
-			}
-			if regionalArea != nil {
-				params.Printer.Warn(deprecationMessage, model.Region, networkAreaLabel)
-				err = apiClient.DefaultAPI.DeleteNetworkAreaRegion(ctx, *model.OrganizationId, model.AreaId, model.Region).Execute()
-				if err != nil {
-					return fmt.Errorf("delete network area region: %w", err)
-				}
-				_, err := wait.DeleteNetworkAreaRegionWaitHandler(ctx, apiClient.DefaultAPI, *model.OrganizationId, model.AreaId, model.Region).WaitWithContext(ctx)
-				if err != nil {
-					return fmt.Errorf("wait delete network area region: %w", err)
-				}
 			}
 
 			// Call API

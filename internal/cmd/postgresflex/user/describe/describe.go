@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -105,7 +105,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiGetUserRequest {
-	req := apiClient.GetUser(ctx, model.ProjectId, model.Region, model.InstanceId, model.UserId)
+	req := apiClient.DefaultAPI.GetUser(ctx, model.ProjectId, model.Region, model.InstanceId, model.UserId)
 	return req
 }
 
@@ -116,7 +116,7 @@ func outputResult(p *print.Printer, outputFormat string, user postgresflex.UserR
 		table.AddSeparator()
 		table.AddRow("USERNAME", utils.PtrString(user.Username))
 		table.AddSeparator()
-		table.AddRow("ROLES", utils.PtrString(user.Roles))
+		table.AddRow("ROLES", user.Roles)
 		table.AddSeparator()
 		table.AddRow("HOST", utils.PtrString(user.Host))
 		table.AddSeparator()

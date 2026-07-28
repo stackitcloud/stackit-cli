@@ -8,6 +8,9 @@ import (
 
 	iaasClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 
+	"github.com/spf13/cobra"
+	serverbackup "github.com/stackitcloud/stackit-sdk-go/services/serverbackup/v2api"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -16,10 +19,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/serverbackup/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverbackup"
 )
 
 const (
@@ -36,7 +35,7 @@ type inputModel struct {
 
 	ServerId              string
 	BackupName            string
-	BackupRetentionPeriod int64
+	BackupRetentionPeriod int32
 	BackupVolumeIds       []string
 }
 
@@ -105,7 +104,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().VarP(flags.UUIDFlag(), serverIdFlag, "s", "Server ID")
 	cmd.Flags().StringP(backupNameFlag, "b", "", "Backup name")
-	cmd.Flags().Int64P(backupRetentionPeriodFlag, "d", defaultRetentionPeriod, "Backup retention period (in days)")
+	cmd.Flags().Int32P(backupRetentionPeriodFlag, "d", defaultRetentionPeriod, "Backup retention period (in days)")
 	cmd.Flags().VarP(flags.UUIDSliceFlag(), backupVolumeIdsFlag, "i", "Backup volume IDs, as comma separated UUID values.")
 
 	err := flags.MarkFlagsRequired(cmd, serverIdFlag, backupNameFlag)
@@ -121,7 +120,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	model := inputModel{
 		GlobalFlagModel:       globalFlags,
 		ServerId:              flags.FlagToStringValue(p, cmd, serverIdFlag),
-		BackupRetentionPeriod: flags.FlagWithDefaultToInt64Value(p, cmd, backupRetentionPeriodFlag),
+		BackupRetentionPeriod: flags.FlagWithDefaultToInt32Value(p, cmd, backupRetentionPeriodFlag),
 		BackupName:            flags.FlagToStringValue(p, cmd, backupNameFlag),
 		BackupVolumeIds:       flags.FlagToStringSliceValue(p, cmd, backupVolumeIdsFlag),
 	}
@@ -131,11 +130,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient) (serverbackup.ApiCreateBackupRequest, error) {
-	req := apiClient.CreateBackup(ctx, model.ProjectId, model.ServerId, model.Region)
+	req := apiClient.DefaultAPI.CreateBackup(ctx, model.ProjectId, model.ServerId, model.Region)
 	payload := serverbackup.CreateBackupPayload{
-		Name:            &model.BackupName,
-		RetentionPeriod: &model.BackupRetentionPeriod,
-		VolumeIds:       &model.BackupVolumeIds,
+		Name:            model.BackupName,
+		RetentionPeriod: model.BackupRetentionPeriod,
+		VolumeIds:       model.BackupVolumeIds,
 	}
 	if model.BackupVolumeIds == nil {
 		payload.VolumeIds = nil
@@ -146,7 +145,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbacku
 
 func outputResult(p *print.Printer, outputFormat, serverLabel string, resp serverbackup.BackupJob) error {
 	return p.OutputResult(outputFormat, resp, func() error {
-		p.Outputf("Triggered creation of server backup for server %s. Backup ID: %s\n", serverLabel, utils.PtrString(resp.Id))
+		p.Outputf("Triggered creation of server backup for server %s. Backup ID: %s\n", serverLabel, resp.Id)
 		return nil
 	})
 }

@@ -5,39 +5,29 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/logs"
+	logs "github.com/stackitcloud/stackit-sdk-go/services/logs/v1api"
 )
 
 var (
 	ErrResponseNil = errors.New("response is nil")
-	ErrNameNil     = errors.New("display name is nil")
 )
 
-type LogsClient interface {
-	GetLogsInstanceExecute(ctx context.Context, projectId, regionId, instanceId string) (*logs.LogsInstance, error)
-	GetAccessTokenExecute(ctx context.Context, projectId string, regionId string, instanceId string, tId string) (*logs.AccessToken, error)
-}
-
-func GetInstanceName(ctx context.Context, apiClient LogsClient, projectId, regionId, instanceId string) (string, error) {
-	resp, err := apiClient.GetLogsInstanceExecute(ctx, projectId, regionId, instanceId)
+func GetInstanceName(ctx context.Context, apiClient logs.DefaultAPI, projectId, regionId, instanceId string) (string, error) {
+	resp, err := apiClient.GetLogsInstance(ctx, projectId, regionId, instanceId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get Logs instance: %w", err)
 	} else if resp == nil {
 		return "", ErrResponseNil
-	} else if resp.DisplayName == nil {
-		return "", ErrNameNil
 	}
-	return *resp.DisplayName, nil
+	return resp.DisplayName, nil
 }
 
-func GetAccessTokenName(ctx context.Context, apiClient LogsClient, projectId, regionId, instanceId, accessTokenId string) (string, error) {
-	resp, err := apiClient.GetAccessTokenExecute(ctx, projectId, regionId, instanceId, accessTokenId)
+func GetAccessTokenName(ctx context.Context, apiClient logs.DefaultAPI, projectId, regionId, instanceId, accessTokenId string) (string, error) {
+	resp, err := apiClient.GetAccessToken(ctx, projectId, regionId, instanceId, accessTokenId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get Logs access token: %w", err)
 	} else if resp == nil {
 		return "", ErrResponseNil
-	} else if resp.DisplayName == nil {
-		return "", ErrNameNil
 	}
-	return *resp.DisplayName, nil
+	return resp.DisplayName, nil
 }

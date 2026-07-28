@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -18,7 +18,7 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &postgresflex.APIClient{}
+var testClient = &postgresflex.APIClient{DefaultAPI: &postgresflex.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 var testRegion = "eu01"
@@ -43,7 +43,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		InstanceId: utils.Ptr(testInstanceId),
+		InstanceId: testInstanceId,
 		Limit:      utils.Ptr(int64(10)),
 	}
 	for _, mod := range mods {
@@ -53,7 +53,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *postgresflex.ApiListUsersRequest)) postgresflex.ApiListUsersRequest {
-	request := testClient.ListUsers(testCtx, testProjectId, testRegion, testInstanceId)
+	request := testClient.DefaultAPI.ListUsers(testCtx, testProjectId, testRegion, testInstanceId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -156,7 +156,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, postgresflex.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -167,8 +167,9 @@ func TestBuildRequest(t *testing.T) {
 
 func Test_outputResult(t *testing.T) {
 	type args struct {
-		outputFormat string
-		users        []postgresflex.ListUsersResponseItem
+		outputFormat  string
+		instanceLabel string
+		users         []postgresflex.ListUsersResponseItem
 	}
 	tests := []struct {
 		name    string
@@ -177,7 +178,7 @@ func Test_outputResult(t *testing.T) {
 	}{
 		{"empty", args{}, false},
 		{"standard", args{users: []postgresflex.ListUsersResponseItem{{}}}, false},
-		{"complete", args{users: []postgresflex.ListUsersResponseItem{{
+		{"complete", args{instanceLabel: "label", users: []postgresflex.ListUsersResponseItem{{
 			Id:       new(string),
 			Username: new(string),
 		}}}, false},
@@ -185,7 +186,7 @@ func Test_outputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.users); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.instanceLabel, tt.args.users); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

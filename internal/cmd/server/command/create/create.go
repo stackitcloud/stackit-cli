@@ -9,7 +9,7 @@ import (
 	iaasClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaas/client"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/runcommand"
+	runcommand "github.com/stackitcloud/stackit-sdk-go/services/runcommand/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -135,9 +135,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *runcommand.APIClient) (runcommand.ApiCreateCommandRequest, error) {
-	req := apiClient.CreateCommand(ctx, model.ProjectId, model.ServerId, model.Region)
+	req := apiClient.DefaultAPI.CreateCommand(ctx, model.ProjectId, model.ServerId, model.Region)
 	req = req.CreateCommandPayload(runcommand.CreateCommandPayload{
-		CommandTemplateName: &model.CommandTemplateName,
+		CommandTemplateName: model.CommandTemplateName,
 		Parameters:          model.Params,
 	})
 	return req, nil

@@ -6,12 +6,13 @@ import (
 	"time"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -20,7 +21,7 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &postgresflex.APIClient{}
+var testClient = &postgresflex.APIClient{DefaultAPI: &postgresflex.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
 var testRegion = "eu01"
@@ -55,7 +56,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *postgresflex.ApiListBackupsRequest)) postgresflex.ApiListBackupsRequest {
-	request := testClient.ListBackups(testCtx, testProjectId, testRegion, testInstanceId)
+	request := testClient.DefaultAPI.ListBackups(testCtx, testProjectId, testRegion, testInstanceId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -165,7 +166,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, postgresflex.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -176,8 +177,9 @@ func TestBuildRequest(t *testing.T) {
 
 func Test_outputResult(t *testing.T) {
 	type args struct {
-		outputFormat string
-		backups      []postgresflex.Backup
+		outputFormat  string
+		instanceLabel string
+		backups       []postgresflex.Backup
 	}
 	tests := []struct {
 		name    string
@@ -185,12 +187,12 @@ func Test_outputResult(t *testing.T) {
 		wantErr bool
 	}{
 		{"empty", args{}, false},
-		{"standard", args{outputFormat: "", backups: []postgresflex.Backup{}}, false},
-		{"complete", args{outputFormat: "", backups: []postgresflex.Backup{
+		{"standard", args{outputFormat: "", instanceLabel: "label", backups: []postgresflex.Backup{}}, false},
+		{"complete", args{outputFormat: "", instanceLabel: "label", backups: []postgresflex.Backup{
 			{
 				EndTime:   utils.Ptr(time.Now().Format(time.RFC3339)),
 				Id:        utils.Ptr("id"),
-				Labels:    &[]string{"foo", "bar", "baz"},
+				Labels:    []string{"foo", "bar", "baz"},
 				Name:      utils.Ptr("name"),
 				Options:   &map[string]string{"test1": "test1", "test2": "test2"},
 				Size:      utils.Ptr(int64(42)),
@@ -199,7 +201,7 @@ func Test_outputResult(t *testing.T) {
 			{
 				EndTime:   utils.Ptr(time.Now().Format(time.RFC3339)),
 				Id:        utils.Ptr("id"),
-				Labels:    &[]string{"foo", "bar", "baz"},
+				Labels:    []string{"foo", "bar", "baz"},
 				Name:      utils.Ptr("name"),
 				Options:   &map[string]string{"test1": "test1", "test2": "test2"},
 				Size:      utils.Ptr(int64(42)),
@@ -211,7 +213,7 @@ func Test_outputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.backups); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.instanceLabel, tt.args.backups); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

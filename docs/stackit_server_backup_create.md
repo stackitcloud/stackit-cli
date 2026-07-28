@@ -23,11 +23,11 @@ stackit server backup create [flags]
 ### Options
 
 ```
-  -h, --help                   Help for "stackit server backup create"
-  -b, --name string            Backup name
-  -d, --retention-period int   Backup retention period (in days) (default 14)
-  -s, --server-id string       Server ID
-  -i, --volume-ids strings     Backup volume IDs, as comma separated UUID values. (default [])
+  -h, --help                     Help for "stackit server backup create"
+  -b, --name string              Backup name
+  -d, --retention-period int32   Backup retention period (in days) (default 14)
+  -s, --server-id string         Server ID
+  -i, --volume-ids strings       Backup volume IDs, as comma separated UUID values. (default [])
 ```
 
 ### Options inherited from parent commands

@@ -16,7 +16,7 @@ import (
 	postgresflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
 )
 
 const (
@@ -60,13 +60,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId)
+			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
 			}
 
-			userLabel, err := postgresflexUtils.GetUserName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceId, model.UserId)
+			userLabel, err := postgresflexUtils.GetUserName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId, model.UserId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get user name: %v", err)
 				userLabel = model.UserId
@@ -119,6 +119,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiDeleteUserRequest {
-	req := apiClient.DeleteUser(ctx, model.ProjectId, model.Region, model.InstanceId, model.UserId)
+	req := apiClient.DefaultAPI.DeleteUser(ctx, model.ProjectId, model.Region, model.InstanceId, model.UserId)
 	return req
 }

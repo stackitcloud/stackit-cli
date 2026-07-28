@@ -6,6 +6,9 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
+	"github.com/spf13/cobra"
+	serverbackup "github.com/stackitcloud/stackit-sdk-go/services/serverbackup/v2api"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -13,10 +16,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/serverbackup/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverbackup"
 )
 
 const (
@@ -44,7 +43,7 @@ type inputModel struct {
 	Enabled               *bool
 	Rrule                 *string
 	BackupName            *string
-	BackupRetentionPeriod *int64
+	BackupRetentionPeriod *int32
 	BackupVolumeIds       []string
 }
 
@@ -76,7 +75,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			currentBackupSchedule, err := apiClient.GetBackupScheduleExecute(ctx, model.ProjectId, model.ServerId, model.Region, model.BackupScheduleId)
+			currentBackupSchedule, err := apiClient.DefaultAPI.GetBackupSchedule(ctx, model.ProjectId, model.ServerId, model.Region, model.BackupScheduleId).Execute()
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get current server backup schedule: %v", err)
 				return err
@@ -110,7 +109,7 @@ func configureFlags(cmd *cobra.Command) {
 
 	cmd.Flags().StringP(backupScheduleNameFlag, "n", "", "Backup schedule name")
 	cmd.Flags().StringP(backupNameFlag, "b", "", "Backup name")
-	cmd.Flags().Int64P(backupRetentionPeriodFlag, "d", defaultRetentionPeriod, "Backup retention period (in days)")
+	cmd.Flags().Int32P(backupRetentionPeriodFlag, "d", defaultRetentionPeriod, "Backup retention period (in days)")
 	cmd.Flags().BoolP(enabledFlag, "e", defaultEnabled, "Is the server backup schedule enabled")
 	cmd.Flags().StringP(rruleFlag, "r", defaultRrule, "Backup RRULE (recurrence rule)")
 	cmd.Flags().VarP(flags.UUIDSliceFlag(), backupVolumeIdsFlag, "i", "Backup volume IDs, as comma separated UUID values.")
@@ -131,7 +130,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		GlobalFlagModel:       globalFlags,
 		BackupScheduleId:      scheduleId,
 		ServerId:              flags.FlagToStringValue(p, cmd, serverIdFlag),
-		BackupRetentionPeriod: flags.FlagToInt64Pointer(p, cmd, backupRetentionPeriodFlag),
+		BackupRetentionPeriod: flags.FlagToInt32Pointer(p, cmd, backupRetentionPeriodFlag),
 		BackupScheduleName:    flags.FlagToStringPointer(p, cmd, backupScheduleNameFlag),
 		BackupName:            flags.FlagToStringPointer(p, cmd, backupNameFlag),
 		Rrule:                 flags.FlagToStringPointer(p, cmd, rruleFlag),
@@ -144,25 +143,25 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient, old serverbackup.BackupSchedule) (serverbackup.ApiUpdateBackupScheduleRequest, error) {
-	req := apiClient.UpdateBackupSchedule(ctx, model.ProjectId, model.ServerId, model.Region, model.BackupScheduleId)
+	req := apiClient.DefaultAPI.UpdateBackupSchedule(ctx, model.ProjectId, model.ServerId, model.Region, model.BackupScheduleId)
 
 	if model.BackupName != nil {
-		old.BackupProperties.Name = model.BackupName
+		old.BackupProperties.Name = *model.BackupName
 	}
 	if model.BackupRetentionPeriod != nil {
-		old.BackupProperties.RetentionPeriod = model.BackupRetentionPeriod
+		old.BackupProperties.RetentionPeriod = *model.BackupRetentionPeriod
 	}
 	if model.BackupVolumeIds != nil {
-		old.BackupProperties.VolumeIds = &model.BackupVolumeIds
+		old.BackupProperties.VolumeIds = model.BackupVolumeIds
 	}
 	if model.Enabled != nil {
-		old.Enabled = model.Enabled
+		old.Enabled = *model.Enabled
 	}
 	if model.BackupScheduleName != nil {
-		old.Name = model.BackupScheduleName
+		old.Name = *model.BackupScheduleName
 	}
 	if model.Rrule != nil {
-		old.Rrule = model.Rrule
+		old.Rrule = *model.Rrule
 	}
 
 	req = req.UpdateBackupSchedulePayload(serverbackup.UpdateBackupSchedulePayload{
@@ -176,7 +175,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbacku
 
 func outputResult(p *print.Printer, outputFormat string, resp serverbackup.BackupSchedule) error {
 	return p.OutputResult(outputFormat, resp, func() error {
-		p.Info("Updated server backup schedule %s\n", utils.PtrString(resp.Id))
+		p.Outputf("Updated server backup schedule %d\n", resp.Id)
 		return nil
 	})
 }
