@@ -122,6 +122,7 @@ var ConfigKeys = []string{
 	ServiceEnablementCustomEndpointKey,
 	SfsCustomEndpointKey,
 	TokenCustomEndpointKey,
+	VPNCustomEndpointKey,
 }
 
 var defaultConfigFolderPath string
@@ -213,6 +214,7 @@ func setConfigDefaults() {
 	viper.SetDefault(AlbCustomEndpoint, "")
 	viper.SetDefault(LogsCustomEndpointKey, "")
 	viper.SetDefault(CDNCustomEndpointKey, "")
+	viper.SetDefault(VPNCustomEndpointKey, "")
 }
 
 func getConfigFilePath(configFolder string) string {

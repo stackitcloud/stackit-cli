@@ -66,7 +66,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("list SFS resource pools: %w", err)
 			}
 
-			resourcePools := utils.GetSliceFromPointer(&resp.ResourcePools)
+			resourcePools := resp.ResourcePools
 
 			// Truncate output
 			if model.Limit != nil && len(resourcePools) > int(*model.Limit) {
