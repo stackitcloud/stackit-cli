@@ -194,8 +194,10 @@ func TestOutputResult(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "empty",
-			args:    args{},
+			name: "empty",
+			args: args{
+				model: fixtureInputModel(),
+			},
 			wantErr: true,
 		},
 		{
