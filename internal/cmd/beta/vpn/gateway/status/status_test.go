@@ -2,7 +2,6 @@ package status
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -10,10 +9,10 @@ import (
 	"github.com/google/uuid"
 	vpn "github.com/stackitcloud/stackit-sdk-go/services/vpn/v1api"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 )
 
@@ -302,15 +301,11 @@ func TestOutputResult(t *testing.T) {
 			},
 		},
 	}
-	printer := print.NewPrinter(
-		os.Stdin,
-		os.Stdout,
-		os.Stderr,
-	)
+	params := testparams.NewTestParams()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(printer, tt.args.outputFormat, tt.args.projectLabel, tt.args.gatewayId, tt.args.gateway); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.projectLabel, tt.args.gatewayId, tt.args.gateway); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
