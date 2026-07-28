@@ -3,10 +3,10 @@ package list
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/spf13/cobra"
-	sfs "github.com/stackitcloud/stackit-sdk-go/services/sfs/v1api"
+
+	vpn "github.com/stackitcloud/stackit-sdk-go/services/vpn/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -15,7 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sfs/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/vpn/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -33,17 +33,17 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Lists all export policies of a project",
-		Long:  "Lists all export policies of a project.",
+		Short: "Lists all vpn gateways",
+		Long:  "Lists all vpn gateways.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all export policies`,
-				"$ stackit beta sfs export-policy list",
+				`List all vpn gateways`,
+				"$ stackit beta vpn gateway list",
 			),
 			examples.NewExample(
-				`List up to 10 export policies`,
-				"$ stackit beta sfs export-policy list --limit 10",
+				`List up to 4 vpn gateways`,
+				"$ stackit beta vpn gateway list --limit 4",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -63,25 +63,20 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("list export policies: %w", err)
-			}
-
-			// Get projectLabel
-			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-			if err != nil {
-				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-				projectLabel = model.ProjectId
-			} else if projectLabel == "" {
-				projectLabel = model.ProjectId
+				return fmt.Errorf("list vpn gateways: %w", err)
 			}
 
 			// Truncate output
-			items := resp.ShareExportPolicies
-			if model.Limit != nil && len(items) > int(*model.Limit) {
-				items = items[:*model.Limit]
+			if model.Limit != nil && len(resp.Gateways) > int(*model.Limit) {
+				resp.Gateways = resp.Gateways[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, projectLabel, items)
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil || projectLabel == "" {
+				projectLabel = model.ProjectId
+			}
+
+			return outputResult(params.Printer, model.OutputFormat, resp.Gateways, projectLabel)
 		},
 	}
 	configureFlags(cmd)
@@ -115,31 +110,27 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiListShareExportPoliciesRequest {
-	return apiClient.DefaultAPI.ListShareExportPolicies(ctx, model.ProjectId, model.Region)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *vpn.APIClient) vpn.ApiListGatewaysRequest {
+	return apiClient.DefaultAPI.ListGateways(ctx, model.ProjectId, model.Region)
 }
 
-func outputResult(p *print.Printer, outputFormat, projectLabel string, exportPolicies []sfs.ShareExportPolicy) error {
-	return p.OutputResult(outputFormat, exportPolicies, func() error {
-		if len(exportPolicies) == 0 {
-			p.Outputf("No export policies found for project %q\n", projectLabel)
+func outputResult(p *print.Printer, outputFormat string, gateways []vpn.GatewayResponse, projectLabel string) error {
+	return p.OutputResult(outputFormat, gateways, func() error {
+		if len(gateways) == 0 {
+			p.Info("No gateways found for %q\n", projectLabel)
 			return nil
 		}
 
 		table := tables.NewTable()
-		table.SetHeader("ID", "NAME", "AMOUNT RULES", "SHARES USING THIS EXPORT POLICY", "CREATED AT")
+		table.SetHeader("ID", "NAME", "PLAN ID", "ROUTING TYPE", "STATE")
 
-		for _, exportPolicy := range exportPolicies {
-			amountRules := "-"
-			if exportPolicy.Rules != nil {
-				amountRules = strconv.Itoa(len(exportPolicy.Rules))
-			}
+		for _, gateway := range gateways {
 			table.AddRow(
-				utils.PtrString(exportPolicy.Id),
-				utils.PtrString(exportPolicy.Name),
-				amountRules,
-				utils.PtrString(exportPolicy.SharesUsingExportPolicy),
-				utils.ConvertTimePToDateTimeString(exportPolicy.CreatedAt),
+				utils.PtrString(gateway.Id),
+				gateway.DisplayName,
+				gateway.PlanId,
+				gateway.RoutingType,
+				utils.PtrString(gateway.State),
 			)
 		}
 		p.Outputln(table.Render())
