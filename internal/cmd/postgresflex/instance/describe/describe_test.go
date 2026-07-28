@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -175,43 +175,47 @@ func TestBuildRequest(t *testing.T) {
 func Test_outputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
-		instance     *postgresflex.Instance
+		instance     *postgresflex.GetInstanceResponse
 	}
 	tests := []struct {
 		name    string
 		args    args
 		wantErr bool
 	}{
-		{"empty", args{}, true},
-		{"standard", args{
-			outputFormat: "",
-			instance:     &postgresflex.Instance{},
-		}, false},
-		{"complete", args{
-			outputFormat: "",
-			instance: &postgresflex.Instance{
-				Acl: &postgresflex.ACL{
-					Items: []string{},
-				},
-				BackupSchedule: new(string),
-				Flavor: &postgresflex.Flavor{
-					Cpu:         new(int64),
-					Description: new(string),
-					Id:          new(string),
-					Memory:      new(int64),
-				},
-				Id:       new(string),
-				Name:     new(string),
-				Options:  &map[string]string{},
-				Replicas: new(int32),
-				Status:   new(string),
-				Storage: &postgresflex.Storage{
-					Class: new(string),
-					Size:  new(int64),
-				},
-				Version: new(string),
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: true,
+		},
+		{
+			name: "standard",
+			args: args{
+				outputFormat: "",
+				instance:     &postgresflex.GetInstanceResponse{},
 			},
-		}, false},
+			wantErr: false,
+		},
+		{
+			name: "complete",
+			args: args{
+				outputFormat: "",
+				instance: &postgresflex.GetInstanceResponse{
+					BackupSchedule: "* * * 1 0",
+					FlavorId:       "PostgreSQL-Flex-16.64-Single-EU01",
+					Id:             uuid.NewString(),
+					Name:           "example-instance-01",
+					Network: postgresflex.InstanceNetwork{
+						Acl: []string{},
+					},
+					State: postgresflex.STATE_READY,
+					Storage: postgresflex.Storage{
+						Class: new(string),
+						Size:  new(int64),
+					},
+					Version: "9",
+				},
+			}, wantErr: false,
+		},
 	}
 	params := testparams.NewTestParams()
 	for _, tt := range tests {

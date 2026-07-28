@@ -3,11 +3,12 @@ package resetpassword
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -17,7 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	postgresflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -30,7 +30,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 
 	InstanceId string
-	UserId     string
+	UserId     int64
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -69,7 +69,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			userLabel, err := postgresflexUtils.GetUserName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId, model.UserId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get user name: %v", err)
-				userLabel = model.UserId
+				userLabel = strconv.FormatInt(model.UserId, 10)
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to reset the password of user %q of instance %q? (This cannot be undone)", userLabel, instanceLabel)
@@ -101,11 +101,16 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	userId := inputArgs[0]
+	userIdStr := inputArgs[0]
 
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
+	}
+
+	userId, err := strconv.ParseInt(userIdStr, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id format, must be an integer: %w", err)
 	}
 
 	model := inputModel{
@@ -118,22 +123,20 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiResetUserRequest {
-	req := apiClient.DefaultAPI.ResetUser(ctx, model.ProjectId, model.Region, model.InstanceId, model.UserId)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiResetUserPasswordRequest {
+	req := apiClient.DefaultAPI.ResetUserPassword(ctx, model.ProjectId, model.Region, model.InstanceId, model.UserId)
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat, userLabel, instanceLabel string, user *postgresflex.ResetUserResponse) error {
+func outputResult(p *print.Printer, outputFormat, userLabel, instanceLabel string, user *postgresflex.ResetUserPasswordResponse) error {
 	return p.OutputResult(outputFormat, user, func() error {
 		if user == nil {
 			return fmt.Errorf("no response passed")
 		}
+
 		p.Outputf("Reset password for user %q of instance %q\n\n", userLabel, instanceLabel)
-		if item := user.Item; item != nil {
-			p.Outputf("Username: %s\n", utils.PtrString(item.Username))
-			p.Outputf("New password: %s\n", utils.PtrString(item.Password))
-			p.Outputf("New URI: %s\n", utils.PtrString(item.Uri))
-		}
+		p.Outputf("Username: %s\n", user.Name)
+		p.Outputf("New password: %s\n", user.Password)
 		return nil
 	})
 }

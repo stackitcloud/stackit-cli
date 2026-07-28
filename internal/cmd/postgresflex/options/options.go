@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -17,16 +17,20 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
-	flavorsFlag  = "flavors"
+	// Deprecated: Will be removed after 2027-01-31.
+	flavorsFlag = "flavors"
+	// Deprecated: Will be removed after 2027-01-31.
 	versionsFlag = "versions"
+	// Deprecated: Will be removed after 2027-01-31.
 	storagesFlag = "storages"
+	// Deprecated: Will be removed after 2027-01-31.
 	flavorIdFlag = "flavor-id"
 )
 
+// Deprecated: Will be removed after 2027-01-31.
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 
@@ -36,17 +40,20 @@ type inputModel struct {
 	FlavorId *string
 }
 
+// Deprecated: Will be removed after 2027-01-31.
 type options struct {
-	Flavors  []postgresflex.Flavor `json:"flavors,omitempty"`
-	Versions []string              `json:"versions,omitempty"`
-	Storages *flavorStorages       `json:"flavorStorages,omitempty"`
+	Flavors  []postgresflex.ListFlavors `json:"flavors,omitempty"`
+	Versions []postgresflex.Version     `json:"versions,omitempty"`
+	Storages *flavorStorages            `json:"flavorStorages,omitempty"`
 }
 
+// Deprecated: Will be removed after 2027-01-31.
 type flavorStorages struct {
-	FlavorId string                             `json:"flavorId"`
-	Storages *postgresflex.ListStoragesResponse `json:"storages"`
+	FlavorId string                                          `json:"flavorId"`
+	Storages []postgresflex.FlavorStorageClassesStorageClass `json:"storages"`
 }
 
+// Deprecated: Will be removed after 2027-01-31.
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "options",
@@ -64,6 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				`List PostgreSQL Flex storage options for a given flavor. The flavor ID can be retrieved by running "$ stackit postgresflex options --flavors"`,
 				"$ stackit postgresflex options --storages --flavor-id <FLAVOR_ID>"),
 		),
+		Deprecated: `Command "stackit postgresflex options" is deprecated and will be removed after 2027-01-31. Please use "stackit postgresflex version list", "stackit postgresflex flavors list" and "stackit postgresflex flavor describe" instead.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 			model, err := parseInput(params.Printer, cmd, args)
@@ -78,25 +86,27 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			err = buildAndExecuteRequest(ctx, params.Printer, model, apiClient.DefaultAPI)
+			options, err := buildAndExecuteRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				return fmt.Errorf("get PostgreSQL Flex options: %w", err)
 			}
 
-			return nil
+			return outputResult(params.Printer, model, options)
 		},
 	}
 	configureFlags(cmd)
 	return cmd
 }
 
+// Deprecated: Will be removed after 2027-01-31.
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(flavorsFlag, false, "Lists supported flavors")
 	cmd.Flags().Bool(versionsFlag, false, "Lists supported versions")
 	cmd.Flags().Bool(storagesFlag, false, "Lists supported storages for a given flavor")
-	cmd.Flags().String(flavorIdFlag, "", `The flavor ID to show storages for. Only relevant when "--storages" is passed`)
+	cmd.Flags().String(flavorIdFlag, "", fmt.Sprintf("The flavor ID to show storages for. Only relevant when \"--%s\" is passed", storagesFlag))
 }
 
+// Deprecated: Will be removed after 2027-01-31.
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
@@ -132,53 +142,59 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputModel, apiClient postgresflex.DefaultAPI) error {
-	var flavors *postgresflex.ListFlavorsResponse
-	var versions *postgresflex.ListVersionsResponse
-	var storages *postgresflex.ListStoragesResponse
-	var err error
+// Deprecated: Will be removed after 2027-01-31.
+func buildAndExecuteRequest(ctx context.Context, model *inputModel, apiClient postgresflex.DefaultAPI) (*options, error) {
+	options := options{}
 
-	if model.Flavors {
-		flavors, err = apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Execute()
+	if model.Flavors || model.Storages {
+		flavors, err := apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Execute()
 		if err != nil {
-			return fmt.Errorf("get PostgreSQL Flex flavors: %w", err)
+			return nil, fmt.Errorf("get PostgreSQL Flex flavors: %w", err)
+		}
+
+		if model.Flavors {
+			options.Flavors = flavors.Flavors
+		}
+
+		if model.Storages && model.FlavorId != nil {
+			for _, f := range flavors.Flavors {
+				if f.Id == *model.FlavorId {
+					options.Storages = &flavorStorages{
+						FlavorId: f.Id,
+						Storages: f.StorageClasses,
+					}
+				}
+			}
+
+			if options.Storages == nil {
+				return nil, fmt.Errorf("couldn't find flavor with id \"%s\"", *model.FlavorId)
+			}
 		}
 	}
+
 	if model.Versions {
-		versions, err = apiClient.ListVersions(ctx, model.ProjectId, model.Region).Execute()
+		versions, err := apiClient.ListVersions(ctx, model.ProjectId, model.Region).Execute()
 		if err != nil {
-			return fmt.Errorf("get PostgreSQL Flex versions: %w", err)
+			return nil, fmt.Errorf("get PostgreSQL Flex versions: %w", err)
 		}
-	}
-	if model.Storages {
-		storages, err = apiClient.ListStorages(ctx, model.ProjectId, model.Region, *model.FlavorId).Execute()
-		if err != nil {
-			return fmt.Errorf("get PostgreSQL Flex storages: %w", err)
-		}
-	}
 
-	return outputResult(p, *model, flavors, versions, storages)
-}
-
-func outputResult(p *print.Printer, model inputModel, flavors *postgresflex.ListFlavorsResponse, versions *postgresflex.ListVersionsResponse, storages *postgresflex.ListStoragesResponse) error {
-	options := &options{}
-	if flavors != nil {
-		options.Flavors = flavors.Flavors
-	}
-	if model.GlobalFlagModel == nil {
-		return fmt.Errorf("no global model defined")
-	}
-	if versions != nil {
 		options.Versions = versions.Versions
 	}
-	if storages != nil && model.FlavorId != nil {
-		options.Storages = &flavorStorages{
-			FlavorId: utils.PtrString(model.FlavorId),
-			Storages: storages,
-		}
+
+	return &options, nil
+}
+
+// Deprecated: Will be removed after 2027-01-31.
+func outputResult(p *print.Printer, model *inputModel, options *options) error {
+	if model == nil || model.GlobalFlagModel == nil {
+		return fmt.Errorf("model is nil")
 	}
 
 	return p.OutputResult(model.OutputFormat, options, func() error {
+		if options == nil {
+			return fmt.Errorf("options is nil")
+		}
+
 		content := []tables.Table{}
 		if model.Flavors && len(options.Flavors) != 0 {
 			content = append(content, buildFlavorsTable(options.Flavors))
@@ -186,8 +202,8 @@ func outputResult(p *print.Printer, model inputModel, flavors *postgresflex.List
 		if model.Versions && len(options.Versions) != 0 {
 			content = append(content, buildVersionsTable(options.Versions))
 		}
-		if model.Storages && options.Storages.Storages != nil && len(options.Storages.Storages.StorageClasses) > 0 {
-			content = append(content, buildStoragesTable(*options.Storages.Storages))
+		if model.Storages && options.Storages != nil && len(options.Storages.Storages) > 0 {
+			content = append(content, buildStoragesTable(options.Storages.Storages))
 		}
 
 		err := tables.DisplayTables(p, content)
@@ -199,44 +215,45 @@ func outputResult(p *print.Printer, model inputModel, flavors *postgresflex.List
 	})
 }
 
-func buildFlavorsTable(flavors []postgresflex.Flavor) tables.Table {
+// Deprecated: Will be removed after 2027-01-31.
+func buildFlavorsTable(flavors []postgresflex.ListFlavors) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Flavors")
 	table.SetHeader("ID", "CPU", "MEMORY", "DESCRIPTION")
-	for i := range flavors {
-		f := flavors[i]
+	for _, f := range flavors {
 		table.AddRow(
-			utils.PtrString(f.Id),
-			utils.PtrString(f.Cpu),
-			utils.PtrString(f.Memory),
-			utils.PtrString(f.Description),
+			f.Id,
+			f.Cpu,
+			f.Memory,
+			f.Description,
 		)
+		table.AddSeparator()
 	}
 	return table
 }
 
-func buildVersionsTable(versions []string) tables.Table {
+// Deprecated: Will be removed after 2027-01-31.
+func buildVersionsTable(versions []postgresflex.Version) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Versions")
-	table.SetHeader("VERSION")
-	for i := range versions {
-		v := versions[i]
-		table.AddRow(v)
+	table.SetHeader("VERSION", "RECOMMEND", "BETA", "DEPRECATED")
+
+	for _, v := range versions {
+		table.AddRow(v.Version, v.Recommend, v.Beta, v.Deprecated)
+		table.AddSeparator()
 	}
 	return table
 }
 
-func buildStoragesTable(storagesResp postgresflex.ListStoragesResponse) tables.Table {
+// Deprecated: Will be removed after 2027-01-31.
+func buildStoragesTable(storageClasses []postgresflex.FlavorStorageClassesStorageClass) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Storages")
-	table.SetHeader("MINIMUM", "MAXIMUM", "STORAGE CLASS")
-	for _, sc := range storagesResp.StorageClasses {
-		table.AddRow(
-			utils.PtrString(storagesResp.StorageRange.Min),
-			utils.PtrString(storagesResp.StorageRange.Max),
-			sc,
-		)
+	table.SetHeader("STORAGE CLASS", "MAX IO PER SEC", "MAX THROUGH (MB)")
+
+	for _, sc := range storageClasses {
+		table.AddRow(sc.Class, sc.MaxIoPerSec, sc.MaxThroughInMb)
+		table.AddSeparator()
 	}
-	table.EnableAutoMergeOnColumns(1, 2, 3)
 	return table
 }

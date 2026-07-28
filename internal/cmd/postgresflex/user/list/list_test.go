@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -169,19 +169,47 @@ func Test_outputResult(t *testing.T) {
 	type args struct {
 		outputFormat  string
 		instanceLabel string
-		users         []postgresflex.ListUsersResponseItem
+		users         []postgresflex.ListUser
 	}
 	tests := []struct {
 		name    string
 		args    args
 		wantErr bool
 	}{
-		{"empty", args{}, false},
-		{"standard", args{users: []postgresflex.ListUsersResponseItem{{}}}, false},
-		{"complete", args{instanceLabel: "label", users: []postgresflex.ListUsersResponseItem{{
-			Id:       new(string),
-			Username: new(string),
-		}}}, false},
+		{
+			name: "users is nil",
+			args: args{
+				users: nil,
+			},
+			wantErr: false,
+		},
+		{
+			name: "users is empty",
+			args: args{
+				users: []postgresflex.ListUser{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty user in users slice",
+			args: args{
+				users: []postgresflex.ListUser{{}},
+			},
+			wantErr: false,
+		},
+		{
+			name: "complete",
+			args: args{
+				instanceLabel: "label",
+				users: []postgresflex.ListUser{
+					{
+						Id:   int64(42),
+						Name: "username",
+					},
+				},
+			},
+			wantErr: false,
+		},
 	}
 	params := testparams.NewTestParams()
 	for _, tt := range tests {

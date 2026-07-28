@@ -4,15 +4,16 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 type testCtxKey struct{}
@@ -20,13 +21,15 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &postgresflex.APIClient{DefaultAPI: &postgresflex.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
-var testRegion = "eu01"
+
+const (
+	testRegion = "eu01"
+)
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
 		globalflags.RegionFlag:    testRegion,
-		limitFlag:                 "10",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -41,7 +44,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		Limit: utils.Ptr(int64(10)),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -49,8 +51,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *postgresflex.ApiListInstancesRequest)) postgresflex.ApiListInstancesRequest {
-	request := testClient.DefaultAPI.ListInstances(testCtx, testProjectId, testRegion)
+func fixtureRequest(mods ...func(request *postgresflex.ApiListFlavorsRequest)) postgresflex.ApiListFlavorsRequest {
+	request := testClient.DefaultAPI.ListFlavors(testCtx, testProjectId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -72,7 +74,7 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModel(),
 		},
 		{
-			description: "no values",
+			description: "no flag values",
 			flagValues:  map[string]string{},
 			isValid:     false,
 		},
@@ -80,34 +82,6 @@ func TestParseInput(t *testing.T) {
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, globalflags.ProjectIdFlag)
-			}),
-			isValid: false,
-		},
-		{
-			description: "project id invalid 1",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[globalflags.ProjectIdFlag] = ""
-			}),
-			isValid: false,
-		},
-		{
-			description: "project id invalid 2",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
-			}),
-			isValid: false,
-		},
-		{
-			description: "limit invalid",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[limitFlag] = "invalid"
-			}),
-			isValid: false,
-		},
-		{
-			description: "limit invalid 2",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[limitFlag] = "0"
 			}),
 			isValid: false,
 		},
@@ -124,7 +98,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest postgresflex.ApiListInstancesRequest
+		expectedRequest postgresflex.ApiListFlavorsRequest
 	}{
 		{
 			description:     "base",
@@ -135,7 +109,7 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			request := buildRequest(testCtx, tt.model, testClient.DefaultAPI)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
@@ -151,8 +125,7 @@ func TestBuildRequest(t *testing.T) {
 func Test_outputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
-		projectLabel string
-		instances    []postgresflex.ListInstance
+		flavors      []postgresflex.ListFlavors
 	}
 	tests := []struct {
 		name    string
@@ -160,41 +133,23 @@ func Test_outputResult(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "empty",
-			args:    args{},
-			wantErr: false,
-		},
-		{
-			name: "standard",
+			name: "flavors slice is nil",
 			args: args{
-				outputFormat: "",
-				projectLabel: "label",
-				instances:    []postgresflex.ListInstance{},
+				flavors: nil,
 			},
 			wantErr: false,
 		},
 		{
-			name: "complete",
+			name: "flavors slice is empty",
 			args: args{
-				outputFormat: "",
-				projectLabel: "label",
-				instances: []postgresflex.ListInstance{
-					{
-						Id:    uuid.NewString(),
-						Name:  "instance-01",
-						State: postgresflex.STATE_READY,
-					},
-					{
-						Id:    uuid.NewString(),
-						Name:  "instance-02",
-						State: postgresflex.STATE_PROGRESSING,
-					},
-					{
-						Id:    uuid.NewString(),
-						Name:  "instance-03",
-						State: postgresflex.STATE_TERMINATING,
-					},
-				},
+				flavors: []postgresflex.ListFlavors{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty flavor in flavors slice",
+			args: args{
+				flavors: []postgresflex.ListFlavors{{}},
 			},
 			wantErr: false,
 		},
@@ -202,7 +157,7 @@ func Test_outputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.projectLabel, tt.args.instances); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.flavors); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

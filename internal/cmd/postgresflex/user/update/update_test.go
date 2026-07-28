@@ -2,6 +2,7 @@ package update
 
 import (
 	"context"
+	"strconv"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -10,7 +11,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
 )
 
 type testCtxKey struct{}
@@ -19,12 +20,15 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &postgresflex.APIClient{DefaultAPI: &postgresflex.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
-var testUserId = "12345"
-var testRegion = "eu01"
+
+const (
+	testUserId = int64(12345)
+	testRegion = "eu01"
+)
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
-		testUserId,
+		strconv.FormatInt(testUserId, 10),
 	}
 	for _, mod := range mods {
 		mod(argValues)

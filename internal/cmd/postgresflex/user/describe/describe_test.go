@@ -2,12 +2,13 @@ package describe
 
 import (
 	"context"
+	"strconv"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -20,12 +21,15 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &postgresflex.APIClient{DefaultAPI: &postgresflex.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
-var testUserId = "12345"
-var testRegion = "eu01"
+
+const (
+	testUserId = int64(12345)
+	testRegion = "eu01"
+)
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
-		testUserId,
+		strconv.FormatInt(testUserId, 10),
 	}
 	for _, mod := range mods {
 		mod(argValues)
@@ -196,22 +200,36 @@ func TestBuildRequest(t *testing.T) {
 func Test_outputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
-		user         postgresflex.UserResponse
+		user         *postgresflex.GetUserResponse
 	}
 	tests := []struct {
 		name    string
 		args    args
 		wantErr bool
 	}{
-		{"basic", args{}, false},
-		{"standard", args{user: postgresflex.UserResponse{}}, false},
-		{"complete", args{user: postgresflex.UserResponse{
-			Host:     new(string),
-			Id:       new(string),
-			Port:     new(int64),
-			Roles:    []string{},
-			Username: new(string),
-		}}, false},
+		{
+			name: "user is nil",
+			args: args{
+				user: nil,
+			},
+			wantErr: true,
+		},
+		{
+			name: "standard",
+			args: args{
+				user: &postgresflex.GetUserResponse{},
+			},
+			wantErr: false},
+		{
+			name: "complete",
+			args: args{user: &postgresflex.GetUserResponse{
+				Id:    int64(1000),
+				Name:  "username",
+				Roles: []string{},
+				State: "foo",
+			}},
+			wantErr: false,
+		},
 	}
 	params := testparams.NewTestParams()
 	for _, tt := range tests {

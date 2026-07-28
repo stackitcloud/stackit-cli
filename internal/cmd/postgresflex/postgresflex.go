@@ -2,9 +2,11 @@ package postgresflex
 
 import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/backup"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/flavor"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/instance"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/options"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/user"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/postgresflex/version"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -28,6 +30,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(instance.NewCmd(params))
 	cmd.AddCommand(user.NewCmd(params))
-	cmd.AddCommand(options.NewCmd(params))
+	cmd.AddCommand(options.NewCmd(params)) //nolint:staticcheck // Command is deprecated but must be kept for backward compatibility
 	cmd.AddCommand(backup.NewCmd(params))
+	cmd.AddCommand(version.NewCmd(params))
+	cmd.AddCommand(flavor.NewCmd(params))
 }

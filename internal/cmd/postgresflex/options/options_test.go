@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
-	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -23,45 +25,37 @@ var testProjectId = uuid.NewString()
 type mockSettings struct {
 	listFlavorsFails  bool
 	listVersionsFails bool
-	listStoragesFails bool
+
+	flavors  []postgresflex.ListFlavors
+	versions []postgresflex.Version
 
 	listFlavorsCalled  bool
 	listVersionsCalled bool
-	listStoragesCalled bool
 }
 
 func newAPIClientMock(c *mockSettings) postgresflex.DefaultAPI {
 	return postgresflex.DefaultAPIServiceMock{
 		ListFlavorsExecuteMock: utils.Ptr(func(_ postgresflex.ApiListFlavorsRequest) (*postgresflex.ListFlavorsResponse, error) {
 			c.listFlavorsCalled = true
+
 			if c.listFlavorsFails {
 				return nil, fmt.Errorf("list flavors failed")
 			}
-			return utils.Ptr(postgresflex.ListFlavorsResponse{
-				Flavors: []postgresflex.Flavor{},
-			}), nil
+
+			return &postgresflex.ListFlavorsResponse{
+				Flavors: c.flavors,
+			}, nil
 		}),
 		ListVersionsExecuteMock: utils.Ptr(func(_ postgresflex.ApiListVersionsRequest) (*postgresflex.ListVersionsResponse, error) {
 			c.listVersionsCalled = true
+
 			if c.listVersionsFails {
 				return nil, fmt.Errorf("list versions failed")
 			}
-			return utils.Ptr(postgresflex.ListVersionsResponse{
-				Versions: []string{},
-			}), nil
-		}),
-		ListStoragesExecuteMock: utils.Ptr(func(_ postgresflex.ApiListStoragesRequest) (*postgresflex.ListStoragesResponse, error) {
-			c.listStoragesCalled = true
-			if c.listStoragesFails {
-				return nil, fmt.Errorf("list storages failed")
-			}
-			return utils.Ptr(postgresflex.ListStoragesResponse{
-				StorageClasses: []string{},
-				StorageRange: &postgresflex.StorageRange{
-					Min: utils.Ptr(int64(10)),
-					Max: utils.Ptr(int64(100)),
-				},
-			}), nil
+
+			return &postgresflex.ListVersionsResponse{
+				Versions: c.versions,
+			}, nil
 		}),
 	}
 }
@@ -69,10 +63,6 @@ func newAPIClientMock(c *mockSettings) postgresflex.DefaultAPI {
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
-		flavorsFlag:               "true",
-		versionsFlag:              "true",
-		storagesFlag:              "true",
-		flavorIdFlag:              "2.4",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -80,7 +70,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	return flagValues
 }
 
-func fixtureInputModelAllFalse(mods ...func(model *inputModel)) *inputModel {
+func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
@@ -89,23 +79,6 @@ func fixtureInputModelAllFalse(mods ...func(model *inputModel)) *inputModel {
 		Flavors:  false,
 		Versions: false,
 		Storages: false,
-	}
-	for _, mod := range mods {
-		mod(model)
-	}
-	return model
-}
-
-func fixtureInputModelAllTrue(mods ...func(model *inputModel)) *inputModel {
-	model := &inputModel{
-		GlobalFlagModel: &globalflags.GlobalFlagModel{
-			ProjectId: testProjectId,
-			Verbosity: globalflags.VerbosityDefault,
-		},
-		Flavors:  true,
-		Versions: true,
-		Storages: true,
-		FlavorId: utils.Ptr("2.4"),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -122,10 +95,25 @@ func TestParseInput(t *testing.T) {
 		expectedModel *inputModel
 	}{
 		{
-			description:   "all values",
-			flagValues:    fixtureFlagValues(),
-			isValid:       true,
-			expectedModel: fixtureInputModelAllTrue(),
+			description: "default (invalid) - at least one flag must be set",
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
+		{
+			description: "all values",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[versionsFlag] = "true"
+				flagValues[storagesFlag] = "true"
+				flagValues[flavorsFlag] = "true"
+				flagValues[flavorIdFlag] = "16.64"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Storages = true
+				model.Versions = true
+				model.Flavors = true
+				model.FlavorId = utils.Ptr("16.64")
+			}),
 		},
 		{
 			description: "no values",
@@ -135,11 +123,11 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "some values 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[storagesFlag] = "false"
-				delete(flagValues, flavorIdFlag)
+				flagValues[versionsFlag] = "true"
+				flagValues[flavorsFlag] = "true"
 			}),
 			isValid: true,
-			expectedModel: fixtureInputModelAllFalse(func(model *inputModel) {
+			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.Flavors = true
 				model.Versions = true
 			}),
@@ -153,7 +141,7 @@ func TestParseInput(t *testing.T) {
 				flagValues[flavorIdFlag] = "2.4"
 			}),
 			isValid: true,
-			expectedModel: fixtureInputModelAllFalse(func(model *inputModel) {
+			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.Storages = true
 				model.FlavorId = utils.Ptr("2.4")
 			}),
@@ -161,6 +149,7 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "storages without flavor-id",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[storagesFlag] = "true"
 				delete(flagValues, flavorIdFlag)
 			}),
 			isValid: false,
@@ -168,12 +157,10 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "flavor-id without storage",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[storagesFlag] = "false"
 				delete(flagValues, storagesFlag)
 			}),
-			isValid: true,
-			expectedModel: fixtureInputModelAllTrue(func(model *inputModel) {
-				model.Storages = false
-			}),
+			isValid: false,
 		},
 	}
 
@@ -185,6 +172,58 @@ func TestParseInput(t *testing.T) {
 }
 
 func TestBuildAndExecuteRequest(t *testing.T) {
+	fixtureVersions := func() []postgresflex.Version {
+		return []postgresflex.Version{
+			{
+				Version:    "2.4",
+				Beta:       false,
+				Recommend:  true,
+				Deprecated: "",
+			},
+			{
+				Version:    "1.9",
+				Beta:       false,
+				Recommend:  false,
+				Deprecated: time.Date(2026, time.July, 27, 12, 0, 0, 0, time.UTC).String(),
+			},
+			{
+				Version:   "3.0",
+				Beta:      true,
+				Recommend: false,
+			},
+		}
+	}
+
+	fixtureFlavors := func() []postgresflex.ListFlavors {
+		return []postgresflex.ListFlavors{
+			{
+				Id:          "16.64",
+				Cpu:         16,
+				Description: "PostgreSQL-Flex-16.64-Single-EU01",
+				MaxGB:       4000,
+				MinGB:       5,
+				NodeType:    "Single",
+				StorageClasses: []postgresflex.FlavorStorageClassesStorageClass{
+					{
+						Class:          "premium-perf2-stackit",
+						MaxIoPerSec:    1000,
+						MaxThroughInMb: 100,
+					},
+					{
+						Class:          "premium-perf4-stackit",
+						MaxIoPerSec:    2000,
+						MaxThroughInMb: 150,
+					},
+					{
+						Class:          "premium-perf6-stackit",
+						MaxIoPerSec:    5000,
+						MaxThroughInMb: 200,
+					},
+				},
+			},
+		}
+	}
+
 	tests := []struct {
 		description              string
 		model                    *inputModel
@@ -192,85 +231,117 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 		mockClientSettings       mockSettings
 		expectListFlavorsCalled  bool
 		expectListVersionsCalled bool
-		expectListStoragesCalled bool
+		want                     *options
 	}{
 		{
-			description:              "all values",
-			model:                    fixtureInputModelAllTrue(),
+			description: "all values",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Storages = true
+				model.Versions = true
+				model.Flavors = true
+			}),
+			mockClientSettings: mockSettings{
+				flavors:  fixtureFlavors(),
+				versions: fixtureVersions(),
+			},
 			isValid:                  true,
 			expectListFlavorsCalled:  true,
 			expectListVersionsCalled: true,
-			expectListStoragesCalled: true,
+			want: &options{
+				Flavors:  fixtureFlavors(),
+				Versions: fixtureVersions(),
+			},
 		},
 		{
 			description:              "no values",
-			model:                    fixtureInputModelAllFalse(),
+			model:                    fixtureInputModel(),
 			isValid:                  true,
 			expectListFlavorsCalled:  false,
 			expectListVersionsCalled: false,
-			expectListStoragesCalled: false,
+			want:                     &options{},
 		},
 		{
 			description:             "only flavors",
-			model:                   fixtureInputModelAllFalse(func(model *inputModel) { model.Flavors = true }),
+			model:                   fixtureInputModel(func(model *inputModel) { model.Flavors = true }),
 			isValid:                 true,
 			expectListFlavorsCalled: true,
+			want:                    &options{},
 		},
 		{
-			description:              "only versions",
-			model:                    fixtureInputModelAllFalse(func(model *inputModel) { model.Versions = true }),
+			description: "only versions",
+			model:       fixtureInputModel(func(model *inputModel) { model.Versions = true }),
+			mockClientSettings: mockSettings{
+				versions: fixtureVersions(),
+			},
 			isValid:                  true,
 			expectListVersionsCalled: true,
+			want: &options{
+				Versions: fixtureVersions(),
+			},
 		},
 		{
-			description: "only storages",
-			model: fixtureInputModelAllFalse(func(model *inputModel) {
+			description: "only storages - flavor not found",
+			model: fixtureInputModel(func(model *inputModel) {
 				model.Storages = true
-				model.FlavorId = utils.Ptr("2.4")
+				model.FlavorId = utils.Ptr("2.2")
 			}),
-			isValid:                  true,
-			expectListStoragesCalled: true,
+			isValid: false,
+		},
+		{
+			description: "only storages - flavor found",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Storages = true
+				model.FlavorId = func() *string {
+					return &fixtureFlavors()[0].Id
+				}()
+			}),
+			mockClientSettings: mockSettings{
+				flavors: fixtureFlavors(),
+			},
+			expectListFlavorsCalled: true,
+			want: &options{
+				Storages: func() *flavorStorages {
+					return &flavorStorages{
+						FlavorId: fixtureFlavors()[0].Id,
+						Storages: fixtureFlavors()[0].StorageClasses,
+					}
+				}(),
+			},
+			isValid: true,
 		},
 		{
 			description: "list flavors fails",
-			model:       fixtureInputModelAllTrue(),
-			isValid:     false,
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Storages = true
+				model.Versions = true
+				model.Flavors = true
+			}),
+			isValid: false,
 			mockClientSettings: mockSettings{
 				listFlavorsFails: true,
 			},
 			expectListFlavorsCalled:  true,
 			expectListVersionsCalled: false,
-			expectListStoragesCalled: false,
 		},
 		{
 			description: "list versions fails",
-			model:       fixtureInputModelAllTrue(),
-			isValid:     false,
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Storages = true
+				model.Versions = true
+				model.Flavors = true
+			}),
+			isValid: false,
 			mockClientSettings: mockSettings{
 				listVersionsFails: true,
 			},
 			expectListFlavorsCalled:  true,
 			expectListVersionsCalled: true,
-			expectListStoragesCalled: false,
-		},
-		{
-			description: "list storages fails",
-			model:       fixtureInputModelAllTrue(),
-			isValid:     false,
-			mockClientSettings: mockSettings{
-				listStoragesFails: true,
-			},
-			expectListFlavorsCalled:  true,
-			expectListVersionsCalled: true,
-			expectListStoragesCalled: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			params := testparams.NewTestParams()
-			client := newAPIClientMock(&tt.mockClientSettings)
-			err := buildAndExecuteRequest(testCtx, params.Printer, tt.model, client)
+			actual, err := buildAndExecuteRequest(testCtx, tt.model, newAPIClientMock(&tt.mockClientSettings))
 			if err != nil && tt.isValid {
 				t.Fatalf("error building and executing request: %v", err)
 			}
@@ -287,8 +358,10 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 			if tt.expectListVersionsCalled != tt.mockClientSettings.listVersionsCalled {
 				t.Fatalf("expected listVersionsCalled to be %v, got %v", tt.expectListVersionsCalled, tt.mockClientSettings.listVersionsCalled)
 			}
-			if tt.expectListStoragesCalled != tt.mockClientSettings.listStoragesCalled {
-				t.Fatalf("expected listStoragesCalled to be %v, got %v", tt.expectListStoragesCalled, tt.mockClientSettings.listStoragesCalled)
+
+			diff := cmp.Diff(actual, tt.want)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
 			}
 		})
 	}
@@ -296,45 +369,69 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 
 func Test_outputResult(t *testing.T) {
 	type args struct {
-		model    inputModel
-		flavors  *postgresflex.ListFlavorsResponse
-		versions *postgresflex.ListVersionsResponse
-		storages *postgresflex.ListStoragesResponse
+		model   *inputModel
+		options *options
 	}
 	tests := []struct {
 		name    string
 		args    args
 		wantErr bool
 	}{
-		{"empty", args{model: inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{}}}, false},
-		{"standard", args{
-			model:    inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{}},
-			flavors:  &postgresflex.ListFlavorsResponse{},
-			versions: &postgresflex.ListVersionsResponse{},
-			storages: &postgresflex.ListStoragesResponse{},
-		}, false},
 		{
-			"complete",
-			args{
-				model: inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{}, Flavors: false, Versions: false, Storages: false, FlavorId: new(string)},
-				flavors: &postgresflex.ListFlavorsResponse{
-					Flavors: []postgresflex.Flavor{},
+			name: "options is nil",
+			args: args{
+				model: &inputModel{
+					GlobalFlagModel: &globalflags.GlobalFlagModel{},
 				},
-				versions: &postgresflex.ListVersionsResponse{
-					Versions: []string{},
+				options: nil,
+			},
+			wantErr: true,
+		},
+		{
+			name: "empty",
+			args: args{
+				model: &inputModel{
+					GlobalFlagModel: &globalflags.GlobalFlagModel{},
 				},
-				storages: &postgresflex.ListStoragesResponse{
-					StorageClasses: []string{},
-					StorageRange:   &postgresflex.StorageRange{},
+				options: &options{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty flavors and versions slice",
+			args: args{
+				model: &inputModel{
+					GlobalFlagModel: &globalflags.GlobalFlagModel{},
+				},
+				options: &options{
+					Flavors:  []postgresflex.ListFlavors{},
+					Versions: []postgresflex.Version{},
 				},
 			},
-			false,
+			wantErr: false,
+		},
+		{
+			name: "complete",
+			args: args{
+				model: &inputModel{
+					GlobalFlagModel: &globalflags.GlobalFlagModel{},
+					Flavors:         false,
+					Versions:        false,
+					Storages:        false,
+					FlavorId:        new(string),
+				},
+				options: &options{
+					Flavors:  []postgresflex.ListFlavors{},
+					Versions: []postgresflex.Version{},
+				},
+			},
+			wantErr: false,
 		},
 	}
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.model, tt.args.flavors, tt.args.versions, tt.args.storages); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.model, tt.args.options); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

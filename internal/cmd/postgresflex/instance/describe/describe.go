@@ -6,21 +6,17 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
-
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
-	postgresflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
 )
 
 const (
@@ -65,7 +61,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("read PostgreSQL Flex instance: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, resp.Item)
+			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
 	return cmd
@@ -93,54 +89,31 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresfle
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, instance *postgresflex.Instance) error {
+func outputResult(p *print.Printer, outputFormat string, instance *postgresflex.GetInstanceResponse) error {
 	return p.OutputResult(outputFormat, instance, func() error {
 		if instance == nil {
 			return fmt.Errorf("no response passed")
 		}
-		acls := ""
-		if instance.HasAcl() && instance.Acl.HasItems() {
-			acls = utils.JoinStringPtr(&instance.Acl.Items, ",")
-		}
-
-		instanceType, err := postgresflexUtils.GetInstanceType(utils.PtrValue(instance.Replicas))
-		if err != nil {
-			// Should never happen
-			instanceType = ""
-		}
 
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(instance.Id))
+		table.AddRow("ID", instance.Id)
 		table.AddSeparator()
-		table.AddRow("NAME", utils.PtrString(instance.Name))
+		table.AddRow("NAME", instance.Name)
 		table.AddSeparator()
-		table.AddRow("STATUS", cases.Title(language.English).String(utils.PtrString(instance.Status)))
+		table.AddRow("STATUS", instance.State)
 		table.AddSeparator()
-		if instance.Storage != nil {
-			table.AddRow("STORAGE SIZE (GB)", utils.PtrString(instance.Storage.Size))
-		}
+		table.AddRow("STORAGE SIZE (GB)", utils.PtrString(instance.Storage.Size))
 		table.AddSeparator()
-		table.AddRow("VERSION", utils.PtrString(instance.Version))
+		table.AddRow("VERSION", instance.Version)
 		table.AddSeparator()
-		table.AddRow("ACL", acls)
+		table.AddRow("ACL", utils.JoinStringPtr(&instance.Network.Acl, ","))
 		table.AddSeparator()
-		if instance.Flavor != nil {
-			table.AddRow("FLAVOR DESCRIPTION", utils.PtrString(instance.Flavor.Description))
-		}
+		table.AddRow("FLAVOR ID", instance.FlavorId)
 		table.AddSeparator()
-		table.AddRow("TYPE", instanceType)
 		table.AddSeparator()
-		table.AddRow("REPLICAS", utils.PtrString(instance.Replicas))
+		table.AddRow("BACKUP SCHEDULE (UTC)", instance.BackupSchedule)
 		table.AddSeparator()
-		if instance.Flavor != nil {
-			table.AddRow("CPU", utils.PtrString(instance.Flavor.Cpu))
-			table.AddSeparator()
-			table.AddRow("RAM (GB)", utils.PtrString(instance.Flavor.Memory))
-		}
-		table.AddSeparator()
-		table.AddRow("BACKUP SCHEDULE (UTC)", utils.PtrString(instance.BackupSchedule))
-		table.AddSeparator()
-		err = table.Display(p)
+		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}

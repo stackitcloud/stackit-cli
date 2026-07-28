@@ -12,7 +12,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -179,36 +179,53 @@ func Test_outputResult(t *testing.T) {
 	type args struct {
 		outputFormat  string
 		instanceLabel string
-		backups       []postgresflex.Backup
+		backups       []postgresflex.BackupData
 	}
 	tests := []struct {
 		name    string
 		args    args
 		wantErr bool
 	}{
-		{"empty", args{}, false},
-		{"standard", args{outputFormat: "", instanceLabel: "label", backups: []postgresflex.Backup{}}, false},
-		{"complete", args{outputFormat: "", instanceLabel: "label", backups: []postgresflex.Backup{
-			{
-				EndTime:   utils.Ptr(time.Now().Format(time.RFC3339)),
-				Id:        utils.Ptr("id"),
-				Labels:    []string{"foo", "bar", "baz"},
-				Name:      utils.Ptr("name"),
-				Options:   &map[string]string{"test1": "test1", "test2": "test2"},
-				Size:      utils.Ptr(int64(42)),
-				StartTime: utils.Ptr(time.Now().Format(time.RFC3339)),
-			},
-			{
-				EndTime:   utils.Ptr(time.Now().Format(time.RFC3339)),
-				Id:        utils.Ptr("id"),
-				Labels:    []string{"foo", "bar", "baz"},
-				Name:      utils.Ptr("name"),
-				Options:   &map[string]string{"test1": "test1", "test2": "test2"},
-				Size:      utils.Ptr(int64(42)),
-				StartTime: utils.Ptr(time.Now().Format(time.RFC3339)),
-			},
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: false,
 		},
-		}, false},
+		{
+			name: "standard",
+			args: args{
+				outputFormat:  "",
+				instanceLabel: "label",
+				backups:       []postgresflex.BackupData{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "complete",
+			args: args{
+				outputFormat:  "",
+				instanceLabel: "label",
+				backups: []postgresflex.BackupData{
+					{
+						CompletionTime: time.Now().Format(time.RFC3339),
+						Id:             int64(1),
+						Name:           "name",
+						RetainedUntil:  time.Now().Format(time.RFC3339),
+						Size:           int64(42),
+						Type:           "type",
+					},
+					{
+						CompletionTime: time.Now().Format(time.RFC3339),
+						Id:             int64(2),
+						Name:           "name",
+						RetainedUntil:  time.Now().Format(time.RFC3339),
+						Size:           int64(42),
+						Type:           "type",
+					},
+				},
+			},
+			wantErr: false,
+		},
 	}
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
