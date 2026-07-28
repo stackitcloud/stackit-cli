@@ -3,6 +3,7 @@ package delete
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
@@ -16,7 +17,7 @@ import (
 	sqlserverflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/utils"
 
 	"github.com/spf13/cobra"
-	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
 )
 
 const (
@@ -29,7 +30,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 
 	InstanceId string
-	UserId     string
+	UserId     int64
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -68,7 +69,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			userLabel, err := sqlserverflexUtils.GetUserName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.UserId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get user name: %v", err)
-				userLabel = model.UserId
+				userLabel = fmt.Sprintf("%d", model.UserId)
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete user %q of instance %q? (This cannot be undone)", userLabel, instanceLabel)
@@ -100,7 +101,11 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	userId := inputArgs[0]
+	userIdStr := inputArgs[0]
+	userId, err := strconv.ParseInt(userIdStr, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id %q: %w", userIdStr, err)
+	}
 
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
@@ -118,6 +123,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiDeleteUserRequest {
-	req := apiClient.DefaultAPI.DeleteUser(ctx, model.ProjectId, model.InstanceId, model.UserId, model.Region)
+	req := apiClient.DefaultAPI.DeleteUser(ctx, model.ProjectId, model.Region, model.InstanceId, model.UserId)
 	return req
 }

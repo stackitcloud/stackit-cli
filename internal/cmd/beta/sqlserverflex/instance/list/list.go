@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -18,7 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -66,7 +65,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get SQLServer Flex instances: %w", err)
 			}
-			instances := resp.GetItems()
+			instances := resp.Instances
 
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
@@ -119,7 +118,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverfl
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat, projectLabel string, instances []sqlserverflex.InstanceListInstance) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, instances []sqlserverflex.ListInstance) error {
 	return p.OutputResult(outputFormat, instances, func() error {
 		if len(instances) == 0 {
 			p.Outputf("No instances found for project %q\n", projectLabel)
@@ -131,9 +130,9 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, instances
 		for i := range instances {
 			instance := instances[i]
 			table.AddRow(
-				utils.PtrString(instance.Id),
-				utils.PtrString(instance.Name),
-				utils.PtrString(instance.Status),
+				instance.Id,
+				instance.Name,
+				instance.State,
 			)
 		}
 		err := table.Display(p)

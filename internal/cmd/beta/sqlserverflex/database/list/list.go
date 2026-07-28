@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -18,7 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -122,11 +121,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiListDatabasesRequest {
-	req := apiClient.DefaultAPI.ListDatabases(ctx, model.ProjectId, model.InstanceId, model.Region)
+	req := apiClient.DefaultAPI.ListDatabases(ctx, model.ProjectId, model.Region, model.InstanceId)
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat, instanceId, projectLabel string, databases []sqlserverflex.Database) error {
+func outputResult(p *print.Printer, outputFormat, instanceId, projectLabel string, databases []sqlserverflex.ListDatabase) error {
 	return p.OutputResult(outputFormat, databases, func() error {
 		if len(databases) == 0 {
 			p.Outputf("No databases found for instance %s on project %s\n", instanceId, projectLabel)
@@ -137,7 +136,7 @@ func outputResult(p *print.Printer, outputFormat, instanceId, projectLabel strin
 		table.SetHeader("ID", "NAME")
 		for i := range databases {
 			database := databases[i]
-			table.AddRow(utils.PtrString(database.Id), utils.PtrString(database.Name))
+			table.AddRow(database.Id, database.Name)
 		}
 		err := table.Display(p)
 		if err != nil {
