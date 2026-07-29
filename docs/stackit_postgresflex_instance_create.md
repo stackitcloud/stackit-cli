@@ -13,30 +13,29 @@ stackit postgresflex instance create [flags]
 ### Examples
 
 ```
-  Create a PostgreSQL Flex instance with name "my-instance", ACL 0.0.0.0/0 (open access) and specify flavor by CPU and RAM. Other parameters are set to default values
-  $ stackit postgresflex instance create --name my-instance --cpu 2 --ram 4 --acl 0.0.0.0/0
+  Create a PostgreSQL Flex instance with name "my-instance", ACL 0.0.0.0/0 (open access).
+  $ stackit postgresflex instance create --name my-instance --flavor-id xxx --acl 0.0.0.0/0 --storage-size 20 --retention-days 32 --version 17 --backup-schedule "6 6 * * *" --storage-size 10 --storage-class premium-perf2-stackit
 
-  Create a PostgreSQL Flex instance with name "my-instance", ACL 0.0.0.0/0 (open access) and specify flavor by ID. Other parameters are set to default values
-  $ stackit postgresflex instance create --name my-instance --flavor-id xxx --acl 0.0.0.0/0
-
-  Create a PostgreSQL Flex instance with name "my-instance", allow access to a specific range of IP addresses, specify flavor by CPU and RAM and set storage size to 20 GB. Other parameters are set to default values
-  $ stackit postgresflex instance create --name my-instance --cpu 2 --ram 4 --acl 1.2.3.0/24 --storage-size 20
+  Create a PostgreSQL Flex instance with name "my-instance", allow access to a specific range of IP addresses.
+  $ stackit postgresflex instance create --name my-instance --flavor-id xxx --acl 1.2.3.0/24 --storage-size 20 --retention-days 32 --version 17 --backup-schedule "6 6 * * *" --storage-size 10 --storage-class premium-perf2-stackit
 ```
 
 ### Options
 
 ```
-      --acl strings              The access control list (ACL). Must contain at least one valid subnet, for instance '0.0.0.0/0' for open access (discouraged), '1.2.3.0/24 for a public IP range of an organization, '1.2.3.4/32' for a single IP range, etc. (default [])
-      --backup-schedule string   Backup schedule (default "0 0 * * *")
-      --cpu int                  Number of CPUs
-      --flavor-id string         ID of the flavor
-  -h, --help                     Help for "stackit postgresflex instance create"
-  -n, --name string              Instance name
-      --ram int                  Amount of RAM (in GB)
-      --storage-class string     Storage class (default "premium-perf2-stackit")
-      --storage-size int         Storage size (in GB) (default 10)
-      --type string              Instance type, (one of: [Replica, Single]) (default "Replica")
-      --version string           PostgreSQL version. Defaults to the latest version available
+      --acl strings                         The access control list (ACL). Must contain at least one valid subnet, for instance '0.0.0.0/0' for open access (discouraged), '1.2.3.0/24 for a public IP range of an organization, '1.2.3.4/32' for a single IP range, etc. (default [])
+      --backup-schedule string              Backup schedule. This flag will be required after 2027-01-31.
+      --encryption-kek-key-id string        The key identifier
+      --encryption-kek-key-version string   The key version
+      --encryption-kek-keyring-id string    The keyring identifier
+      --encryption-service-account string   The service account
+      --flavor-id string                    ID of the flavor. This flag will be required after 2027-01-31.
+  -h, --help                                Help for "stackit postgresflex instance create"
+  -n, --name string                         Instance name
+      --retention-days int32                The days for how long the backup files should be stored before cleaned up (32 to 90). This flag will be required after 2027-01-31.
+      --storage-class string                Storage class. This flag will be required after 2027-01-31.
+      --storage-size int                    Storage size (in GB). This flag will be required after 2027-01-31.
+      --version string                      PostgreSQL version. Defaults to the latest version available. This flag will be required after 2027-01-31.
 ```
 
 ### Options inherited from parent commands

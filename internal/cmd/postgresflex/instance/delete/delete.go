@@ -111,7 +111,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolP(forceDeleteFlag, "f", false, "Force deletion of a delayed deleted instance")
 
-	_ = cmd.Flags().MarkDeprecated(forceDeleteFlag, "Force delete is the default option by now. This flag will be removed after 2027-01-31.")
+	err := cmd.Flags().MarkDeprecated(forceDeleteFlag, "Force delete is the default option by now. This flag will be removed after 2027-01-31.")
+	cobra.CheckErr(err)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
