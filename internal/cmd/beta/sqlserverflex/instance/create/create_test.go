@@ -52,17 +52,21 @@ var testFlavorId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		globalflags.ProjectIdFlag: testProjectId,
-		globalflags.RegionFlag:    testRegion,
-		instanceNameFlag:          "example-name",
-		aclFlag:                   "0.0.0.0/0",
-		backupScheduleFlag:        "0 0/6 * * *",
-		flavorIdFlag:              testFlavorId,
-		storageClassFlag:          "storage-class", // Non-default
-		storageSizeFlag:           "10",
-		versionFlag:               "6.0",
-		editionFlag:               "developer",
-		retentionDaysFlag:         "32",
+		globalflags.ProjectIdFlag:    testProjectId,
+		globalflags.RegionFlag:       testRegion,
+		instanceNameFlag:             "example-name",
+		aclFlag:                      "0.0.0.0/0",
+		backupScheduleFlag:           "0 0/6 * * *",
+		flavorIdFlag:                 testFlavorId,
+		storageClassFlag:             "storage-class", // Non-default
+		storageSizeFlag:              "10",
+		versionFlag:                  "6.0",
+		editionFlag:                  "developer",
+		retentionDaysFlag:            "32",
+		encryptionKekKeyIdFlag:       "key-id",
+		encryptionKekKeyringIdFlag:   "keyring-id",
+		encryptionKekKeyVersionFlag:  "key-version",
+		encryptionServiceAccountFlag: "service-account",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -85,6 +89,11 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		StorageSize:    utils.Ptr(int64(10)),
 		Version:        "6.0",
 		RetentionDays:  32,
+
+		EncryptionKekKeyId:       utils.Ptr("key-id"),
+		EncryptionKekKeyringId:   utils.Ptr("keyring-id"),
+		EncryptionKekKeyVersion:  utils.Ptr("key-version"),
+		EncryptionServiceAccount: utils.Ptr("service-account"),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -108,7 +117,13 @@ func fixturePayload(mods ...func(payload *sqlserverflex.CreateInstancePayload)) 
 			Acl: []string{"0.0.0.0/0"},
 		},
 		BackupSchedule: "0 0/6 * * *",
-		FlavorId:       testFlavorId,
+		Encryption: &sqlserverflex.InstanceEncryption{
+			KekKeyId:       "key-id",
+			KekKeyRingId:   "keyring-id",
+			KekKeyVersion:  "key-version",
+			ServiceAccount: "service-account",
+		},
+		FlavorId: testFlavorId,
 		Storage: sqlserverflex.StorageCreate{
 			Class: "storage-class",
 			Size:  int64(10),
@@ -136,6 +151,29 @@ func TestParseInput(t *testing.T) {
 			flagValues:    fixtureFlagValues(),
 			isValid:       true,
 			expectedModel: fixtureInputModel(),
+		},
+		{
+			description: "without encryption",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, encryptionKekKeyIdFlag)
+				delete(flagValues, encryptionKekKeyringIdFlag)
+				delete(flagValues, encryptionKekKeyVersionFlag)
+				delete(flagValues, encryptionServiceAccountFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.EncryptionKekKeyId = nil
+				model.EncryptionKekKeyringId = nil
+				model.EncryptionKekKeyVersion = nil
+				model.EncryptionServiceAccount = nil
+			}),
+		},
+		{
+			description: "incomplete encryption configuration",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, encryptionServiceAccountFlag)
+			}),
+			isValid: false,
 		},
 		{
 			description: "use CPU and RAM",
