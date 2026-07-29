@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -75,6 +76,23 @@ func LoadFlavorId(cpu, ram int64, flavors []sqlserverflex.ListFlavors) (string, 
 	}
 }
 
+func ListAllFlavors(ctx context.Context, api sqlserverflex.DefaultAPI, projectId, region string) ([]sqlserverflex.ListFlavors, error) {
+	const pageSize = 100
+	const sort = sqlserverflex.FLAVORSORT_ID_ASC
+	totalRows := int64(math.MaxInt64)
+	var page int64 = 1
+	var result []sqlserverflex.ListFlavors
+	for ; int64(len(result)) < totalRows; page++ {
+		flavors, err := api.ListFlavors(ctx, projectId, region).Page(page).Sort(sort).Size(pageSize).Execute()
+		if err != nil {
+			return result, fmt.Errorf("listing flavors: %w", err)
+		}
+		result = append(result, flavors.Flavors...)
+		totalRows = flavors.Pagination.TotalRows
+	}
+	return result, nil
+}
+
 func GetInstanceName(ctx context.Context, apiClient sqlserverflex.DefaultAPI, projectId, instanceId, region string) (string, error) {
 	resp, err := apiClient.GetInstance(ctx, projectId, region, instanceId).Execute()
 	if err != nil {
@@ -92,12 +110,11 @@ func GetUserName(ctx context.Context, apiClient sqlserverflex.DefaultAPI, projec
 }
 
 func GetFlavor(ctx context.Context, client sqlserverflex.DefaultAPI, projectId, region, flavorId string) (*sqlserverflex.ListFlavors, error) {
-	req := client.ListFlavors(ctx, projectId, region)
-	flavorsResp, err := client.ListFlavorsExecute(req)
+	flavors, err := ListAllFlavors(ctx, client, projectId, region)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list flavors: %w", err)
 	}
-	for _, flavor := range flavorsResp.Flavors {
+	for _, flavor := range flavors {
 		if flavor.Id == flavorId {
 			return &flavor, nil
 		}
