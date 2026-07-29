@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
@@ -125,7 +126,7 @@ func outputResult(p *print.Printer, outputFormat string, user *postgresflex.GetU
 		table.AddSeparator()
 		table.AddRow("USERNAME", user.Name)
 		table.AddSeparator()
-		table.AddRow("ROLES", user.Roles)
+		table.AddRow("ROLES", strings.Join(user.Roles, ", "))
 		table.AddSeparator()
 
 		err := table.Display(p)

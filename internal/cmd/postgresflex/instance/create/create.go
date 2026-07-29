@@ -33,8 +33,9 @@ const (
 	versionFlag        = "version"
 	retentionDaysFlag  = "retention-days"
 
-	defaultBackupSchedule = "0 0 * * *" // Deprecated: Will be removed after 2027-01-31.
-	defaultStorageSize    = 10          // Deprecated: Will be removed after 2027-01-31.
+	defaultBackupSchedule = "0 0 * * *"             // Deprecated: Will be removed after 2027-01-31.
+	defaultStorageSize    = 10                      // Deprecated: Will be removed after 2027-01-31.
+	defaultStorageClass   = "premium-perf2-stackit" // Deprecated: Will be removed after 2027-01-31.
 
 	encryptionKekKeyIdFlag       = "encryption-kek-key-id"
 	encryptionKekKeyringIdFlag   = "encryption-kek-keyring-id"
@@ -87,10 +88,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a PostgreSQL Flex instance with name "my-instance", ACL 0.0.0.0/0 (open access).`,
-				`$ stackit postgresflex instance create --name my-instance --flavor-id xxx --acl 0.0.0.0/0 --storage-size 20 --retention-days 32 --version 17 --backup-schedule "6 6 * * *" --storage-size 10`),
+				`$ stackit postgresflex instance create --name my-instance --flavor-id xxx --acl 0.0.0.0/0 --storage-size 20 --retention-days 32 --version 17 --backup-schedule "6 6 * * *" --storage-size 10 --storage-class premium-perf2-stackit`),
 			examples.NewExample(
 				`Create a PostgreSQL Flex instance with name "my-instance", allow access to a specific range of IP addresses.`,
-				`$ stackit postgresflex instance create --name my-instance --flavor-id xxx --acl 1.2.3.0/24 --storage-size 20 --retention-days 32 --version 17 --backup-schedule "6 6 * * *" --storage-size 10`),
+				`$ stackit postgresflex instance create --name my-instance --flavor-id xxx --acl 1.2.3.0/24 --storage-size 20 --retention-days 32 --version 17 --backup-schedule "6 6 * * *" --storage-size 10 --storage-class premium-perf2-stackit`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -150,6 +151,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				model.StorageSize = utils.Ptr(int64(defaultStorageSize))
 			}
 
+			if model.StorageClass == nil {
+				params.Printer.Warn("The --%s flag is not set. Using the default value (%s). This behavior is deprecated, the --%s flag will be required after 2027-01-31.\n", storageClassFlag, defaultStorageClass, storageClassFlag)
+				model.StorageClass = utils.Ptr(defaultStorageClass)
+			}
+
 			prompt := fmt.Sprintf("Are you sure you want to create a PostgreSQL Flex instance for project %q?", projectLabel)
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
@@ -189,10 +195,10 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.CIDRSliceFlag(), aclFlag, "The access control list (ACL). Must contain at least one valid subnet, for instance '0.0.0.0/0' for open access (discouraged), '1.2.3.0/24 for a public IP range of an organization, '1.2.3.4/32' for a single IP range, etc.")
 	cmd.Flags().String(backupScheduleFlag, "", "Backup schedule. This flag will be required after 2027-01-31.")
 	cmd.Flags().String(flavorIdFlag, "", "ID of the flavor. This flag will be required after 2027-01-31.")
-	cmd.Flags().String(storageClassFlag, "", "Storage class")
+	cmd.Flags().String(storageClassFlag, "", "Storage class. This flag will be required after 2027-01-31.")
 	cmd.Flags().Int64(storageSizeFlag, 0, "Storage size (in GB). This flag will be required after 2027-01-31.")
 	cmd.Flags().String(versionFlag, "", "PostgreSQL version. Defaults to the latest version available. This flag will be required after 2027-01-31.")
-	cmd.Flags().String(retentionDaysFlag, "", "The days for how long the backup files should be stored before cleaned up (32 to 90). This flag will be required after 2027-01-31.")
+	cmd.Flags().Int32(retentionDaysFlag, 0, "The days for how long the backup files should be stored before cleaned up (32 to 90). This flag will be required after 2027-01-31.")
 	cmd.Flags().String(encryptionKekKeyIdFlag, "", "The key identifier")
 	cmd.Flags().String(encryptionKekKeyringIdFlag, "", "The keyring identifier")
 	cmd.Flags().String(encryptionKekKeyVersionFlag, "", "The key version")
@@ -250,27 +256,22 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		storageSize = flags.FlagToInt64Pointer(p, cmd, storageSizeFlag)
 	}
 
-	// remove after 2027-01-31: backup schedule flag will be required then (no pointer anymore)
-	var backupSchedule *string
-	if cmd.Flags().Changed(backupScheduleFlag) {
-		backupSchedule = flags.FlagToStringPointer(p, cmd, backupScheduleFlag)
-	}
-
-	// remove after 2027-01-31: version flag will be required then (no pointer anymore)
-	var version *string
-	if cmd.Flags().Changed(versionFlag) {
-		version = flags.FlagToStringPointer(p, cmd, versionFlag)
+	// remove after 2027-01-31: retention days flag will be required then (no pointer anymore)
+	var retentionDays *int32
+	if cmd.Flags().Changed(retentionDaysFlag) {
+		retentionDays = flags.FlagToInt32Pointer(p, cmd, retentionDaysFlag)
 	}
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceName:    flags.FlagToStringValue(p, cmd, instanceNameFlag),
 		ACL:             flags.FlagToStringSliceValue(p, cmd, aclFlag),
-		BackupSchedule:  backupSchedule,
+		BackupSchedule:  flags.FlagToStringPointer(p, cmd, backupScheduleFlag),
 		FlavorId:        flavorId,
 		StorageClass:    flags.FlagToStringPointer(p, cmd, storageClassFlag),
 		StorageSize:     storageSize,
-		Version:         version,
+		Version:         flags.FlagToStringPointer(p, cmd, versionFlag),
+		RetentionDays:   retentionDays,
 
 		EncryptionKekKeyId:       flags.FlagToStringPointer(p, cmd, encryptionKekKeyIdFlag),
 		EncryptionKekKeyringId:   flags.FlagToStringPointer(p, cmd, encryptionKekKeyringIdFlag),

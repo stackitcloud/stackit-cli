@@ -73,7 +73,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex.DefaultAPI) postgresflex.ApiListFlavorsRequest {
-	return apiClient.ListFlavors(ctx, model.ProjectId, model.Region)
+	return apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Size(100)
 }
 
 func outputResult(p *print.Printer, outputFormat string, flavors []postgresflex.ListFlavors) error {

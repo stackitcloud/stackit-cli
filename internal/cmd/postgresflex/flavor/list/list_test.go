@@ -52,7 +52,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *postgresflex.ApiListFlavorsRequest)) postgresflex.ApiListFlavorsRequest {
-	request := testClient.DefaultAPI.ListFlavors(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.ListFlavors(testCtx, testProjectId, testRegion).Size(100)
 	for _, mod := range mods {
 		mod(&request)
 	}

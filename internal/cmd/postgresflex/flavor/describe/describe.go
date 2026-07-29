@@ -87,7 +87,7 @@ func buildAndExecuteRequest(ctx context.Context, model *inputModel, apiClient po
 
 	// TODO: Use GET endpoint instead of list endpoint after https://support.stackit.cloud/servicedesk/customer/portal/3/SSD-23311 is done
 
-	flavors, err := apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Execute()
+	flavors, err := apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Size(100).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("listing flavors: %w", err)
 	}

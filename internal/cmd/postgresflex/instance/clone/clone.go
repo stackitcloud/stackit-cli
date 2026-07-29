@@ -49,10 +49,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			"The new cloned instance will be an independent instance with the same settings as the original instance unless the flags are specified.",
 		Example: examples.Build(
 			examples.NewExample(
-				`Clone a PostgreSQL Flex instance with ID "xxx" from a selected recovery timestamp and 10 GB of storage size.`,
-				`$ stackit postgresflex instance clone xxx --recovery-timestamp 2023-04-17T09:28:00+00:00 --storage-size 10`),
-			examples.NewExample(
-				`Clone a PostgreSQL Flex instance with ID "xxx" from a selected recovery timestamp and specify storage class.`,
+				`Clone a PostgreSQL Flex instance with ID "xxx" from a selected recovery timestamp.`,
 				`$ stackit postgresflex instance clone xxx --recovery-timestamp 2023-04-17T09:28:00+00:00 --storage-size 10 --storage-class premium-perf6-stackit`),
 		),
 		Args: args.SingleArg(instanceIdArg, utils.ValidateUUID),
@@ -85,6 +82,16 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				}
 
 				model.StorageSize = instance.Storage.Size
+			}
+
+			if model.StorageClass == nil {
+				params.Printer.Warn("The --%s flag is not set. Using the storage class from the instance you're cloning. This behavior is deprecated, the --%s flag will be required after 2027-01-31.\n", storageClassFlag, storageClassFlag)
+
+				if instance.Storage.Class == nil {
+					return fmt.Errorf("could not read storage class for instance %s", model.InstanceId)
+				}
+
+				model.StorageClass = instance.Storage.Class
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to clone instance %q?", instanceLabel)
@@ -123,7 +130,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(recoveryTimestampFlag, "", "Recovery timestamp for the instance, in a date-time with the layout format YYYY-MM-DDTHH:mm:ss±HH:mm, e.g. 2006-01-02T15:04:05-07:00")
-	cmd.Flags().String(storageClassFlag, "", "Storage class. If not specified, storage class from the existing instance will be used.")
+	cmd.Flags().String(storageClassFlag, "", "Storage class. If not specified, storage class from the existing instance will be used. This flag will be required after 2027-01-31.")
 	cmd.Flags().Int64(storageSizeFlag, 0, "Storage size (in GB). If not specified, storage size from the existing instance will be used. This flag will be required after 2027-01-31.")
 
 	// mark storage-size flag required here after 2027-01-31
