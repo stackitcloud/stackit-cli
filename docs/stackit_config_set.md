@@ -63,6 +63,7 @@ stackit config set [flags]
       --ske-custom-endpoint string                                 SKE API base URL, used in calls to this API
       --sqlserverflex-custom-endpoint string                       SQLServer Flex API base URL, used in calls to this API
       --token-custom-endpoint string                               Custom token endpoint of the Service Account API, which is used to request access tokens when the service account authentication is activated. Not relevant for user authentication.
+      --vpn-custom-endpoint string                                 VPN API base URL, used in calls to this API
 ```
 
 ### Options inherited from parent commands

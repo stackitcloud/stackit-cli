@@ -8,108 +8,119 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverbackup"
+	serverbackup "github.com/stackitcloud/stackit-sdk-go/services/serverbackup/v2api"
 )
+
+const testRegion = "eu01"
 
 var (
 	testProjectId = uuid.NewString()
 	testServerId  = uuid.NewString()
-	testRegion    = "eu01"
 )
 
-type serverbackupClientMocked struct {
+type mockSettings struct {
 	listBackupSchedulesFails bool
 	listBackupSchedulesResp  *serverbackup.GetBackupSchedulesResponse
 	listBackupsFails         bool
 	listBackupsResp          *serverbackup.GetBackupsListResponse
 }
 
-func (m *serverbackupClientMocked) ListBackupSchedulesExecute(_ context.Context, _, _, _ string) (*serverbackup.GetBackupSchedulesResponse, error) {
-	if m.listBackupSchedulesFails {
-		return nil, fmt.Errorf("could not list backup schedules")
+func newServerbackupClientMock(s mockSettings) serverbackup.DefaultAPI {
+	return &serverbackup.DefaultAPIServiceMock{
+		ListBackupSchedulesExecuteMock: utils.Ptr(func(_ serverbackup.ApiListBackupSchedulesRequest) (*serverbackup.GetBackupSchedulesResponse, error) {
+			if s.listBackupSchedulesFails {
+				return nil, fmt.Errorf("could not list backup schedules")
+			}
+			return s.listBackupSchedulesResp, nil
+		}),
+		ListBackupsExecuteMock: utils.Ptr(func(_ serverbackup.ApiListBackupsRequest) (*serverbackup.GetBackupsListResponse, error) {
+			if s.listBackupsFails {
+				return nil, fmt.Errorf("could not list backups")
+			}
+			return s.listBackupsResp, nil
+		}),
 	}
-	return m.listBackupSchedulesResp, nil
-}
-
-func (m *serverbackupClientMocked) ListBackupsExecute(_ context.Context, _, _, _ string) (*serverbackup.GetBackupsListResponse, error) {
-	if m.listBackupsFails {
-		return nil, fmt.Errorf("could not list backups")
-	}
-	return m.listBackupsResp, nil
 }
 
 func TestCanDisableBackupService(t *testing.T) {
 	tests := []struct {
-		description              string
-		listBackupsFails         bool
-		listBackupSchedulesFails bool
-		listBackups              *serverbackup.GetBackupsListResponse
-		listBackupSchedules      *serverbackup.GetBackupSchedulesResponse
-		isValid                  bool // isValid ==> err == nil
-		expectedOutput           bool // expectedCanDisable
+		description    string
+		mockSettings   mockSettings
+		isValid        bool // isValid ==> err == nil
+		expectedOutput bool // expectedCanDisable
 	}{
 		{
-			description:              "base-ok-can-disable-backups-service-no-backups-no-backup-schedules",
-			listBackupsFails:         false,
-			listBackupSchedulesFails: false,
-			listBackups:              &serverbackup.GetBackupsListResponse{Items: &[]serverbackup.Backup{}},
-			listBackupSchedules:      &serverbackup.GetBackupSchedulesResponse{Items: &[]serverbackup.BackupSchedule{}},
-			isValid:                  true,
-			expectedOutput:           true,
+			description: "base-ok-can-disable-backups-service-no-backups-no-backup-schedules",
+			mockSettings: mockSettings{
+				listBackupsFails:         false,
+				listBackupSchedulesFails: false,
+				listBackupsResp:          &serverbackup.GetBackupsListResponse{Items: []serverbackup.Backup{}},
+				listBackupSchedulesResp:  &serverbackup.GetBackupSchedulesResponse{Items: []serverbackup.BackupSchedule{}},
+			},
+			isValid:        true,
+			expectedOutput: true,
 		},
 		{
-			description:              "not-ok-api-error-list-backups",
-			listBackupsFails:         true,
-			listBackupSchedulesFails: false,
-			listBackups:              &serverbackup.GetBackupsListResponse{Items: &[]serverbackup.Backup{}},
-			listBackupSchedules:      &serverbackup.GetBackupSchedulesResponse{Items: &[]serverbackup.BackupSchedule{}},
-			isValid:                  false,
-			expectedOutput:           false,
+			description: "not-ok-api-error-list-backups",
+			mockSettings: mockSettings{
+				listBackupsFails:         true,
+				listBackupSchedulesFails: false,
+				listBackupsResp:          &serverbackup.GetBackupsListResponse{Items: []serverbackup.Backup{}},
+				listBackupSchedulesResp:  &serverbackup.GetBackupSchedulesResponse{Items: []serverbackup.BackupSchedule{}},
+			},
+			isValid:        false,
+			expectedOutput: false,
 		},
 		{
-			description:              "not-ok-api-error-list-backup-schedules",
-			listBackupsFails:         true,
-			listBackupSchedulesFails: false,
-			listBackups:              &serverbackup.GetBackupsListResponse{Items: &[]serverbackup.Backup{}},
-			listBackupSchedules:      &serverbackup.GetBackupSchedulesResponse{Items: &[]serverbackup.BackupSchedule{}},
-			isValid:                  false,
-			expectedOutput:           false,
+			description: "not-ok-api-error-list-backup-schedules",
+			mockSettings: mockSettings{
+				listBackupsFails:         true,
+				listBackupSchedulesFails: false,
+				listBackupsResp:          &serverbackup.GetBackupsListResponse{Items: []serverbackup.Backup{}},
+				listBackupSchedulesResp:  &serverbackup.GetBackupSchedulesResponse{Items: []serverbackup.BackupSchedule{}},
+			},
+			isValid:        false,
+			expectedOutput: false,
 		},
 		{
-			description:              "not-ok-has-backups-cannot-disable",
-			listBackupsFails:         false,
-			listBackupSchedulesFails: false,
-			listBackups: &serverbackup.GetBackupsListResponse{
-				Items: &[]serverbackup.Backup{
-					{
-						CreatedAt:      utils.Ptr("test timestamp"),
-						ExpireAt:       utils.Ptr("test timestamp"),
-						Id:             utils.Ptr("5"),
-						LastRestoredAt: utils.Ptr("test timestamp"),
-						Name:           utils.Ptr("test name"),
-						Size:           utils.Ptr(int64(5)),
-						Status:         serverbackup.BACKUPSTATUS_IN_PROGRESS.Ptr(),
-						VolumeBackups:  nil,
+			description: "not-ok-has-backups-cannot-disable",
+			mockSettings: mockSettings{
+				listBackupsFails:         false,
+				listBackupSchedulesFails: false,
+				listBackupsResp: &serverbackup.GetBackupsListResponse{
+					Items: []serverbackup.Backup{
+						{
+							CreatedAt:      "test timestamp",
+							ExpireAt:       "test timestamp",
+							Id:             "5",
+							LastRestoredAt: utils.Ptr("test timestamp"),
+							Name:           "test name",
+							Size:           utils.Ptr(int32(5)),
+							Status:         serverbackup.BACKUPSTATUS_IN_PROGRESS,
+							VolumeBackups:  nil,
+						},
 					},
 				},
+				listBackupSchedulesResp: &serverbackup.GetBackupSchedulesResponse{Items: []serverbackup.BackupSchedule{}},
 			},
-			listBackupSchedules: &serverbackup.GetBackupSchedulesResponse{Items: &[]serverbackup.BackupSchedule{}},
-			isValid:             true,
-			expectedOutput:      false,
+			isValid:        true,
+			expectedOutput: false,
 		},
 		{
-			description:              "not-ok-has-backups-schedules-cannot-disable",
-			listBackupsFails:         false,
-			listBackupSchedulesFails: false,
-			listBackups:              &serverbackup.GetBackupsListResponse{Items: &[]serverbackup.Backup{}},
-			listBackupSchedules: &serverbackup.GetBackupSchedulesResponse{
-				Items: &[]serverbackup.BackupSchedule{
-					{
-						BackupProperties: nil,
-						Enabled:          utils.Ptr(false),
-						Id:               utils.Ptr(int64(5)),
-						Name:             utils.Ptr("some name"),
-						Rrule:            utils.Ptr("some rrule"),
+			description: "not-ok-has-backups-schedules-cannot-disable",
+			mockSettings: mockSettings{
+				listBackupsFails:         false,
+				listBackupSchedulesFails: false,
+				listBackupsResp:          &serverbackup.GetBackupsListResponse{Items: []serverbackup.Backup{}},
+				listBackupSchedulesResp: &serverbackup.GetBackupSchedulesResponse{
+					Items: []serverbackup.BackupSchedule{
+						{
+							BackupProperties: nil,
+							Enabled:          false,
+							Id:               int32(5),
+							Name:             "some name",
+							Rrule:            "some rrule",
+						},
 					},
 				},
 			},
@@ -120,12 +131,7 @@ func TestCanDisableBackupService(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			client := &serverbackupClientMocked{
-				listBackupsFails:         tt.listBackupsFails,
-				listBackupSchedulesFails: tt.listBackupSchedulesFails,
-				listBackupsResp:          tt.listBackups,
-				listBackupSchedulesResp:  tt.listBackupSchedules,
-			}
+			client := newServerbackupClientMock(tt.mockSettings)
 
 			output, err := CanDisableBackupService(context.Background(), client, testProjectId, testServerId, testRegion)
 

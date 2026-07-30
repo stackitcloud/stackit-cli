@@ -76,7 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Truncate output
-			items := utils.GetSliceFromPointer(&resp.ShareExportPolicies)
+			items := resp.ShareExportPolicies
 			if model.Limit != nil && len(items) > int(*model.Limit) {
 				items = items[:*model.Limit]
 			}

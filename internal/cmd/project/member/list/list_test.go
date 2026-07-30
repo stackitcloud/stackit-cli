@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
+	authorization "github.com/stackitcloud/stackit-sdk-go/services/authorization/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -20,7 +20,7 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &authorization.APIClient{}
+var testClient = &authorization.APIClient{DefaultAPI: &authorization.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -50,7 +50,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *authorization.ApiListMembersRequest)) authorization.ApiListMembersRequest {
-	request := testClient.ListMembers(testCtx, projectResourceType, testProjectId)
+	request := testClient.DefaultAPI.ListMembers(testCtx, projectResourceType, testProjectId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -161,7 +161,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, authorization.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -172,38 +172,65 @@ func TestBuildRequest(t *testing.T) {
 
 func Test_outputResult(t *testing.T) {
 	type args struct {
-		model   inputModel
-		members []authorization.Member
+		model        inputModel
+		projectLabel string
+		members      []authorization.Member
 	}
 	tests := []struct {
 		name    string
 		args    args
 		wantErr bool
 	}{
-		{"empty", args{model: inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{}}}, false},
-		{"base", args{inputModel{
-			GlobalFlagModel: &globalflags.GlobalFlagModel{},
-			Subject:         utils.Ptr("subject"),
-			Limit:           nil,
-			SortBy:          "",
-		}, nil}, false},
-		{"complete", args{inputModel{
-			GlobalFlagModel: &globalflags.GlobalFlagModel{},
-			Subject:         utils.Ptr("subject"),
-			Limit:           nil,
-			SortBy:          "",
+		{
+			name: "empty",
+			args: args{
+				model: inputModel{
+					GlobalFlagModel: &globalflags.GlobalFlagModel{}},
+			},
+			wantErr: false,
 		},
-			[]authorization.Member{
-				{Role: utils.Ptr("role1"), Subject: utils.Ptr("subject1")},
-				{Role: utils.Ptr("role2"), Subject: utils.Ptr("subject2")},
-				{Role: utils.Ptr("role3"), Subject: utils.Ptr("subject3")},
-			}},
-			false},
+		{
+			name: "base",
+			args: args{
+				model: inputModel{
+					GlobalFlagModel: &globalflags.GlobalFlagModel{},
+					Subject:         utils.Ptr("subject"),
+					Limit:           nil,
+					SortBy:          "",
+				},
+				members: nil},
+			wantErr: false,
+		},
+		{
+			name: "complete",
+			args: args{
+				model: inputModel{
+					GlobalFlagModel: &globalflags.GlobalFlagModel{},
+					Subject:         utils.Ptr("subject"),
+					Limit:           nil,
+					SortBy:          "",
+				},
+				members: []authorization.Member{
+					{
+						Role:    "role1",
+						Subject: "subject1",
+					},
+					{
+						Role:    "role2",
+						Subject: "subject2",
+					},
+					{
+						Role:    "role3",
+						Subject: "subject3",
+					},
+				}},
+			wantErr: false,
+		},
 	}
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.model, tt.args.members); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.model, tt.args.projectLabel, tt.args.members); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

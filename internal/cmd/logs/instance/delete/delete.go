@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/logs"
+	logs "github.com/stackitcloud/stackit-sdk-go/services/logs/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
@@ -19,7 +19,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
-	"github.com/stackitcloud/stackit-sdk-go/services/logs/wait"
+	"github.com/stackitcloud/stackit-sdk-go/services/logs/v1api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/logs/client"
 	logsUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/logs/utils"
@@ -66,7 +66,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			instanceLabel, err := logsUtils.GetInstanceName(ctx, apiClient, model.ProjectId, model.Region, model.InstanceID)
+			instanceLabel, err := logsUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceID)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceID
@@ -89,7 +89,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Deleting instance", func() error {
-					_, err = wait.DeleteLogsInstanceWaitHandler(ctx, apiClient, model.ProjectId, model.Region, model.InstanceID).WaitWithContext(ctx)
+					_, err = wait.DeleteLogsInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceID).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -127,6 +127,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *logs.APIClient) logs.ApiDeleteLogsInstanceRequest {
-	req := apiClient.DeleteLogsInstance(ctx, model.ProjectId, model.Region, model.InstanceID)
+	req := apiClient.DefaultAPI.DeleteLogsInstance(ctx, model.ProjectId, model.Region, model.InstanceID)
 	return req
 }

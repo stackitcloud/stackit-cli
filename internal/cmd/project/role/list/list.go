@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
+	authorization "github.com/stackitcloud/stackit-sdk-go/services/authorization/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -18,7 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/authorization/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -69,15 +68,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get project roles: %w", err)
 			}
-			roles := *resp.Roles
-			if len(roles) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-					projectLabel = model.ProjectId
-				}
-				params.Printer.Info("No roles found for project %q\n", projectLabel)
-				return nil
+			roles := resp.Roles
+
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
 
 			// Truncate output
@@ -85,7 +81,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				roles = roles[:*model.Limit]
 			}
 
-			return outputRolesResult(params.Printer, model.OutputFormat, roles)
+			return outputRolesResult(params.Printer, model.OutputFormat, projectLabel, roles)
 		},
 	}
 	configureFlags(cmd)
@@ -120,22 +116,24 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *authorization.APIClient) authorization.ApiListRolesRequest {
-	return apiClient.ListRoles(ctx, projectResourceType, model.ProjectId)
+	return apiClient.DefaultAPI.ListRoles(ctx, projectResourceType, model.ProjectId)
 }
 
-func outputRolesResult(p *print.Printer, outputFormat string, roles []authorization.Role) error {
+func outputRolesResult(p *print.Printer, outputFormat, projectLabel string, roles []authorization.Role) error {
 	return p.OutputResult(outputFormat, roles, func() error {
+		if len(roles) == 0 {
+			p.Outputf("No roles found for project %q\n", projectLabel)
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("ROLE NAME", "ROLE DESCRIPTION", "PERMISSION NAME", "PERMISSION DESCRIPTION")
-		for i := range roles {
-			r := roles[i]
-			for j := range *r.Permissions {
-				p := (*r.Permissions)[j]
+		for _, r := range roles {
+			for _, p := range r.Permissions {
 				table.AddRow(
-					utils.PtrString(r.Name),
-					utils.PtrString(r.Description),
-					utils.PtrString(p.Name),
-					utils.PtrString(p.Description),
+					r.Name,
+					r.Description,
+					p.Name,
+					p.Description,
 				)
 			}
 			table.AddSeparator()

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,22 +16,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 
 	"github.com/spf13/cobra"
-	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
 )
-
-// enforce implementation of interfaces
-var (
-	_ sqlServerFlexOptionsClient = sqlserverflex.APIClient{}.DefaultAPI
-)
-
-type sqlServerFlexOptionsClient interface {
-	ListFlavors(ctx context.Context, projectId string, region string) sqlserverflex.ApiListFlavorsRequest
-	ListVersions(ctx context.Context, projectId string, region string) sqlserverflex.ApiListVersionsRequest
-	ListStorages(ctx context.Context, projectId, flavorId string, region string) sqlserverflex.ApiListStoragesRequest
-	ListRoles(ctx context.Context, projectId string, instanceId string, region string) sqlserverflex.ApiListRolesRequest
-	ListCollations(ctx context.Context, projectId string, instanceId string, region string) sqlserverflex.ApiListCollationsRequest
-	ListCompatibility(ctx context.Context, projectId string, instanceId string, region string) sqlserverflex.ApiListCompatibilityRequest
-}
 
 const (
 	flavorsFlag           = "flavors"
@@ -59,12 +46,12 @@ type inputModel struct {
 }
 
 type options struct {
-	Flavors           []sqlserverflex.InstanceFlavorEntry `json:"flavors,omitempty"`
-	Versions          []string                            `json:"versions,omitempty"`
-	Storages          *flavorStorages                     `json:"flavorStorages,omitempty"`
-	UserRoles         *instanceUserRoles                  `json:"userRoles,omitempty"`
-	DBCollations      *instanceDBCollations               `json:"dbCollations,omitempty"`
-	DBCompatibilities *instanceDBCompatibilities          `json:"dbCompatibilities,omitempty"`
+	Flavors           []sqlserverflex.ListFlavors `json:"flavors,omitempty"`
+	Versions          []sqlserverflex.Version     `json:"versions,omitempty"`
+	Storages          *flavorStorages             `json:"flavorStorages,omitempty"`
+	UserRoles         *instanceUserRoles          `json:"userRoles,omitempty"`
+	DBCollations      *instanceDBCollations       `json:"dbCollations,omitempty"`
+	DBCompatibilities *instanceDBCompatibilities  `json:"dbCompatibilities,omitempty"`
 }
 
 type flavorStorages struct {
@@ -78,13 +65,13 @@ type instanceUserRoles struct {
 }
 
 type instanceDBCollations struct {
-	InstanceId   string                                 `json:"instanceId"`
-	DBCollations []sqlserverflex.MssqlDatabaseCollation `json:"dbCollations"`
+	InstanceId   string                               `json:"instanceId"`
+	DBCollations []sqlserverflex.DatabaseGetcollation `json:"dbCollations"`
 }
 
 type instanceDBCompatibilities struct {
-	InstanceId        string                                     `json:"instanceId"`
-	DBCompatibilities []sqlserverflex.MssqlDatabaseCompatibility `json:"dbCompatibilities"`
+	InstanceId        string                                   `json:"instanceId"`
+	DBCompatibilities []sqlserverflex.DatabaseGetcompatibility `json:"dbCompatibilities"`
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -193,7 +180,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputModel, apiClient sqlServerFlexOptionsClient) error {
+func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputModel, apiClient sqlserverflex.DefaultAPI) error {
 	var flavors *sqlserverflex.ListFlavorsResponse
 	var versions *sqlserverflex.ListVersionsResponse
 	var storages *sqlserverflex.ListStoragesResponse
@@ -215,25 +202,25 @@ func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputM
 		}
 	}
 	if model.Storages {
-		storages, err = apiClient.ListStorages(ctx, model.ProjectId, *model.FlavorId, model.Region).Execute()
+		storages, err = apiClient.ListStorages(ctx, model.ProjectId, model.Region, *model.FlavorId).Execute()
 		if err != nil {
 			return fmt.Errorf("get SQL Server Flex storages: %w", err)
 		}
 	}
 	if model.UserRoles {
-		userRoles, err = apiClient.ListRoles(ctx, model.ProjectId, *model.InstanceId, model.Region).Execute()
+		userRoles, err = apiClient.ListRoles(ctx, model.ProjectId, model.Region, *model.InstanceId).Execute()
 		if err != nil {
 			return fmt.Errorf("get SQL Server Flex user roles: %w", err)
 		}
 	}
 	if model.DBCollations {
-		dbCollations, err = apiClient.ListCollations(ctx, model.ProjectId, *model.InstanceId, model.Region).Execute()
+		dbCollations, err = apiClient.ListCollations(ctx, model.ProjectId, model.Region, *model.InstanceId).Execute()
 		if err != nil {
 			return fmt.Errorf("get SQL Server Flex DB collations: %w", err)
 		}
 	}
 	if model.DBCompatibilities {
-		dbCompatibilities, err = apiClient.ListCompatibility(ctx, model.ProjectId, *model.InstanceId, model.Region).Execute()
+		dbCompatibilities, err = apiClient.ListCompatibilities(ctx, model.ProjectId, model.Region, *model.InstanceId).Execute()
 		if err != nil {
 			return fmt.Errorf("get SQL Server Flex DB compatibilities: %w", err)
 		}
@@ -306,24 +293,24 @@ func outputResult(p *print.Printer, model *inputModel, flavors *sqlserverflex.Li
 	})
 }
 
-func buildFlavorsTable(flavors []sqlserverflex.InstanceFlavorEntry) tables.Table {
+func buildFlavorsTable(flavors []sqlserverflex.ListFlavors) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Flavors")
-	table.SetHeader("ID", "CPU", "MEMORY", "DESCRIPTION", "VALID INSTANCE TYPES")
+	table.SetHeader("ID", "CPU", "MEMORY", "DESCRIPTION")
 	for i := range flavors {
 		f := flavors[i]
-		table.AddRow(*f.Id, *f.Cpu, *f.Memory, *f.Description, *f.Categories)
+		table.AddRow(f.Id, f.Cpu, f.Memory, f.Description)
 	}
 	return table
 }
 
-func buildVersionsTable(versions []string) tables.Table {
+func buildVersionsTable(versions []sqlserverflex.Version) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Versions")
-	table.SetHeader("VERSION")
+	table.SetHeader("VERSION", "RECOMMENDED", "BETA", "DEPRECATED")
 	for i := range versions {
 		v := versions[i]
-		table.AddRow(v)
+		table.AddRow(v.Version, v.Recommend, v.Beta, v.Deprecated)
 	}
 	return table
 }
@@ -335,7 +322,7 @@ func buildStoragesTable(storagesResp sqlserverflex.ListStoragesResponse) tables.
 	table.SetHeader("MINIMUM", "MAXIMUM", "STORAGE CLASS")
 	for i := range storages {
 		sc := storages[i]
-		table.AddRow(*storagesResp.StorageRange.Min, *storagesResp.StorageRange.Max, sc)
+		table.AddRow(storagesResp.StorageRange.Min, storagesResp.StorageRange.Max, sc.Class)
 	}
 	table.EnableAutoMergeOnColumns(1, 2, 3)
 	return table
@@ -351,22 +338,28 @@ func buildUserRoles(roles *instanceUserRoles) tables.Table {
 	return table
 }
 
-func buildDBCollationsTable(dbCollations []sqlserverflex.MssqlDatabaseCollation) tables.Table {
+func buildDBCollationsTable(dbCollations []sqlserverflex.DatabaseGetcollation) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("DB Collations")
 	table.SetHeader("NAME", "DESCRIPTION")
 	for i := range dbCollations {
-		table.AddRow(dbCollations[i].CollationName, dbCollations[i].Description)
+		table.AddRow(
+			utils.PtrString(dbCollations[i].CollationName),
+			utils.PtrString(dbCollations[i].Description),
+		)
 	}
 	return table
 }
 
-func buildDBCompatibilitiesTable(dbCompatibilities []sqlserverflex.MssqlDatabaseCompatibility) tables.Table {
+func buildDBCompatibilitiesTable(dbCompatibilities []sqlserverflex.DatabaseGetcompatibility) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("DB Compatibilities")
 	table.SetHeader("COMPATIBILITY LEVEL", "DESCRIPTION")
 	for i := range dbCompatibilities {
-		table.AddRow(dbCompatibilities[i].CompatibilityLevel, dbCompatibilities[i].Description)
+		table.AddRow(
+			utils.PtrString(dbCompatibilities[i].CompatibilityLevel),
+			utils.PtrString(dbCompatibilities[i].Description),
+		)
 	}
 	return table
 }

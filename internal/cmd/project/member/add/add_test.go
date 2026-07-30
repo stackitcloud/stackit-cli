@@ -4,14 +4,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/authorization"
+	authorization "github.com/stackitcloud/stackit-sdk-go/services/authorization/v2api"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -19,7 +18,7 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &authorization.APIClient{}
+var testClient = &authorization.APIClient{DefaultAPI: &authorization.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testSubject = "someone@domain.com"
 var testRole = "reader"
@@ -52,7 +51,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		Subject: testSubject,
-		Role:    utils.Ptr(testRole),
+		Role:    testRole,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -61,15 +60,15 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *authorization.ApiAddMembersRequest)) authorization.ApiAddMembersRequest {
-	request := testClient.AddMembers(testCtx, testProjectId)
+	request := testClient.DefaultAPI.AddMembers(testCtx, testProjectId)
 	request = request.AddMembersPayload(authorization.AddMembersPayload{
-		Members: utils.Ptr([]authorization.Member{
+		Members: []authorization.Member{
 			{
-				Subject: &testSubject,
-				Role:    &testRole,
+				Subject: testSubject,
+				Role:    testRole,
 			},
-		}),
-		ResourceType: utils.Ptr(projectResourceType),
+		},
+		ResourceType: projectResourceType,
 	})
 
 	for _, mod := range mods {
@@ -147,7 +146,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, authorization.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

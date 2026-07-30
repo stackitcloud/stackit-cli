@@ -12,13 +12,13 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/serverbackup"
+	serverbackup "github.com/stackitcloud/stackit-sdk-go/services/serverbackup/v2api"
 )
 
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &serverbackup.APIClient{}
+var testClient = &serverbackup.APIClient{DefaultAPI: &serverbackup.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testServerId = uuid.NewString()
 var testBackupId = uuid.NewString()
@@ -63,7 +63,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *serverbackup.ApiGetBackupRequest)) serverbackup.ApiGetBackupRequest {
-	request := testClient.GetBackup(testCtx, testProjectId, testServerId, testRegion, testBackupId)
+	request := testClient.DefaultAPI.GetBackup(testCtx, testProjectId, testServerId, testRegion, testBackupId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -157,7 +157,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, serverbackup.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -169,7 +169,7 @@ func TestBuildRequest(t *testing.T) {
 func TestOutputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
-		backup       serverbackup.Backup
+		backup       *serverbackup.Backup
 	}
 	tests := []struct {
 		name    string
@@ -177,15 +177,26 @@ func TestOutputResult(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "empty",
-			args:    args{},
+			name: "backup is nil",
+			args: args{
+				outputFormat: print.PrettyOutputFormat,
+				backup:       nil,
+			},
+			wantErr: true,
+		},
+		{
+			name: "empty",
+			args: args{
+				outputFormat: print.PrettyOutputFormat,
+				backup:       &serverbackup.Backup{},
+			},
 			wantErr: false,
 		},
 		{
 			name: "output format json",
 			args: args{
 				outputFormat: print.JSONOutputFormat,
-				backup:       serverbackup.Backup{},
+				backup:       &serverbackup.Backup{},
 			},
 			wantErr: false,
 		},

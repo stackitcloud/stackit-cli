@@ -185,3 +185,50 @@ func TestFlagToInt32Pointer(t *testing.T) {
 		})
 	}
 }
+
+func TestFlagWithDefaultToInt32Value(t *testing.T) {
+	const flagName = "limit"
+	tests := []struct {
+		name      string
+		flagValue *string
+		want      int32
+	}{
+		{
+			name:      "flag unset default value",
+			flagValue: nil,
+			want:      0,
+		},
+		{
+			name:      "flag value",
+			flagValue: utils.Ptr("42"),
+			want:      42,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			params := testparams.NewTestParams()
+			cmd := func() *cobra.Command {
+				cmd := &cobra.Command{
+					Use:   "greet",
+					Short: "A simple greeting command",
+					Long:  "A simple greeting command",
+					Run: func(_ *cobra.Command, _ []string) {
+						fmt.Println("Hello world")
+					},
+				}
+				cmd.Flags().Int32(flagName, 0, "limit")
+				return cmd
+			}()
+			if tt.flagValue != nil {
+				err := cmd.Flags().Set(flagName, *tt.flagValue)
+				if err != nil {
+					t.Error(err)
+				}
+			}
+
+			if got := FlagWithDefaultToInt32Value(params.Printer, cmd, flagName); got != tt.want {
+				t.Errorf("FlagWithDefaultToInt32Value() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

@@ -26,11 +26,11 @@ stackit logs instance create [flags]
 ### Options
 
 ```
-      --acl strings           Access control list
-      --description string    Description
-      --display-name string   Display name
-  -h, --help                  Help for "stackit logs instance create"
-      --retention-days int    The days for how long the logs should be stored before being cleaned up
+      --acl strings            Access control list
+      --description string     Description
+      --display-name string    Display name
+  -h, --help                   Help for "stackit logs instance create"
+      --retention-days int32   The days for how long the logs should be stored before being cleaned up
 ```
 
 ### Options inherited from parent commands

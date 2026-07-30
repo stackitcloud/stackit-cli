@@ -2,12 +2,13 @@ package describe
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -21,12 +22,12 @@ var testClient = &sqlserverflex.APIClient{DefaultAPI: &sqlserverflex.DefaultAPIS
 
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
-var testUserId = "my-user-id"
+var testUserId = int64(123123)
 var testRegion = "eu01"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
-		testUserId,
+		fmt.Sprintf("%d", testUserId),
 	}
 	for _, mod := range mods {
 		mod(argValues)
@@ -63,7 +64,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *sqlserverflex.ApiGetUserRequest)) sqlserverflex.ApiGetUserRequest {
-	request := testClient.DefaultAPI.GetUser(testCtx, testProjectId, testInstanceId, testUserId, testRegion)
+	request := testClient.DefaultAPI.GetUser(testCtx, testProjectId, testRegion, testInstanceId, testUserId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -191,7 +192,7 @@ func TestBuildRequest(t *testing.T) {
 func TestOutputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
-		user         *sqlserverflex.UserResponseUser
+		user         *sqlserverflex.GetUserResponse
 	}
 	tests := []struct {
 		name    string
@@ -206,7 +207,7 @@ func TestOutputResult(t *testing.T) {
 		{
 			name: "only user as argument",
 			args: args{
-				user: &sqlserverflex.UserResponseUser{},
+				user: &sqlserverflex.GetUserResponse{},
 			},
 			wantErr: false,
 		},
