@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serviceaccount"
+	serviceaccount "github.com/stackitcloud/stackit-sdk-go/services/serviceaccount/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -17,7 +17,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -68,18 +67,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list keys metadata: %w", err)
 			}
-			keys := *resp.Items
-			if len(keys) == 0 {
-				params.Printer.Info("No keys found for service account %s\n", model.ServiceAccountEmail)
-				return nil
-			}
+			keys := resp.Items
 
 			// Truncate output
 			if model.Limit != nil && len(keys) > int(*model.Limit) {
 				keys = keys[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, keys)
+			return outputResult(params.Printer, model.OutputFormat, model.ServiceAccountEmail, keys)
 		},
 	}
 
@@ -128,12 +123,17 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceaccount.APIClient) serviceaccount.ApiListServiceAccountKeysRequest {
-	req := apiClient.ListServiceAccountKeys(ctx, model.ProjectId, model.ServiceAccountEmail)
+	req := apiClient.DefaultAPI.ListServiceAccountKeys(ctx, model.ProjectId, model.ServiceAccountEmail)
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, keys []serviceaccount.ServiceAccountKeyListResponse) error {
+func outputResult(p *print.Printer, outputFormat, serviceAccountEmail string, keys []serviceaccount.ServiceAccountKeyListResponse) error {
 	return p.OutputResult(outputFormat, keys, func() error {
+		if len(keys) == 0 {
+			p.Outputf("No keys found for service account %s\n", serviceAccountEmail)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "ACTIVE", "CREATED_AT", "VALID_UNTIL")
 		for i := range keys {
@@ -143,9 +143,9 @@ func outputResult(p *print.Printer, outputFormat string, keys []serviceaccount.S
 				validUntil = k.ValidUntil.String()
 			}
 			table.AddRow(
-				utils.PtrString(k.Id),
-				utils.PtrString(k.Active),
-				utils.PtrString(k.CreatedAt),
+				k.Id,
+				k.Active,
+				k.CreatedAt,
 				validUntil,
 			)
 		}
