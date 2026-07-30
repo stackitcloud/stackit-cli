@@ -20,8 +20,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v1api"
-	"github.com/stackitcloud/stackit-sdk-go/services/logme/v1api/wait"
+	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v2api"
+	"github.com/stackitcloud/stackit-sdk-go/services/logme/v2api/wait"
 )
 
 const (
@@ -84,7 +84,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := logmeUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId)
+			instanceLabel, err := logmeUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -114,7 +114,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Updating instance", func() error {
-					_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, instanceId).WaitWithContext(ctx)
+					_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, instanceId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -203,12 +203,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient logme.DefaultAPI) (logme.ApiPartialUpdateInstanceRequest, error) {
-	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 
 	var planId *string
 	var err error
 
-	offerings, err := apiClient.ListOfferings(ctx, model.ProjectId).Execute()
+	offerings, err := apiClient.ListOfferings(ctx, model.ProjectId, model.Region).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get LogMe offerings: %w", err)
 	}

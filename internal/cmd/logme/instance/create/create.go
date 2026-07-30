@@ -21,8 +21,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v1api"
-	"github.com/stackitcloud/stackit-sdk-go/services/logme/v1api/wait"
+	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v2api"
+	"github.com/stackitcloud/stackit-sdk-go/services/logme/v2api/wait"
 )
 
 const (
@@ -115,7 +115,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating instance", func() error {
-					_, err = wait.CreateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, instanceId).WaitWithContext(ctx)
+					_, err = wait.CreateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, instanceId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -188,12 +188,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient logme.DefaultAPI) (logme.ApiCreateInstanceRequest, error) {
-	req := apiClient.CreateInstance(ctx, model.ProjectId)
+	req := apiClient.CreateInstance(ctx, model.ProjectId, model.Region)
 
 	var planId *string
 	var err error
 
-	offerings, err := apiClient.ListOfferings(ctx, model.ProjectId).Execute()
+	offerings, err := apiClient.ListOfferings(ctx, model.ProjectId, model.Region).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get LogMe offerings: %w", err)
 	}
