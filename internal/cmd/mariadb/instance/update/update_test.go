@@ -12,15 +12,21 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	mariadb "github.com/stackitcloud/stackit-sdk-go/services/mariadb/v1api"
+	mariadb "github.com/stackitcloud/stackit-sdk-go/services/mariadb/v2api"
 )
-
-var projectIdFlag = globalflags.ProjectIdFlag
 
 type testCtxKey struct{}
 
-var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &mariadb.APIClient{DefaultAPI: &mariadb.DefaultAPIService{}}
+var (
+	testCtx                  = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient               = &mariadb.APIClient{DefaultAPI: &mariadb.DefaultAPIService{}}
+	testProjectId            = uuid.NewString()
+	testInstanceId           = uuid.NewString()
+	testPlanId               = uuid.NewString()
+	testMonitoringInstanceId = uuid.NewString()
+)
+
+const testRegion = "eu01"
 
 type mockSettings struct {
 	returnError       bool
@@ -38,13 +44,6 @@ func newAPIMock(s mockSettings) mariadb.DefaultAPI {
 	}
 }
 
-var (
-	testProjectId            = uuid.NewString()
-	testInstanceId           = uuid.NewString()
-	testPlanId               = uuid.NewString()
-	testMonitoringInstanceId = uuid.NewString()
-)
-
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
 		testInstanceId,
@@ -57,15 +56,16 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:            testProjectId,
-		enableMonitoringFlag:     "true",
-		graphiteFlag:             "example-graphite",
-		metricsFrequencyFlag:     "100",
-		metricsPrefixFlag:        "example-prefix",
-		monitoringInstanceIdFlag: testMonitoringInstanceId,
-		sgwAclFlag:               "198.51.100.14/24",
-		syslogFlag:               "example-syslog",
-		planIdFlag:               testPlanId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+		enableMonitoringFlag:      "true",
+		graphiteFlag:              "example-graphite",
+		metricsFrequencyFlag:      "100",
+		metricsPrefixFlag:         "example-prefix",
+		monitoringInstanceIdFlag:  testMonitoringInstanceId,
+		sgwAclFlag:                "198.51.100.14/24",
+		syslogFlag:                "example-syslog",
+		planIdFlag:                testPlanId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -77,6 +77,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId:           testInstanceId,
@@ -96,7 +97,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *mariadb.ApiPartialUpdateInstanceRequest)) mariadb.ApiPartialUpdateInstanceRequest {
-	request := testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testInstanceId)
+	request := testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId)
 	request = request.PartialUpdateInstancePayload(mariadb.PartialUpdateInstancePayload{
 		Parameters: &mariadb.InstanceParameters{
 			EnableMonitoring:     utils.Ptr(true),
@@ -154,7 +155,7 @@ func TestParseInput(t *testing.T) {
 			description: "required flags only (no values to update)",
 			argValues:   fixtureArgValues(),
 			flagValues: map[string]string{
-				projectIdFlag: testProjectId,
+				globalflags.ProjectIdFlag: testProjectId,
 			},
 			isValid: false,
 			expectedModel: &inputModel{
@@ -169,12 +170,12 @@ func TestParseInput(t *testing.T) {
 			description: "zero values",
 			argValues:   fixtureArgValues(),
 			flagValues: map[string]string{
-				projectIdFlag:        testProjectId,
-				planIdFlag:           testPlanId,
-				enableMonitoringFlag: "false",
-				graphiteFlag:         "",
-				metricsFrequencyFlag: "0",
-				metricsPrefixFlag:    "",
+				globalflags.ProjectIdFlag: testProjectId,
+				planIdFlag:                testPlanId,
+				enableMonitoringFlag:      "false",
+				graphiteFlag:              "",
+				metricsFrequencyFlag:      "0",
+				metricsPrefixFlag:         "",
 			},
 			isValid: true,
 			expectedModel: &inputModel{
@@ -194,7 +195,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id missing",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
@@ -202,7 +203,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 1",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
@@ -210,7 +211,7 @@ func TestParseInput(t *testing.T) {
 			description: "project id invalid 2",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
@@ -439,11 +440,12 @@ func TestBuildRequest(t *testing.T) {
 			model: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
+					Region:    testRegion,
 					Verbosity: globalflags.VerbosityDefault,
 				},
 				InstanceId: testInstanceId,
 			},
-			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testInstanceId).
+			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId).
 				PartialUpdateInstancePayload(mariadb.PartialUpdateInstancePayload{Parameters: &mariadb.InstanceParameters{}}),
 		},
 	}

@@ -7,7 +7,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 
-	mariadb "github.com/stackitcloud/stackit-sdk-go/services/mariadb/v1api"
+	mariadb "github.com/stackitcloud/stackit-sdk-go/services/mariadb/v2api"
 )
 
 const (
@@ -62,16 +62,16 @@ func LoadPlanId(planName, version string, offerings *mariadb.ListOfferingsRespon
 	}
 }
 
-func GetInstanceName(ctx context.Context, apiClient mariadb.DefaultAPI, projectId, instanceId string) (string, error) {
-	resp, err := apiClient.GetInstance(ctx, projectId, instanceId).Execute()
+func GetInstanceName(ctx context.Context, apiClient mariadb.DefaultAPI, projectId, region, instanceId string) (string, error) {
+	resp, err := apiClient.GetInstance(ctx, projectId, region, instanceId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get MariaDB instance: %w", err)
 	}
 	return resp.Name, nil
 }
 
-func GetCredentialsUsername(ctx context.Context, apiClient mariadb.DefaultAPI, projectId, instanceId, credentialsId string) (string, error) {
-	resp, err := apiClient.GetCredentials(ctx, projectId, instanceId, credentialsId).Execute()
+func GetCredentialsUsername(ctx context.Context, apiClient mariadb.DefaultAPI, projectId, region, instanceId, credentialsId string) (string, error) {
+	resp, err := apiClient.GetCredentials(ctx, projectId, region, instanceId, credentialsId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get MariaDB credentials: %w", err)
 	}

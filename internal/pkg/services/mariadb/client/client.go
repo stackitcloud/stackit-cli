@@ -6,9 +6,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/viper"
-	mariadb "github.com/stackitcloud/stackit-sdk-go/services/mariadb/v1api"
+	mariadb "github.com/stackitcloud/stackit-sdk-go/services/mariadb/v2api"
 )
 
 func ConfigureClient(p *print.Printer, cliVersion string) (*mariadb.APIClient, error) {
-	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.MariaDBCustomEndpointKey), true, mariadb.NewAPIClient)
+	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.MariaDBCustomEndpointKey), false, mariadb.NewAPIClient)
 }
