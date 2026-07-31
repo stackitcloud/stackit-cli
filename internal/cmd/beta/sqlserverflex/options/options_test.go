@@ -466,7 +466,7 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 func TestOutputResult(t *testing.T) {
 	type args struct {
 		model             *inputModel
-		flavors           *sqlserverflex.ListFlavorsResponse
+		flavors           []sqlserverflex.ListFlavors
 		versions          *sqlserverflex.ListVersionsResponse
 		storages          *sqlserverflex.ListStoragesResponse
 		userRoles         *sqlserverflex.ListRolesResponse
@@ -489,7 +489,7 @@ func TestOutputResult(t *testing.T) {
 			name: "all input set",
 			args: args{
 				model:             fixtureInputModelAllTrue(),
-				flavors:           &sqlserverflex.ListFlavorsResponse{Flavors: []sqlserverflex.ListFlavors{}},
+				flavors:           []sqlserverflex.ListFlavors{},
 				versions:          &sqlserverflex.ListVersionsResponse{Versions: []sqlserverflex.Version{}},
 				storages:          &sqlserverflex.ListStoragesResponse{StorageClasses: []sqlserverflex.FlavorStorageClassesStorageClass{}},
 				userRoles:         &sqlserverflex.ListRolesResponse{Roles: []string{}},

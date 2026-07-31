@@ -25,6 +25,10 @@ const (
 )
 
 type mockSettings struct {
+	listFlavorsFails     bool
+	listFlavorsResp      *sqlserverflex.ListFlavorsResponse
+	listFlavorsResps     []*sqlserverflex.ListFlavorsResponse
+	listFlavorsCallCount int
 	listVersionsFails    bool
 	listVersionsResp     *sqlserverflex.ListVersionsResponse
 	getInstanceFails     bool
@@ -37,6 +41,20 @@ type mockSettings struct {
 
 func newApiMock(s *mockSettings) sqlserverflex.DefaultAPI {
 	return &sqlserverflex.DefaultAPIServiceMock{
+		ListFlavorsExecuteMock: utils.Ptr(func(_ sqlserverflex.ApiListFlavorsRequest) (*sqlserverflex.ListFlavorsResponse, error) {
+			if s.listFlavorsFails {
+				return nil, fmt.Errorf("could not list flavors")
+			}
+			if len(s.listFlavorsResps) > 0 {
+				if s.listFlavorsCallCount >= len(s.listFlavorsResps) {
+					return nil, fmt.Errorf("no more mock responses")
+				}
+				resp := s.listFlavorsResps[s.listFlavorsCallCount]
+				s.listFlavorsCallCount++
+				return resp, nil
+			}
+			return s.listFlavorsResp, nil
+		}),
 		ListVersionsExecuteMock: utils.Ptr(func(_ sqlserverflex.ApiListVersionsRequest) (*sqlserverflex.ListVersionsResponse, error) {
 			if s.listVersionsFails {
 				return nil, fmt.Errorf("could not list versions")
@@ -61,6 +79,141 @@ func newApiMock(s *mockSettings) sqlserverflex.DefaultAPI {
 			}
 			return s.listRestoreJobsResp, nil
 		}),
+	}
+}
+
+func TestListAllFlavors(t *testing.T) {
+	tests := []struct {
+		description      string
+		listFlavorsFails bool
+		listFlavorsResp  *sqlserverflex.ListFlavorsResponse
+		listFlavorsResps []*sqlserverflex.ListFlavorsResponse
+		isValid          bool
+		expectedOutput   []sqlserverflex.ListFlavors
+	}{
+		{
+			description: "base",
+			listFlavorsResp: &sqlserverflex.ListFlavorsResponse{
+				Flavors: []sqlserverflex.ListFlavors{
+					{
+						Id: "flavor-1",
+					},
+					{
+						Id: "flavor-2",
+					},
+				},
+				Pagination: sqlserverflex.Pagination{
+					TotalRows: 2,
+				},
+			},
+			isValid: true,
+			expectedOutput: []sqlserverflex.ListFlavors{
+				{
+					Id: "flavor-1",
+				},
+				{
+					Id: "flavor-2",
+				},
+			},
+		},
+		{
+			description: "multiple pages",
+			listFlavorsResps: []*sqlserverflex.ListFlavorsResponse{
+				{
+					Flavors: []sqlserverflex.ListFlavors{
+						{
+							Id: "flavor-1",
+						},
+						{
+							Id: "flavor-2",
+						},
+					},
+					Pagination: sqlserverflex.Pagination{
+						TotalRows: 3,
+					},
+				},
+				{
+					Flavors: []sqlserverflex.ListFlavors{
+						{
+							Id: "flavor-3",
+						},
+					},
+					Pagination: sqlserverflex.Pagination{
+						TotalRows: 3,
+					},
+				},
+			},
+			isValid: true,
+			expectedOutput: []sqlserverflex.ListFlavors{
+				{
+					Id: "flavor-1",
+				},
+				{
+					Id: "flavor-2",
+				},
+				{
+					Id: "flavor-3",
+				},
+			},
+		},
+		{
+			description: "empty response",
+			listFlavorsResp: &sqlserverflex.ListFlavorsResponse{
+				Flavors: []sqlserverflex.ListFlavors{},
+				Pagination: sqlserverflex.Pagination{
+					TotalRows: 0,
+				},
+			},
+			isValid:        true,
+			expectedOutput: nil,
+		},
+		{
+			description:      "list flavors fails",
+			listFlavorsFails: true,
+			isValid:          false,
+		},
+		{
+			description: "page 2 fails",
+			listFlavorsResps: []*sqlserverflex.ListFlavorsResponse{
+				{
+					Flavors: []sqlserverflex.ListFlavors{
+						{
+							Id: "flavor-1",
+						},
+					},
+					Pagination: sqlserverflex.Pagination{
+						TotalRows: 2,
+					},
+				},
+			},
+			isValid: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			settings := &mockSettings{
+				listFlavorsFails: tt.listFlavorsFails,
+				listFlavorsResp:  tt.listFlavorsResp,
+				listFlavorsResps: tt.listFlavorsResps,
+			}
+
+			output, err := ListAllFlavors(context.Background(), newApiMock(settings), testProjectId, testRegion)
+
+			if tt.isValid && err != nil {
+				t.Fatalf("failed on valid input: %v", err)
+			}
+			if !tt.isValid && err == nil {
+				t.Fatalf("did not fail on invalid input")
+			}
+			if !tt.isValid {
+				return
+			}
+			diff := cmp.Diff(output, tt.expectedOutput)
+			if diff != "" {
+				t.Fatalf("outputs do not match: %s", diff)
+			}
+		})
 	}
 }
 
