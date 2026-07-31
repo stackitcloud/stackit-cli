@@ -9,7 +9,7 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/stackitcloud/stackit-cli)](https://goreportcard.com/report/github.com/stackitcloud/stackit-cli) ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/stackitcloud/stackit-cli) [![GitHub License](https://img.shields.io/github/license/stackitcloud/stackit-cli)](https://www.apache.org/licenses/LICENSE-2.0)
 
-Welcome to the STACKIT CLI, a command-line interface for [STACKIT - The sovereign cloud for Europe](https://www.stackit.de/en).
+Welcome to the STACKIT CLI, a command-line interface for [STACKIT - The sovereign cloud for Europe](https://www.stackit.com/).
 
 The STACKIT CLI allows you to manage your STACKIT services and resources as well as perform operations using the command-line or in scripts or automation, such as:
 
@@ -206,7 +206,7 @@ Apache 2.0
 
 - [STACKIT Portal](https://portal.stackit.cloud/)
 
-- [STACKIT](https://www.stackit.de/en/)
+- [STACKIT](https://www.stackit.com/)
 
 - [STACKIT Docs](https://docs.stackit.cloud/)
 

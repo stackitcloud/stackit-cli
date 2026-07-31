@@ -134,7 +134,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating cluster", func() error {
-					_, err = wait.CreateOrUpdateClusterWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, name).WaitWithContext(ctx)
+					_, err = wait.CreateClusterWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, name).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {

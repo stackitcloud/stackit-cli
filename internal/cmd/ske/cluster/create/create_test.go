@@ -55,7 +55,7 @@ var testPayload = &ske.CreateOrUpdateClusterPayload{
 			},
 			AvailabilityZones: []string{"eu01-3"},
 			Cri: &ske.CRI{
-				Name:                 utils.Ptr("containerd"),
+				Name:                 ske.NAMEOFTHECRILIBRARY_CONTAINERD.Ptr(),
 				AdditionalProperties: map[string]any{},
 			},
 			AdditionalProperties: map[string]any{},

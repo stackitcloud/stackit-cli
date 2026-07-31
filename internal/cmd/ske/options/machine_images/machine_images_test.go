@@ -186,7 +186,7 @@ func TestOutputResult(t *testing.T) {
 								{
 									Cri: []ske.CRI{
 										{
-											Name: utils.Ptr("containerd"),
+											Name: ske.NAMEOFTHECRILIBRARY_CONTAINERD.Ptr(),
 										},
 									},
 									ExpirationDate: utils.Ptr(time.Now()),

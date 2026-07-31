@@ -27,15 +27,15 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/logs v0.10.0
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.1.0
-	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.11.0
+	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.24.0
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.8.0
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.18.1
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.7.0
 	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.5.2
-	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.12.0
+	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.20.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.7.0
-	github.com/stackitcloud/stackit-sdk-go/services/ske v1.11.0
+	github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.0
 	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.16.1
 	github.com/stackitcloud/stackit-sdk-go/services/vpn v0.14.0
 	github.com/zalando/go-keyring v0.2.8
