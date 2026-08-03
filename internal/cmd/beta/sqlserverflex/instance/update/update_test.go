@@ -356,6 +356,9 @@ func TestBuildRequest(t *testing.T) {
 			model:           fixtureRequiredInputModel(),
 			isValid:         true,
 			expectedRequest: fixtureRequest(),
+			listFlavorsResp: &sqlserverflex.ListFlavorsResponse{
+				Flavors: make([]sqlserverflex.ListFlavors, 0),
+			},
 		},
 		{
 			description: "update flavor from id",
@@ -443,6 +446,9 @@ func TestBuildRequest(t *testing.T) {
 			),
 			getInstanceFails: true,
 			isValid:          false,
+			listFlavorsResp: &sqlserverflex.ListFlavorsResponse{
+				Flavors: make([]sqlserverflex.ListFlavors, 0),
+			},
 		},
 		{
 			description: "get storages fails",
