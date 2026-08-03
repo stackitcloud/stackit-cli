@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	defaultNodepoolCRI              = "containerd"
+	defaultNodepoolCRI              = ske.NAMEOFTHECRILIBRARY_CONTAINERD
 	defaultNodepoolMachineImageName = "flatcar"
 	defaultNodepoolMaxUnavailable   = 0
 	defaultNodepoolMinimum          = 1
@@ -128,7 +128,7 @@ func getDefaultPayloadNodepool(resp *ske.ProviderOptions) (*ske.Nodepool, error)
 	output := &ske.Nodepool{
 		AvailabilityZones: availabilityZones,
 		Cri: &ske.CRI{
-			Name: utils.Ptr(defaultNodepoolCRI),
+			Name: new(defaultNodepoolCRI),
 		},
 		Machine: ske.Machine{
 			Type: machineType,
@@ -137,13 +137,13 @@ func getDefaultPayloadNodepool(resp *ske.ProviderOptions) (*ske.Nodepool, error)
 			},
 		},
 		// there must be as many nodes as availability zones are given
-		MaxSurge:       utils.Ptr(int32(azLen)),
-		MaxUnavailable: utils.Ptr(int32(defaultNodepoolMaxUnavailable)),
+		MaxSurge:       new(int32(azLen)),
+		MaxUnavailable: new(int32(defaultNodepoolMaxUnavailable)),
 		Maximum:        int32(azLen),
 		Minimum:        int32(defaultNodepoolMinimum),
 		Name:           defaultNodepoolName,
 		Volume: ske.Volume{
-			Type: utils.Ptr(defaultNodepoolVolumeType),
+			Type: new(defaultNodepoolVolumeType),
 			Size: int32(defaultNodepoolVolumeSize),
 		},
 	}

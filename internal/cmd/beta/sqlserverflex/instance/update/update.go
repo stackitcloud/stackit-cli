@@ -184,7 +184,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlserverfle
 	var flavorId *string
 	var err error
 
-	flavors, err := apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Execute()
+	flavors, err := sqlserverflexUtils.ListAllFlavors(ctx, apiClient, model.ProjectId, model.Region)
 	if err != nil {
 		return req, fmt.Errorf("get SQLServer Flex flavors: %w", err)
 	}
@@ -198,7 +198,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlserverfle
 				return req, fmt.Errorf("get SQLServer Flex instance: %w", err)
 			}
 			var currentFlavor *sqlserverflex.ListFlavors
-			for _, flavor := range flavors.Flavors {
+			for _, flavor := range flavors {
 				if flavor.Id == currentInstance.FlavorId {
 					currentFlavor = &flavor
 				}
@@ -213,7 +213,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlserverfle
 				cpu = &currentFlavor.Cpu
 			}
 		}
-		loadedId, err := sqlserverflexUtils.LoadFlavorId(*cpu, *ram, flavors.Flavors)
+		loadedId, err := sqlserverflexUtils.LoadFlavorId(*cpu, *ram, flavors)
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 			if !errors.As(err, &dsaInvalidPlanError) {
@@ -223,7 +223,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlserverfle
 		}
 		flavorId = &loadedId
 	} else if model.FlavorId != nil {
-		err := sqlserverflexUtils.ValidateFlavorId(*model.FlavorId, flavors.Flavors)
+		err := sqlserverflexUtils.ValidateFlavorId(*model.FlavorId, flavors)
 		if err != nil {
 			return req, err
 		}
