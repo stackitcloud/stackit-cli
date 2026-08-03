@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -64,7 +64,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *sqlserverflex.ApiGetDatabaseRequest)) sqlserverflex.ApiGetDatabaseRequest {
-	request := testClient.DefaultAPI.GetDatabase(testCtx, testProjectId, testInstanceId, testDatabaseName, testRegion)
+	request := testClient.DefaultAPI.GetDatabase(testCtx, testProjectId, testRegion, testInstanceId, testDatabaseName)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -209,20 +209,6 @@ func TestOutputResult(t *testing.T) {
 			name:    "empty",
 			args:    args{},
 			wantErr: true,
-		},
-		{
-			name: "empty response",
-			args: args{
-				resp: &sqlserverflex.GetDatabaseResponse{},
-			},
-			wantErr: true,
-		},
-		{
-			name: "only database as argument",
-			args: args{
-				resp: &sqlserverflex.GetDatabaseResponse{Database: &sqlserverflex.SingleDatabase{}},
-			},
-			wantErr: false,
 		},
 	}
 	params := testparams.NewTestParams()

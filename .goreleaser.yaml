@@ -155,25 +155,3 @@ snapcrafts:
     grade: stable
     # Whether to publish the Snap to the store
     publish: true
-
-winget:
-  - name: stackit
-    publisher: stackitcloud
-    short_description: A command-line interface to manage STACKIT resources.
-    license: Apache-2.0
-    publisher_support_url: "https://github.com/stackitcloud/stackit-cli/issues"
-    package_identifier: stackitcloud.stackit
-    homepage: "https://github.com/stackitcloud/stackit-cli"
-    # If set to auto, the release will not be uploaded to the homebrew tap repo
-    # if the tag has a prerelease indicator (e.g. v0.0.1-alpha1)
-    # Temporarily not skipping prereleases to test integration with Winget
-    # skip_upload: auto
-    repository:
-      owner: stackitcloud
-      name: winget-pkgs
-      pull_request:
-        enabled: true
-        base:
-          owner: microsoft
-          name: winget-pkgs
-          branch: master

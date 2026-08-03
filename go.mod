@@ -11,7 +11,7 @@ require (
 	github.com/inhies/go-bytesize v0.0.0-20220417184213-4913239db9cf
 	github.com/jedib0t/go-pretty/v6 v6.8.2
 	github.com/lmittmann/tint v1.1.3
-	github.com/mattn/go-colorable v0.1.14
+	github.com/mattn/go-colorable v0.1.15
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
@@ -27,16 +27,16 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/logs v0.10.0
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.1.0
-	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.11.0
+	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.24.0
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.8.0
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.18.1
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.7.0
 	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.5.2
-	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.12.0
+	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.20.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.7.0
-	github.com/stackitcloud/stackit-sdk-go/services/ske v1.11.0
-	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.11.0
+	github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.0
+	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.16.1
 	github.com/stackitcloud/stackit-sdk-go/services/vpn v0.14.0
 	github.com/zalando/go-keyring v0.2.8
 	golang.org/x/mod v0.37.0
@@ -265,7 +265,7 @@ require (
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/stackitcloud/stackit-sdk-go/services/kms v1.11.0
-	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.14.0
+	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.15.0
 	github.com/stackitcloud/stackit-sdk-go/services/logme v1.0.1
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.30.0
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.9.0

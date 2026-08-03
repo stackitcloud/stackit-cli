@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
@@ -63,7 +63,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *sqlserverflex.ApiDeleteDatabaseRequest)) sqlserverflex.ApiDeleteDatabaseRequest {
-	request := testClient.DefaultAPI.DeleteDatabase(testCtx, testProjectId, testInstanceId, testDatabaseName, testRegion)
+	request := testClient.DefaultAPI.DeleteDatabase(testCtx, testProjectId, testRegion, testInstanceId, testDatabaseName)
 	for _, mod := range mods {
 		mod(&request)
 	}

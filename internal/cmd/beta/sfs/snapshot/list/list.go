@@ -63,7 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Truncate output
-			items := utils.GetSliceFromPointer(&resp.ResourcePoolSnapshots)
+			items := resp.ResourcePoolSnapshots
 			if model.Limit != nil && len(items) > int(*model.Limit) {
 				items = items[:*model.Limit]
 			}

@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v2api"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -61,7 +61,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *sqlserverflex.ApiGetInstanceRequest)) sqlserverflex.ApiGetInstanceRequest {
-	request := testClient.DefaultAPI.GetInstance(testCtx, testProjectId, testInstanceId, testRegion)
+	request := testClient.DefaultAPI.GetInstance(testCtx, testProjectId, testRegion, testInstanceId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -177,7 +177,8 @@ func TestBuildRequest(t *testing.T) {
 func TestOutputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
-		instance     *sqlserverflex.Instance
+		instance     *sqlserverflex.GetInstanceResponse
+		flavor       *sqlserverflex.ListFlavors
 	}
 	tests := []struct {
 		name    string
@@ -192,7 +193,8 @@ func TestOutputResult(t *testing.T) {
 		{
 			name: "instance as argument",
 			args: args{
-				instance: &sqlserverflex.Instance{},
+				instance: &sqlserverflex.GetInstanceResponse{},
+				flavor:   &sqlserverflex.ListFlavors{},
 			},
 			wantErr: false,
 		},
@@ -201,7 +203,7 @@ func TestOutputResult(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.instance); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.instance, tt.args.flavor); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
