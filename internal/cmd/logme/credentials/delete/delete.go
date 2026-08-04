@@ -17,7 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v1api"
+	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v2api"
 )
 
 const (
@@ -56,13 +56,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := logmeUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId)
+			instanceLabel, err := logmeUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
 			}
 
-			credentialsLabel, err := logmeUtils.GetCredentialsUsername(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.CredentialsId)
+			credentialsLabel, err := logmeUtils.GetCredentialsUsername(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.CredentialsId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get credentials username: %v", err)
 				credentialsLabel = model.CredentialsId
@@ -115,6 +115,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *logme.APIClient) logme.ApiDeleteCredentialsRequest {
-	req := apiClient.DefaultAPI.DeleteCredentials(ctx, model.ProjectId, model.InstanceId, model.CredentialsId)
+	req := apiClient.DefaultAPI.DeleteCredentials(ctx, model.ProjectId, model.Region, model.InstanceId, model.CredentialsId)
 	return req
 }
