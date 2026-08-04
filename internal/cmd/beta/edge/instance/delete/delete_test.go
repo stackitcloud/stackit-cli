@@ -19,10 +19,10 @@ var (
 	testCtx        = context.WithValue(context.Background(), testCtxKey{}, "foo")
 	testProjectId  = uuid.NewString()
 	testInstanceId = uuid.NewString()
-	testRegion     = "eu01"
-
-	testClient = &edge.APIClient{DefaultAPI: &edge.DefaultAPIService{}}
+	testClient     = &edge.APIClient{DefaultAPI: &edge.DefaultAPIService{}}
 )
+
+const testRegion = "eu01"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{

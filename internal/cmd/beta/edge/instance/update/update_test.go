@@ -17,14 +17,16 @@ import (
 type testCtxKey struct{}
 
 var (
-	testCtx         = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testProjectId   = uuid.NewString()
-	testRegion      = "eu01"
-	testInstanceId  = uuid.NewString()
-	testDescription = "new description"
-	testPlanId      = uuid.NewString()
+	testCtx        = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testProjectId  = uuid.NewString()
+	testInstanceId = uuid.NewString()
+	testPlanId     = uuid.NewString()
+	testClient     = &edge.APIClient{DefaultAPI: &edge.DefaultAPIService{}}
+)
 
-	testClient = &edge.APIClient{DefaultAPI: &edge.DefaultAPIService{}}
+const (
+	testRegion      = "eu01"
+	testDescription = "new description"
 )
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {

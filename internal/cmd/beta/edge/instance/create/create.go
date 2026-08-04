@@ -30,9 +30,9 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	DisplayName *string
-	Description string
-	PlanId      *string
+	DisplayName string
+	Description *string
+	PlanId      string
 }
 
 // NewCmd https://aip.stackit.cloud/aip/general/0121/
@@ -118,19 +118,19 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	displayNameValue := flags.FlagToStringPointer(p, cmd, displayNameFlag)
+	displayNameValue := flags.FlagToStringValue(p, cmd, displayNameFlag)
 	planIdValue := flags.FlagToStringValue(p, cmd, planIdFlag)
 	err := utils.ValidateUUID(planIdValue)
 	if err != nil {
 		return nil, err
 	}
-	descriptionValue := flags.FlagToStringValue(p, cmd, descriptionFlag)
+	descriptionValue := flags.FlagToStringPointer(p, cmd, descriptionFlag)
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		DisplayName:     displayNameValue,
 		Description:     descriptionValue,
-		PlanId:          &planIdValue,
+		PlanId:          planIdValue,
 	}
 
 	p.DebugInputModel(model)
@@ -141,20 +141,20 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *edge.APICli
 	req = apiClient.DefaultAPI.CreateInstance(ctx, model.ProjectId, model.Region)
 
 	payload := edge.CreateInstancePayload{
-		DisplayName: *model.DisplayName,
-		Description: &model.Description,
-		PlanId:      *model.PlanId,
+		DisplayName: model.DisplayName,
+		Description: model.Description,
+		PlanId:      model.PlanId,
 	}
 
 	return req.CreateInstancePayload(payload), nil
 }
 
 func outputResult(p *print.Printer, model *inputModel, projectLabel string, instance *edge.Instance) error {
-	if instance == nil {
-		return fmt.Errorf("instance response is empty")
-	}
-
 	return p.OutputResult(model.OutputFormat, instance, func() error {
+		if instance == nil {
+			return fmt.Errorf("instance response is empty")
+		}
+
 		operationState := "Created"
 		if model.Async {
 			operationState = "Triggered creation of"

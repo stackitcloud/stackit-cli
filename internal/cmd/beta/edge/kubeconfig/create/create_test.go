@@ -21,13 +21,13 @@ type testCtxKey struct{}
 var (
 	testCtx        = context.WithValue(context.Background(), testCtxKey{}, "foo")
 	testProjectId  = uuid.NewString()
-	testRegion     = "eu01"
 	testInstanceId = uuid.NewString()
-	testExpiration = 3600
 	testClient     = &edge.APIClient{DefaultAPI: &edge.DefaultAPIService{}}
 )
 
 const (
+	testRegion     = "eu01"
+	testExpiration = 3600
 	testKubeconfig = `
 apiVersion: v1
 clusters:
@@ -61,20 +61,11 @@ func testKubeconfigMap() map[string]interface{} {
 	return kubeconfigMap
 }
 
-func fixtureArgValues(mods ...func(argValues []string)) []string {
-	argValues := []string{
-		testInstanceId,
-	}
-	for _, mod := range mods {
-		mod(argValues)
-	}
-	return argValues
-}
-
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
 		globalflags.RegionFlag:    testRegion,
+		instanceIdFlag:            testInstanceId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -122,14 +113,12 @@ func TestParseInput(t *testing.T) {
 	}{
 		{
 			description:   "base",
-			argValues:     fixtureArgValues(),
 			flagValues:    fixtureFlagValues(),
 			isValid:       true,
 			expectedModel: fixtureInputModel(),
 		},
 		{
 			description: "with expiration",
-			argValues:   fixtureArgValues(),
 			isValid:     true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.Expiration = uint64(3600)
@@ -139,26 +128,12 @@ func TestParseInput(t *testing.T) {
 			}),
 		},
 		{
-			description: "no values",
-			argValues:   []string{},
-			flagValues:  map[string]string{},
-			isValid:     false,
-		},
-		{
-			description: "no arg values",
-			argValues:   []string{},
-			flagValues:  fixtureFlagValues(),
-			isValid:     false,
-		},
-		{
 			description: "no flag values",
-			argValues:   fixtureArgValues(),
 			flagValues:  map[string]string{},
 			isValid:     false,
 		},
 		{
 			description: "project id missing",
-			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
@@ -166,7 +141,6 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "project id invalid 1",
-			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
@@ -174,21 +148,34 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "project id invalid 2",
-			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
 		{
-			description: "instance id invalid",
-			argValues:   []string{""},
-			flagValues:  fixtureFlagValues(),
-			isValid:     false,
+			description: "instance id missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, instanceIdFlag)
+			}),
+			isValid: false,
+		},
+		{
+			description: "instance id invalid 1",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[instanceIdFlag] = ""
+			}),
+			isValid: false,
+		},
+		{
+			description: "instance id invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[instanceIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
 		},
 		{
 			description: "disable writing and invalid output format",
-			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[disableWritingFlag] = "true"
 			}),
@@ -196,7 +183,6 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "disable writing and valid output format",
-			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[disableWritingFlag] = "true"
 				flagValues[globalflags.OutputFormatFlag.Name()] = print.YAMLOutputFormat
@@ -209,7 +195,6 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "invalid expiration format",
-			argValues:   fixtureArgValues(),
 			isValid:     false,
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[expirationFlag] = "invalid"
@@ -217,7 +202,6 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "expiration too short",
-			argValues:   fixtureArgValues(),
 			isValid:     false,
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[expirationFlag] = "1s"
@@ -225,7 +209,6 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "expiration too long",
-			argValues:   fixtureArgValues(),
 			isValid:     false,
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[expirationFlag] = "13M"
@@ -233,7 +216,6 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "enable overwrite",
-			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[overwriteFlag] = "true"
 			}),
@@ -244,7 +226,6 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "disable overwrite",
-			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[overwriteFlag] = "false"
 			}),

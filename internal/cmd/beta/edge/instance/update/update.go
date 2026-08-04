@@ -76,7 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			instanceLabel, err := edgeUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
+			instanceLabel, err := edgeUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -97,15 +97,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("update Edge Cloud instance: %w", err)
 			}
-			instanceId := model.InstanceId
 
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Updating instance", func() error {
-					_, err = wait.CreateOrUpdateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, instanceId).WaitWithContext(ctx)
+					_, err = wait.CreateOrUpdateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
-					return fmt.Errorf("wait for SQLServer Flex instance update: %w", err)
+					return fmt.Errorf("wait for Edge Cloud instance update: %w", err)
 				}
 			}
 
@@ -113,7 +112,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered update of"
 			}
-			params.Printer.Info("%s instance %q\n", operationState, instanceLabel)
+			params.Printer.Outputf("%s instance %q\n", operationState, instanceLabel)
 			return nil
 		},
 	}
@@ -126,8 +125,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(planIdFlag, "", "Service plan configures the size of the Instance.")
 
 	// Make sure at least one updatable field is provided, otherwise it would be a no-op
-	updatedFields := []string{descriptionFlag, planIdFlag}
-	cmd.MarkFlagsOneRequired(updatedFields...)
+	cmd.MarkFlagsOneRequired(descriptionFlag, planIdFlag)
 }
 
 // Parse user input (arguments and/or flags)
@@ -139,20 +137,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	model := inputModel{
-		GlobalFlagModel: globalFlags,
-	}
-
 	planIdValue := flags.FlagToStringValue(p, cmd, planIdFlag)
 	err := utils.ValidateUUID(planIdValue)
 	if err != nil {
 		return nil, err
 	}
-	model.PlanId = &planIdValue
 
-	description := flags.FlagToStringPointer(p, cmd, descriptionFlag)
-	model.InstanceId = instanceId
-	model.Description = description
+	model := inputModel{
+		GlobalFlagModel: globalFlags,
+		PlanId:          &planIdValue,
+		InstanceId:      instanceId,
+		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
+	}
 
 	p.DebugInputModel(model)
 	return &model, nil

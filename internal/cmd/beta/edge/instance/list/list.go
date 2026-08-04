@@ -127,8 +127,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, instances
 
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "UI", "STATE")
-		for i := range instances {
-			instance := instances[i]
+		for _, instance := range instances {
 			table.AddRow(
 				instance.Id,
 				instance.DisplayName,

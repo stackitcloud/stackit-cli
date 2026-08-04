@@ -19,16 +19,17 @@ import (
 type testCtxKey struct{}
 
 var (
-	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testProjectId = uuid.NewString()
-	testRegion    = "eu01"
+	testCtx        = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testProjectId  = uuid.NewString()
+	testPlanId     = uuid.NewString()
+	testInstanceId = uuid.NewString()
+	testClient     = &edge.APIClient{DefaultAPI: &edge.DefaultAPIService{}}
+)
 
+const (
+	testRegion      = "eu01"
 	testName        = "test"
-	testPlanId      = uuid.NewString()
 	testDescription = "Initial instance description"
-	testInstanceId  = uuid.NewString()
-
-	testClient = &edge.APIClient{DefaultAPI: &edge.DefaultAPIService{}}
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -52,9 +53,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		DisplayName: utils.Ptr(testName),
-		Description: testDescription,
-		PlanId:      utils.Ptr(testPlanId),
+		DisplayName: testName,
+		Description: utils.Ptr(testDescription),
+		PlanId:      testPlanId,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -165,15 +166,14 @@ func TestBuildRequest(t *testing.T) {
 					Region:    testRegion,
 					Verbosity: globalflags.VerbosityDefault,
 				},
-				DisplayName: utils.Ptr(testName),
-				PlanId:      utils.Ptr(testPlanId),
+				DisplayName: testName,
+				PlanId:      testPlanId,
 			},
 			expectedRequest: testClient.DefaultAPI.
 				CreateInstance(testCtx, testProjectId, testRegion).
 				CreateInstancePayload(edge.CreateInstancePayload{
 					DisplayName: testName,
 					PlanId:      testPlanId,
-					Description: utils.Ptr(""),
 				}),
 		},
 	}

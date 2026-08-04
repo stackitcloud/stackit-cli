@@ -17,14 +17,13 @@ import (
 type testCtxKey struct{}
 
 var (
-	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testProjectId = uuid.NewString()
-	testRegion    = "eu01"
-
+	testCtx        = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testProjectId  = uuid.NewString()
 	testInstanceId = uuid.NewString()
-
-	testClient = &edge.APIClient{DefaultAPI: &edge.DefaultAPIService{}}
+	testClient     = &edge.APIClient{DefaultAPI: &edge.DefaultAPIService{}}
 )
+
+const testRegion = "eu01"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
@@ -153,8 +152,10 @@ func TestOutputResult(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "empty",
-			args:    args{},
+			name: "instance is nil",
+			args: args{
+				instance: nil,
+			},
 			wantErr: true,
 		},
 		{

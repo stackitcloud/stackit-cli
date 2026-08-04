@@ -94,11 +94,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *edge.APICli
 }
 
 func outputResult(p *print.Printer, outputFormat string, instance *edge.Instance) error {
-	if instance == nil {
-		return fmt.Errorf("instance response is empty")
-	}
-
 	return p.OutputResult(outputFormat, instance, func() error {
+		if instance == nil {
+			return fmt.Errorf("instance response is empty")
+		}
+
 		table := tables.NewTable()
 		table.AddRow("ID", instance.Id)
 		table.AddSeparator()

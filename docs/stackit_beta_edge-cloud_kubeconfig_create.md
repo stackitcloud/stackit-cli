@@ -12,34 +12,35 @@ An expiration time can be set for the kubeconfig. The expiration time is set in 
 Note: the format for the duration is <value><unit>, e.g. 30d for 30 days. You may not combine units.
 
 ```
-stackit beta edge-cloud kubeconfig create kubeconfig for INSTANCE_ID [flags]
+stackit beta edge-cloud kubeconfig create [flags]
 ```
 
 ### Examples
 
 ```
   Create or update a kubeconfig for the Edge Cloud instance with instance ID "xxx". If the config exists in the kubeconfig file, the information will be updated.
-  $ stackit beta edge-cloud kubeconfig create xxx
+  $ stackit beta edge-cloud kubeconfig create --instance-id xxx
 
   Create or update a kubeconfig for the Edge Cloud instance with instance ID "xxx" in a custom filepath.
-  $ stackit beta edge-cloud kubeconfig create xxx --filepath yyy
+  $ stackit beta edge-cloud kubeconfig create --instance-id xxx --filepath yyy
 
   Get a kubeconfig for the Edge Cloud instance with instance ID "xxx" without writing it to a file and format the output as json.
-  $ stackit beta edge-cloud kubeconfig create xxx --disable-writing --output-format json
+  $ stackit beta edge-cloud kubeconfig create --instance-id xxx --disable-writing --output-format json
 
   Create a kubeconfig for the Edge Cloud instance with instance ID "xxx". This will replace your current kubeconfig file.
-  $ stackit beta edge-cloud kubeconfig create xxx --overwrite
+  $ stackit beta edge-cloud kubeconfig create --instance-id xxx --overwrite
 ```
 
 ### Options
 
 ```
-      --disable-writing     Disable writing the kubeconfig to a file.
-  -e, --expiration string   Expiration time for the kubeconfig, e.g. 5d. By default, the token is valid for 1h.
-  -f, --filepath string     Path to the kubeconfig file. A default is chosen by Kubernetes if not set.
-  -h, --help                Help for "stackit beta edge-cloud kubeconfig create"
-      --overwrite           Force overwrite the kubeconfig file if it exists.
-      --switch-context      Switch to the context in the kubeconfig file to the new context.
+      --disable-writing      Disable writing the kubeconfig to a file.
+  -e, --expiration string    Expiration time for the kubeconfig, e.g. 5d. By default, the token is valid for 1h.
+  -f, --filepath string      Path to the kubeconfig file. A default is chosen by Kubernetes if not set.
+  -h, --help                 Help for "stackit beta edge-cloud kubeconfig create"
+      --instance-id string   Edge Cloud instance ID
+      --overwrite            Force overwrite the kubeconfig file if it exists.
+      --switch-context       Switch to the context in the kubeconfig file to the new context.
 ```
 
 ### Options inherited from parent commands

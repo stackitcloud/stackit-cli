@@ -28,8 +28,7 @@ import (
 )
 
 const (
-	instanceIdArg = "INSTANCE_ID"
-
+	instanceIdFlag     = "instance-id"
 	expirationFlag     = "expiration"
 	disableWritingFlag = "disable-writing"
 	filepathFlag       = "filepath"
@@ -54,7 +53,7 @@ type inputModel struct {
 // To be the AIP compliant, and align with the standard CLI implementation, we will use the InstanceID arg
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("create kubeconfig for %s", instanceIdArg),
+		Use:   "create",
 		Short: "Creates or updates a local kubeconfig file of an Edge Cloud instance",
 		Long: fmt.Sprintf("%s\n\n%s\n%s\n%s\n%s",
 			"Creates or updates a local kubeconfig file of a STACKIT Edge Cloud (STEC) instance. If the config exists in the kubeconfig file, the information will be updated.",
@@ -62,20 +61,20 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			fmt.Sprintf("You can override this behavior by specifying a custom filepath with the --%s flag or disable writing with the --%s flag.", filepathFlag, disableWritingFlag),
 			fmt.Sprintf("An expiration time can be set for the kubeconfig. The expiration time is set in seconds(s), minutes(m), hours(h), days(d) or months(M). Default is %d seconds.", expirationSecondsDefault),
 			"Note: the format for the duration is <value><unit>, e.g. 30d for 30 days. You may not combine units."),
-		Args: args.SingleArg(instanceIdArg, nil),
+		Args: args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				`Create or update a kubeconfig for the Edge Cloud instance with instance ID "xxx". If the config exists in the kubeconfig file, the information will be updated.`,
-				`$ stackit beta edge-cloud kubeconfig create xxx`),
+				`$ stackit beta edge-cloud kubeconfig create --instance-id xxx`),
 			examples.NewExample(
 				`Create or update a kubeconfig for the Edge Cloud instance with instance ID "xxx" in a custom filepath.`,
-				`$ stackit beta edge-cloud kubeconfig create xxx --filepath yyy`),
+				`$ stackit beta edge-cloud kubeconfig create --instance-id xxx --filepath yyy`),
 			examples.NewExample(
 				`Get a kubeconfig for the Edge Cloud instance with instance ID "xxx" without writing it to a file and format the output as json.`,
-				`$ stackit beta edge-cloud kubeconfig create xxx --disable-writing --output-format json`),
+				`$ stackit beta edge-cloud kubeconfig create --instance-id xxx --disable-writing --output-format json`),
 			examples.NewExample(
 				`Create a kubeconfig for the Edge Cloud instance with instance ID "xxx". This will replace your current kubeconfig file.`,
-				`$ stackit beta edge-cloud kubeconfig create xxx --overwrite`),
+				`$ stackit beta edge-cloud kubeconfig create --instance-id xxx --overwrite`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -102,7 +101,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			instanceLabel, err := edgeUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
+			instanceLabel, err := edgeUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -128,7 +127,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("create kubeconfig for Edge Cloud instance: %w", err)
 			}
-			if respKubeconfig.Kubeconfig == nil {
+			if respKubeconfig == nil {
 				return fmt.Errorf("no kubeconfig returned from the API")
 			}
 
@@ -151,6 +150,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
+	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Edge Cloud instance ID")
 	cmd.Flags().Bool(disableWritingFlag, false, "Disable writing the kubeconfig to a file.")
 	cmd.Flags().StringP(filepathFlag, "f", "", "Path to the kubeconfig file. A default is chosen by Kubernetes if not set.")
 	cmd.Flags().StringP(expirationFlag, "e", "", "Expiration time for the kubeconfig, e.g. 5d. By default, the token is valid for 1h.")
@@ -159,12 +159,13 @@ func configureFlags(cmd *cobra.Command) {
 
 	cmd.MarkFlagsMutuallyExclusive(disableWritingFlag, filepathFlag)  // DisableWriting xor Filepath
 	cmd.MarkFlagsMutuallyExclusive(disableWritingFlag, overwriteFlag) // DisableWriting xor Overwrite
+
+	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
+	cobra.CheckErr(err)
 }
 
 // Parse user input (arguments and/or flags)
-func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	instanceId := inputArgs[0]
-
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
@@ -173,7 +174,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	// Generate input model based on chosen flags
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		InstanceId:      instanceId,
+		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
 		Filepath:        flags.FlagToStringPointer(p, cmd, filepathFlag),
 		Overwrite:       flags.FlagToBoolValue(p, cmd, overwriteFlag),
 		SwitchContext:   flags.FlagToBoolValue(p, cmd, switchContextFlag),
@@ -234,7 +235,6 @@ func outputResult(p *print.Printer, outputFormat string, model *inputModel, kube
 	if kubeconfig == nil || kubeconfig.Kubeconfig == nil {
 		return fmt.Errorf("no kubeconfig returned from the API")
 	}
-	kubeconfigMap := kubeconfig.Kubeconfig
 
 	// Determine output format for terminal or file output
 	var format string
@@ -256,7 +256,7 @@ func outputResult(p *print.Printer, outputFormat string, model *inputModel, kube
 	}
 
 	// Marshal kubeconfig data based on the determined format
-	kubeconfigData, err := marshalKubeconfig(kubeconfigMap, format)
+	kubeconfigData, err := marshalKubeconfig(kubeconfig.Kubeconfig, format)
 	if err != nil {
 		return err
 	}

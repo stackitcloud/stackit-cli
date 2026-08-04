@@ -10,24 +10,25 @@ An expiration time can be set for the token. The expiration time is set in secon
 Note: the format for the duration is <value><unit>, e.g. 30d for 30 days. You may not combine units.
 
 ```
-stackit beta edge-cloud token create token for INSTANCE_ID [flags]
+stackit beta edge-cloud token create [flags]
 ```
 
 ### Examples
 
 ```
   Create a token for the Edge Cloud instance with instance ID "xxx".
-  $ stackit beta edge-cloud token create xxx
+  $ stackit beta edge-cloud token create --instance-id xxx
 
   Create a token for the Edge Cloud instance with instance ID "xxx". The token will be valid for one day.
-  $ stackit beta edge-cloud token create xxx --expiration 1d
+  $ stackit beta edge-cloud token create --instance-id xxx --expiration 1d
 ```
 
 ### Options
 
 ```
-  -e, --expiration string   Expiration time for the token, e.g. 5d. By default, the token is valid for 1h.
-  -h, --help                Help for "stackit beta edge-cloud token create"
+  -e, --expiration string    Expiration time for the token, e.g. 5d. By default, the token is valid for 1h.
+  -h, --help                 Help for "stackit beta edge-cloud token create"
+      --instance-id string   Edge Cloud instance ID
 ```
 
 ### Options inherited from parent commands

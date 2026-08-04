@@ -67,7 +67,7 @@ func TestGetInstanceName(t *testing.T) {
 				getInstanceResp:  tt.getInstanceResp,
 			}
 
-			output, err := GetInstanceName(context.Background(), newApiMock(settings), testProjectId, testInstanceId, testRegion)
+			output, err := GetInstanceName(context.Background(), newApiMock(settings), testProjectId, testRegion, testInstanceId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
