@@ -161,20 +161,6 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
-			description: "instance id invalid 1",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[instanceIdFlag] = ""
-			}),
-			isValid: false,
-		},
-		{
-			description: "instance id invalid 2",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[instanceIdFlag] = "invalid-uuid"
-			}),
-			isValid: false,
-		},
-		{
 			description: "disable writing and invalid output format",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[disableWritingFlag] = "true"

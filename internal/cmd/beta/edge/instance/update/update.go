@@ -6,8 +6,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -137,15 +135,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	planIdValue := flags.FlagToStringValue(p, cmd, planIdFlag)
-	err := utils.ValidateUUID(planIdValue)
-	if err != nil {
-		return nil, err
-	}
-
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		PlanId:          &planIdValue,
+		PlanId:          flags.FlagToStringPointer(p, cmd, planIdFlag),
 		InstanceId:      instanceId,
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
 	}

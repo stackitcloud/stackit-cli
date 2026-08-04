@@ -154,14 +154,6 @@ func TestParseInput(t *testing.T) {
 			flagValues:  fixtureFlagValues(),
 			isValid:     false,
 		},
-		{
-			description: "plan id invalid",
-			argValues:   fixtureArgValues(),
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[planIdFlag] = "invalid-uuid"
-			}),
-			isValid: false,
-		},
 	}
 
 	for _, tt := range tests {

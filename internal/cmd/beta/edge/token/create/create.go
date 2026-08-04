@@ -122,7 +122,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Edge Cloud instance ID")
+	cmd.Flags().String(instanceIdFlag, "", "Edge Cloud instance ID")
 	cmd.Flags().StringP(expirationFlag, "e", "", "Expiration time for the token, e.g. 5d. By default, the token is valid for 1h.")
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)

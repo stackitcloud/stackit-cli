@@ -150,7 +150,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Edge Cloud instance ID")
+	cmd.Flags().String(instanceIdFlag, "", "Edge Cloud instance ID")
 	cmd.Flags().Bool(disableWritingFlag, false, "Disable writing the kubeconfig to a file.")
 	cmd.Flags().StringP(filepathFlag, "f", "", "Path to the kubeconfig file. A default is chosen by Kubernetes if not set.")
 	cmd.Flags().StringP(expirationFlag, "e", "", "Expiration time for the kubeconfig, e.g. 5d. By default, the token is valid for 1h.")
