@@ -20,7 +20,8 @@ stackit postgresflex flavor list [flags]
 ### Options
 
 ```
-  -h, --help   Help for "stackit postgresflex flavor list"
+  -h, --help        Help for "stackit postgresflex flavor list"
+      --limit int   Maximum number of entries to list
 ```
 
 ### Options inherited from parent commands
