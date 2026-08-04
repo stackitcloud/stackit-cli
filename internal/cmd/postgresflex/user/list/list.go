@@ -122,6 +122,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiListUsersRequest {
 	req := apiClient.DefaultAPI.ListUsers(ctx, model.ProjectId, model.Region, model.InstanceId)
+
+	if model.Limit != nil {
+		req = req.Size(*model.Limit)
+	} else {
+		// default page size is only 10
+		req = req.Size(100)
+	}
+
 	return req
 }
 

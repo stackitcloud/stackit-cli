@@ -56,7 +56,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *postgresflex.ApiListBackupsRequest)) postgresflex.ApiListBackupsRequest {
-	request := testClient.DefaultAPI.ListBackups(testCtx, testProjectId, testRegion, testInstanceId)
+	request := testClient.DefaultAPI.ListBackups(testCtx, testProjectId, testRegion, testInstanceId).Size(100)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -154,9 +154,20 @@ func TestBuildRequest(t *testing.T) {
 		expectedRequest postgresflex.ApiListBackupsRequest
 	}{
 		{
-			description:     "base",
-			model:           fixtureInputModel(),
+			description: "base",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Limit = nil
+			}),
 			expectedRequest: fixtureRequest(),
+		},
+		{
+			description: "limit flag is set",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Limit = new(int64(12))
+			}),
+			expectedRequest: fixtureRequest(func(request *postgresflex.ApiListBackupsRequest) {
+				*request = request.Size(12)
+			}),
 		},
 	}
 

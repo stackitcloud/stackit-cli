@@ -105,6 +105,15 @@ func TestBuildRequest(t *testing.T) {
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
 		},
+		{
+			description: "limit flag set",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Limit = new(int64(12))
+			}),
+			expectedRequest: fixtureRequest(func(request *postgresflex.ApiListFlavorsRequest) {
+				*request = request.Size(12)
+			}),
+		},
 	}
 
 	for _, tt := range tests {

@@ -216,7 +216,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.MarkFlagsRequiredTogether(encryptionKekKeyIdFlag, encryptionKekKeyringIdFlag, encryptionKekKeyVersionFlag, encryptionServiceAccountFlag)
 
 	// remove after 2027-01-31
-	err = cmd.Flags().MarkDeprecated("type", fmt.Sprintf("Will be removed after 2027-01-31. Use the --%s flag instead.", flavorIdFlag))
+	err = cmd.Flags().MarkDeprecated(typeFlag.Name(), fmt.Sprintf("Will be removed after 2027-01-31. Use the --%s flag instead.", flavorIdFlag))
 	cobra.CheckErr(err)
 	err = cmd.Flags().MarkDeprecated(cpuFlag, fmt.Sprintf("Will be removed after 2027-01-31. Use the --%s flag instead.", flavorIdFlag))
 	cobra.CheckErr(err)

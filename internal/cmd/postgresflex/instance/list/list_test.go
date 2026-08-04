@@ -50,7 +50,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *postgresflex.ApiListInstancesRequest)) postgresflex.ApiListInstancesRequest {
-	request := testClient.DefaultAPI.ListInstances(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.ListInstances(testCtx, testProjectId, testRegion).Size(100)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -127,9 +127,20 @@ func TestBuildRequest(t *testing.T) {
 		expectedRequest postgresflex.ApiListInstancesRequest
 	}{
 		{
-			description:     "base",
-			model:           fixtureInputModel(),
+			description: "base",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Limit = nil
+			}),
 			expectedRequest: fixtureRequest(),
+		},
+		{
+			description: "limit flag is set",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Limit = new(int64(12))
+			}),
+			expectedRequest: fixtureRequest(func(request *postgresflex.ApiListInstancesRequest) {
+				*request = request.Size(12)
+			}),
 		},
 	}
 

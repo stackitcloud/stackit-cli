@@ -71,49 +71,17 @@ func ValidateFlavorId(flavorId string, flavors []postgresflex.ListFlavors) error
 	}
 }
 
-/*func ValidateStorage(storageClass *string, storageSize *int64, flavors []postgresflex.ListFlavors, flavorId string) error {
-	if flavors == nil {
-		return fmt.Errorf("nil flavors")
-	}
-
-	for _, flavor := range flavors {
-		if flavor.Id == flavorId {
-			if storageSize != nil {
-				if *storageSize < *storages.StorageRange.Min || *storageSize > *storages.StorageRange.Max {
-					return fmt.Errorf("%s", fmt.Sprintf("You provided storage size '%d', which is invalid. The valid range is %d-%d.", *storageSize, *storages.StorageRange.Min, *storages.StorageRange.Max))
-				}
-			}
-		}
-	}
-
-	if storageClass == nil {
-		return nil
-	}
-
-	for _, sc := range storages.StorageClasses {
-		if strings.EqualFold(*storageClass, sc) {
-			return nil
-		}
-	}
-	return &errors.DatabaseInvalidStorageError{
-		Service:  "postgresflex",
-		Details:  fmt.Sprintf("You provided storage class '%s', which is invalid.", *storageClass),
-		FlavorId: flavorId,
-	}
-}*/
-
 func LoadFlavorId(cpu, ram int64, flavors []postgresflex.ListFlavors) (*string, error) {
 	if flavors == nil {
 		return nil, fmt.Errorf("nil flavors")
 	}
 
-	availableFlavors := ""
 	for _, f := range flavors {
 		if f.Cpu == cpu && f.Memory == ram {
 			return &f.Id, nil
 		}
-		availableFlavors = fmt.Sprintf("%s\n- %d CPU, %d GB RAM", availableFlavors, f.Cpu, f.Cpu)
 	}
+
 	return nil, &errors.DatabaseInvalidFlavorError{
 		Service: "postgresflex",
 		Details: "You provided an invalid combination for CPU and RAM.",

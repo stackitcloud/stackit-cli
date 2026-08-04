@@ -76,14 +76,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get backups for PostgreSQL Flex instance %q: %w", instanceLabel, err)
 			}
-			backups := resp.Backups
 
-			// Truncate output
-			if model.Limit != nil && len(backups) > int(*model.Limit) {
-				backups = backups[:*model.Limit]
-			}
-
-			return outputResult(params.Printer, model.OutputFormat, instanceLabel, backups)
+			return outputResult(params.Printer, model.OutputFormat, instanceLabel, resp.Backups)
 		},
 	}
 
@@ -122,6 +116,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiListBackupsRequest {
 	req := apiClient.DefaultAPI.ListBackups(ctx, model.ProjectId, model.Region, *model.InstanceId)
+
+	if model.Limit != nil {
+		req = req.Size(*model.Limit)
+	} else {
+		// default page size is only 10
+		req = req.Size(100)
+	}
+
 	return req
 }
 
@@ -133,7 +135,7 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, backups 
 		}
 
 		table := tables.NewTable()
-		table.SetHeader("ID", "CREATED AT", "RETAINED UNTIL", "BACKUP SIZE")
+		table.SetHeader("ID", "COMPLETED AT", "RETAINED UNTIL", "BACKUP SIZE")
 
 		for _, backup := range backups {
 			backupCompletionTime, err := time.Parse(time.RFC3339, backup.CompletionTime)

@@ -12,14 +12,20 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 )
 
+const (
+	limitFlag = "limit"
+)
+
 type inputModel struct {
 	*globalflags.GlobalFlagModel
+	Limit *int64
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -55,7 +61,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, flavors.Flavors)
 		},
 	}
+
+	configureFlags(cmd)
 	return cmd
+}
+
+func configureFlags(cmd *cobra.Command) {
+	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
@@ -64,8 +76,17 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		return nil, &cliErr.ProjectIdError{}
 	}
 
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
+	if limit != nil && *limit < 1 {
+		return nil, &cliErr.FlagValidationError{
+			Flag:    limitFlag,
+			Details: "must be greater than 0",
+		}
+	}
+
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
+		Limit:           limit,
 	}
 
 	p.DebugInputModel(model)
@@ -73,7 +94,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex.DefaultAPI) postgresflex.ApiListFlavorsRequest {
-	return apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Size(100)
+	req := apiClient.ListFlavors(ctx, model.ProjectId, model.Region)
+
+	if model.Limit != nil {
+		req = req.Size(*model.Limit)
+	} else {
+		// the default page size is only 10
+		req = req.Size(100)
+	}
+
+	return req
 }
 
 func outputResult(p *print.Printer, outputFormat string, flavors []postgresflex.ListFlavors) error {

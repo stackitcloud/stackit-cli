@@ -115,20 +115,26 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("update PostgreSQL Flex instance: %w", err)
 			}
 
-			var waitResp *postgresflex.GetInstanceResponse
+			// update endpoint doesn't return the updated instance, so we have to call the GET endpoint to fetch it
+			var getResp *postgresflex.GetInstanceResponse
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Updating instance", func() error {
-					waitResp, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId).WaitWithContext(ctx)
+					getResp, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
 					return fmt.Errorf("wait for PostgreSQL Flex instance update: %w", err)
 				}
+			} else {
+				getResp, err = apiClient.DefaultAPI.GetInstance(ctx, model.ProjectId, model.Region, model.InstanceId).Execute()
+				if err != nil {
+					return fmt.Errorf("fetching PostgreSQL Flex instance after async update: %w", err)
+				}
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, model.Async, instanceLabel, waitResp)
+			return outputResult(params.Printer, model.OutputFormat, model.Async, instanceLabel, getResp)
 		},
 	}
 	configureFlags(cmd)
@@ -153,7 +159,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 
 	// remove after 2027-01-31
-	err = cmd.Flags().MarkDeprecated("type", fmt.Sprintf("Will be removed after 2027-01-31. Use the --%s flag instead.", flavorIdFlag))
+	err = cmd.Flags().MarkDeprecated(typeFlag.Name(), fmt.Sprintf("Will be removed after 2027-01-31. Use the --%s flag instead.", flavorIdFlag))
 	cobra.CheckErr(err)
 	err = cmd.Flags().MarkDeprecated(cpuFlag, fmt.Sprintf("Will be removed after 2027-01-31. Use the --%s flag instead.", flavorIdFlag))
 	cobra.CheckErr(err)

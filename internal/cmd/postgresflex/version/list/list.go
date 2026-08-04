@@ -55,6 +55,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, versions.Versions)
 		},
 	}
+
 	return cmd
 }
 
@@ -63,6 +64,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
 	}
+
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 	}

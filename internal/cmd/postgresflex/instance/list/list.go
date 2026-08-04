@@ -68,19 +68,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("get PostgreSQL Flex instances: %w", err)
 			}
 
-			instances := resp.Instances
-
-			// Truncate output
-			if model.Limit != nil && len(instances) > int(*model.Limit) {
-				instances = instances[:*model.Limit]
-			}
-
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
 			}
-			return outputResult(params.Printer, model.OutputFormat, projectLabel, instances)
+
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, resp.Instances)
 		},
 	}
 
@@ -117,6 +111,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiListInstancesRequest {
 	req := apiClient.DefaultAPI.ListInstances(ctx, model.ProjectId, model.Region)
+
+	if model.Limit != nil {
+		req = req.Size(*model.Limit)
+	} else {
+		// default page size is only 10
+		req = req.Size(100)
+	}
+
 	return req
 }
 
