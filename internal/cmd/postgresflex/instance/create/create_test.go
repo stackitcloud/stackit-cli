@@ -221,6 +221,18 @@ func TestParseInput(t *testing.T) {
 			aclValues: []string{},
 			isValid:   false,
 		},
+		{
+			description: "access scope set",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues["access-scope"] = string(postgresflex.INSTANCENETWORKACCESSSCOPE_SNA)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(
+				func(model *inputModel) {
+					model.AccessScope = new(string(postgresflex.INSTANCENETWORKACCESSSCOPE_SNA))
+				},
+			),
+		},
 	}
 
 	for _, tt := range tests {
@@ -244,6 +256,20 @@ func TestBuildRequest(t *testing.T) {
 			model:           fixtureInputModel(),
 			isValid:         true,
 			expectedRequest: fixtureRequest(),
+		},
+		{
+			description: "access scope set",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.AccessScope = new(string(postgresflex.INSTANCENETWORKACCESSSCOPE_SNA))
+			}),
+			isValid: true,
+			expectedRequest: fixtureRequest(func(request *postgresflex.ApiCreateInstanceRequest) {
+				payload := fixturePayload(func(payload *postgresflex.CreateInstancePayload) {
+					payload.Network.AccessScope = new(postgresflex.INSTANCENETWORKACCESSSCOPE_SNA)
+				})
+
+				*request = request.CreateInstancePayload(payload)
+			}),
 		},
 	}
 

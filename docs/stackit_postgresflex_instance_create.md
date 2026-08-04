@@ -23,6 +23,7 @@ stackit postgresflex instance create [flags]
 ### Options
 
 ```
+      --access-scope string                 The access scope of the instance. It defines if the instance is public or airgapped. (one of: [PUBLIC, SNA])
       --acl strings                         The access control list (ACL). Must contain at least one valid subnet, for instance '0.0.0.0/0' for open access (discouraged), '1.2.3.0/24 for a public IP range of an organization, '1.2.3.4/32' for a single IP range, etc. (default [])
       --backup-schedule string              Backup schedule. This flag will be required after 2027-01-31.
       --encryption-kek-key-id string        The key identifier

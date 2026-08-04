@@ -55,6 +55,15 @@ var (
 		"Instance type,",
 		flags.StringEnumDefaultValue(defaultType),
 	)
+
+	accessScopeFlag = flags.StringEnumFlag(
+		"access-scope",
+		[]string{
+			string(postgresflex.INSTANCENETWORKACCESSSCOPE_PUBLIC),
+			string(postgresflex.INSTANCENETWORKACCESSSCOPE_SNA),
+		},
+		"The access scope of the instance. It defines if the instance is public or airgapped.",
+	)
 )
 
 type inputModel struct {
@@ -62,6 +71,7 @@ type inputModel struct {
 
 	InstanceName   string
 	ACL            []string
+	AccessScope    *string
 	BackupSchedule *string
 	FlavorId       *string
 	StorageClass   *string
@@ -203,6 +213,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(encryptionKekKeyringIdFlag, "", "The keyring identifier")
 	cmd.Flags().String(encryptionKekKeyVersionFlag, "", "The key version")
 	cmd.Flags().String(encryptionServiceAccountFlag, "", "The service account")
+	accessScopeFlag.Register(cmd.Flags())
 
 	// remove after 2027-01-31
 	cmd.Flags().Int64(cpuFlag, 0, "Number of CPUs.")
@@ -266,6 +277,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		GlobalFlagModel: globalFlags,
 		InstanceName:    flags.FlagToStringValue(p, cmd, instanceNameFlag),
 		ACL:             flags.FlagToStringSliceValue(p, cmd, aclFlag),
+		AccessScope:     accessScopeFlag.Ptr(),
 		BackupSchedule:  flags.FlagToStringPointer(p, cmd, backupScheduleFlag),
 		FlavorId:        flavorId,
 		StorageClass:    flags.FlagToStringPointer(p, cmd, storageClassFlag),
@@ -326,6 +338,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex
 		}
 	}
 
+	var accessScope *postgresflex.InstanceNetworkAccessScope
+	if model.AccessScope != nil {
+		accessScope = new(postgresflex.InstanceNetworkAccessScope(*model.AccessScope))
+	}
+
 	// remove after 2027-01-31
 	if model.BackupSchedule == nil {
 		return postgresflex.ApiCreateInstanceRequest{}, fmt.Errorf("backup schedule is nil")
@@ -341,7 +358,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex
 		FlavorId:       utils.PtrString(model.FlavorId),
 		Name:           model.InstanceName,
 		Network: postgresflex.InstanceNetworkCreate{
-			Acl: model.ACL,
+			Acl:         model.ACL,
+			AccessScope: accessScope,
 		},
 		RetentionDays: *postgresflex.NewNullableInt32(model.RetentionDays),
 		Storage: postgresflex.StorageCreate{
