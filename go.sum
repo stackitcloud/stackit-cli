@@ -610,8 +610,8 @@ github.com/stackitcloud/stackit-sdk-go/services/intake v0.7.1 h1:7ZSrwps/zI41rl+
 github.com/stackitcloud/stackit-sdk-go/services/intake v0.7.1/go.mod h1:ZIvwBZwEMFO+YfJLCNXqabslI0Fp9zxV7ZBwlZjk7uE=
 github.com/stackitcloud/stackit-sdk-go/services/kms v1.11.0 h1:OrUaDypQNr1nOXZfVQXCwUpN4YhR5y0vtvYi9/Ogoi4=
 github.com/stackitcloud/stackit-sdk-go/services/kms v1.11.0/go.mod h1:pVaCmb1ZHAPGVRlSlBlVOjThp9Tb2sX9+nRX0M+d1KU=
-github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.14.0 h1:1dvL7tX91ziklayQmOupniE3jM4D5Nbtc0auNcx2p18=
-github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.14.0/go.mod h1:+Ld3dn648I+YKcBV3fEkYpDSr3fel421+LurJGywSBs=
+github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.15.0 h1:YWpy3VDKrTKVgvnHgbLFYRZ4qUKiNxzCejUNdWIYZ6Q=
+github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.15.0/go.mod h1:+Ld3dn648I+YKcBV3fEkYpDSr3fel421+LurJGywSBs=
 github.com/stackitcloud/stackit-sdk-go/services/logme v1.0.1 h1:iteL61eMMPWT6872nF4Ko/tBU1IXemvS++XR09pj6NA=
 github.com/stackitcloud/stackit-sdk-go/services/logme v1.0.1/go.mod h1:JDOOYaGgcBts2x52nKPRMFgSZe7qqOFmfz1xIXCQgRY=
 github.com/stackitcloud/stackit-sdk-go/services/logs v0.10.0 h1:g7zpfQFFq3UhAWrMK9rPaZY6dLMAuMJf5g6+r7VRTXc=
@@ -789,8 +789,8 @@ golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4/go.mod h1:jJ57K6gSWd91
 golang.org/x/mod v0.8.0/go.mod h1:iBbtSCu2XBx23ZKBPSOrRkjjQPZFPuis4dIYUhu/chs=
 golang.org/x/mod v0.12.0/go.mod h1:iBbtSCu2XBx23ZKBPSOrRkjjQPZFPuis4dIYUhu/chs=
 golang.org/x/mod v0.13.0/go.mod h1:hTbmBsO62+eylJbnUtE2MGJUyE7QWk4xUqPFrRgJ+7c=
-golang.org/x/mod v0.37.0 h1:vF1DjpVEshcIqoEaauuHebaLk1O1forxjxBaVn884JQ=
-golang.org/x/mod v0.37.0/go.mod h1:m8S8VeM9r4dzDwjrKO0a1sZP3YjeMamRRlD+fmR2Q/0=
+golang.org/x/mod v0.38.0 h1:MECBjubtXD7yj4HrhIUcywNaGeNVUdfVnxmPajOk4yk=
+golang.org/x/mod v0.38.0/go.mod h1:V6Xz0pq8TQ3dGqVQ1FVHuelZpAL0uNhSkk9ogYP3c40=
 golang.org/x/net v0.0.0-20180724234803-3673e40ba225/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
 golang.org/x/net v0.0.0-20180826012351-8a410e7b638d/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
 golang.org/x/net v0.0.0-20181114220301-adae6a3d119a/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=

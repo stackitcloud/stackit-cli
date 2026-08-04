@@ -39,7 +39,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.16.1
 	github.com/stackitcloud/stackit-sdk-go/services/vpn v0.14.0
 	github.com/zalando/go-keyring v0.2.8
-	golang.org/x/mod v0.37.0
+	golang.org/x/mod v0.38.0
 	golang.org/x/oauth2 v0.36.0
 	golang.org/x/term v0.44.0
 	golang.org/x/text v0.40.0
@@ -265,7 +265,7 @@ require (
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/stackitcloud/stackit-sdk-go/services/kms v1.11.0
-	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.14.0
+	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.15.0
 	github.com/stackitcloud/stackit-sdk-go/services/logme v1.0.1
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.1.0
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.9.0
