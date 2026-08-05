@@ -2,12 +2,13 @@ package resetpassword
 
 import (
 	"context"
+	"strconv"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -20,12 +21,15 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &postgresflex.APIClient{DefaultAPI: &postgresflex.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
-var testUserId = "12345"
-var testRegion = "eu01"
+
+const (
+	testUserId = int64(12345)
+	testRegion = "eu01"
+)
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
-		testUserId,
+		strconv.FormatInt(testUserId, 10),
 	}
 	for _, mod := range mods {
 		mod(argValues)
@@ -61,8 +65,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *postgresflex.ApiResetUserRequest)) postgresflex.ApiResetUserRequest {
-	request := testClient.DefaultAPI.ResetUser(testCtx, testProjectId, testRegion, testInstanceId, testUserId)
+func fixtureRequest(mods ...func(request *postgresflex.ApiResetUserPasswordRequest)) postgresflex.ApiResetUserPasswordRequest {
+	request := testClient.DefaultAPI.ResetUserPassword(testCtx, testProjectId, testRegion, testInstanceId, testUserId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -169,7 +173,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest postgresflex.ApiResetUserRequest
+		expectedRequest postgresflex.ApiResetUserPasswordRequest
 	}{
 		{
 			description:     "base",
@@ -198,21 +202,33 @@ func Test_outputResult(t *testing.T) {
 		outputFormat  string
 		userLabel     string
 		instanceLabel string
-		user          *postgresflex.ResetUserResponse
+		user          *postgresflex.ResetUserPasswordResponse
 	}
 	tests := []struct {
 		name    string
 		args    args
 		wantErr bool
 	}{
-		{"empty", args{}, true},
-		{"standard", args{user: &postgresflex.ResetUserResponse{}}, false},
-		{"complete", args{
-			userLabel:     "userLabel",
-			instanceLabel: "instanceLabel",
-			user: &postgresflex.ResetUserResponse{
-				Item: &postgresflex.User{},
-			}}, false},
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: true,
+		},
+		{
+			name: "standard",
+			args: args{
+				user: &postgresflex.ResetUserPasswordResponse{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "complete",
+			args: args{
+				userLabel:     "userLabel",
+				instanceLabel: "instanceLabel",
+				user:          &postgresflex.ResetUserPasswordResponse{}},
+			wantErr: false,
+		},
 	}
 	params := testparams.NewTestParams()
 	for _, tt := range tests {

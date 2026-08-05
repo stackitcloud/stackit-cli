@@ -3,12 +3,12 @@ package describe
 import (
 	"context"
 	"fmt"
-	"time"
+	"strconv"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -18,24 +18,19 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
 	backupIdArg = "BACKUP_ID"
 
 	instanceIdFlag = "instance-id"
-
-	backupExpireYearOffset  = 0
-	backupExpireMonthOffset = 0
-	backupExpireDayOffset   = 30
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 
 	InstanceId string
-	BackupId   string
+	BackupId   int64
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -73,7 +68,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("describe backup for PostgreSQL Flex instance: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, resp.Item)
+			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -88,11 +83,16 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	backupId := inputArgs[0]
+	backupIdStr := inputArgs[0]
 
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
+	}
+
+	backupId, err := strconv.ParseInt(backupIdStr, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid backup id format, must be an integer: %w", err)
 	}
 
 	return &inputModel{
@@ -107,30 +107,20 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresfle
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, backup *postgresflex.Backup) error {
-	if backup == nil {
-		return fmt.Errorf("backup is nil")
-	}
-	if backup.StartTime == nil || *backup.StartTime == "" {
-		return fmt.Errorf("start time not defined")
-	}
-	backupStartTime, err := time.Parse(time.RFC3339, utils.PtrString(backup.StartTime))
-	if err != nil {
-		return fmt.Errorf("parse backup start time: %w", err)
-	}
-	backupExpireDate := backupStartTime.AddDate(backupExpireYearOffset, backupExpireMonthOffset, backupExpireDayOffset).Format(time.DateOnly)
-
+func outputResult(p *print.Printer, outputFormat string, backup *postgresflex.BackupData) error {
 	return p.OutputResult(outputFormat, backup, func() error {
-		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(backup.Id))
-		table.AddSeparator()
-		table.AddRow("CREATED AT", utils.PtrString(backup.StartTime))
-		table.AddSeparator()
-		table.AddRow("EXPIRES AT", backupExpireDate)
-		table.AddSeparator()
+		if backup == nil {
+			return fmt.Errorf("backup is nil")
+		}
 
-		backupSize := utils.PtrByteSizeDefault(backup.Size, "n/a")
-		table.AddRow("BACKUP SIZE", backupSize)
+		table := tables.NewTable()
+		table.AddRow("ID", backup.Id)
+		table.AddSeparator()
+		table.AddRow("COMPLETED AT", backup.CompletionTime)
+		table.AddSeparator()
+		table.AddRow("RETAINED UNTIL", backup.RetainedUntil)
+		table.AddSeparator()
+		table.AddRow("BACKUP SIZE", backup.Size)
 
 		err := table.Display(p)
 		if err != nil {

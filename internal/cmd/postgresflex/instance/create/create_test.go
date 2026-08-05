@@ -2,13 +2,12 @@ package create
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -20,34 +19,10 @@ type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &postgresflex.APIClient{DefaultAPI: &postgresflex.DefaultAPIService{}}
-var testRegion = "eu01"
-
-type mockSettings struct {
-	listFlavorsFails  bool
-	listFlavorsResp   *postgresflex.ListFlavorsResponse
-	listStoragesFails bool
-	listStoragesResp  *postgresflex.ListStoragesResponse
-}
-
-func newAPIClientMock(c mockSettings) postgresflex.DefaultAPI {
-	return postgresflex.DefaultAPIServiceMock{
-		ListStoragesExecuteMock: utils.Ptr(func(_ postgresflex.ApiListStoragesRequest) (*postgresflex.ListStoragesResponse, error) {
-			if c.listStoragesFails {
-				return nil, fmt.Errorf("list storages failed")
-			}
-			return c.listStoragesResp, nil
-		}),
-		ListFlavorsExecuteMock: utils.Ptr(func(_ postgresflex.ApiListFlavorsRequest) (*postgresflex.ListFlavorsResponse, error) {
-			if c.listFlavorsFails {
-				return nil, fmt.Errorf("list flavors failed")
-			}
-			return c.listFlavorsResp, nil
-		}),
-	}
-}
-
 var testProjectId = uuid.NewString()
 var testFlavorId = uuid.NewString()
+
+const testRegion = "eu01"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
@@ -77,11 +52,11 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		InstanceName:   "example-name",
 		ACL:            []string{"0.0.0.0/0"},
-		BackupSchedule: "0 0 * * *",
+		BackupSchedule: utils.Ptr("0 0 * * *"),
 		FlavorId:       utils.Ptr(testFlavorId),
 		StorageClass:   utils.Ptr("premium-perf4-stackit"),
 		StorageSize:    utils.Ptr(int64(10)),
-		Version:        "6.0",
+		Version:        utils.Ptr("6.0"),
 		Type:           "Replica",
 	}
 	for _, mod := range mods {
@@ -101,19 +76,18 @@ func fixtureRequest(mods ...func(request *postgresflex.ApiCreateInstanceRequest)
 
 func fixturePayload(mods ...func(payload *postgresflex.CreateInstancePayload)) postgresflex.CreateInstancePayload {
 	payload := postgresflex.CreateInstancePayload{
-		Name:           "example-name",
-		Acl:            postgresflex.ACL{Items: []string{"0.0.0.0/0"}},
 		BackupSchedule: "0 0 * * *",
 		FlavorId:       testFlavorId,
-		Replicas:       int32(3),
-		Storage: postgresflex.Storage{
+		Name:           "example-name",
+		Network: postgresflex.InstanceNetworkCreate{
+			Acl: []string{"0.0.0.0/0"},
+		},
+		Storage: postgresflex.StorageCreate{
 			Class: utils.Ptr("premium-perf4-stackit"),
-			Size:  utils.Ptr(int64(10)),
+			Size:  int64(10),
 		},
-		Version: "6.0",
-		Options: map[string]string{
-			"type": "Replica",
-		},
+		Version:       "6.0",
+		RetentionDays: *postgresflex.NewNullableInt32(nil),
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -142,8 +116,10 @@ func TestParseInput(t *testing.T) {
 				delete(flagValues, backupScheduleFlag)
 				delete(flagValues, typeFlag.Name())
 			}),
-			isValid:       true,
-			expectedModel: fixtureInputModel(),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.BackupSchedule = nil
+			}),
 		},
 		{
 			description: "use CPU and RAM",
@@ -214,7 +190,7 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Version = ""
+				model.Version = nil
 			}),
 		},
 		{
@@ -245,6 +221,18 @@ func TestParseInput(t *testing.T) {
 			aclValues: []string{},
 			isValid:   false,
 		},
+		{
+			description: "access scope set",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues["access-scope"] = string(postgresflex.INSTANCENETWORKACCESSSCOPE_SNA)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(
+				func(model *inputModel) {
+					model.AccessScope = new(string(postgresflex.INSTANCENETWORKACCESSSCOPE_SNA))
+				},
+			),
+		},
 	}
 
 	for _, tt := range tests {
@@ -258,212 +246,36 @@ func TestParseInput(t *testing.T) {
 
 func TestBuildRequest(t *testing.T) {
 	tests := []struct {
-		description        string
-		model              *inputModel
-		expectedRequest    postgresflex.ApiCreateInstanceRequest
-		mockClientSettings mockSettings
-		isValid            bool
+		description     string
+		model           *inputModel
+		expectedRequest postgresflex.ApiCreateInstanceRequest
+		isValid         bool
 	}{
 		{
 			description:     "base with flavor ID",
 			model:           fixtureInputModel(),
 			isValid:         true,
 			expectedRequest: fixtureRequest(),
-			mockClientSettings: mockSettings{
-				listFlavorsResp: &postgresflex.ListFlavorsResponse{
-					Flavors: []postgresflex.Flavor{
-						{
-							Id:     utils.Ptr(testFlavorId),
-							Cpu:    utils.Ptr(int64(2)),
-							Memory: utils.Ptr(int64(4)),
-						},
-					},
-				},
-				listStoragesResp: &postgresflex.ListStoragesResponse{
-					StorageClasses: []string{"premium-perf4-stackit"},
-					StorageRange: &postgresflex.StorageRange{
-						Min: utils.Ptr(int64(10)),
-						Max: utils.Ptr(int64(100)),
-					},
-				},
-			},
 		},
 		{
-			description: "with CPU and RAM",
-			model: fixtureInputModel(
-				func(model *inputModel) {
-					model.FlavorId = nil
-					model.CPU = utils.Ptr(int64(2))
-					model.RAM = utils.Ptr(int64(4))
-				},
-			),
-			isValid:         true,
-			expectedRequest: fixtureRequest(),
-			mockClientSettings: mockSettings{
-				listFlavorsResp: &postgresflex.ListFlavorsResponse{
-					Flavors: []postgresflex.Flavor{
-						{
-							Id:     utils.Ptr(testFlavorId),
-							Cpu:    utils.Ptr(int64(2)),
-							Memory: utils.Ptr(int64(4)),
-						},
-						{
-							Id:     utils.Ptr("other-flavor"),
-							Cpu:    utils.Ptr(int64(1)),
-							Memory: utils.Ptr(int64(8)),
-						},
-					},
-				},
-				listStoragesResp: &postgresflex.ListStoragesResponse{
-					StorageClasses: []string{"premium-perf4-stackit"},
-					StorageRange: &postgresflex.StorageRange{
-						Min: utils.Ptr(int64(10)),
-						Max: utils.Ptr(int64(100)),
-					},
-				},
-			},
-		},
-		{
-			description: "single instance type",
-			model:       fixtureInputModel(func(model *inputModel) { model.Type = "Single" }),
-			isValid:     true,
-			expectedRequest: fixtureRequest().CreateInstancePayload(fixturePayload(func(payload *postgresflex.CreateInstancePayload) {
-				payload.Options = map[string]string{"type": "Single"}
-				payload.Replicas = int32(1)
-			})),
-			mockClientSettings: mockSettings{
-				listFlavorsResp: &postgresflex.ListFlavorsResponse{
-					Flavors: []postgresflex.Flavor{
-						{
-							Id:     utils.Ptr(testFlavorId),
-							Cpu:    utils.Ptr(int64(2)),
-							Memory: utils.Ptr(int64(4)),
-						},
-					},
-				},
-				listStoragesResp: &postgresflex.ListStoragesResponse{
-					StorageClasses: []string{"premium-perf4-stackit"},
-					StorageRange: &postgresflex.StorageRange{
-						Min: utils.Ptr(int64(10)),
-						Max: utils.Ptr(int64(100)),
-					},
-				},
-			},
-		},
-		{
-			description: "get flavors fails",
-			model: fixtureInputModel(
-				func(model *inputModel) {
-					model.FlavorId = nil
-					model.CPU = utils.Ptr(int64(2))
-					model.RAM = utils.Ptr(int64(4))
-				},
-			),
-			mockClientSettings: mockSettings{
-				listFlavorsFails: true,
-			},
-			isValid: false,
-		},
-		{
-			description: "flavor id not found",
-			model: fixtureInputModel(
-				func(model *inputModel) {
-					model.FlavorId = nil
-					model.CPU = utils.Ptr(int64(5))
-					model.RAM = utils.Ptr(int64(9))
-				},
-			),
-			mockClientSettings: mockSettings{
-				listFlavorsResp: &postgresflex.ListFlavorsResponse{
-					Flavors: []postgresflex.Flavor{
-						{
-							Id:     utils.Ptr(testFlavorId),
-							Cpu:    utils.Ptr(int64(2)),
-							Memory: utils.Ptr(int64(4)),
-						},
-						{
-							Id:     utils.Ptr("other-flavor"),
-							Cpu:    utils.Ptr(int64(1)),
-							Memory: utils.Ptr(int64(8)),
-						},
-					},
-				},
-			},
-			isValid: false,
-		},
-		{
-			description: "get storages fails",
-			model: fixtureInputModel(
-				func(model *inputModel) {
-					model.FlavorId = nil
-					model.CPU = utils.Ptr(int64(2))
-					model.RAM = utils.Ptr(int64(4))
-				},
-			),
-			mockClientSettings: mockSettings{
-				listFlavorsFails: true,
-			},
-			isValid: false,
-		},
-		{
-			description: "invalid storage class",
-			model: fixtureInputModel(
-				func(model *inputModel) {
-					model.StorageClass = utils.Ptr("non-existing-class")
-				},
-			),
-			mockClientSettings: mockSettings{
-				listFlavorsResp: &postgresflex.ListFlavorsResponse{
-					Flavors: []postgresflex.Flavor{
-						{
-							Id:     utils.Ptr(testFlavorId),
-							Cpu:    utils.Ptr(int64(2)),
-							Memory: utils.Ptr(int64(4)),
-						},
-					},
-				},
-				listStoragesResp: &postgresflex.ListStoragesResponse{
-					StorageClasses: []string{"premium-perf4-stackit"},
-					StorageRange: &postgresflex.StorageRange{
-						Min: utils.Ptr(int64(10)),
-						Max: utils.Ptr(int64(100)),
-					},
-				},
-			},
-			isValid: false,
-		},
-		{
-			description: "invalid storage size",
-			model: fixtureInputModel(
-				func(model *inputModel) {
-					model.StorageSize = utils.Ptr(int64(9))
-				},
-			),
-			mockClientSettings: mockSettings{
-				listFlavorsResp: &postgresflex.ListFlavorsResponse{
-					Flavors: []postgresflex.Flavor{
-						{
-							Id:     utils.Ptr(testFlavorId),
-							Cpu:    utils.Ptr(int64(2)),
-							Memory: utils.Ptr(int64(4)),
-						},
-					},
-				},
-				listStoragesResp: &postgresflex.ListStoragesResponse{
-					StorageClasses: []string{"premium-perf4-stackit"},
-					StorageRange: &postgresflex.StorageRange{
-						Min: utils.Ptr(int64(10)),
-						Max: utils.Ptr(int64(100)),
-					},
-				},
-			},
-			isValid: false,
+			description: "access scope set",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.AccessScope = new(string(postgresflex.INSTANCENETWORKACCESSSCOPE_SNA))
+			}),
+			isValid: true,
+			expectedRequest: fixtureRequest(func(request *postgresflex.ApiCreateInstanceRequest) {
+				payload := fixturePayload(func(payload *postgresflex.CreateInstancePayload) {
+					payload.Network.AccessScope = new(postgresflex.INSTANCENETWORKACCESSSCOPE_SNA)
+				})
+
+				*request = request.CreateInstancePayload(payload)
+			}),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request, err := buildRequest(testCtx, tt.model, newAPIClientMock(tt.mockClientSettings))
+			request, err := buildRequest(testCtx, tt.model, testClient.DefaultAPI)
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -473,8 +285,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
-				cmpopts.IgnoreFields(tt.expectedRequest, "ApiService"),
+				cmpopts.EquateComparable(testCtx, postgresflex.DefaultAPIService{}, postgresflex.NullableInt32{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -496,15 +307,23 @@ func Test_outputResult(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{"empty", args{}, true},
-		{"standard", args{
-			outputFormat: "",
-			async:        false,
-			projectLabel: "label",
-			instanceId:   "4711",
-			resp:         &postgresflex.CreateInstanceResponse{Id: utils.Ptr("id")},
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: true,
 		},
-			false,
+		{
+			name: "standard",
+			args: args{
+				outputFormat: "",
+				async:        false,
+				projectLabel: "label",
+				instanceId:   "4711",
+				resp: &postgresflex.CreateInstanceResponse{
+					Id: "id",
+				},
+			},
+			wantErr: false,
 		},
 	}
 	params := testparams.NewTestParams()

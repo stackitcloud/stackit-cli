@@ -1,19 +1,19 @@
-## stackit postgresflex backup
+## stackit postgresflex version
 
-Provides functionality for PostgreSQL Flex instance backups
+Provides functionality for PostgreSQL Flex versions
 
 ### Synopsis
 
-Provides functionality for PostgreSQL Flex instance backups.
+Provides functionality for PostgreSQL Flex versions.
 
 ```
-stackit postgresflex backup [flags]
+stackit postgresflex version [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit postgresflex backup"
+  -h, --help   Help for "stackit postgresflex version"
 ```
 
 ### Options inherited from parent commands
@@ -30,6 +30,5 @@ stackit postgresflex backup [flags]
 ### SEE ALSO
 
 * [stackit postgresflex](./stackit_postgresflex.md)	 - Provides functionality for PostgreSQL Flex
-* [stackit postgresflex backup describe](./stackit_postgresflex_backup_describe.md)	 - Shows details of a backup for a PostgreSQL Flex instance
-* [stackit postgresflex backup list](./stackit_postgresflex_backup_list.md)	 - Lists all backups which are available for a PostgreSQL Flex instance
+* [stackit postgresflex version list](./stackit_postgresflex_version_list.md)	 - Lists PostgreSQL Flex versions
 

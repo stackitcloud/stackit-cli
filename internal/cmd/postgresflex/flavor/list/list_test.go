@@ -1,16 +1,19 @@
-package delete
+package list
 
 import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 )
 
 type testCtxKey struct{}
@@ -18,19 +21,10 @@ type testCtxKey struct{}
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &postgresflex.APIClient{DefaultAPI: &postgresflex.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
-var testInstanceId = uuid.NewString()
 
-const testRegion = "eu01"
-
-func fixtureArgValues(mods ...func(argValues []string)) []string {
-	argValues := []string{
-		testInstanceId,
-	}
-	for _, mod := range mods {
-		mod(argValues)
-	}
-	return argValues
-}
+const (
+	testRegion = "eu01"
+)
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
@@ -50,7 +44,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		InstanceId: testInstanceId,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -58,8 +51,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *postgresflex.ApiDeleteInstanceRequest)) postgresflex.ApiDeleteInstanceRequest {
-	request := testClient.DefaultAPI.DeleteInstance(testCtx, testProjectId, testRegion, testInstanceId)
+func fixtureRequest(mods ...func(request *postgresflex.ApiListFlavorsRequest)) postgresflex.ApiListFlavorsRequest {
+	request := testClient.DefaultAPI.ListFlavors(testCtx, testProjectId, testRegion).Size(100)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -76,64 +69,21 @@ func TestParseInput(t *testing.T) {
 	}{
 		{
 			description:   "base",
-			argValues:     fixtureArgValues(),
 			flagValues:    fixtureFlagValues(),
 			isValid:       true,
 			expectedModel: fixtureInputModel(),
 		},
 		{
-			description: "no values",
-			argValues:   []string{},
-			flagValues:  map[string]string{},
-			isValid:     false,
-		},
-		{
-			description: "no arg values",
-			argValues:   []string{},
-			flagValues:  fixtureFlagValues(),
-			isValid:     false,
-		},
-		{
 			description: "no flag values",
-			argValues:   fixtureArgValues(),
 			flagValues:  map[string]string{},
 			isValid:     false,
 		},
 		{
 			description: "project id missing",
-			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
-		},
-		{
-			description: "project id invalid 1",
-			argValues:   fixtureArgValues(),
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[globalflags.ProjectIdFlag] = ""
-			}),
-			isValid: false,
-		},
-		{
-			description: "project id invalid 2",
-			argValues:   fixtureArgValues(),
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
-			}),
-			isValid: false,
-		},
-		{
-			description: "instance id invalid 1",
-			argValues:   []string{""},
-			flagValues:  fixtureFlagValues(),
-			isValid:     false,
-		},
-		{
-			description: "instance id invalid 2",
-			argValues:   []string{"invalid-uuid"},
-			flagValues:  fixtureFlagValues(),
-			isValid:     false,
 		},
 	}
 
@@ -148,18 +98,27 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest postgresflex.ApiDeleteInstanceRequest
+		expectedRequest postgresflex.ApiListFlavorsRequest
 	}{
 		{
 			description:     "base",
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
 		},
+		{
+			description: "limit flag set",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Limit = new(int64(12))
+			}),
+			expectedRequest: fixtureRequest(func(request *postgresflex.ApiListFlavorsRequest) {
+				*request = request.Size(12)
+			}),
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildDeleteRequest(testCtx, tt.model, testClient)
+			request := buildRequest(testCtx, tt.model, testClient.DefaultAPI)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
@@ -167,6 +126,48 @@ func TestBuildRequest(t *testing.T) {
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func Test_outputResult(t *testing.T) {
+	type args struct {
+		outputFormat string
+		flavors      []postgresflex.ListFlavors
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "flavors slice is nil",
+			args: args{
+				flavors: nil,
+			},
+			wantErr: false,
+		},
+		{
+			name: "flavors slice is empty",
+			args: args{
+				flavors: []postgresflex.ListFlavors{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty flavor in flavors slice",
+			args: args{
+				flavors: []postgresflex.ListFlavors{{}},
+			},
+			wantErr: false,
+		},
+	}
+	params := testparams.NewTestParams()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.flavors); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

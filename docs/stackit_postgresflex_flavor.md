@@ -1,19 +1,19 @@
-## stackit postgresflex backup
+## stackit postgresflex flavor
 
-Provides functionality for PostgreSQL Flex instance backups
+Provides functionality for PostgreSQL Flex flavors
 
 ### Synopsis
 
-Provides functionality for PostgreSQL Flex instance backups.
+Provides functionality for PostgreSQL Flex flavors.
 
 ```
-stackit postgresflex backup [flags]
+stackit postgresflex flavor [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit postgresflex backup"
+  -h, --help   Help for "stackit postgresflex flavor"
 ```
 
 ### Options inherited from parent commands
@@ -30,6 +30,6 @@ stackit postgresflex backup [flags]
 ### SEE ALSO
 
 * [stackit postgresflex](./stackit_postgresflex.md)	 - Provides functionality for PostgreSQL Flex
-* [stackit postgresflex backup describe](./stackit_postgresflex_backup_describe.md)	 - Shows details of a backup for a PostgreSQL Flex instance
-* [stackit postgresflex backup list](./stackit_postgresflex_backup_list.md)	 - Lists all backups which are available for a PostgreSQL Flex instance
+* [stackit postgresflex flavor describe](./stackit_postgresflex_flavor_describe.md)	 - Show details of a PostgreSQL Flex flavor
+* [stackit postgresflex flavor list](./stackit_postgresflex_flavor_list.md)	 - Lists PostgreSQL Flex flavors
 
