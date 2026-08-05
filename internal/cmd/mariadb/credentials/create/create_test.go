@@ -11,22 +11,25 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	mariadb "github.com/stackitcloud/stackit-sdk-go/services/mariadb/v1api"
+	mariadb "github.com/stackitcloud/stackit-sdk-go/services/mariadb/v2api"
 )
-
-var projectIdFlag = globalflags.ProjectIdFlag
 
 type testCtxKey struct{}
 
-var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &mariadb.APIClient{DefaultAPI: &mariadb.DefaultAPIService{}}
-var testProjectId = uuid.NewString()
-var testInstanceId = uuid.NewString()
+var (
+	testCtx        = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient     = &mariadb.APIClient{DefaultAPI: &mariadb.DefaultAPIService{}}
+	testProjectId  = uuid.NewString()
+	testInstanceId = uuid.NewString()
+)
+
+const testRegion = "eu01"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:  testProjectId,
-		instanceIdFlag: testInstanceId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+		instanceIdFlag:            testInstanceId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -38,6 +41,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId: testInstanceId,
@@ -49,7 +53,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *mariadb.ApiCreateCredentialsRequest)) mariadb.ApiCreateCredentialsRequest {
-	request := testClient.DefaultAPI.CreateCredentials(testCtx, testProjectId, testInstanceId)
+	request := testClient.DefaultAPI.CreateCredentials(testCtx, testProjectId, testRegion, testInstanceId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -88,21 +92,21 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},

@@ -13,15 +13,21 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v1api"
+	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v2api"
 )
-
-var projectIdFlag = globalflags.ProjectIdFlag
 
 type testCtxKey struct{}
 
-var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &logme.APIClient{DefaultAPI: &logme.DefaultAPIService{}}
+var (
+	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient    = &logme.APIClient{DefaultAPI: &logme.DefaultAPIService{}}
+	testProjectId = uuid.NewString()
+	testPlanId    = uuid.NewString()
+
+	testMonitoringInstanceId = uuid.NewString()
+)
+
+const testRegion = "eu01"
 
 type mockSettings struct {
 	returnError       bool
@@ -39,22 +45,19 @@ func newAPIMock(s mockSettings) logme.DefaultAPI {
 	}
 }
 
-var testProjectId = uuid.NewString()
-var testPlanId = uuid.NewString()
-var testMonitoringInstanceId = uuid.NewString()
-
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:            testProjectId,
-		instanceNameFlag:         "example-name",
-		enableMonitoringFlag:     "true",
-		graphiteFlag:             "example-graphite",
-		metricsFrequencyFlag:     "100",
-		metricsPrefixFlag:        "example-prefix",
-		monitoringInstanceIdFlag: testMonitoringInstanceId,
-		sgwAclFlag:               "198.51.100.14/24",
-		syslogFlag:               "example-syslog",
-		planIdFlag:               testPlanId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+		instanceNameFlag:          "example-name",
+		enableMonitoringFlag:      "true",
+		graphiteFlag:              "example-graphite",
+		metricsFrequencyFlag:      "100",
+		metricsPrefixFlag:         "example-prefix",
+		monitoringInstanceIdFlag:  testMonitoringInstanceId,
+		sgwAclFlag:                "198.51.100.14/24",
+		syslogFlag:                "example-syslog",
+		planIdFlag:                testPlanId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -66,6 +69,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceName:         utils.Ptr("example-name"),
@@ -85,7 +89,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *logme.ApiCreateInstanceRequest)) logme.ApiCreateInstanceRequest {
-	request := testClient.DefaultAPI.CreateInstance(testCtx, testProjectId)
+	request := testClient.DefaultAPI.CreateInstance(testCtx, testProjectId, testRegion)
 	request = request.CreateInstancePayload(logme.CreateInstancePayload{
 		InstanceName: "example-name",
 		Parameters: &logme.InstanceParameters{
@@ -143,14 +147,16 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "required fields only",
 			flagValues: map[string]string{
-				projectIdFlag:    testProjectId,
-				instanceNameFlag: "example-name",
-				planIdFlag:       testPlanId,
+				globalflags.ProjectIdFlag: testProjectId,
+				globalflags.RegionFlag:    testRegion,
+				instanceNameFlag:          "example-name",
+				planIdFlag:                testPlanId,
 			},
 			isValid: true,
 			expectedModel: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
+					Region:    testRegion,
 					Verbosity: globalflags.VerbosityDefault,
 				},
 				InstanceName: utils.Ptr("example-name"),
@@ -160,18 +166,20 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "zero values",
 			flagValues: map[string]string{
-				projectIdFlag:        testProjectId,
-				planIdFlag:           testPlanId,
-				instanceNameFlag:     "",
-				enableMonitoringFlag: "false",
-				graphiteFlag:         "",
-				metricsFrequencyFlag: "0",
-				metricsPrefixFlag:    "",
+				globalflags.ProjectIdFlag: testProjectId,
+				globalflags.RegionFlag:    testRegion,
+				planIdFlag:                testPlanId,
+				instanceNameFlag:          "",
+				enableMonitoringFlag:      "false",
+				graphiteFlag:              "",
+				metricsFrequencyFlag:      "0",
+				metricsPrefixFlag:         "",
 			},
 			isValid: true,
 			expectedModel: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
+					Region:    testRegion,
 					Verbosity: globalflags.VerbosityDefault,
 				},
 				PlanId:           &testPlanId,
@@ -185,21 +193,21 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "project id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[projectIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
@@ -361,6 +369,7 @@ func TestBuildRequest(t *testing.T) {
 			model: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
+					Region:    testRegion,
 					Verbosity: globalflags.VerbosityDefault,
 				},
 				PlanId: &testPlanId,
@@ -378,7 +387,7 @@ func TestBuildRequest(t *testing.T) {
 					},
 				},
 			},
-			expectedRequest: testClient.DefaultAPI.CreateInstance(testCtx, testProjectId).
+			expectedRequest: testClient.DefaultAPI.CreateInstance(testCtx, testProjectId, testRegion).
 				CreateInstancePayload(logme.CreateInstancePayload{PlanId: testPlanId, Parameters: &logme.InstanceParameters{}}),
 		},
 	}

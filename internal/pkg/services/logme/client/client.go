@@ -6,9 +6,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/spf13/viper"
-	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v1api"
+	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v2api"
 )
 
 func ConfigureClient(p *print.Printer, cliVersion string) (*logme.APIClient, error) {
-	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.LogMeCustomEndpointKey), true, logme.NewAPIClient)
+	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.LogMeCustomEndpointKey), false, logme.NewAPIClient)
 }

@@ -266,8 +266,8 @@ require (
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/stackitcloud/stackit-sdk-go/services/kms v1.11.0
 	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.15.0
-	github.com/stackitcloud/stackit-sdk-go/services/logme v1.0.1
-	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.30.0
+	github.com/stackitcloud/stackit-sdk-go/services/logme v1.1.0
+	github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.1.0
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.9.0
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.24.0
 	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.1.1
