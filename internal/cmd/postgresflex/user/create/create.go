@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -17,7 +17,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	postgresflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -39,7 +38,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 
 	InstanceId string
-	Username   *string
+	Username   string
 	Roles      []string
 }
 
@@ -120,7 +119,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
-		Username:        flags.FlagToStringPointer(p, cmd, usernameFlag),
+		Username:        flags.FlagToStringValue(p, cmd, usernameFlag),
 		Roles:           roleFlag.Get(),
 	}
 
@@ -131,27 +130,21 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiCreateUserRequest {
 	req := apiClient.DefaultAPI.CreateUser(ctx, model.ProjectId, model.Region, model.InstanceId)
 	req = req.CreateUserPayload(postgresflex.CreateUserPayload{
-		Username: model.Username,
-		Roles:    model.Roles,
+		Name:  model.Username,
+		Roles: model.Roles,
 	})
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat, instanceLabel string, resp *postgresflex.CreateUserResponse) error {
-	if resp == nil {
-		return fmt.Errorf("no response passed")
-	}
-
-	return p.OutputResult(outputFormat, resp, func() error {
-		if user := resp.Item; user != nil {
-			p.Outputf("Created user for instance %q. User ID: %s\n\n", instanceLabel, utils.PtrString(user.Id))
-			p.Outputf("Username: %s\n", utils.PtrString(user.Username))
-			p.Outputf("Password: %s\n", utils.PtrString(user.Password))
-			p.Outputf("Roles: %v\n", user.Roles)
-			p.Outputf("Host: %s\n", utils.PtrString(user.Host))
-			p.Outputf("Port: %s\n", utils.PtrString(user.Port))
-			p.Outputf("URI: %s\n", utils.PtrString(user.Uri))
+func outputResult(p *print.Printer, outputFormat, instanceLabel string, user *postgresflex.CreateUserResponse) error {
+	return p.OutputResult(outputFormat, user, func() error {
+		if user == nil {
+			return fmt.Errorf("no response passed")
 		}
+
+		p.Outputf("Created user for instance %q. User ID: %d\n\n", instanceLabel, user.Id)
+		p.Outputf("Username: %s\n", user.Name)
+		p.Outputf("Password: %s\n", user.Password)
 
 		return nil
 	})

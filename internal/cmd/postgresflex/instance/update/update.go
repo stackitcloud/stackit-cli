@@ -19,8 +19,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
-	wait "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api/wait"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
+	"github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api/wait"
 )
 
 const (
@@ -30,13 +30,18 @@ const (
 	aclFlag            = "acl"
 	backupScheduleFlag = "backup-schedule"
 	flavorIdFlag       = "flavor-id"
-	cpuFlag            = "cpu"
-	ramFlag            = "ram"
-	storageClassFlag   = "storage-class"
 	storageSizeFlag    = "storage-size"
 	versionFlag        = "version"
+	retentionDaysFlag  = "retention-days"
+
+	// Deprecated: Will be removed after 2027-01-31. Storage class can not be updated.
+	storageClassFlag = "storage-class"
+
+	cpuFlag = "cpu" // Deprecated: Will be removed after 2027-01-31. Flavor id should be used instead.
+	ramFlag = "ram" // Deprecated: Will be removed after 2027-01-31. Flavor id should be used instead.
 )
 
+// Deprecated: Will be removed after 2027-01-31. Replicas are managed via the flavor id on API side now.
 var typeFlag = flags.StringEnumFlag(
 	"type",
 	postgresflexUtils.AvailableInstanceTypes(),
@@ -51,12 +56,13 @@ type inputModel struct {
 	ACL            []string
 	BackupSchedule *string
 	FlavorId       *string
-	CPU            *int64
-	RAM            *int64
-	StorageClass   *string
 	StorageSize    *int64
 	Version        *string
-	Type           *string
+	RetentionDays  *int32
+
+	CPU  *int64  // Deprecated: Will be removed after 2027-01-31
+	RAM  *int64  // Deprecated: Will be removed after 2027-01-31
+	Type *string // Deprecated: Will be removed after 2027-01-31
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -104,24 +110,31 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			resp, err := req.Execute()
+			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("update PostgreSQL Flex instance: %w", err)
 			}
-			instanceId := *resp.Item.Id
+
+			// update endpoint doesn't return the updated instance, so we have to call the GET endpoint to fetch it
+			var getResp *postgresflex.GetInstanceResponse
 
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Updating instance", func() error {
-					_, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, instanceId).WaitWithContext(ctx)
+					getResp, err = wait.PartialUpdateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
 					return fmt.Errorf("wait for PostgreSQL Flex instance update: %w", err)
 				}
+			} else {
+				getResp, err = apiClient.DefaultAPI.GetInstance(ctx, model.ProjectId, model.Region, model.InstanceId).Execute()
+				if err != nil {
+					return fmt.Errorf("fetching PostgreSQL Flex instance after async update: %w", err)
+				}
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, model.Async, instanceLabel, resp)
+			return outputResult(params.Printer, model.OutputFormat, model.Async, instanceLabel, getResp)
 		},
 	}
 	configureFlags(cmd)
@@ -133,12 +146,28 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.CIDRSliceFlag(), aclFlag, "List of IP networks in CIDR notation which are allowed to access this instance")
 	cmd.Flags().String(backupScheduleFlag, "", "Backup schedule")
 	cmd.Flags().String(flavorIdFlag, "", "ID of the flavor")
-	cmd.Flags().Int64(cpuFlag, 0, "Number of CPUs")
-	cmd.Flags().Int64(ramFlag, 0, "Amount of RAM (in GB)")
-	cmd.Flags().String(storageClassFlag, "", "Storage class")
+	cmd.Flags().Int64(cpuFlag, 0, "Number of CPUs")            // remove after 2027-01-31
+	cmd.Flags().Int64(ramFlag, 0, "Amount of RAM (in GB)")     // remove after 2027-01-31
+	cmd.Flags().String(storageClassFlag, "", "Storage class.") // remove after 2027-01-31
 	cmd.Flags().Int64(storageSizeFlag, 0, "Storage size (in GB)")
 	cmd.Flags().String(versionFlag, "", "Version")
+	cmd.Flags().String(retentionDaysFlag, "", "The days for how long the backup files should be stored before cleaned up (32 to 90).")
 	typeFlag.Register(cmd.Flags())
+
+	// remove after 2027-01-31
+	err := cmd.Flags().MarkDeprecated(storageClassFlag, "This flag has no effect and will be removed after 2027-01-31.")
+	cobra.CheckErr(err)
+
+	// remove after 2027-01-31
+	err = cmd.Flags().MarkDeprecated(typeFlag.Name(), fmt.Sprintf("Will be removed after 2027-01-31. Use the --%s flag instead.", flavorIdFlag))
+	cobra.CheckErr(err)
+	err = cmd.Flags().MarkDeprecated(cpuFlag, fmt.Sprintf("Will be removed after 2027-01-31. Use the --%s flag instead.", flavorIdFlag))
+	cobra.CheckErr(err)
+	err = cmd.Flags().MarkDeprecated(ramFlag, fmt.Sprintf("Will be removed after 2027-01-31. Use the --%s flag instead.", flavorIdFlag))
+	cobra.CheckErr(err)
+	cmd.MarkFlagsMutuallyExclusive(flavorIdFlag, cpuFlag)
+	cmd.MarkFlagsMutuallyExclusive(flavorIdFlag, ramFlag)
+	cmd.MarkFlagsMutuallyExclusive(flavorIdFlag, "type")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -155,13 +184,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	ram := flags.FlagToInt64Pointer(p, cmd, ramFlag)
 	acl := flags.FlagToStringSliceValue(p, cmd, aclFlag)
 	backupSchedule := flags.FlagToStringPointer(p, cmd, backupScheduleFlag)
-	storageClass := flags.FlagToStringPointer(p, cmd, storageClassFlag)
 	storageSize := flags.FlagToInt64Pointer(p, cmd, storageSizeFlag)
 	version := flags.FlagToStringPointer(p, cmd, versionFlag)
 	instanceType := typeFlag.Ptr()
+	retentionDays := flags.FlagToInt32Pointer(p, cmd, retentionDaysFlag)
 
 	if instanceName == nil && flavorId == nil && cpu == nil && ram == nil && acl == nil &&
-		backupSchedule == nil && storageClass == nil && storageSize == nil && version == nil && instanceType == nil {
+		backupSchedule == nil && storageSize == nil && version == nil && instanceType == nil && retentionDays == nil {
 		return nil, &cliErr.EmptyUpdateError{}
 	}
 
@@ -179,12 +208,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		ACL:             acl,
 		BackupSchedule:  backupSchedule,
 		FlavorId:        flavorId,
-		CPU:             cpu,
-		RAM:             ram,
-		StorageClass:    storageClass,
 		StorageSize:     storageSize,
 		Version:         version,
-		Type:            instanceType,
+		RetentionDays:   retentionDays,
+
+		// deprecated fields
+		Type: instanceType,
+		CPU:  cpu,
+		RAM:  ram,
 	}
 
 	p.DebugInputModel(model)
@@ -192,31 +223,47 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex.DefaultAPI) (postgresflex.ApiPartialUpdateInstanceRequest, error) {
-	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
-
 	var flavorId *string
 	var err error
+
+	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
+
+	currentInstance, err := apiClient.GetInstance(ctx, model.ProjectId, model.Region, model.InstanceId).Execute()
+	if err != nil {
+		return req, fmt.Errorf("failed to get instance %s: %w", model.InstanceId, err)
+	}
 
 	flavors, err := apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get PostgreSQL Flex flavors: %w", err)
 	}
 
+	// if cpu/ram flags are used instead of the flavor id flag
 	if model.FlavorId == nil && (model.RAM != nil || model.CPU != nil) {
 		ram := model.RAM
 		cpu := model.CPU
+
+		// if only one of the cpu/ram flags is set
 		if model.RAM == nil || model.CPU == nil {
-			currentInstance, err := apiClient.GetInstance(ctx, model.ProjectId, model.Region, model.InstanceId).Execute()
-			if err != nil {
-				return req, fmt.Errorf("get PostgreSQL Flex instance: %w", err)
+			var currentFlavor *postgresflex.ListFlavors
+			for _, f := range flavors.Flavors {
+				if f.Id == currentInstance.FlavorId {
+					currentFlavor = &f
+				}
 			}
+
+			if currentFlavor == nil {
+				return req, fmt.Errorf("flavor %s not found", currentInstance.FlavorId)
+			}
+
 			if model.RAM == nil {
-				ram = currentInstance.Item.Flavor.Memory
+				ram = utils.Ptr(currentFlavor.Memory)
 			}
 			if model.CPU == nil {
-				cpu = currentInstance.Item.Flavor.Cpu
+				cpu = utils.Ptr(currentFlavor.Cpu)
 			}
 		}
+
 		flavorId, err = postgresflexUtils.LoadFlavorId(*cpu, *ram, flavors.Flavors)
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
@@ -226,84 +273,48 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex
 			return req, err
 		}
 	} else if model.FlavorId != nil {
-		err := postgresflexUtils.ValidateFlavorId(*model.FlavorId, flavors.Flavors)
-		if err != nil {
-			return req, err
-		}
 		flavorId = model.FlavorId
 	}
 
-	var storages *postgresflex.ListStoragesResponse
-	if model.StorageClass != nil || model.StorageSize != nil {
-		validationFlavorId := flavorId
-		if validationFlavorId == nil {
-			currentInstance, err := apiClient.GetInstance(ctx, model.ProjectId, model.Region, model.InstanceId).Execute()
-			if err != nil {
-				return req, fmt.Errorf("get PostgreSQL Flex instance: %w", err)
-			}
-			validationFlavorId = currentInstance.Item.Flavor.Id
-		}
-		storages, err = apiClient.ListStorages(ctx, model.ProjectId, model.Region, *validationFlavorId).Execute()
-		if err != nil {
-			return req, fmt.Errorf("get PostgreSQL Flex storages: %w", err)
-		}
-		err = postgresflexUtils.ValidateStorage(model.StorageClass, model.StorageSize, storages, *validationFlavorId)
-		if err != nil {
-			return req, err
-		}
-	}
-
-	var payloadAcl *postgresflex.ACL
+	var payloadNetwork *postgresflex.InstanceNetworkOpt
 	if model.ACL != nil {
-		payloadAcl = &postgresflex.ACL{Items: model.ACL}
+		payloadNetwork = &postgresflex.InstanceNetworkOpt{
+			Acl: model.ACL,
+		}
 	}
 
 	var payloadStorage *postgresflex.StorageUpdate
-	if model.StorageClass != nil || model.StorageSize != nil {
+	if model.StorageSize != nil {
 		payloadStorage = &postgresflex.StorageUpdate{
-			Class: model.StorageClass,
-			Size:  model.StorageSize,
+			Size: model.StorageSize,
 		}
 	}
 
-	var replicas *int32
-	var payloadOptions *map[string]string
-	if model.Type != nil {
-		replicasInt, err := postgresflexUtils.GetInstanceReplicas(*model.Type)
-		if err != nil {
-			return req, fmt.Errorf("get PostgreSQL Flex instance type: %w", err)
-		}
-
-		replicas = &replicasInt
-		payloadOptions = utils.Ptr(map[string]string{
-			"type": *model.Type,
-		})
-	}
-
-	req = req.PartialUpdateInstancePayload(postgresflex.PartialUpdateInstancePayload{
-		Name:           model.InstanceName,
-		Acl:            payloadAcl,
+	payload := postgresflex.PartialUpdateInstancePayload{
 		BackupSchedule: model.BackupSchedule,
 		FlavorId:       flavorId,
-		Replicas:       replicas,
+		Name:           model.InstanceName,
+		Network:        payloadNetwork,
+		RetentionDays:  model.RetentionDays,
 		Storage:        payloadStorage,
 		Version:        model.Version,
-		Options:        payloadOptions,
-	})
-	return req, nil
-}
-
-func outputResult(p *print.Printer, outputFormat string, async bool, instanceLabel string, resp *postgresflex.PartialUpdateInstanceResponse) error {
-	if resp == nil {
-		return fmt.Errorf("no response passed")
 	}
 
+	return req.PartialUpdateInstancePayload(payload), nil
+}
+
+func outputResult(p *print.Printer, outputFormat string, async bool, instanceLabel string, resp *postgresflex.GetInstanceResponse) error {
 	return p.OutputResult(outputFormat, resp, func() error {
+		if resp == nil {
+			return fmt.Errorf("no response passed")
+		}
+
 		operationState := "Updated"
 		if async {
 			operationState = "Triggered update of"
 		}
-		p.Info("%s instance %q\n", operationState, instanceLabel)
+
+		p.Outputf("%s instance %q\n", operationState, instanceLabel)
 		return nil
 	})
 }

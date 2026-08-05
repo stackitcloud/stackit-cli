@@ -4,11 +4,10 @@ import (
 	"context"
 	"fmt"
 	"slices"
-	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 
-	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
 	"golang.org/x/mod/semver"
 )
 
@@ -16,12 +15,6 @@ import (
 var instanceTypeToReplicas = map[string]int32{
 	"Single":  1,
 	"Replica": 3,
-}
-
-type PostgresFlexClient interface {
-	ListVersions(ctx context.Context, projectId, region string) postgresflex.ApiListVersionsRequest
-	GetInstance(ctx context.Context, projectId, region, instanceId string) postgresflex.ApiGetInstanceRequest
-	GetUser(ctx context.Context, projectId, region, instanceId, userId string) postgresflex.ApiGetUserRequest
 }
 
 func AvailableInstanceTypes() []string {
@@ -37,89 +30,24 @@ func AvailableInstanceTypes() []string {
 	return instanceTypes
 }
 
-func GetInstanceReplicas(instanceType string) (int32, error) {
-	numReplicas, ok := instanceTypeToReplicas[instanceType]
-	if !ok {
-		return 0, fmt.Errorf("invalid instance type: %v", instanceType)
-	}
-	return numReplicas, nil
-}
-
-func GetInstanceType(numReplicas int32) (string, error) {
-	for k, v := range instanceTypeToReplicas {
-		if v == numReplicas {
-			return k, nil
-		}
-	}
-	return "", fmt.Errorf("invalid number of replicas: %v", numReplicas)
-}
-
-func ValidateFlavorId(flavorId string, flavors []postgresflex.Flavor) error {
-	if flavors == nil {
-		return fmt.Errorf("nil flavors")
-	}
-
-	for _, f := range flavors {
-		if f.Id != nil && strings.EqualFold(*f.Id, flavorId) {
-			return nil
-		}
-	}
-
-	return &errors.DatabaseInvalidFlavorError{
-		Service: "postgresflex",
-		Details: fmt.Sprintf("You provided flavor ID '%s', which is invalid.", flavorId),
-	}
-}
-
-func ValidateStorage(storageClass *string, storageSize *int64, storages *postgresflex.ListStoragesResponse, flavorId string) error {
-	if storages == nil {
-		return fmt.Errorf("nil storages")
-	}
-
-	if storageSize != nil {
-		if *storageSize < *storages.StorageRange.Min || *storageSize > *storages.StorageRange.Max {
-			return fmt.Errorf("%s", fmt.Sprintf("You provided storage size '%d', which is invalid. The valid range is %d-%d.", *storageSize, *storages.StorageRange.Min, *storages.StorageRange.Max))
-		}
-	}
-
-	if storageClass == nil {
-		return nil
-	}
-
-	for _, sc := range storages.StorageClasses {
-		if strings.EqualFold(*storageClass, sc) {
-			return nil
-		}
-	}
-	return &errors.DatabaseInvalidStorageError{
-		Service:  "postgresflex",
-		Details:  fmt.Sprintf("You provided storage class '%s', which is invalid.", *storageClass),
-		FlavorId: flavorId,
-	}
-}
-
-func LoadFlavorId(cpu, ram int64, flavors []postgresflex.Flavor) (*string, error) {
+func LoadFlavorId(cpu, ram int64, flavors []postgresflex.ListFlavors) (*string, error) {
 	if flavors == nil {
 		return nil, fmt.Errorf("nil flavors")
 	}
 
-	availableFlavors := ""
 	for _, f := range flavors {
-		if f.Id == nil || f.Cpu == nil || f.Memory == nil {
-			continue
+		if f.Cpu == cpu && f.Memory == ram {
+			return &f.Id, nil
 		}
-		if *f.Cpu == cpu && *f.Memory == ram {
-			return f.Id, nil
-		}
-		availableFlavors = fmt.Sprintf("%s\n- %d CPU, %d GB RAM", availableFlavors, *f.Cpu, *f.Cpu)
 	}
+
 	return nil, &errors.DatabaseInvalidFlavorError{
 		Service: "postgresflex",
 		Details: "You provided an invalid combination for CPU and RAM.",
 	}
 }
 
-func GetLatestPostgreSQLVersion(ctx context.Context, apiClient PostgresFlexClient, projectId, region string) (string, error) {
+func GetLatestPostgreSQLVersion(ctx context.Context, apiClient postgresflex.DefaultAPI, projectId, region string) (string, error) {
 	resp, err := apiClient.ListVersions(ctx, projectId, region).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get PostgreSQL versions: %w", err)
@@ -128,11 +56,11 @@ func GetLatestPostgreSQLVersion(ctx context.Context, apiClient PostgresFlexClien
 	latestVersion := "0"
 	for i := range resp.Versions {
 		oldSemVer := fmt.Sprintf("v%s", latestVersion)
-		newSemVer := fmt.Sprintf("v%s", resp.Versions[i])
+		newSemVer := fmt.Sprintf("v%s", resp.Versions[i].Version)
 		if semver.Compare(newSemVer, oldSemVer) != 1 {
 			continue
 		}
-		latestVersion = resp.Versions[i]
+		latestVersion = resp.Versions[i].Version
 	}
 	if latestVersion == "0" {
 		return "", fmt.Errorf("no PostgreSQL versions found")
@@ -140,26 +68,18 @@ func GetLatestPostgreSQLVersion(ctx context.Context, apiClient PostgresFlexClien
 	return latestVersion, nil
 }
 
-func GetInstanceName(ctx context.Context, apiClient PostgresFlexClient, projectId, region, instanceId string) (string, error) {
+func GetInstanceName(ctx context.Context, apiClient postgresflex.DefaultAPI, projectId, region, instanceId string) (string, error) {
 	resp, err := apiClient.GetInstance(ctx, projectId, region, instanceId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get PostgreSQL Flex instance: %w", err)
 	}
-	return *resp.Item.Name, nil
+	return resp.Name, nil
 }
 
-func GetInstanceStatus(ctx context.Context, apiClient PostgresFlexClient, projectId, region, instanceId string) (string, error) {
-	resp, err := apiClient.GetInstance(ctx, projectId, region, instanceId).Execute()
-	if err != nil {
-		return "", fmt.Errorf("get PostgreSQL Flex instance: %w", err)
-	}
-	return *resp.Item.Status, nil
-}
-
-func GetUserName(ctx context.Context, apiClient PostgresFlexClient, projectId, region, instanceId, userId string) (string, error) {
+func GetUserName(ctx context.Context, apiClient postgresflex.DefaultAPI, projectId, region, instanceId string, userId int64) (string, error) {
 	resp, err := apiClient.GetUser(ctx, projectId, region, instanceId, userId).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get PostgreSQL Flex user: %w", err)
 	}
-	return *resp.Item.Username, nil
+	return resp.Name, nil
 }
