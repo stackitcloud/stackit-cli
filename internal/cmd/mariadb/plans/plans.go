@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	mariadb "github.com/stackitcloud/stackit-sdk-go/services/mariadb/v1api"
+	mariadb "github.com/stackitcloud/stackit-sdk-go/services/mariadb/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -114,7 +114,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *mariadb.APIClient) mariadb.ApiListOfferingsRequest {
-	req := apiClient.DefaultAPI.ListOfferings(ctx, model.ProjectId)
+	req := apiClient.DefaultAPI.ListOfferings(ctx, model.ProjectId, model.Region)
 	return req
 }
 

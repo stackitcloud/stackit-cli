@@ -8,7 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/uuid"
-	mariadb "github.com/stackitcloud/stackit-sdk-go/services/mariadb/v1api"
+	mariadb "github.com/stackitcloud/stackit-sdk-go/services/mariadb/v2api"
 )
 
 var (
@@ -19,6 +19,7 @@ var (
 
 const (
 	testInstanceName        = "instance"
+	testRegion              = "eu01"
 	testCredentialsUsername = "username"
 )
 
@@ -76,7 +77,7 @@ func TestGetInstanceName(t *testing.T) {
 				getInstanceResp:  tt.getInstanceResp,
 			}
 
-			output, err := GetInstanceName(context.Background(), newAPIMock(settings), testProjectId, testInstanceId)
+			output, err := GetInstanceName(context.Background(), newAPIMock(settings), testProjectId, testRegion, testInstanceId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -128,7 +129,7 @@ func TestGetCredentialsUsername(t *testing.T) {
 				getCredentialsResp:  tt.getCredentialsResp,
 			}
 
-			output, err := GetCredentialsUsername(context.Background(), newAPIMock(settings), testProjectId, testInstanceId, testCredentialsId)
+			output, err := GetCredentialsUsername(context.Background(), newAPIMock(settings), testProjectId, testRegion, testInstanceId, testCredentialsId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
