@@ -335,3 +335,68 @@ func TestInitKeyFlow(t *testing.T) {
 		})
 	}
 }
+
+func TestGetAccessToken_EnvVar(t *testing.T) {
+	const envValue = "token-from-env"
+	const storedValue = "stored-token"
+
+	tests := []struct {
+		description   string
+		envToken      string
+		storedToken   string
+		expectedToken string
+		isValid       bool
+	}{
+		{
+			description:   "env var set and no stored token",
+			envToken:      envValue,
+			expectedToken: envValue,
+			isValid:       true,
+		},
+		{
+			description:   "env var set and stored token present",
+			envToken:      envValue,
+			storedToken:   storedValue,
+			expectedToken: envValue,
+			isValid:       true,
+		},
+		{
+			description:   "env var not set and stored token present",
+			storedToken:   storedValue,
+			expectedToken: storedValue,
+			isValid:       true,
+		},
+		{
+			description: "env var not set and no stored token",
+			isValid:     false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			keyring.MockInit()
+			if tt.envToken != "" {
+				t.Setenv(envAccessTokenName, tt.envToken)
+			}
+			if tt.storedToken != "" {
+				if err := SetAuthField(ACCESS_TOKEN, tt.storedToken); err != nil {
+					t.Fatalf("Failed to set stored token: %v", err)
+				}
+				if err := SetAuthFlow(AUTH_FLOW_SERVICE_ACCOUNT_TOKEN); err != nil {
+					t.Fatalf("Failed to set auth flow: %v", err)
+				}
+			}
+
+			got, err := GetAccessToken()
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if tt.expectedToken != got {
+				t.Errorf("expected token %q, got %q", tt.expectedToken, got)
+			}
+		})
+	}
+}
