@@ -76,10 +76,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				`Create a kubeconfig for the Edge Cloud instance with instance ID "xxx". This will replace your current kubeconfig file.`,
 				`$ stackit beta edge-cloud kubeconfig create --instance-id xxx --overwrite`),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 
-			model, err := parseInput(params.Printer, cmd, args)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
@@ -165,7 +165,7 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 // Parse user input (arguments and/or flags)
-func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}

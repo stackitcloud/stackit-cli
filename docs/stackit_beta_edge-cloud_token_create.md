@@ -6,7 +6,7 @@ Creates a token for an Edge Cloud instance
 
 Creates a token for a STACKIT Edge Cloud (STEC) instance.
 
-An expiration time can be set for the token. The expiration time is set in seconds(s), minutes(m), hours(h), days(d) or months(M). Default is 3600(1h) seconds.
+An expiration time can be set for the token. The expiration time is set in seconds(s), minutes(m), hours(h), days(d) or months(M). Default is 3600 seconds.
 Note: the format for the duration is <value><unit>, e.g. 30d for 30 days. You may not combine units.
 
 ```
@@ -26,7 +26,7 @@ stackit beta edge-cloud token create [flags]
 ### Options
 
 ```
-  -e, --expiration string    Expiration time for the token, e.g. 5d. By default, the token is valid for 1h.
+  -e, --expiration string    Expiration time for the token, e.g. 5d. By default, the token is valid for 3600 seconds.
   -h, --help                 Help for "stackit beta edge-cloud token create"
       --instance-id string   Edge Cloud instance ID
 ```

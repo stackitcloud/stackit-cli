@@ -74,11 +74,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, model, apiClient)
-			if err != nil {
-				return err
-			}
-			resp, err := req.Execute()
+			request := buildRequest(ctx, model, apiClient)
+
+			resp, err := request.Execute()
 			if err != nil {
 				return fmt.Errorf("create edge cloud instance: %w", err)
 			}
@@ -131,8 +129,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *edge.APIClient) (req edge.ApiCreateInstanceRequest, err error) {
-	req = apiClient.DefaultAPI.CreateInstance(ctx, model.ProjectId, model.Region)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *edge.APIClient) edge.ApiCreateInstanceRequest {
+	req := apiClient.DefaultAPI.CreateInstance(ctx, model.ProjectId, model.Region)
 
 	payload := edge.CreateInstancePayload{
 		DisplayName: model.DisplayName,
@@ -140,7 +138,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *edge.APICli
 		PlanId:      model.PlanId,
 	}
 
-	return req.CreateInstancePayload(payload), nil
+	return req.CreateInstancePayload(payload)
 }
 
 func outputResult(p *print.Printer, model *inputModel, projectLabel string, instance *edge.Instance) error {

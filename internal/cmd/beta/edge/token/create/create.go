@@ -45,7 +45,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Short: "Creates a token for an Edge Cloud instance",
 		Long: fmt.Sprintf("%s\n\n%s\n%s",
 			"Creates a token for a STACKIT Edge Cloud (STEC) instance.",
-			"An expiration time can be set for the token. The expiration time is set in seconds(s), minutes(m), hours(h), days(d) or months(M). Default is 3600(1h) seconds.",
+			fmt.Sprintf("An expiration time can be set for the token. The expiration time is set in seconds(s), minutes(m), hours(h), days(d) or months(M). Default is %d seconds.", expirationSecondsDefault),
 			"Note: the format for the duration is <value><unit>, e.g. 30d for 30 days. You may not combine units."),
 		Args: args.NoArgs,
 		Example: examples.Build(
@@ -56,10 +56,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				`Create a token for the Edge Cloud instance with instance ID "xxx". The token will be valid for one day.`,
 				`$ stackit beta edge-cloud token create --instance-id xxx --expiration 1d`),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 
-			model, err := parseInput(params.Printer, cmd, args)
+			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
 			}
@@ -123,14 +123,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(instanceIdFlag, "", "Edge Cloud instance ID")
-	cmd.Flags().StringP(expirationFlag, "e", "", "Expiration time for the token, e.g. 5d. By default, the token is valid for 1h.")
+	cmd.Flags().StringP(expirationFlag, "e", "", fmt.Sprintf("Expiration time for the token, e.g. 5d. By default, the token is valid for %d seconds.", expirationSecondsDefault))
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)
 }
 
 // Parse user input (arguments and/or flags)
-func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
