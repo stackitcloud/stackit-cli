@@ -56,60 +56,6 @@ func newAPIMockClient(s mockSettings) postgresflex.DefaultAPI {
 	}
 }
 
-func TestValidateFlavorId(t *testing.T) {
-	tests := []struct {
-		description string
-		flavorId    string
-		flavors     []postgresflex.ListFlavors
-		isValid     bool
-	}{
-		{
-			description: "base",
-			flavorId:    "foo",
-			flavors: []postgresflex.ListFlavors{
-				{Id: "bar-1"},
-				{Id: "bar-2"},
-				{Id: "foo"},
-			},
-			isValid: true,
-		},
-		{
-			description: "nil flavors",
-			flavorId:    "foo",
-			flavors:     nil,
-			isValid:     false,
-		},
-		{
-			description: "no flavors",
-			flavorId:    "foo",
-			flavors:     []postgresflex.ListFlavors{},
-			isValid:     false,
-		},
-		{
-			description: "invalid flavor",
-			flavorId:    "foo",
-			flavors: []postgresflex.ListFlavors{
-				{Id: "bar-1"},
-				{Id: "bar-2"},
-				{Id: "bar-3"},
-			},
-			isValid: false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.description, func(t *testing.T) {
-			err := ValidateFlavorId(tt.flavorId, tt.flavors)
-			if tt.isValid && err != nil {
-				t.Fatalf("should not have failed: %v", err)
-			}
-			if !tt.isValid && err == nil {
-				t.Fatalf("should have failed")
-			}
-		})
-	}
-}
-
 func TestLoadFlavorId(t *testing.T) {
 	tests := []struct {
 		description    string
@@ -354,52 +300,6 @@ func TestGetUserName(t *testing.T) {
 			}
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
-			}
-		})
-	}
-}
-
-func TestGetInstanceType(t *testing.T) {
-	tests := []struct {
-		description    string
-		numReplicas    int32
-		expectedOutput string
-		isValid        bool
-	}{
-		{
-			description:    "single",
-			numReplicas:    1,
-			expectedOutput: "Single",
-			isValid:        true,
-		},
-		{
-			description:    "replica set",
-			numReplicas:    3,
-			expectedOutput: "Replica",
-			isValid:        true,
-		},
-		{
-			description: "invalid",
-			numReplicas: 0,
-			isValid:     false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.description, func(t *testing.T) {
-			output, err := GetInstanceType(tt.numReplicas)
-			if !tt.isValid {
-				if err == nil {
-					t.Fatalf("did not fail on invalid input")
-				}
-				return
-			}
-			if err != nil {
-				t.Fatalf("failed on valid input: %v", err)
-			}
-
-			if output != tt.expectedOutput {
-				t.Fatalf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}
 		})
 	}

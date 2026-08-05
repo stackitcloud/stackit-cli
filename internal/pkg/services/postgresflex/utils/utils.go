@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"slices"
-	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 
@@ -18,12 +17,6 @@ var instanceTypeToReplicas = map[string]int32{
 	"Replica": 3,
 }
 
-type PostgresFlexClient interface {
-	ListVersions(ctx context.Context, projectId, region string) postgresflex.ApiListVersionsRequest
-	GetInstance(ctx context.Context, projectId, region, instanceId string) postgresflex.ApiGetInstanceRequest
-	GetUser(ctx context.Context, projectId, region, instanceId, userId string) postgresflex.ApiGetUserRequest
-}
-
 func AvailableInstanceTypes() []string {
 	instanceTypes := make([]string, len(instanceTypeToReplicas))
 	i := 0
@@ -35,40 +28,6 @@ func AvailableInstanceTypes() []string {
 	// So we sort the array to make the output consistent
 	slices.Sort(instanceTypes)
 	return instanceTypes
-}
-
-func GetInstanceReplicas(instanceType string) (int32, error) {
-	numReplicas, ok := instanceTypeToReplicas[instanceType]
-	if !ok {
-		return 0, fmt.Errorf("invalid instance type: %v", instanceType)
-	}
-	return numReplicas, nil
-}
-
-func GetInstanceType(numReplicas int32) (string, error) {
-	for k, v := range instanceTypeToReplicas {
-		if v == numReplicas {
-			return k, nil
-		}
-	}
-	return "", fmt.Errorf("invalid number of replicas: %v", numReplicas)
-}
-
-func ValidateFlavorId(flavorId string, flavors []postgresflex.ListFlavors) error {
-	if flavors == nil {
-		return fmt.Errorf("nil flavors")
-	}
-
-	for _, f := range flavors {
-		if strings.EqualFold(f.Id, flavorId) {
-			return nil
-		}
-	}
-
-	return &errors.DatabaseInvalidFlavorError{
-		Service: "postgresflex",
-		Details: fmt.Sprintf("You provided flavor ID '%s', which is invalid.", flavorId),
-	}
 }
 
 func LoadFlavorId(cpu, ram int64, flavors []postgresflex.ListFlavors) (*string, error) {
