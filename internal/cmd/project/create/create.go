@@ -148,29 +148,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *resourcemanager.APIClient) (resourcemanager.ApiCreateProjectRequest, error) {
 	req := apiClient.DefaultAPI.CreateProject(ctx)
 
-	authFlow, err := auth.GetAuthFlow()
+	email, err := auth.GetAuthEmail()
 	if err != nil {
-		return req, fmt.Errorf("get authentication flow: %w", err)
-	}
-	var email string
-	switch authFlow {
-	case auth.AUTH_FLOW_SERVICE_ACCOUNT_TOKEN:
-		email, err = auth.GetAuthField(auth.SERVICE_ACCOUNT_EMAIL)
-		if err != nil {
-			return req, fmt.Errorf("get email of the service account that was used to authenticate: %w", err)
-		}
-	case auth.AUTH_FLOW_SERVICE_ACCOUNT_KEY:
-		email, err = auth.GetAuthField(auth.SERVICE_ACCOUNT_EMAIL)
-		if err != nil {
-			return req, fmt.Errorf("get email of the service account that was used to authenticate: %w", err)
-		}
-	case auth.AUTH_FLOW_USER_TOKEN:
-		email, err = auth.GetAuthField(auth.USER_EMAIL)
-		if err != nil {
-			return req, fmt.Errorf("get your user email from configuration: %w", err)
-		}
-	default:
-		return req, fmt.Errorf("the configured authentication flow (%s) is not supported, please report this issue", authFlow)
+		return req, fmt.Errorf("get email of authenticated user: %w", err)
 	}
 
 	if email == "" {
