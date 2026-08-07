@@ -64,7 +64,7 @@ func NewPrinter(stdIn io.Reader, stdOut, stdErr io.Writer) *Printer {
 		logW = colorable.NewColorable(f)
 	}
 	logger := slog.New(
-		tint.NewHandler(logW, &tint.Options{AddSource: false, Level: slog.LevelDebug}),
+		tint.NewTextHandler(logW, &tint.Options{AddSource: false, Level: slog.LevelDebug}),
 	)
 	slog.SetDefault(logger)
 
