@@ -1,6 +1,6 @@
 ## stackit beta edge-cloud kubeconfig create
 
-Creates or updates a local kubeconfig file of an edge instance
+Creates or updates a local kubeconfig file of an Edge Cloud instance
 
 ### Synopsis
 
@@ -18,30 +18,29 @@ stackit beta edge-cloud kubeconfig create [flags]
 ### Examples
 
 ```
-  Create or update a kubeconfig for the edge instance with id "xxx". If the config exists in the kubeconfig file, the information will be updated.
-  $ stackit beta edge-cloud kubeconfig create --id "xxx"
+  Create or update a kubeconfig for the Edge Cloud instance with instance ID "xxx". If the config exists in the kubeconfig file, the information will be updated.
+  $ stackit beta edge-cloud kubeconfig create --instance-id xxx
 
-  Create or update a kubeconfig for the edge instance with name "xxx" in a custom filepath.
-  $ stackit beta edge-cloud kubeconfig create --name "xxx" --filepath "yyy"
+  Create or update a kubeconfig for the Edge Cloud instance with instance ID "xxx" in a custom filepath.
+  $ stackit beta edge-cloud kubeconfig create --instance-id xxx --filepath yyy
 
-  Get a kubeconfig for the edge instance with name "xxx" without writing it to a file and format the output as json.
-  $ stackit beta edge-cloud kubeconfig create --name "xxx" --disable-writing --output-format json
+  Get a kubeconfig for the Edge Cloud instance with instance ID "xxx" without writing it to a file and format the output as json.
+  $ stackit beta edge-cloud kubeconfig create --instance-id xxx --disable-writing --output-format json
 
-  Create a kubeconfig for the edge instance with id "xxx". This will replace your current kubeconfig file.
-  $ stackit beta edge-cloud kubeconfig create --id "xxx" --overwrite
+  Create a kubeconfig for the Edge Cloud instance with instance ID "xxx". This will replace your current kubeconfig file.
+  $ stackit beta edge-cloud kubeconfig create --instance-id xxx --overwrite
 ```
 
 ### Options
 
 ```
-      --disable-writing     Disable writing the kubeconfig to a file.
-  -e, --expiration string   Expiration time for the kubeconfig, e.g. 5d. By default, the token is valid for 1h.
-  -f, --filepath string     Path to the kubeconfig file. A default is chosen by Kubernetes if not set.
-  -h, --help                Help for "stackit beta edge-cloud kubeconfig create"
-  -i, --id string           The project-unique identifier of this instance.
-  -n, --name string         The displayed name to distinguish multiple instances.
-      --overwrite           Force overwrite the kubeconfig file if it exists.
-      --switch-context      Switch to the context in the kubeconfig file to the new context.
+      --disable-writing      Disable writing the kubeconfig to a file.
+  -e, --expiration string    Expiration time for the kubeconfig, e.g. 5d. By default, the token is valid for 1h.
+  -f, --filepath string      Path to the kubeconfig file. A default is chosen by Kubernetes if not set.
+  -h, --help                 Help for "stackit beta edge-cloud kubeconfig create"
+      --instance-id string   Edge Cloud instance ID
+      --overwrite            Force overwrite the kubeconfig file if it exists.
+      --switch-context       Switch to the context in the kubeconfig file to the new context.
 ```
 
 ### Options inherited from parent commands
@@ -57,5 +56,5 @@ stackit beta edge-cloud kubeconfig create [flags]
 
 ### SEE ALSO
 
-* [stackit beta edge-cloud kubeconfig](./stackit_beta_edge-cloud_kubeconfig.md)	 - Provides functionality for edge kubeconfig.
+* [stackit beta edge-cloud kubeconfig](./stackit_beta_edge-cloud_kubeconfig.md)	 - Provides functionality for Edge Cloud kubeconfig.
 

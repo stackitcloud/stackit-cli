@@ -1,6 +1,6 @@
 ## stackit beta edge-cloud plans list
 
-Lists available edge service plans
+Lists available Edge Cloud service plans
 
 ### Synopsis
 
@@ -13,11 +13,11 @@ stackit beta edge-cloud plans list [flags]
 ### Examples
 
 ```
-  Lists all edge plans for a given project
-  $ stackit beta edge-cloud plan list
+  Lists all Edge Cloud plans for a given project
+  $ stackit beta edge-cloud plans list
 
-  Lists all edge plans for a given project and limits the output to two plans
-  $ stackit beta edge-cloud plan list --limit 2
+  Lists all Edge Cloud plans for a given project and limits the output to two plans
+  $ stackit beta edge-cloud plans list --limit=2
 ```
 
 ### Options
@@ -40,5 +40,5 @@ stackit beta edge-cloud plans list [flags]
 
 ### SEE ALSO
 
-* [stackit beta edge-cloud plans](./stackit_beta_edge-cloud_plans.md)	 - Provides functionality for edge service plans.
+* [stackit beta edge-cloud plans](./stackit_beta_edge-cloud_plans.md)	 - Provides functionality for Edge Cloud service plans.
 
