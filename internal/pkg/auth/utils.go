@@ -46,6 +46,10 @@ func getIDPClientID() (string, error) {
 }
 
 func retrieveIDPWellKnownConfig(p *print.Printer) (*wellKnownConfig, error) {
+	return retrieveIDPWellKnownConfigWithStorage(p, true)
+}
+
+func retrieveIDPWellKnownConfigWithStorage(p *print.Printer, persistTokenEndpoint bool) (*wellKnownConfig, error) {
 	idpWellKnownConfigURL, err := getIDPWellKnownConfigURL()
 	if err != nil {
 		return nil, fmt.Errorf("get IDP well-known configuration: %w", err)
@@ -60,16 +64,35 @@ func retrieveIDPWellKnownConfig(p *print.Printer) (*wellKnownConfig, error) {
 
 	p.Debug(print.DebugLevel, "get IDP well-known configuration from %s", idpWellKnownConfigURL)
 	httpClient := &http.Client{}
-	idpWellKnownConfig, err := parseWellKnownConfiguration(httpClient, idpWellKnownConfigURL)
+	idpWellKnownConfig, err := parseWellKnownConfigurationWithStorage(httpClient, idpWellKnownConfigURL, persistTokenEndpoint)
 	if err != nil {
 		return nil, fmt.Errorf("parse IDP well-known configuration: %w", err)
 	}
 	return idpWellKnownConfig, nil
 }
 
+// GetIDPTokenEndpoint returns the configured IdP token endpoint without requiring
+// authentication storage. Persisted configuration is reused when available.
+func GetIDPTokenEndpoint(p *print.Printer) (string, error) {
+	tokenEndpoint, err := GetAuthField(IDP_TOKEN_ENDPOINT)
+	if err == nil && tokenEndpoint != "" {
+		return tokenEndpoint, nil
+	}
+
+	wellKnownConfig, err := retrieveIDPWellKnownConfigWithStorage(p, false)
+	if err != nil {
+		return "", err
+	}
+	return wellKnownConfig.TokenEndpoint, nil
+}
+
 // parseWellKnownConfiguration gets the well-known OpenID configuration from the provided URL and returns it as a JSON
 // the method also stores the IDP token endpoint in the authentication storage
 func parseWellKnownConfiguration(httpClient apiClient, wellKnownConfigURL string) (wellKnownConfig *wellKnownConfig, err error) {
+	return parseWellKnownConfigurationWithStorage(httpClient, wellKnownConfigURL, true)
+}
+
+func parseWellKnownConfigurationWithStorage(httpClient apiClient, wellKnownConfigURL string, persistTokenEndpoint bool) (wellKnownConfig *wellKnownConfig, err error) {
 	req, _ := http.NewRequest("GET", wellKnownConfigURL, http.NoBody)
 	res, err := httpClient.Do(req)
 	if err != nil {
@@ -114,9 +137,11 @@ func parseWellKnownConfiguration(httpClient apiClient, wellKnownConfigURL string
 		return nil, fmt.Errorf("token endpoint is invalid")
 	}
 
-	err = SetAuthField(IDP_TOKEN_ENDPOINT, wellKnownConfig.TokenEndpoint)
-	if err != nil {
-		return nil, fmt.Errorf("set token endpoint in the authentication storage: %w", err)
+	if persistTokenEndpoint {
+		err = SetAuthField(IDP_TOKEN_ENDPOINT, wellKnownConfig.TokenEndpoint)
+		if err != nil {
+			return nil, fmt.Errorf("set token endpoint in the authentication storage: %w", err)
+		}
 	}
 	return wellKnownConfig, err
 }
