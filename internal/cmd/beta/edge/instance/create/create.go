@@ -114,15 +114,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	displayNameValue := flags.FlagToStringValue(p, cmd, displayNameFlag)
-	planIdValue := flags.FlagToStringValue(p, cmd, planIdFlag)
-	descriptionValue := flags.FlagToStringPointer(p, cmd, descriptionFlag)
-
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		DisplayName:     displayNameValue,
-		Description:     descriptionValue,
-		PlanId:          planIdValue,
+		DisplayName:     flags.FlagToStringValue(p, cmd, displayNameFlag),
+		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
+		PlanId:          flags.FlagToStringValue(p, cmd, planIdFlag),
 	}
 
 	p.DebugInputModel(model)

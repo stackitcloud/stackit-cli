@@ -66,8 +66,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
-			resp, err := req.Execute()
+			resp, err := buildRequest(ctx, model, apiClient).Execute()
 			if err != nil {
 				return fmt.Errorf("get Edge Cloud instances: %w", err)
 			}
@@ -114,8 +113,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *edge.APIClient) edge.ApiListInstancesRequest {
-	req := apiClient.DefaultAPI.ListInstances(ctx, model.ProjectId, model.Region)
-	return req
+	return apiClient.DefaultAPI.ListInstances(ctx, model.ProjectId, model.Region)
 }
 
 func outputResult(p *print.Printer, outputFormat, projectLabel string, instances []edge.Instance) error {

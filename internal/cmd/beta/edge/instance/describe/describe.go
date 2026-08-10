@@ -89,8 +89,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *edge.APIClient) edge.ApiGetInstanceRequest {
-	req := apiClient.DefaultAPI.GetInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
-	return req
+	return apiClient.DefaultAPI.GetInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 }
 
 func outputResult(p *print.Printer, outputFormat string, instance *edge.Instance) error {
