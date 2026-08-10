@@ -217,6 +217,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlserverfle
 		return req, err
 	}
 
+	if model.ACL == nil {
+		model.ACL = make([]string, 0)
+	}
+
 	req = req.CreateInstancePayload(sqlserverflex.CreateInstancePayload{
 		Name: model.InstanceName,
 		Network: sqlserverflex.CreateInstancePayloadNetwork{
