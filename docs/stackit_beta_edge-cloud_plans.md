@@ -1,6 +1,6 @@
 ## stackit beta edge-cloud plans
 
-Provides functionality for edge service plans.
+Provides functionality for Edge Cloud service plans.
 
 ### Synopsis
 
@@ -29,6 +29,6 @@ stackit beta edge-cloud plans [flags]
 
 ### SEE ALSO
 
-* [stackit beta edge-cloud](./stackit_beta_edge-cloud.md)	 - Provides functionality for edge services.
-* [stackit beta edge-cloud plans list](./stackit_beta_edge-cloud_plans_list.md)	 - Lists available edge service plans
+* [stackit beta edge-cloud](./stackit_beta_edge-cloud.md)	 - Provides functionality for Edge Cloud services.
+* [stackit beta edge-cloud plans list](./stackit_beta_edge-cloud_plans_list.md)	 - Lists available Edge Cloud service plans
 
