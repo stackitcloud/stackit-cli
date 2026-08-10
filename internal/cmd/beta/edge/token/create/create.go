@@ -185,13 +185,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *edge.APICli
 
 // Output result based on the configured output format
 func outputResult(p *print.Printer, outputFormat string, token *edge.Token) error {
-	if token == nil {
-		// This is only to prevent nil pointer deref.
-		// As long as the API behaves as defined by it's spec, instance can not be empty (HTTP 200 with an empty body)
-		return fmt.Errorf("no token returned from the API")
-	}
-
 	return p.OutputResult(outputFormat, token, func() error {
+		if token == nil {
+			// This is only to prevent nil pointer deref.
+			// As long as the API behaves as defined by it's spec, instance can not be empty (HTTP 200 with an empty body)
+			return fmt.Errorf("no token returned from the API")
+		}
+
 		p.Outputln(token.Token)
 		return nil
 	})
