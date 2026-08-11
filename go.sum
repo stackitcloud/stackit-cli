@@ -652,6 +652,8 @@ github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.0 h1:eu9PhRdL2GkXpHtf4
 github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.0/go.mod h1:TbqmZhLMofmfl+HhVl6oHYcI3zvXTm1vRjN3A/fOkM4=
 github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.16.1 h1:pjFVw2Tc0cSfAzmyZRiLknuKSADs7nPXNUyrM216CwQ=
 github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.16.1/go.mod h1:AiUoMAqQcOlMgDtkVJlqI7P/VGD5xjN3dYjERGnwN/M=
+github.com/stackitcloud/stackit-sdk-go/services/valkey v0.2.0 h1:RP9ITvjsPhA2+Xi9MhqYP9xkEsURyxYmRB3JKXIB5zc=
+github.com/stackitcloud/stackit-sdk-go/services/valkey v0.2.0/go.mod h1:etzt/a723p327dqha1V72cCoBWjUBS2DtHy3ZTac0SA=
 github.com/stackitcloud/stackit-sdk-go/services/vpn v0.14.0 h1:LMgbzhPunuelsIsfyEj/5O/aYfNcg/eGHsnZ7AZOhYg=
 github.com/stackitcloud/stackit-sdk-go/services/vpn v0.14.0/go.mod h1:toIjQk1dhxdUFVyCWJJja0w/0nFpDid8MWX0ukQfvfo=
 github.com/stbenjam/no-sprintf-host-port v0.3.1 h1:AyX7+dxI4IdLBPtDbsGAyqiTSLpCP9hWRrXQDU4Cm/g=

@@ -10,6 +10,7 @@ import (
 	affinityGroups "github.com/stackitcloud/stackit-cli/internal/cmd/affinity-groups"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/auth"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/valkey"
 	configCmd "github.com/stackitcloud/stackit-cli/internal/cmd/config"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/curl"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/dns"
@@ -203,6 +204,7 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(affinityGroups.NewCmd(params))
 	cmd.AddCommand(git.NewCmd(params))
 	cmd.AddCommand(kms.NewCmd(params))
+	cmd.AddCommand(valkey.NewCmd(params))
 }
 
 // traverseCommands calls f for c and all of its children.
