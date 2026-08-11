@@ -246,8 +246,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlserverfle
 			KekKeyVersion:  *model.EncryptionKekKeyVersion,
 			ServiceAccount: *model.EncryptionServiceAccount,
 		}
-	if model.ACL == nil {
-		model.ACL = make([]string, 0)
+		if model.ACL == nil {
+			model.ACL = make([]string, 0)
+		}
 	}
 
 	req = req.CreateInstancePayload(sqlserverflex.CreateInstancePayload{
