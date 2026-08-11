@@ -6,6 +6,9 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
+	"github.com/spf13/cobra"
+	serviceaccount "github.com/stackitcloud/stackit-sdk-go/services/serviceaccount/v2api"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -14,10 +17,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serviceaccount"
 )
 
 const (
@@ -26,7 +25,7 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Name *string
+	Name string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -94,7 +93,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		Name:            flags.FlagToStringPointer(p, cmd, nameFlag),
+		Name:            flags.FlagToStringValue(p, cmd, nameFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -102,7 +101,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceaccount.APIClient) serviceaccount.ApiCreateServiceAccountRequest {
-	req := apiClient.CreateServiceAccount(ctx, model.ProjectId)
+	req := apiClient.DefaultAPI.CreateServiceAccount(ctx, model.ProjectId)
 	req = req.CreateServiceAccountPayload(serviceaccount.CreateServiceAccountPayload{
 		Name: model.Name,
 	})
@@ -115,7 +114,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, serviceAc
 	}
 
 	return p.OutputResult(outputFormat, serviceAccount, func() error {
-		p.Outputf("Created service account for project %q. Email: %s\n", projectLabel, utils.PtrString(serviceAccount.Email))
+		p.Outputf("Created service account for project %q. Email: %s\n", projectLabel, serviceAccount.Email)
 		return nil
 	})
 }

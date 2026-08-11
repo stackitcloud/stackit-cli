@@ -20,28 +20,28 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.15.2
 	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.16.0
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.21.0
-	github.com/stackitcloud/stackit-sdk-go/services/edge v0.4.3
+	github.com/stackitcloud/stackit-sdk-go/services/edge v0.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.14.0
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/intake v0.7.1
 	github.com/stackitcloud/stackit-sdk-go/services/logs v0.10.0
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.1.0
-	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.11.0
+	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.24.0
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.8.0
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.18.1
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.7.0
 	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.5.2
-	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.12.0
+	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.20.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.7.0
-	github.com/stackitcloud/stackit-sdk-go/services/ske v1.11.0
+	github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.0
 	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.16.1
 	github.com/stackitcloud/stackit-sdk-go/services/vpn v0.14.0
 	github.com/zalando/go-keyring v0.2.8
-	golang.org/x/mod v0.37.0
+	golang.org/x/mod v0.38.0
 	golang.org/x/oauth2 v0.36.0
-	golang.org/x/term v0.44.0
+	golang.org/x/term v0.45.0
 	golang.org/x/text v0.40.0
 	k8s.io/apimachinery v0.36.2
 	k8s.io/client-go v0.36.2
@@ -265,16 +265,16 @@ require (
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/stackitcloud/stackit-sdk-go/services/kms v1.11.0
-	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.14.0
-	github.com/stackitcloud/stackit-sdk-go/services/logme v1.0.1
-	github.com/stackitcloud/stackit-sdk-go/services/mariadb v0.30.0
+	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.15.0
+	github.com/stackitcloud/stackit-sdk-go/services/logme v1.1.0
+	github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.1.0
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.9.0
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.24.0
 	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.1.1
 	github.com/stackitcloud/stackit-sdk-go/services/redis v1.1.0
 	github.com/stackitcloud/stackit-sdk-go/services/sfs v0.9.0
 	github.com/subosito/gotenv v1.6.0 // indirect
-	golang.org/x/sys v0.46.0 // indirect
+	golang.org/x/sys v0.47.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/api v0.36.2 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect

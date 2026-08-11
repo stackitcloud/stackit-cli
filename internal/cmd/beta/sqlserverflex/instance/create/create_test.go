@@ -457,6 +457,35 @@ func TestBuildRequest(t *testing.T) {
 			},
 			isValid: false,
 		},
+		{
+			description: "nil acl",
+			model: fixtureInputModel(
+				func(model *inputModel) {
+					model.ACL = nil
+				}),
+			listFlavorsResp: &sqlserverflex.ListFlavorsResponse{
+				Flavors: []sqlserverflex.ListFlavors{
+					{
+						Id:     testFlavorId,
+						Cpu:    int64(2),
+						Memory: int64(4),
+					},
+				},
+			},
+			listStoragesResp: &sqlserverflex.ListStoragesResponse{
+				StorageClasses: []sqlserverflex.FlavorStorageClassesStorageClass{{
+					Class: "storage-class",
+				}},
+				StorageRange: sqlserverflex.FlavorStorageRange{
+					Min: 10,
+					Max: 100,
+				},
+			},
+			isValid: true,
+			expectedRequest: testClient.DefaultAPI.CreateInstance(testCtx, testProjectId, testRegion).CreateInstancePayload(fixturePayload(func(payload *sqlserverflex.CreateInstancePayload) {
+				payload.Network.Acl = make([]string, 0)
+			})),
+		},
 	}
 
 	for _, tt := range tests {

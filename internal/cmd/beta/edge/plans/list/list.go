@@ -1,6 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
-// SPDX-FileCopyrightText: 2025 STACKIT GmbH & Co. KG
-
 package list
 
 import (
@@ -8,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/edge"
+	edge "github.com/stackitcloud/stackit-sdk-go/services/edge/v1beta1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -34,36 +31,24 @@ type inputModel struct {
 	Limit *int64
 }
 
-// listRequestSpec captures the details of the request for testing.
-type listRequestSpec struct {
-	// Exported fields allow tests to inspect the request inputs
-	ProjectID string
-	Limit     *int64
-
-	// Execute is a closure that wraps the actual SDK call
-	Execute func() (*edge.PlanList, error)
-}
-
-// Command constructor
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Lists available edge service plans",
+		Short: "Lists available Edge Cloud service plans",
 		Long:  "Lists available STACKIT Edge Cloud (STEC) service plans of a project",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Lists all edge plans for a given project`,
-				`$ stackit beta edge-cloud plan list`),
+				`Lists all Edge Cloud plans for a given project`,
+				`$ stackit beta edge-cloud plans list`),
 			examples.NewExample(
-				`Lists all edge plans for a given project and limits the output to two plans`,
-				fmt.Sprintf(`$ stackit beta edge-cloud plan list --%s 2`, limitFlag)),
+				`Lists all Edge Cloud plans for a given project and limits the output to two plans`,
+				`$ stackit beta edge-cloud plans list --limit=2`),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 
-			// Parse user input (arguments and/or flags)
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -82,15 +67,21 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			resp, err := run(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient)
+			resp, err := req.Execute()
 			if err != nil {
-				return err
+				return fmt.Errorf("get Edge Cloud plans: %w", err)
+			}
+			plans := resp.GetValidPlans()
+
+			// Truncate output
+			if model.Limit != nil && len(plans) > int(*model.Limit) {
+				plans = (plans)[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, projectLabel, resp)
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, plans)
 		},
 	}
-
 	configureFlags(cmd)
 	return cmd
 }
@@ -99,8 +90,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 }
 
-// Parse user input (arguments and/or flags)
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
@@ -125,46 +115,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-// Run is the main execution function used by the command runner.
-// It is decoupled from TTY output to have the ability to mock the API client during testing.
-func run(ctx context.Context, model *inputModel, apiClient client.APIClient) ([]edge.Plan, error) {
-	spec, err := buildRequest(ctx, model, apiClient)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := spec.Execute()
-	if err != nil {
-		return nil, cliErr.NewRequestFailedError(err)
-	}
-	if resp == nil {
-		return nil, fmt.Errorf("list plans: empty response from API")
-	}
-	if resp.ValidPlans == nil {
-		return nil, fmt.Errorf("list plans: valid plans missing in response")
-	}
-	plans := *resp.ValidPlans
-
-	// Truncate output
-	if spec.Limit != nil && len(plans) > int(*spec.Limit) {
-		plans = plans[:*spec.Limit]
-	}
-
-	return plans, nil
+func buildRequest(ctx context.Context, model *inputModel, apiClient *edge.APIClient) edge.ApiListPlansProjectRequest {
+	return apiClient.DefaultAPI.ListPlansProject(ctx, model.ProjectId)
 }
 
-// buildRequest constructs the spec that can be tested.
-func buildRequest(ctx context.Context, model *inputModel, apiClient client.APIClient) (*listRequestSpec, error) {
-	req := apiClient.ListPlansProject(ctx, model.ProjectId)
-
-	return &listRequestSpec{
-		ProjectID: model.ProjectId,
-		Limit:     model.Limit,
-		Execute:   req.Execute,
-	}, nil
-}
-
-// Output result based on the configured output format
 func outputResult(p *print.Printer, outputFormat, projectLabel string, plans []edge.Plan) error {
 	return p.OutputResult(outputFormat, plans, func() error {
 		// No plans found for project

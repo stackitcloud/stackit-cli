@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serviceaccount"
+	serviceaccount "github.com/stackitcloud/stackit-sdk-go/services/serviceaccount/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -16,7 +16,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -30,7 +29,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 
 	ServiceAccountEmail string
-	TTLDays             *int64
+	TTLDays             int32
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -87,7 +86,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(serviceAccountEmailFlag, "e", "", "Service account email")
-	cmd.Flags().Int64(ttlDaysFlag, defaultTTLDays, "How long (in days) the new access token is valid")
+	cmd.Flags().Int32(ttlDaysFlag, defaultTTLDays, "How long (in days) the new access token is valid")
 
 	err := flags.MarkFlagsRequired(cmd, serviceAccountEmailFlag)
 	cobra.CheckErr(err)
@@ -107,7 +106,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		}
 	}
 
-	ttlDays := flags.FlagWithDefaultToInt64Value(p, cmd, ttlDaysFlag)
+	ttlDays := flags.FlagWithDefaultToInt32Value(p, cmd, ttlDaysFlag)
 	if ttlDays < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    serviceAccountEmailFlag,
@@ -118,7 +117,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	model := inputModel{
 		GlobalFlagModel:     globalFlags,
 		ServiceAccountEmail: email,
-		TTLDays:             &ttlDays,
+		TTLDays:             ttlDays,
 	}
 
 	p.DebugInputModel(model)
@@ -126,7 +125,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceaccount.APIClient) serviceaccount.ApiCreateAccessTokenRequest {
-	req := apiClient.CreateAccessToken(ctx, model.ProjectId, model.ServiceAccountEmail)
+	req := apiClient.DefaultAPI.CreateAccessToken(ctx, model.ProjectId, model.ServiceAccountEmail)
 	req = req.CreateAccessTokenPayload(serviceaccount.CreateAccessTokenPayload{
 		TtlDays: model.TTLDays,
 	})
@@ -134,14 +133,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 }
 
 func outputResult(p *print.Printer, outputFormat, serviceAccountEmail string, token *serviceaccount.AccessToken) error {
-	if token == nil {
-		return fmt.Errorf("token is nil")
-	}
-
 	return p.OutputResult(outputFormat, token, func() error {
-		p.Outputf("Created access token for service account %s. Token ID: %s\n\n", serviceAccountEmail, utils.PtrString(token.Id))
-		p.Outputf("Valid until: %s\n", utils.PtrString(token.ValidUntil))
-		p.Outputf("Token: %s\n", utils.PtrString(token.Token))
+		if token == nil {
+			return fmt.Errorf("token is nil")
+		}
+
+		p.Outputf("Created access token for service account %s. Token ID: %s\n\n", serviceAccountEmail, token.Id)
+		p.Outputf("Valid until: %s\n", token.ValidUntil)
+		p.Outputf("Token: %s\n", token.Token)
 		return nil
 	})
 }

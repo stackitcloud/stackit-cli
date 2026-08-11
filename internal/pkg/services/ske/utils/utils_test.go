@@ -164,10 +164,7 @@ func fixtureProviderOptions(mods ...func(*ske.ProviderOptions)) *ske.ProviderOpt
 						Version: utils.Ptr("1.2.3"),
 						Cri: []ske.CRI{
 							{
-								Name: utils.Ptr("docker"),
-							},
-							{
-								Name: utils.Ptr("containerd"),
+								Name: ske.NAMEOFTHECRILIBRARY_CONTAINERD.Ptr(),
 							},
 						},
 					},
@@ -176,10 +173,7 @@ func fixtureProviderOptions(mods ...func(*ske.ProviderOptions)) *ske.ProviderOpt
 						Version: utils.Ptr("3.2.1"),
 						Cri: []ske.CRI{
 							{
-								Name: utils.Ptr("docker"),
-							},
-							{
-								Name: utils.Ptr("containerd"),
+								Name: ske.NAMEOFTHECRILIBRARY_CONTAINERD.Ptr(),
 							},
 						},
 					},
@@ -193,7 +187,7 @@ func fixtureProviderOptions(mods ...func(*ske.ProviderOptions)) *ske.ProviderOpt
 						Version: utils.Ptr("4.4.4"),
 						Cri: []ske.CRI{
 							{
-								Name: utils.Ptr("containerd"),
+								Name: ske.NAMEOFTHECRILIBRARY_CONTAINERD.Ptr(),
 							},
 						},
 					},
@@ -216,7 +210,7 @@ func fixtureProviderOptions(mods ...func(*ske.ProviderOptions)) *ske.ProviderOpt
 						Version: utils.Ptr("4.4.4"),
 						Cri: []ske.CRI{
 							{
-								Name: utils.Ptr("containerd"),
+								Name: ske.NAMEOFTHECRILIBRARY_CONTAINERD.Ptr(),
 							},
 						},
 					},
@@ -228,11 +222,7 @@ func fixtureProviderOptions(mods ...func(*ske.ProviderOptions)) *ske.ProviderOpt
 					{
 						State:   utils.Ptr("supported"),
 						Version: utils.Ptr("4.4.4"),
-						Cri: []ske.CRI{
-							{
-								Name: utils.Ptr("docker"),
-							},
-						},
+						Cri:     []ske.CRI{},
 					},
 				},
 			},
@@ -263,7 +253,7 @@ func fixtureGetDefaultPayload(mods ...func(*ske.CreateOrUpdateClusterPayload)) *
 					"eu01-3",
 				},
 				Cri: &ske.CRI{
-					Name: utils.Ptr("containerd"),
+					Name: ske.NAMEOFTHECRILIBRARY_CONTAINERD.Ptr(),
 				},
 				Machine: ske.Machine{
 					Type: "b1.2",

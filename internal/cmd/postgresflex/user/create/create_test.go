@@ -7,12 +7,11 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 type testCtxKey struct{}
@@ -45,7 +44,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId: testInstanceId,
-		Username:   utils.Ptr("johndoe"),
+		Username:   "johndoe",
 		Roles:      []string{"login"},
 	}
 	for _, mod := range mods {
@@ -57,8 +56,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 func fixtureRequest(mods ...func(request *postgresflex.ApiCreateUserRequest)) postgresflex.ApiCreateUserRequest {
 	request := testClient.DefaultAPI.CreateUser(testCtx, testProjectId, testRegion, testInstanceId)
 	request = request.CreateUserPayload(postgresflex.CreateUserPayload{
-		Username: utils.Ptr("johndoe"),
-		Roles:    []string{"login"},
+		Name:  "johndoe",
+		Roles: []string{"login"},
 	})
 
 	for _, mod := range mods {
@@ -166,15 +165,6 @@ func TestBuildRequest(t *testing.T) {
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
 		},
-		{
-			description: "no username specified",
-			model: fixtureInputModel(func(model *inputModel) {
-				model.Username = nil
-			}),
-			expectedRequest: fixtureRequest().CreateUserPayload(postgresflex.CreateUserPayload{
-				Roles: []string{"login"},
-			}),
-		},
 	}
 
 	for _, tt := range tests {
@@ -203,20 +193,29 @@ func Test_outputResult(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{"empty", args{}, true},
-		{"standard", args{resp: &postgresflex.CreateUserResponse{}}, false},
-		{"complete", args{resp: &postgresflex.CreateUserResponse{
-			Item: &postgresflex.User{
-				Database: new(string),
-				Host:     new(string),
-				Id:       new(string),
-				Password: new(string),
-				Port:     new(int64),
-				Roles:    []string{},
-				Uri:      new(string),
-				Username: new(string),
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: true,
+		},
+		{
+			name: "standard",
+			args: args{
+				resp: &postgresflex.CreateUserResponse{},
 			},
-		}}, false},
+			wantErr: false,
+		},
+		{
+			name: "complete",
+			args: args{
+				resp: &postgresflex.CreateUserResponse{
+					Id:       int64(12),
+					Name:     "username",
+					Password: "password",
+				},
+			},
+			wantErr: false,
+		},
 	}
 	params := testparams.NewTestParams()
 	for _, tt := range tests {

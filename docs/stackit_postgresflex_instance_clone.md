@@ -14,13 +14,7 @@ stackit postgresflex instance clone INSTANCE_ID [flags]
 
 ```
   Clone a PostgreSQL Flex instance with ID "xxx" from a selected recovery timestamp.
-  $ stackit postgresflex instance clone xxx --recovery-timestamp 2023-04-17T09:28:00+00:00
-
-  Clone a PostgreSQL Flex instance with ID "xxx" from a selected recovery timestamp and specify storage class.
-  $ stackit postgresflex instance clone xxx --recovery-timestamp 2023-04-17T09:28:00+00:00 --storage-class premium-perf6-stackit
-
-  Clone a PostgreSQL Flex instance with ID "xxx" from a selected recovery timestamp and specify storage size.
-  $ stackit postgresflex instance clone xxx --recovery-timestamp 2023-04-17T09:28:00+00:00 --storage-size 10
+  $ stackit postgresflex instance clone xxx --recovery-timestamp 2023-04-17T09:28:00+00:00 --storage-size 10 --storage-class premium-perf6-stackit
 ```
 
 ### Options
@@ -28,8 +22,8 @@ stackit postgresflex instance clone INSTANCE_ID [flags]
 ```
   -h, --help                        Help for "stackit postgresflex instance clone"
       --recovery-timestamp string   Recovery timestamp for the instance, in a date-time with the layout format YYYY-MM-DDTHH:mm:ss±HH:mm, e.g. 2006-01-02T15:04:05-07:00
-      --storage-class string        Storage class. If not specified, storage class from the existing instance will be used.
-      --storage-size int            Storage size (in GB). If not specified, storage size from the existing instance will be used.
+      --storage-class string        Storage class. If not specified, storage class from the existing instance will be used. This flag will be required after 2027-01-31.
+      --storage-size int            Storage size (in GB). If not specified, storage size from the existing instance will be used. This flag will be required after 2027-01-31.
 ```
 
 ### Options inherited from parent commands

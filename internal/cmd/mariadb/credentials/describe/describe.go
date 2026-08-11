@@ -17,7 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	mariadb "github.com/stackitcloud/stackit-sdk-go/services/mariadb/v1api"
+	mariadb "github.com/stackitcloud/stackit-sdk-go/services/mariadb/v2api"
 )
 
 const (
@@ -99,7 +99,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *mariadb.APIClient) mariadb.ApiGetCredentialsRequest {
-	req := apiClient.DefaultAPI.GetCredentials(ctx, model.ProjectId, model.InstanceId, model.CredentialsId)
+	req := apiClient.DefaultAPI.GetCredentials(ctx, model.ProjectId, model.Region, model.InstanceId, model.CredentialsId)
 	return req
 }
 

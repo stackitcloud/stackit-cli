@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -50,7 +50,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *postgresflex.ApiListInstancesRequest)) postgresflex.ApiListInstancesRequest {
-	request := testClient.DefaultAPI.ListInstances(testCtx, testProjectId, testRegion)
+	request := testClient.DefaultAPI.ListInstances(testCtx, testProjectId, testRegion).Size(100)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -127,9 +127,20 @@ func TestBuildRequest(t *testing.T) {
 		expectedRequest postgresflex.ApiListInstancesRequest
 	}{
 		{
-			description:     "base",
-			model:           fixtureInputModel(),
+			description: "base",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Limit = nil
+			}),
 			expectedRequest: fixtureRequest(),
+		},
+		{
+			description: "limit flag is set",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Limit = new(int64(12))
+			}),
+			expectedRequest: fixtureRequest(func(request *postgresflex.ApiListInstancesRequest) {
+				*request = request.Size(12)
+			}),
 		},
 	}
 
@@ -152,32 +163,52 @@ func Test_outputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
 		projectLabel string
-		instances    []postgresflex.InstanceListInstance
+		instances    []postgresflex.ListInstance
 	}
 	tests := []struct {
 		name    string
 		args    args
 		wantErr bool
 	}{
-		{"empty", args{}, false},
-		{"standard", args{"", "label", []postgresflex.InstanceListInstance{}}, false},
-		{"complete", args{"", "label", []postgresflex.InstanceListInstance{
-			{
-				Id:     new(string),
-				Name:   new(string),
-				Status: new(string),
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: false,
+		},
+		{
+			name: "standard",
+			args: args{
+				outputFormat: "",
+				projectLabel: "label",
+				instances:    []postgresflex.ListInstance{},
 			},
-			{
-				Id:     new(string),
-				Name:   new(string),
-				Status: new(string),
+			wantErr: false,
+		},
+		{
+			name: "complete",
+			args: args{
+				outputFormat: "",
+				projectLabel: "label",
+				instances: []postgresflex.ListInstance{
+					{
+						Id:    uuid.NewString(),
+						Name:  "instance-01",
+						State: postgresflex.STATE_READY,
+					},
+					{
+						Id:    uuid.NewString(),
+						Name:  "instance-02",
+						State: postgresflex.STATE_PROGRESSING,
+					},
+					{
+						Id:    uuid.NewString(),
+						Name:  "instance-03",
+						State: postgresflex.STATE_TERMINATING,
+					},
+				},
 			},
-			{
-				Id:     new(string),
-				Name:   new(string),
-				Status: new(string),
-			},
-		}}, false},
+			wantErr: false,
+		},
 	}
 	params := testparams.NewTestParams()
 	for _, tt := range tests {

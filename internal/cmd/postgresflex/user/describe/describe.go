@@ -3,11 +3,13 @@ package describe
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -17,7 +19,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -30,7 +31,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 
 	InstanceId string
-	UserId     string
+	UserId     int64
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -71,7 +72,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("get postgresflex user: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, *resp.Item)
+			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
 
@@ -87,11 +88,16 @@ func configureFlags(cmd *cobra.Command) {
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
-	userId := inputArgs[0]
+	userIdStr := inputArgs[0]
 
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
+	}
+
+	userId, err := strconv.ParseInt(userIdStr, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id format, must be an integer: %w", err)
 	}
 
 	model := inputModel{
@@ -109,18 +115,19 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresfle
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, user postgresflex.UserResponse) error {
+func outputResult(p *print.Printer, outputFormat string, user *postgresflex.GetUserResponse) error {
 	return p.OutputResult(outputFormat, user, func() error {
+		if user == nil {
+			return fmt.Errorf("user is nil")
+		}
+
 		table := tables.NewTable()
-		table.AddRow("ID", utils.PtrString(user.Id))
+		table.AddRow("ID", user.Id)
 		table.AddSeparator()
-		table.AddRow("USERNAME", utils.PtrString(user.Username))
+		table.AddRow("USERNAME", user.Name)
 		table.AddSeparator()
-		table.AddRow("ROLES", user.Roles)
+		table.AddRow("ROLES", strings.Join(user.Roles, ", "))
 		table.AddSeparator()
-		table.AddRow("HOST", utils.PtrString(user.Host))
-		table.AddSeparator()
-		table.AddRow("PORT", utils.PtrString(user.Port))
 
 		err := table.Display(p)
 		if err != nil {

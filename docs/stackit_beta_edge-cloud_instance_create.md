@@ -1,6 +1,6 @@
 ## stackit beta edge-cloud instance create
 
-Creates an edge instance
+Creates an Edge Cloud instance
 
 ### Synopsis
 
@@ -13,7 +13,7 @@ stackit beta edge-cloud instance create [flags]
 ### Examples
 
 ```
-  Creates an edge instance with the name "xxx" and plan-id "yyy"
+  Creates an Edge Cloud instance with the name "xxx" and plan-id "yyy"
   $ stackit beta edge-cloud instance create --name "xxx" --plan-id "yyy"
 ```
 
@@ -23,7 +23,7 @@ stackit beta edge-cloud instance create [flags]
   -d, --description string   A user chosen description to distinguish multiple instances.
   -h, --help                 Help for "stackit beta edge-cloud instance create"
   -n, --name string          The displayed name to distinguish multiple instances.
-      --plan-id string       Service Plan configures the size of the Instance.
+      --plan-id string       Service plan configures the size of the Instance.
 ```
 
 ### Options inherited from parent commands
@@ -39,5 +39,5 @@ stackit beta edge-cloud instance create [flags]
 
 ### SEE ALSO
 
-* [stackit beta edge-cloud instance](./stackit_beta_edge-cloud_instance.md)	 - Provides functionality for edge instances.
+* [stackit beta edge-cloud instance](./stackit_beta_edge-cloud_instance.md)	 - Provides functionality for Edge Cloud instances.
 

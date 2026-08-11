@@ -12,23 +12,26 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v1api"
+	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v2api"
 )
 
 type testCtxKey struct{}
 
-var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &logme.APIClient{DefaultAPI: &logme.DefaultAPIService{}}
-var testProjectId = uuid.NewString()
-var testInstanceId = uuid.NewString()
-var testRegion = "region"
+var (
+	testCtx        = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient     = &logme.APIClient{DefaultAPI: &logme.DefaultAPIService{}}
+	testProjectId  = uuid.NewString()
+	testInstanceId = uuid.NewString()
+)
+
+const testRegion = "eu01"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
 		instanceIdFlag:            testInstanceId,
 		limitFlag:                 "10",
-		globalflags.RegionFlag:    testRegion,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -53,7 +56,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *logme.ApiListCredentialsRequest)) logme.ApiListCredentialsRequest {
-	request := testClient.DefaultAPI.ListCredentials(testCtx, testProjectId, testInstanceId)
+	request := testClient.DefaultAPI.ListCredentials(testCtx, testProjectId, testRegion, testInstanceId)
 	for _, mod := range mods {
 		mod(&request)
 	}

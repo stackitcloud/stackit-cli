@@ -10,7 +10,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/serviceaccount"
+	serviceaccount "github.com/stackitcloud/stackit-sdk-go/services/serviceaccount/v2api"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -18,7 +18,7 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &serviceaccount.APIClient{}
+var testClient = &serviceaccount.APIClient{DefaultAPI: &serviceaccount.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testServiceAccountEmail = "my-service-account-1234567@sa.stackit.cloud"
 var testTokenId = uuid.NewString()
@@ -60,7 +60,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *serviceaccount.ApiDeleteAccessTokenRequest)) serviceaccount.ApiDeleteAccessTokenRequest {
-	request := testClient.DeleteAccessToken(testCtx, testProjectId, testServiceAccountEmail, testTokenId)
+	request := testClient.DefaultAPI.DeleteAccessToken(testCtx, testProjectId, testServiceAccountEmail, testTokenId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -174,7 +174,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, serviceaccount.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
