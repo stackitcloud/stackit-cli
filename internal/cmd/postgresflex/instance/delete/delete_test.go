@@ -2,18 +2,15 @@ package delete
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
-	wait "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api/wait"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
 )
 
 type testCtxKey struct{}
@@ -22,23 +19,8 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &postgresflex.APIClient{DefaultAPI: &postgresflex.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
-var testRegion = "eu01"
 
-type mockSettings struct {
-	getInstanceFails bool
-	getInstanceResp  *postgresflex.InstanceResponse
-}
-
-func newAPIMockClient(c mockSettings) postgresflex.DefaultAPI {
-	return postgresflex.DefaultAPIServiceMock{
-		GetInstanceExecuteMock: utils.Ptr(func(_ postgresflex.ApiGetInstanceRequest) (*postgresflex.InstanceResponse, error) {
-			if c.getInstanceFails {
-				return nil, fmt.Errorf("get instance failed")
-			}
-			return c.getInstanceResp, nil
-		}),
-	}
-}
+const testRegion = "eu01"
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
@@ -76,16 +58,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureDeleteRequest(mods ...func(request *postgresflex.ApiDeleteInstanceRequest)) postgresflex.ApiDeleteInstanceRequest {
+func fixtureRequest(mods ...func(request *postgresflex.ApiDeleteInstanceRequest)) postgresflex.ApiDeleteInstanceRequest {
 	request := testClient.DefaultAPI.DeleteInstance(testCtx, testProjectId, testRegion, testInstanceId)
-	for _, mod := range mods {
-		mod(&request)
-	}
-	return request
-}
-
-func fixtureForceDeleteRequest(mods ...func(request *postgresflex.ApiForceDeleteInstanceRequest)) postgresflex.ApiForceDeleteInstanceRequest {
-	request := testClient.DefaultAPI.ForceDeleteInstance(testCtx, testProjectId, testRegion, testInstanceId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -170,7 +144,7 @@ func TestParseInput(t *testing.T) {
 	}
 }
 
-func TestBuildDeleteRequest(t *testing.T) {
+func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
@@ -179,7 +153,7 @@ func TestBuildDeleteRequest(t *testing.T) {
 		{
 			description:     "base",
 			model:           fixtureInputModel(),
-			expectedRequest: fixtureDeleteRequest(),
+			expectedRequest: fixtureRequest(),
 		},
 	}
 
@@ -193,132 +167,6 @@ func TestBuildDeleteRequest(t *testing.T) {
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
-			}
-		})
-	}
-}
-
-func TestBuildForceDeleteRequest(t *testing.T) {
-	tests := []struct {
-		description     string
-		model           *inputModel
-		expectedRequest postgresflex.ApiForceDeleteInstanceRequest
-	}{
-		{
-			description:     "base",
-			model:           fixtureInputModel(),
-			expectedRequest: fixtureForceDeleteRequest(),
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.description, func(t *testing.T) {
-			request := buildForceDeleteRequest(testCtx, tt.model, testClient)
-
-			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx, postgresflex.DefaultAPIService{}),
-			)
-			if diff != "" {
-				t.Fatalf("Data does not match: %s", diff)
-			}
-		})
-	}
-}
-
-func TestCheckIfInstanceIsDeleted(t *testing.T) {
-	tests := []struct {
-		description           string
-		model                 *inputModel
-		expectedToDelete      bool
-		expectedToForceDelete bool
-		mockClientSettings    mockSettings
-		isValid               bool
-	}{
-		{
-			description:           "delete instance state Ready",
-			model:                 fixtureInputModel(),
-			expectedToDelete:      true,
-			expectedToForceDelete: false,
-			mockClientSettings: mockSettings{
-				getInstanceResp: &postgresflex.InstanceResponse{
-					Item: &postgresflex.Instance{
-						Status: utils.Ptr(wait.InstanceStateSuccess),
-					},
-				},
-			},
-			isValid: true,
-		},
-		{
-			description: "force delete instance state Ready",
-			model: fixtureInputModel(func(model *inputModel) {
-				model.ForceDelete = true
-			}),
-			expectedToDelete:      true,
-			expectedToForceDelete: true,
-			mockClientSettings: mockSettings{
-				getInstanceResp: &postgresflex.InstanceResponse{
-					Item: &postgresflex.Instance{
-						Status: utils.Ptr(wait.InstanceStateSuccess),
-					},
-				},
-			},
-			isValid: true,
-		},
-		{
-			description: "force delete instance state Deleted",
-			model: fixtureInputModel(func(model *inputModel) {
-				model.ForceDelete = true
-			}),
-			expectedToDelete:      false,
-			expectedToForceDelete: true,
-			mockClientSettings: mockSettings{
-				getInstanceResp: &postgresflex.InstanceResponse{
-					Item: &postgresflex.Instance{
-						Status: utils.Ptr(wait.InstanceStateDeleted),
-					},
-				},
-			},
-			isValid: true,
-		},
-		{
-			description: "delete instance state Deleted",
-			model:       fixtureInputModel(),
-			mockClientSettings: mockSettings{
-				getInstanceResp: &postgresflex.InstanceResponse{
-					Item: &postgresflex.Instance{
-						Status: utils.Ptr(wait.InstanceStateDeleted),
-					},
-				},
-			},
-			isValid: false,
-		},
-		{
-			description: "delete instance get instance fails",
-			model:       fixtureInputModel(),
-			mockClientSettings: mockSettings{
-				getInstanceFails: true,
-			},
-			isValid: false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.description, func(t *testing.T) {
-			toDelete, toForceDelete, err := getNextOperations(testCtx, tt.model, newAPIMockClient(tt.mockClientSettings))
-			if err != nil {
-				if !tt.isValid {
-					return
-				}
-				t.Fatalf("error checking if instance is deleted: %v", err)
-			}
-
-			if toDelete != tt.expectedToDelete {
-				t.Fatalf("toDelete does not match: got %v, expected %v", toDelete, tt.expectedToDelete)
-			}
-
-			if toForceDelete != tt.expectedToForceDelete {
-				t.Fatalf("toForceDelete does not match: got %v, expected %v", toForceDelete, tt.expectedToForceDelete)
 			}
 		})
 	}

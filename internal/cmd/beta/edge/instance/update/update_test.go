@@ -1,136 +1,50 @@
-// SPDX-License-Identifier: Apache-2.0
-// SPDX-FileCopyrightText: 2025 STACKIT GmbH & Co. KG
-
 package update
 
 import (
 	"context"
-	"errors"
-	"net/http"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/core/oapierror"
-	"github.com/stackitcloud/stackit-sdk-go/services/edge"
+	edge "github.com/stackitcloud/stackit-sdk-go/services/edge/v1beta1api"
 
-	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/edge/client"
-	commonErr "github.com/stackitcloud/stackit-cli/internal/pkg/services/edge/common/error"
-	commonInstance "github.com/stackitcloud/stackit-cli/internal/pkg/services/edge/common/instance"
-	commonValidation "github.com/stackitcloud/stackit-cli/internal/pkg/services/edge/common/validation"
 	testUtils "github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 type testCtxKey struct{}
 
 var (
-	testCtx         = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testProjectId   = uuid.NewString()
-	testRegion      = "eu01"
-	testInstanceId  = "instance"
-	testDisplayName = "test"
-	testDescription = "new description"
-	testPlanId      = uuid.NewString()
+	testCtx        = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testProjectId  = uuid.NewString()
+	testInstanceId = uuid.NewString()
+	testPlanId     = uuid.NewString()
+	testClient     = &edge.APIClient{DefaultAPI: &edge.DefaultAPIService{}}
 )
 
-type mockExecutable struct {
-	executeFails                bool
-	executeNotFound             bool
-	capturedUpdatePayload       *edge.UpdateInstancePayload
-	capturedUpdateByNamePayload *edge.UpdateInstanceByNamePayload
-}
+const (
+	testRegion      = "eu01"
+	testDescription = "new description"
+)
 
-func (m *mockExecutable) Execute() error {
-	if m.executeFails {
-		return errors.New("API error")
+func fixtureArgValues(mods ...func(argValues []string)) []string {
+	argValues := []string{
+		testInstanceId,
 	}
-	if m.executeNotFound {
-		return &oapierror.GenericOpenAPIError{
-			StatusCode: http.StatusNotFound,
-		}
+	for _, mod := range mods {
+		mod(argValues)
 	}
-	return nil
-}
-
-func (m *mockExecutable) UpdateInstancePayload(payload edge.UpdateInstancePayload) edge.ApiUpdateInstanceRequest {
-	if m.capturedUpdatePayload != nil {
-		*m.capturedUpdatePayload = payload
-	}
-	return m
-}
-
-func (m *mockExecutable) UpdateInstanceByNamePayload(payload edge.UpdateInstanceByNamePayload) edge.ApiUpdateInstanceByNameRequest {
-	if m.capturedUpdateByNamePayload != nil {
-		*m.capturedUpdateByNamePayload = payload
-	}
-	return m
-}
-
-type mockAPIClient struct {
-	updateInstanceMock       edge.ApiUpdateInstanceRequest
-	updateInstanceByNameMock edge.ApiUpdateInstanceByNameRequest
-}
-
-func (m *mockAPIClient) UpdateInstance(_ context.Context, _, _, _ string) edge.ApiUpdateInstanceRequest {
-	if m.updateInstanceMock != nil {
-		return m.updateInstanceMock
-	}
-	return &mockExecutable{}
-}
-
-func (m *mockAPIClient) UpdateInstanceByName(_ context.Context, _, _, _ string) edge.ApiUpdateInstanceByNameRequest {
-	if m.updateInstanceByNameMock != nil {
-		return m.updateInstanceByNameMock
-	}
-	return &mockExecutable{}
-}
-
-// Unused methods to satisfy the interface
-func (m *mockAPIClient) CreateInstance(_ context.Context, _, _ string) edge.ApiCreateInstanceRequest {
-	return nil
-}
-func (m *mockAPIClient) GetInstance(_ context.Context, _, _, _ string) edge.ApiGetInstanceRequest {
-	return nil
-}
-func (m *mockAPIClient) GetInstanceByName(_ context.Context, _, _, _ string) edge.ApiGetInstanceByNameRequest {
-	return nil
-}
-func (m *mockAPIClient) ListInstances(_ context.Context, _, _ string) edge.ApiListInstancesRequest {
-	return nil
-}
-func (m *mockAPIClient) DeleteInstance(_ context.Context, _, _, _ string) edge.ApiDeleteInstanceRequest {
-	return nil
-}
-func (m *mockAPIClient) DeleteInstanceByName(_ context.Context, _, _, _ string) edge.ApiDeleteInstanceByNameRequest {
-	return nil
-}
-func (m *mockAPIClient) GetKubeconfigByInstanceId(_ context.Context, _, _, _ string) edge.ApiGetKubeconfigByInstanceIdRequest {
-	return nil
-}
-func (m *mockAPIClient) GetKubeconfigByInstanceName(_ context.Context, _, _, _ string) edge.ApiGetKubeconfigByInstanceNameRequest {
-	return nil
-}
-func (m *mockAPIClient) GetTokenByInstanceId(_ context.Context, _, _, _ string) edge.ApiGetTokenByInstanceIdRequest {
-	return nil
-}
-func (m *mockAPIClient) GetTokenByInstanceName(_ context.Context, _, _, _ string) edge.ApiGetTokenByInstanceNameRequest {
-	return nil
-}
-
-func (m *mockAPIClient) ListPlansProject(_ context.Context, _ string) edge.ApiListPlansProjectRequest {
-	return nil
+	return argValues
 }
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		globalflags.ProjectIdFlag:      testProjectId,
-		globalflags.RegionFlag:         testRegion,
-		commonInstance.InstanceIdFlag:  testInstanceId,
-		commonInstance.DescriptionFlag: testDescription,
-		commonInstance.PlanIdFlag:      testPlanId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+		descriptionFlag:           testDescription,
+		planIdFlag:                testPlanId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -138,404 +52,148 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	return flagValues
 }
 
-func fixtureByIdInputModel(mods ...func(model *inputModel)) *inputModel {
-	return fixtureInputModel(false, mods...)
-}
-
-func fixtureByNameInputModel(mods ...func(model *inputModel)) *inputModel {
-	return fixtureInputModel(true, mods...)
-}
-
-func fixtureInputModel(useName bool, mods ...func(model *inputModel)) *inputModel {
+func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		Description: &testDescription,
-		PlanId:      &testPlanId,
+		InstanceId:  testInstanceId,
+		Description: utils.Ptr(testDescription),
+		PlanId:      utils.Ptr(testPlanId),
 	}
-
-	if useName {
-		model.identifier = &commonValidation.Identifier{
-			Flag:  commonInstance.DisplayNameFlag,
-			Value: testDisplayName,
-		}
-	} else {
-		model.identifier = &commonValidation.Identifier{
-			Flag:  commonInstance.InstanceIdFlag,
-			Value: testInstanceId,
-		}
-	}
-
 	for _, mod := range mods {
 		mod(model)
 	}
 	return model
 }
 
-func TestParseInput(t *testing.T) {
-	type args struct {
-		flags   map[string]string
-		cmpOpts []testUtils.ValueComparisonOption
+func fixtureRequest(mods ...func(request *edge.ApiUpdateInstanceRequest)) edge.ApiUpdateInstanceRequest {
+	request := testClient.DefaultAPI.UpdateInstance(testCtx, testProjectId, testRegion, testInstanceId)
+	request = request.UpdateInstancePayload(edge.UpdateInstancePayload{
+		Description: utils.Ptr(testDescription),
+		PlanId:      utils.Ptr(testPlanId),
+	})
+	for _, mod := range mods {
+		mod(&request)
 	}
+	return request
+}
 
+func TestParseInput(t *testing.T) {
 	tests := []struct {
-		name    string
-		wantErr any
-		want    *inputModel
-		args    args
+		description   string
+		argValues     []string
+		flagValues    map[string]string
+		wantErr       any
+		isValid       bool
+		expectedModel *inputModel
 	}{
 		{
-			name: "by id",
-			want: fixtureByIdInputModel(),
-			args: args{
-				flags: fixtureFlagValues(),
-				cmpOpts: []testUtils.ValueComparisonOption{
-					testUtils.WithAllowUnexported(inputModel{}),
-				},
-			},
+			description:   "base",
+			argValues:     fixtureArgValues(),
+			flagValues:    fixtureFlagValues(),
+			isValid:       true,
+			expectedModel: fixtureInputModel(),
 		},
 		{
-			name: "by name",
-			want: fixtureByNameInputModel(),
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					delete(flagValues, commonInstance.InstanceIdFlag)
-					flagValues[commonInstance.DisplayNameFlag] = testDisplayName
-				}),
-				cmpOpts: []testUtils.ValueComparisonOption{
-					testUtils.WithAllowUnexported(inputModel{}),
-				},
-			},
+			description: "no values",
+			argValues:   []string{},
+			flagValues:  map[string]string{},
+			isValid:     false,
 		},
 		{
-			name:    "by id and name",
-			wantErr: true,
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					flagValues[commonInstance.DisplayNameFlag] = testDisplayName
-				}),
-			},
+			description: "no arg values",
+			argValues:   []string{},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
 		},
 		{
-			name:    "no flag values",
-			wantErr: true,
-			args: args{
-				flags: map[string]string{},
-			},
+			description: "no flag values",
+			argValues:   fixtureArgValues(),
+			flagValues:  map[string]string{},
+			isValid:     false,
 		},
 		{
-			name:    "no update flags",
-			wantErr: true,
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					delete(flagValues, commonInstance.DescriptionFlag)
-					delete(flagValues, commonInstance.PlanIdFlag)
-				}),
-			},
+			description: "no update flags",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, descriptionFlag)
+				delete(flagValues, planIdFlag)
+			}),
+			isValid: false,
 		},
 		{
-			name:    "project id missing",
-			wantErr: &cliErr.ProjectIdError{},
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					delete(flagValues, globalflags.ProjectIdFlag)
-				}),
-			},
+			description: "project id missing",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, globalflags.ProjectIdFlag)
+			}),
+			isValid: false,
 		},
 		{
-			name:    "project id empty",
-			wantErr: "value cannot be empty",
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					flagValues[globalflags.ProjectIdFlag] = ""
-				}),
-			},
+			description: "project id invalid 1",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[globalflags.ProjectIdFlag] = ""
+			}),
+			isValid: false,
 		},
 		{
-			name:    "project id invalid",
-			wantErr: "invalid UUID length",
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
-				}),
-			},
+			description: "project id invalid 2",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
 		},
 		{
-			name:    "plan id invalid",
-			wantErr: &cliErr.FlagValidationError{},
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					flagValues[commonInstance.PlanIdFlag] = "not-a-uuid"
-				}),
-			},
+			description: "instance id invalid",
+			argValues:   []string{""},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
 		},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			caseOpts := []testUtils.ParseInputCaseOption{}
-			if len(tt.args.cmpOpts) > 0 {
-				caseOpts = append(caseOpts, testUtils.WithParseInputCmpOptions(tt.args.cmpOpts...))
-			}
-
-			testUtils.RunParseInputCase(t, testUtils.ParseInputTestCase[*inputModel]{
-				Name:       tt.name,
-				Flags:      tt.args.flags,
-				WantModel:  tt.want,
-				WantErr:    tt.wantErr,
-				CmdFactory: NewCmd,
-				ParseInputFunc: func(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
-					return parseInput(p, cmd)
-				},
-			}, caseOpts...)
+		t.Run(tt.description, func(t *testing.T) {
+			testUtils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
 	}
 }
 
 func TestBuildRequest(t *testing.T) {
-	type args struct {
-		model  *inputModel
-		client client.APIClient
-	}
 	tests := []struct {
-		name    string
-		args    args
-		want    *updateRequestSpec
-		wantErr error
+		description     string
+		model           *inputModel
+		expectedRequest edge.ApiUpdateInstanceRequest
+		isValid         bool
 	}{
 		{
-			name: "by id",
-			args: args{
-				model: fixtureByIdInputModel(),
-				client: &mockAPIClient{
-					updateInstanceMock: &mockExecutable{},
-				},
-			},
-			want: &updateRequestSpec{
-				ProjectID:  testProjectId,
-				Region:     testRegion,
-				InstanceId: testInstanceId,
-				Payload: edge.UpdateInstancePayload{
-					Description: &testDescription,
-					PlanId:      &testPlanId,
-				},
-			},
-		},
-		{
-			name: "by name",
-			args: args{
-				model: fixtureByNameInputModel(),
-				client: &mockAPIClient{
-					updateInstanceByNameMock: &mockExecutable{},
-				},
-			},
-			want: &updateRequestSpec{
-				ProjectID:    testProjectId,
-				Region:       testRegion,
-				InstanceName: testDisplayName,
-				Payload: edge.UpdateInstancePayload{
-					Description: &testDescription,
-					PlanId:      &testPlanId,
-				},
-			},
-		},
-		{
-			name: "no identifier",
-			args: args{
-				model: fixtureByIdInputModel(func(model *inputModel) {
-					model.identifier = nil
-				}),
-				client: &mockAPIClient{},
-			},
-			wantErr: &commonErr.NoIdentifierError{},
-		},
-		{
-			name: "invalid identifier",
-			args: args{
-				model: fixtureByIdInputModel(func(model *inputModel) {
-					model.identifier = &commonValidation.Identifier{Flag: "unknown", Value: "val"}
-				}),
-				client: &mockAPIClient{},
-			},
-			wantErr: &cliErr.BuildRequestError{},
+			description:     "base",
+			model:           fixtureInputModel(),
+			expectedRequest: fixtureRequest(),
+			isValid:         true,
 		},
 	}
+
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := buildRequest(testCtx, tt.args.model, tt.args.client)
-			if !testUtils.AssertError(t, err, tt.wantErr) {
-				return
-			}
-			if got != nil {
-				if got.Execute == nil {
-					t.Error("expected non-nil Execute function")
+		t.Run(tt.description, func(t *testing.T) {
+			request, err := buildRequest(testCtx, tt.model, testClient)
+			if err != nil {
+				if !tt.isValid {
+					return
 				}
-				testUtils.AssertValue(t, got, tt.want, testUtils.WithIgnoreFields(updateRequestSpec{}, "Execute"))
-			}
-		})
-	}
-}
-
-func TestRun(t *testing.T) {
-	type args struct {
-		model  *inputModel
-		client client.APIClient
-	}
-
-	tests := []struct {
-		name    string
-		wantErr error
-		args    args
-	}{
-		{
-			name: "update by id success",
-			args: args{
-				model: fixtureByIdInputModel(),
-				client: &mockAPIClient{
-					updateInstanceMock: &mockExecutable{},
-				},
-			},
-		},
-		{
-			name: "update by name success",
-			args: args{
-				model: fixtureByNameInputModel(),
-				client: &mockAPIClient{
-					updateInstanceByNameMock: &mockExecutable{},
-				},
-			},
-		},
-		{
-			name:    "no id or name",
-			wantErr: &commonErr.NoIdentifierError{},
-			args: args{
-				model: fixtureInputModel(false, func(model *inputModel) {
-					model.identifier = nil
-				}),
-				client: &mockAPIClient{},
-			},
-		},
-		{
-			name:    "instance not found error",
-			wantErr: &cliErr.RequestFailedError{},
-			args: args{
-				model: fixtureByIdInputModel(),
-				client: &mockAPIClient{
-					updateInstanceMock: &mockExecutable{
-						executeNotFound: true,
-					},
-				},
-			},
-		},
-		{
-			name:    "update by id API error",
-			wantErr: &cliErr.RequestFailedError{},
-			args: args{
-				model: fixtureByIdInputModel(),
-				client: &mockAPIClient{
-					updateInstanceMock: &mockExecutable{
-						executeFails: true,
-					},
-				},
-			},
-		},
-		{
-			name:    "update by name API error",
-			wantErr: &cliErr.RequestFailedError{},
-			args: args{
-				model: fixtureByNameInputModel(),
-				client: &mockAPIClient{
-					updateInstanceByNameMock: &mockExecutable{
-						executeFails: true,
-					},
-				},
-			},
-		},
-		{
-			name:    "identifier invalid",
-			wantErr: &commonErr.InvalidIdentifierError{},
-			args: args{
-				model: fixtureInputModel(false, func(model *inputModel) {
-					model.identifier = &commonValidation.Identifier{
-						Flag:  "unknown-flag",
-						Value: "some-value",
-					}
-				}),
-				client: &mockAPIClient{},
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := run(testCtx, tt.args.model, tt.args.client)
-			testUtils.AssertError(t, err, tt.wantErr)
-		})
-	}
-}
-
-func TestGetWaiterFactory(t *testing.T) {
-	type args struct {
-		model *inputModel
-	}
-
-	tests := []struct {
-		name    string
-		wantErr error
-		want    bool
-		args    args
-	}{
-		{
-			name: "by id",
-			want: true,
-			args: args{
-				model: fixtureByIdInputModel(),
-			},
-		},
-		{
-			name: "by name",
-			want: true,
-			args: args{
-				model: fixtureByNameInputModel(),
-			},
-		},
-		{
-			name:    "no id or name",
-			wantErr: &commonErr.NoIdentifierError{},
-			want:    false,
-			args: args{
-				model: fixtureInputModel(false, func(model *inputModel) {
-					model.identifier = nil
-				}),
-			},
-		},
-		{
-			name:    "unknown identifier",
-			wantErr: &commonErr.InvalidIdentifierError{},
-			want:    false,
-			args: args{
-				model: fixtureInputModel(false, func(model *inputModel) {
-					model.identifier.Flag = "unknown"
-				}),
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := getWaiterFactory(testCtx, tt.args.model)
-			if !testUtils.AssertError(t, err, tt.wantErr) {
-				return
+				t.Fatalf("error building request: %v", err)
 			}
 
-			if tt.want && got == nil {
-				t.Fatal("expected non-nil waiter factory")
-			}
-			if !tt.want && got != nil {
-				t.Fatal("expected nil waiter factory")
+			diff := cmp.Diff(request, tt.expectedRequest,
+				cmp.AllowUnexported(tt.expectedRequest, edge.DefaultAPIService{}),
+				cmpopts.EquateComparable(testCtx),
+			)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
 			}
 		})
 	}

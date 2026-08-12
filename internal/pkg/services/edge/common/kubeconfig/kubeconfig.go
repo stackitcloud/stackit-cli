@@ -1,6 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
-// SPDX-FileCopyrightText: 2025 STACKIT GmbH & Co. KG
-
 package kubeconfig
 
 import (
@@ -26,29 +23,7 @@ const (
 
 // User input flags for kubeconfig commands
 const (
-	ExpirationFlag     = "expiration"
-	DisableWritingFlag = "disable-writing"
-	FilepathFlag       = "filepath"
-	OverwriteFlag      = "overwrite"
-	SwitchContextFlag  = "switch-context"
-)
-
-// Flag usage texts
-const (
-	ExpirationUsage     = "Expiration time for the kubeconfig, e.g. 5d. By default, the token is valid for 1h."
-	FilepathUsage       = "Path to the kubeconfig file. A default is chosen by Kubernetes if not set."
-	DisableWritingUsage = "Disable writing the kubeconfig to a file."
-	OverwriteUsage      = "Force overwrite the kubeconfig file if it exists."
-	SwitchContextUsage  = "Switch to the context in the kubeconfig file to the new context."
-)
-
-// Flag shorthands
-const (
-	ExpirationShorthand     = "e"
-	DisableWritingShorthand = ""
-	FilepathShorthand       = "f"
-	OverwriteShorthand      = ""
-	SwitchContextShorthand  = ""
+	ExpirationFlag = "expiration"
 )
 
 func ValidateExpiration(expiration *uint64) error {

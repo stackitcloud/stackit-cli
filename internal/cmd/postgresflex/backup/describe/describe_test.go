@@ -2,17 +2,19 @@ package describe
 
 import (
 	"context"
+	"strconv"
 	"testing"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 type testCtxKey struct{}
@@ -21,12 +23,15 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &postgresflex.APIClient{DefaultAPI: &postgresflex.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
-var testBackupId = "backupID"
-var testRegion = "eu01"
+
+const (
+	testBackupId = int64(42)
+	testRegion   = "eu01"
+)
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
-		testBackupId,
+		strconv.FormatInt(testBackupId, 10),
 	}
 	for _, mod := range mods {
 		mod(argValues)
@@ -243,7 +248,7 @@ func TestBuildRequest(t *testing.T) {
 func Test_outputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
-		backup       *postgresflex.Backup
+		backup       *postgresflex.BackupData
 	}
 	tests := []struct {
 		name    string
@@ -251,35 +256,32 @@ func Test_outputResult(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "empty",
-			args:    args{},
+			name: "backup is nil",
+			args: args{
+				backup:       nil,
+				outputFormat: print.PrettyOutputFormat,
+			},
 			wantErr: true,
 		},
 		{
-			name: "standard",
+			name: "empty backup",
 			args: args{
-				outputFormat: "",
-				backup: &postgresflex.Backup{
-					StartTime: utils.Ptr(time.Now().Format(time.RFC3339)),
-				},
+				outputFormat: print.PrettyOutputFormat,
+				backup:       &postgresflex.BackupData{},
 			},
 			wantErr: false,
 		},
 		{
 			name: "complete",
 			args: args{
-				outputFormat: "",
-				backup: &postgresflex.Backup{
-					EndTime: utils.Ptr(time.Now().Format(time.RFC3339)),
-					Id:      utils.Ptr("id"),
-					Labels: []string{"foo",
-						"bar",
-						"baz",
-					},
-					Name:      utils.Ptr("name"),
-					Options:   &map[string]string{"test1": "test1", "test2": "test2"},
-					Size:      utils.Ptr(int64(42)),
-					StartTime: utils.Ptr(time.Now().Format(time.RFC3339)),
+				outputFormat: print.PrettyOutputFormat,
+				backup: &postgresflex.BackupData{
+					CompletionTime: time.Now().Format(time.RFC3339),
+					Id:             int64(1),
+					Name:           "name",
+					RetainedUntil:  time.Now().Format(time.RFC3339),
+					Size:           int64(42),
+					Type:           "type",
 				},
 			},
 			wantErr: false,

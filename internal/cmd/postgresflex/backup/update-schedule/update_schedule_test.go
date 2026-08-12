@@ -19,8 +19,9 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &postgresflex.APIClient{DefaultAPI: &postgresflex.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testInstanceId = uuid.NewString()
-var testSchedule = "0 0 * * *"
-var testRegion = "eu01"
+
+const testSchedule = "0 0 * * *"
+const testRegion = "eu01"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{

@@ -26,5 +26,5 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(list.NewCmd(params))
 	cmd.AddCommand(describe.NewCmd(params))
-	cmd.AddCommand(updateschedule.NewCmd(params))
+	cmd.AddCommand(updateschedule.NewCmd(params)) //nolint:staticcheck // Command is deprecated but must be kept for backward compatibility
 }

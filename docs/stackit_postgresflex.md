@@ -31,7 +31,8 @@ stackit postgresflex [flags]
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
 * [stackit postgresflex backup](./stackit_postgresflex_backup.md)	 - Provides functionality for PostgreSQL Flex instance backups
+* [stackit postgresflex flavor](./stackit_postgresflex_flavor.md)	 - Provides functionality for PostgreSQL Flex flavors
 * [stackit postgresflex instance](./stackit_postgresflex_instance.md)	 - Provides functionality for PostgreSQL Flex instances
-* [stackit postgresflex options](./stackit_postgresflex_options.md)	 - Lists PostgreSQL Flex options
 * [stackit postgresflex user](./stackit_postgresflex_user.md)	 - Provides functionality for PostgreSQL Flex users
+* [stackit postgresflex version](./stackit_postgresflex_version.md)	 - Provides functionality for PostgreSQL Flex versions
 

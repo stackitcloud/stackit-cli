@@ -8,7 +8,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/uuid"
-	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v1api"
+	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v2api"
 )
 
 var (
@@ -20,6 +20,7 @@ var (
 const (
 	testInstanceName        = "instance"
 	testCredentialsUsername = "username"
+	testRegion              = "eu01"
 )
 
 type mockSettings struct {
@@ -76,7 +77,7 @@ func TestGetInstanceName(t *testing.T) {
 				getInstanceResp:  tt.getInstanceResp,
 			}
 
-			output, err := GetInstanceName(context.Background(), newAPIMock(client), testProjectId, testInstanceId)
+			output, err := GetInstanceName(context.Background(), newAPIMock(client), testProjectId, testInstanceId, testRegion)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
@@ -128,7 +129,7 @@ func TestGetCredentialsUsername(t *testing.T) {
 				getCredentialsResp:  tt.getCredentialsResp,
 			}
 
-			output, err := GetCredentialsUsername(context.Background(), newAPIMock(client), testProjectId, testInstanceId, testCredentialsId)
+			output, err := GetCredentialsUsername(context.Background(), newAPIMock(client), testProjectId, testInstanceId, testCredentialsId, testRegion)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")

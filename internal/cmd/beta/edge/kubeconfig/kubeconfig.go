@@ -1,6 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
-// SPDX-FileCopyrightText: 2025 STACKIT GmbH & Co. KG
-
 package kubeconfig
 
 import (
@@ -15,7 +12,7 @@ import (
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "kubeconfig",
-		Short: "Provides functionality for edge kubeconfig.",
+		Short: "Provides functionality for Edge Cloud kubeconfig.",
 		Long:  "Provides functionality for STACKIT Edge Cloud (STEC) kubeconfig management.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,

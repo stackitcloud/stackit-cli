@@ -134,6 +134,9 @@ func UserSessionExpired() (bool, error) {
 }
 
 func GetAccessToken() (string, error) {
+	if accessToken := os.Getenv(envAccessTokenName); accessToken != "" {
+		return accessToken, nil
+	}
 	accessToken, err := GetAuthField(ACCESS_TOKEN)
 	if err != nil {
 		return "", fmt.Errorf("get %s: %w", ACCESS_TOKEN, err)

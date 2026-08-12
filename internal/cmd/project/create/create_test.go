@@ -2,6 +2,9 @@ package create
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -24,6 +27,15 @@ var testClient = &resourcemanager.APIClient{DefaultAPI: &resourcemanager.Default
 var testParentId = uuid.NewString()
 var testNetworkAreaId = uuid.NewString()
 var testEmail = "email"
+
+// buildTestJWT creates an unsigned JWT token containing the given email claim.
+// getEmailFromToken uses ParseUnverified, so no real signing key is needed.
+func buildTestJWT(email string) string {
+	header, _ := json.Marshal(map[string]string{"alg": "HS256", "typ": "JWT"})
+	payload, _ := json.Marshal(map[string]string{"email": email})
+	enc := base64.RawURLEncoding
+	return fmt.Sprintf("%s.%s.fakesig", enc.EncodeToString(header), enc.EncodeToString(payload))
+}
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
@@ -193,6 +205,7 @@ func TestBuildRequest(t *testing.T) {
 		authFlow        auth.AuthFlow
 		sa_email        *string
 		user_email      *string
+		accessToken     *string
 		expectedRequest resourcemanager.ApiCreateProjectRequest
 		isValid         bool
 	}{
@@ -217,6 +230,13 @@ func TestBuildRequest(t *testing.T) {
 			model:           fixtureInputModel(),
 			authFlow:        auth.AUTH_FLOW_USER_TOKEN,
 			user_email:      utils.Ptr(testEmail),
+			expectedRequest: fixtureRequest(),
+			isValid:         true,
+		},
+		{
+			description:     "access_token_env_var_no_stored_auth_flow",
+			model:           fixtureInputModel(),
+			accessToken:     utils.Ptr(buildTestJWT(testEmail)),
 			expectedRequest: fixtureRequest(),
 			isValid:         true,
 		},
@@ -295,6 +315,9 @@ func TestBuildRequest(t *testing.T) {
 				if err != nil {
 					t.Fatalf("Failed to set user email in storage: %v", err)
 				}
+			}
+			if tt.accessToken != nil {
+				t.Setenv("STACKIT_ACCESS_TOKEN", *tt.accessToken)
 			}
 			request, err := buildRequest(testCtx, tt.model, testClient)
 			if err != nil {

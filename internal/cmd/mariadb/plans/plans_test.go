@@ -12,18 +12,23 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	mariadb "github.com/stackitcloud/stackit-sdk-go/services/mariadb/v1api"
+	mariadb "github.com/stackitcloud/stackit-sdk-go/services/mariadb/v2api"
 )
 
 type testCtxKey struct{}
 
-var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &mariadb.APIClient{DefaultAPI: &mariadb.DefaultAPIService{}}
-var testProjectId = uuid.NewString()
+var (
+	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient    = &mariadb.APIClient{DefaultAPI: &mariadb.DefaultAPIService{}}
+	testProjectId = uuid.NewString()
+)
+
+const testRegion = "eu01"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
 		limitFlag:                 "10",
 	}
 	for _, mod := range mods {
@@ -36,6 +41,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		Limit: utils.Ptr(int64(10)),
@@ -47,7 +53,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *mariadb.ApiListOfferingsRequest)) mariadb.ApiListOfferingsRequest {
-	request := testClient.DefaultAPI.ListOfferings(testCtx, testProjectId)
+	request := testClient.DefaultAPI.ListOfferings(testCtx, testProjectId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}

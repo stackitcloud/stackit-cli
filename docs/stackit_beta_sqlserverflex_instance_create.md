@@ -24,18 +24,22 @@ stackit beta sqlserverflex instance create [flags]
 ### Options
 
 ```
-      --acl strings              The access control list (ACL). Must contain at least one valid subnet, for instance '0.0.0.0/0' for open access (discouraged), '1.2.3.0/24 for a public IP range of an organization, '1.2.3.4/32' for a single IP range, etc. (default [])
-      --backup-schedule string   Backup schedule
-      --cpu int                  Number of CPUs
-      --edition string           Edition of the SQLServer instance
-      --flavor-id string         ID of the flavor
-  -h, --help                     Help for "stackit beta sqlserverflex instance create"
-  -n, --name string              Instance name
-      --ram int                  Amount of RAM (in GB)
-      --retention-days int32     The days for how long the backup files should be stored before being cleaned up
-      --storage-class string     Storage class
-      --storage-size int         Storage size (in GB)
-      --version string           SQLServer version
+      --acl strings                         The access control list (ACL). Must contain at least one valid subnet, for instance '0.0.0.0/0' for open access (discouraged), '1.2.3.0/24 for a public IP range of an organization, '1.2.3.4/32' for a single IP range, etc. (default [])
+      --backup-schedule string              Backup schedule
+      --cpu int                             Number of CPUs
+      --edition string                      Edition of the SQLServer instance
+      --encryption-kek-key-id string        The key identifier
+      --encryption-kek-key-version string   The key version
+      --encryption-kek-keyring-id string    The keyring identifier
+      --encryption-service-account string   The service account
+      --flavor-id string                    ID of the flavor
+  -h, --help                                Help for "stackit beta sqlserverflex instance create"
+  -n, --name string                         Instance name
+      --ram int                             Amount of RAM (in GB)
+      --retention-days int32                The days for how long the backup files should be stored before being cleaned up
+      --storage-class string                Storage class
+      --storage-size int                    Storage size (in GB)
+      --version string                      SQLServer version
 ```
 
 ### Options inherited from parent commands
