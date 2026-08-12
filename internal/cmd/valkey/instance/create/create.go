@@ -146,8 +146,8 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(planNameFlag, "", "Plan name")
 	cmd.Flags().String(versionFlag, "", "Instance Valkey version")
 
-	cmd.Flags().Int32(minReplicasToWriteFlag, 0, "Minimum number of replicas that must acknowledge a write for it to be accepted (Valkey only)")
-	cmd.Flags().String(replBacklogSizeFlag, "", "Replication backlog size (e.g. \"1mb\") (Valkey only)")
+	cmd.Flags().Int32(minReplicasToWriteFlag, 0, "Minimum number of replicas that must acknowledge a write for it to be accepted")
+	cmd.Flags().String(replBacklogSizeFlag, "", "Replication backlog size (e.g. \"1mb\")")
 
 	err := flags.MarkFlagsRequired(cmd, instanceNameFlag)
 	cobra.CheckErr(err)

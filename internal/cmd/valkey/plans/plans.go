@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
@@ -18,21 +19,32 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 )
 
+const (
+	limitFlag = "limit"
+)
+
 type inputModel struct {
 	*globalflags.GlobalFlagModel
+	Limit *int64
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "offerings",
+		Use:   "plans",
 		Short: "Lists all Valkey service plans",
 		Long:  "Lists all Valkey service plans.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				"Lists all Valkey service plans",
-				"$ stackit valkey offerings",
+				"$ stackit valkey plans",
 			),
+			examples.NewExample(
+				`List all Valkey service plans in JSON format`,
+				"$ stackit valkey plans --output-format json"),
+			examples.NewExample(
+				`List up to 10 Valkey service plans`,
+				"$ stackit valkey plans --limit 10"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -53,6 +65,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 			plans := resp.Offerings
 
+			// Truncate output
+			if model.Limit != nil && len(plans) > int(*model.Limit) {
+				plans = plans[:*model.Limit]
+			}
+
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
@@ -62,7 +79,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, projectLabel, plans)
 		},
 	}
+	configureFlags(cmd)
 	return cmd
+}
+
+func configureFlags(cmd *cobra.Command) {
+	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
@@ -71,8 +93,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		return nil, &errors.ProjectIdError{}
 	}
 
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
+	if limit != nil && *limit < 1 {
+		return nil, &errors.FlagValidationError{
+			Flag:    limitFlag,
+			Details: "must be greater than 0",
+		}
+	}
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
+		Limit:           limit,
 	}
 
 	p.DebugInputModel(model)

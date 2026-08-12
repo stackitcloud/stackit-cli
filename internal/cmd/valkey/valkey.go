@@ -3,9 +3,9 @@ package valkey
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/valkey/credentials"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/valkey/instance"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/valkey/plans"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/valkey/credentials"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/valkey/instance"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/valkey/plans"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
