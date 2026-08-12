@@ -1,26 +1,33 @@
-## stackit beta valkey instance delete
+## stackit valkey plans
 
-Deletes a Valkey instance
+Lists all Valkey service plans
 
 ### Synopsis
 
-Deletes a Valkey instance.
+Lists all Valkey service plans.
 
 ```
-stackit beta valkey instance delete INSTANCE_ID [flags]
+stackit valkey plans [flags]
 ```
 
 ### Examples
 
 ```
-  Delete a Valkey instance with ID "xxx"
-  $ stackit beta valkey instance delete xxx
+  Lists all Valkey service plans
+  $ stackit valkey plans
+
+  List all Valkey service plans in JSON format
+  $ stackit valkey plans --output-format json
+
+  List up to 10 Valkey service plans
+  $ stackit valkey plans --limit 10
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta valkey instance delete"
+  -h, --help        Help for "stackit valkey plans"
+      --limit int   Maximum number of entries to list
 ```
 
 ### Options inherited from parent commands
@@ -36,5 +43,5 @@ stackit beta valkey instance delete INSTANCE_ID [flags]
 
 ### SEE ALSO
 
-* [stackit beta valkey instance](./stackit_beta_valkey_instance.md)	 - Provides functionality for Valkey instances
+* [stackit valkey](./stackit_valkey.md)	 - Provides functionality for Valkey
 

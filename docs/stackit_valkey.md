@@ -32,5 +32,5 @@ stackit valkey [flags]
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
 * [stackit valkey credentials](./stackit_valkey_credentials.md)	 - Provides functionality for Valkey credentials
 * [stackit valkey instance](./stackit_valkey_instance.md)	 - Provides functionality for Valkey instances
-* [stackit valkey offerings](./stackit_valkey_offerings.md)	 - Lists all Valkey service plans
+* [stackit valkey plans](./stackit_valkey_plans.md)	 - Lists all Valkey service plans
 

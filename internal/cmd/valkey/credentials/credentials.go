@@ -1,13 +1,12 @@
-package instance
+package credentials
 
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/valkey/instance/create"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/valkey/instance/delete"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/valkey/instance/describe"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/valkey/instance/list"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/valkey/instance/update"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/valkey/credentials/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/valkey/credentials/delete"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/valkey/credentials/describe"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/valkey/credentials/list"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -15,9 +14,9 @@ import (
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "instance",
-		Short: "Provides functionality for Valkey instances",
-		Long:  "Provides functionality for Valkey instances.",
+		Use:   "credentials",
+		Short: "Provides functionality for Valkey credentials",
+		Long:  "Provides functionality for Valkey credentials.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
@@ -30,5 +29,4 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(delete.NewCmd(params))
 	cmd.AddCommand(describe.NewCmd(params))
 	cmd.AddCommand(list.NewCmd(params))
-	cmd.AddCommand(update.NewCmd(params))
 }

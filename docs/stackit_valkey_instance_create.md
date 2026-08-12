@@ -32,12 +32,12 @@ stackit valkey instance create [flags]
   -h, --help                            Help for "stackit valkey instance create"
       --metrics-frequency int32         Metrics frequency in seconds
       --metrics-prefix string           Metrics prefix
-      --min-replicas-to-write int32     Minimum number of replicas that must acknowledge a write for it to be accepted (Valkey only)
+      --min-replicas-to-write int32     Minimum number of replicas that must acknowledge a write for it to be accepted
       --monitoring-instance-id string   Monitoring instance ID
   -n, --name string                     Instance name
       --plan-id string                  Plan ID
       --plan-name string                Plan name
-      --repl-backlog-size string        Replication backlog size (e.g. "1mb") (Valkey only)
+      --repl-backlog-size string        Replication backlog size (e.g. "1mb")
       --syslog strings                  Syslog
       --version string                  Instance Valkey version
 ```
