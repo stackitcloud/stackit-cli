@@ -29,7 +29,7 @@ stackit beta alb-waf custom-rule-group [flags]
 
 ### SEE ALSO
 
-* [stackit beta alb-waf](./stackit_beta_alb-waf.md)	 - Provides functionality for Application Load Balancer Web Application Firwall
+* [stackit beta alb-waf](./stackit_beta_alb-waf.md)	 - Provides functionality for Application Load Balancer Web Application Firewall
 * [stackit beta alb-waf custom-rule-group create](./stackit_beta_alb-waf_custom-rule-group_create.md)	 - Creates an ALB WAF custom rule group
 * [stackit beta alb-waf custom-rule-group delete](./stackit_beta_alb-waf_custom-rule-group_delete.md)	 - Deletes an ALB WAF custom rule group
 * [stackit beta alb-waf custom-rule-group describe](./stackit_beta_alb-waf_custom-rule-group_describe.md)	 - Shows details of an ALB WAF custom rule group

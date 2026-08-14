@@ -88,8 +88,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("update ALB WAF custom rule group: %w", err)
 			}
 
-			params.Printer.Outputf("Updated custom rule group %q.\n", resp.Name)
-			return nil
+			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -135,4 +134,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *albwaf.APIC
 	req := apiClient.DefaultAPI.UpdateCustomRuleGroup(ctx, model.ProjectId, model.Region, model.Name)
 	req = req.UpdateCustomRuleGroupPayload(*model.Payload)
 	return req
+}
+
+func outputResult(p *print.Printer, outputFormat string, resp *albwaf.GetCustomRuleGroupResponse) error {
+	return p.OutputResult(outputFormat, resp, func() error {
+		if resp == nil {
+			p.Outputf("Received empty custom rule group response")
+			return nil
+		}
+		p.Outputf("Updated custom rule group %q.\n", resp.Name)
+		return nil
+	})
 }

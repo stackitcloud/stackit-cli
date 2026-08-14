@@ -7,6 +7,8 @@ import (
 	albwaf "github.com/stackitcloud/stackit-sdk-go/services/albwaf/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 
 	"github.com/google/go-cmp/cmp"
@@ -167,6 +169,47 @@ func TestBuildRequest(t *testing.T) {
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestOutputResult(t *testing.T) {
+	tests := []struct {
+		description  string
+		outputFormat string
+		resp         *albwaf.GetCustomRuleGroupResponse
+		wantErr      bool
+	}{
+		{
+			description:  "empty",
+			outputFormat: "",
+			resp:         nil,
+			wantErr:      false,
+		},
+		{
+			description:  "base",
+			outputFormat: "",
+			resp: &albwaf.GetCustomRuleGroupResponse{
+				Name: "test-custom-rule-group",
+			},
+			wantErr: false,
+		},
+		{
+			description:  "json output",
+			outputFormat: print.JSONOutputFormat,
+			resp: &albwaf.GetCustomRuleGroupResponse{
+				Name: "test-custom-rule-group",
+			},
+			wantErr: false,
+		},
+	}
+	params := testparams.NewTestParams()
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			if err := outputResult(params.Printer, tt.outputFormat, tt.resp); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

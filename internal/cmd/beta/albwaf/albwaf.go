@@ -12,8 +12,8 @@ import (
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "alb-waf",
-		Short: "Provides functionality for Application Load Balancer Web Application Firwall",
-		Long:  "Provides functionality for Application Load Balancer Web Application Firwall.",
+		Short: "Provides functionality for Application Load Balancer Web Application Firewall",
+		Long:  "Provides functionality for Application Load Balancer Web Application Firewall.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

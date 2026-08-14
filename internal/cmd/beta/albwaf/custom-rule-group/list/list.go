@@ -122,12 +122,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *albwaf.APIC
 
 func fetchCustomRuleGroups(ctx context.Context, model *inputModel, apiClient *albwaf.APIClient) ([]albwaf.GetCustomRuleGroupResponse, error) {
 	var pageId string
-	var items []albwaf.GetCustomRuleGroupResponse
+	items := make([]albwaf.GetCustomRuleGroupResponse, 0)
 	received := int64(0)
 	limit := int64(math.MaxInt64)
 	if model.Limit != nil {
 		limit = *model.Limit
 	}
+	// Replace with pagination function to be introduced in STACKITSDK-525
 	for {
 		want := min(int64(maxPageSize), limit-received)
 		request := buildRequest(ctx, model, apiClient, pageId, want)
@@ -135,9 +136,7 @@ func fetchCustomRuleGroups(ctx context.Context, model *inputModel, apiClient *al
 		if err != nil {
 			return nil, fmt.Errorf("list custom rule groups: %w", err)
 		}
-		if response.Items != nil {
-			items = append(items, response.Items...)
-		}
+		items = append(items, response.Items...)
 		pageId = ""
 		if response.NextPageId != nil {
 			pageId = *response.NextPageId

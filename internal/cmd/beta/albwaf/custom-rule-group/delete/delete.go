@@ -74,7 +74,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("delete ALB WAF custom rule group: %w", err)
 			}
 
-			params.Printer.Outputf("Custom rule group %q deleted.\n", model.Name)
+			params.Printer.Info("Custom rule group %q deleted.\n", model.Name)
 			return nil
 		},
 	}

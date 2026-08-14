@@ -74,13 +74,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
-			_, err = req.Execute()
+			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create ALB WAF custom rule group: %w", err)
 			}
 
-			params.Printer.Outputf("Created custom rule group with name %q \n", model.Payload.Name)
-			return nil
+			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -123,4 +122,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *albwaf.APIC
 	req := apiClient.DefaultAPI.CreateCustomRuleGroup(ctx, model.ProjectId, model.Region)
 	req = req.CreateCustomRuleGroupPayload(*model.Payload)
 	return req
+}
+
+func outputResult(p *print.Printer, outputFormat string, resp *albwaf.GetCustomRuleGroupResponse) error {
+	return p.OutputResult(outputFormat, resp, func() error {
+		if resp == nil {
+			p.Outputf("Received empty custom rule group response")
+			return nil
+		}
+		p.Outputf("Created custom rule group with name %q \n", resp.Name)
+		return nil
+	})
 }
