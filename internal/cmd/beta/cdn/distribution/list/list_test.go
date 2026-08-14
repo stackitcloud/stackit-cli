@@ -14,7 +14,6 @@ import (
 	"github.com/google/uuid"
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 	cdn "github.com/stackitcloud/stackit-sdk-go/services/cdn/v1api"
-	"github.com/stackitcloud/stackit-sdk-go/services/cdn/v1api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -32,7 +31,7 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 const (
 	testNextPageID = "next-page-id-123"
 	testID         = "dist-1"
-	testStatus     = wait.DISTRIBUTIONSTATUS_ACTIVE
+	testStatus     = cdn.DISTRIBUTIONSTATUS_ACTIVE
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -62,7 +61,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 func fixtureRequest(mods ...func(request cdn.ApiListDistributionsRequest) cdn.ApiListDistributionsRequest) cdn.ApiListDistributionsRequest {
 	request := testClient.DefaultAPI.ListDistributions(testCtx, testProjectId)
 	request = request.PageSize(100)
-	request = request.SortBy("createdAt")
+	request = request.SortBy(cdn.LISTDISTRIBUTIONSSORTBYPARAMETER_CREATED_AT)
 	for _, mod := range mods {
 		request = mod(request)
 	}
@@ -196,7 +195,7 @@ func TestBuildRequest(t *testing.T) {
 				model.SortBy = "updatedAt"
 			}),
 			expected: fixtureRequest(func(req cdn.ApiListDistributionsRequest) cdn.ApiListDistributionsRequest {
-				return req.SortBy("updatedAt")
+				return req.SortBy(cdn.LISTDISTRIBUTIONSSORTBYPARAMETER_UPDATED_AT)
 			}),
 		},
 		{
