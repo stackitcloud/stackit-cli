@@ -86,14 +86,16 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("create service account key: %w", err)
 			}
 
-			params.Printer.Outputf("Created key for service account %s with ID %q\n", model.ServiceAccountEmail, resp.Id)
+			return params.Printer.OutputResult(model.OutputFormat, resp, func() error {
+				params.Printer.Outputf("Created key for service account %s with ID %q\n", model.ServiceAccountEmail, resp.Id)
 
-			key, err := json.MarshalIndent(resp, "", "  ")
-			if err != nil {
-				return fmt.Errorf("marshal key: %w", err)
-			}
-			params.Printer.Outputln(string(key))
-			return nil
+				key, err := json.MarshalIndent(resp, "", "  ")
+				if err != nil {
+					return fmt.Errorf("marshal key: %w", err)
+				}
+				params.Printer.Outputln(string(key))
+				return nil
+			})
 		},
 	}
 

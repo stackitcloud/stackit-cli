@@ -1,45 +1,34 @@
-// SPDX-License-Identifier: Apache-2.0
-// SPDX-FileCopyrightText: 2025 STACKIT GmbH & Co. KG
-
 package create
 
 import (
 	"context"
-	"errors"
-	"net/http"
 	"testing"
 
 	"github.com/goccy/go-yaml"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/core/oapierror"
-	"github.com/stackitcloud/stackit-sdk-go/services/edge"
+	edge "github.com/stackitcloud/stackit-sdk-go/services/edge/v1beta1api"
 
-	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/edge/client"
-	commonErr "github.com/stackitcloud/stackit-cli/internal/pkg/services/edge/common/error"
-	commonInstance "github.com/stackitcloud/stackit-cli/internal/pkg/services/edge/common/instance"
-	commonKubeconfig "github.com/stackitcloud/stackit-cli/internal/pkg/services/edge/common/kubeconfig"
-	commonValidation "github.com/stackitcloud/stackit-cli/internal/pkg/services/edge/common/validation"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
-	testUtils "github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 )
 
 type testCtxKey struct{}
 
 var (
-	testCtx         = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testProjectId   = uuid.NewString()
-	testRegion      = "eu01"
-	testInstanceId  = "instance"
-	testDisplayName = "test"
-	testExpiration  = "1h"
+	testCtx        = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testProjectId  = uuid.NewString()
+	testInstanceId = uuid.NewString()
+	testClient     = &edge.APIClient{DefaultAPI: &edge.DefaultAPIService{}}
 )
 
 const (
+	testRegion     = "eu01"
+	testExpiration = 3600
 	testKubeconfig = `
 apiVersion: v1
 clusters:
@@ -63,123 +52,21 @@ users:
 // Helper function to create a new instance of Kubeconfig
 //
 //nolint:gocritic // ptrToRefParam: Required by edge.Kubeconfig API which expects *map[string]interface{}
-func testKubeconfigMap() *map[string]interface{} {
+func testKubeconfigMap() map[string]interface{} {
 	var kubeconfigMap map[string]interface{}
 	err := yaml.Unmarshal([]byte(testKubeconfig), &kubeconfigMap)
 	if err != nil {
 		// This should never happen in tests with valid YAML
 		panic(err)
 	}
-	return utils.Ptr(kubeconfigMap)
-}
-
-// mockKubeconfigWaiter is a mock for the kubeconfigWaiter interface
-type mockKubeconfigWaiter struct {
-	waitFails    bool
-	waitNotFound bool
-	waitResp     *edge.Kubeconfig
-}
-
-func (m *mockKubeconfigWaiter) WaitWithContext(_ context.Context) (*edge.Kubeconfig, error) {
-	if m.waitFails {
-		return nil, errors.New("wait error")
-	}
-	if m.waitNotFound {
-		return nil, &oapierror.GenericOpenAPIError{
-			StatusCode: http.StatusNotFound,
-		}
-	}
-	if m.waitResp != nil {
-		return m.waitResp, nil
-	}
-
-	// Default kubeconfig response
-	return &edge.Kubeconfig{
-		Kubeconfig: testKubeconfigMap(),
-	}, nil
-}
-
-// testWaiterFactoryProvider is a test implementation that returns mock waiters.
-type testWaiterFactoryProvider struct {
-	waiter kubeconfigWaiter
-}
-
-func (t *testWaiterFactoryProvider) getKubeconfigWaiter(_ context.Context, model *inputModel, _ client.APIClient) (kubeconfigWaiter, error) {
-	if model == nil || model.identifier == nil {
-		return nil, &commonErr.NoIdentifierError{}
-	}
-
-	// Validate identifier like the real implementation
-	switch model.identifier.Flag {
-	case commonInstance.InstanceIdFlag, commonInstance.DisplayNameFlag:
-		// Return our mock waiter directly, bypassing the client type casting issue
-		return t.waiter, nil
-	default:
-		return nil, commonErr.NewInvalidIdentifierError(model.identifier.Flag)
-	}
-}
-
-// mockAPIClient is a mock for the edge.APIClient interface
-type mockAPIClient struct{}
-
-// Unused methods to satisfy the interface
-func (m *mockAPIClient) GetKubeconfigByInstanceId(_ context.Context, _, _, _ string) edge.ApiGetKubeconfigByInstanceIdRequest {
-	return nil
-}
-
-func (m *mockAPIClient) GetKubeconfigByInstanceName(_ context.Context, _, _, _ string) edge.ApiGetKubeconfigByInstanceNameRequest {
-	return nil
-}
-
-func (m *mockAPIClient) GetTokenByInstanceId(_ context.Context, _, _, _ string) edge.ApiGetTokenByInstanceIdRequest {
-	return nil
-}
-
-func (m *mockAPIClient) GetTokenByInstanceName(_ context.Context, _, _, _ string) edge.ApiGetTokenByInstanceNameRequest {
-	return nil
-}
-
-func (m *mockAPIClient) ListPlansProject(_ context.Context, _ string) edge.ApiListPlansProjectRequest {
-	return nil
-}
-
-func (m *mockAPIClient) CreateInstance(_ context.Context, _, _ string) edge.ApiCreateInstanceRequest {
-	return nil
-}
-
-func (m *mockAPIClient) DeleteInstance(_ context.Context, _, _, _ string) edge.ApiDeleteInstanceRequest {
-	return nil
-}
-
-func (m *mockAPIClient) DeleteInstanceByName(_ context.Context, _, _, _ string) edge.ApiDeleteInstanceByNameRequest {
-	return nil
-}
-
-func (m *mockAPIClient) GetInstance(_ context.Context, _, _, _ string) edge.ApiGetInstanceRequest {
-	return nil
-}
-
-func (m *mockAPIClient) GetInstanceByName(_ context.Context, _, _, _ string) edge.ApiGetInstanceByNameRequest {
-	return nil
-}
-
-func (m *mockAPIClient) ListInstances(_ context.Context, _, _ string) edge.ApiListInstancesRequest {
-	return nil
-}
-
-func (m *mockAPIClient) UpdateInstance(_ context.Context, _, _, _ string) edge.ApiUpdateInstanceRequest {
-	return nil
-}
-
-func (m *mockAPIClient) UpdateInstanceByName(_ context.Context, _, _, _ string) edge.ApiUpdateInstanceByNameRequest {
-	return nil
+	return kubeconfigMap
 }
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		globalflags.ProjectIdFlag:     testProjectId,
-		globalflags.RegionFlag:        testRegion,
-		commonInstance.InstanceIdFlag: testInstanceId,
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
+		instanceIdFlag:            testInstanceId,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -187,15 +74,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	return flagValues
 }
 
-func fixtureByIdInputModel(mods ...func(model *inputModel)) *inputModel {
-	return fixtureInputModel(false, mods...)
-}
-
-func fixtureByNameInputModel(mods ...func(model *inputModel)) *inputModel {
-	return fixtureInputModel(true, mods...)
-}
-
-func fixtureInputModel(useName bool, mods ...func(model *inputModel)) *inputModel {
+func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
@@ -207,18 +86,7 @@ func fixtureInputModel(useName bool, mods ...func(model *inputModel)) *inputMode
 		Overwrite:      false,
 		Expiration:     uint64(3600), // Default 1 hour
 		SwitchContext:  false,
-	}
-
-	if useName {
-		model.identifier = &commonValidation.Identifier{
-			Flag:  commonInstance.DisplayNameFlag,
-			Value: testDisplayName,
-		}
-	} else {
-		model.identifier = &commonValidation.Identifier{
-			Flag:  commonInstance.InstanceIdFlag,
-			Value: testInstanceId,
-		}
+		InstanceId:     testInstanceId,
 	}
 
 	for _, mod := range mods {
@@ -227,467 +95,176 @@ func fixtureInputModel(useName bool, mods ...func(model *inputModel)) *inputMode
 	return model
 }
 
-func TestParseInput(t *testing.T) {
-	type args struct {
-		flags   map[string]string
-		cmpOpts []testUtils.ValueComparisonOption
+func fixtureRequest(mods ...func(request *edge.ApiGetKubeconfigByInstanceIdRequest)) edge.ApiGetKubeconfigByInstanceIdRequest {
+	request := testClient.DefaultAPI.GetKubeconfigByInstanceId(testCtx, testProjectId, testRegion, testInstanceId)
+	request = request.ExpirationSeconds(int64(testExpiration))
+	for _, mod := range mods {
+		mod(&request)
 	}
+	return request
+}
 
+func TestParseInput(t *testing.T) {
 	tests := []struct {
-		name    string
-		wantErr any
-		want    *inputModel
-		args    args
+		description   string
+		argValues     []string
+		flagValues    map[string]string
+		isValid       bool
+		expectedModel *inputModel
 	}{
 		{
-			name: "by id",
-			want: fixtureByIdInputModel(),
-			args: args{
-				flags: fixtureFlagValues(),
-				cmpOpts: []testUtils.ValueComparisonOption{
-					testUtils.WithAllowUnexported(inputModel{}),
-				},
-			},
+			description:   "base",
+			flagValues:    fixtureFlagValues(),
+			isValid:       true,
+			expectedModel: fixtureInputModel(),
 		},
 		{
-			name: "by name",
-			want: fixtureByNameInputModel(),
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					delete(flagValues, commonInstance.InstanceIdFlag)
-					flagValues[commonInstance.DisplayNameFlag] = testDisplayName
-				}),
-				cmpOpts: []testUtils.ValueComparisonOption{
-					testUtils.WithAllowUnexported(inputModel{}),
-				},
-			},
-		},
-		{
-			name: "with expiration",
-			want: fixtureByIdInputModel(func(model *inputModel) {
+			description: "with expiration",
+			isValid:     true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.Expiration = uint64(3600)
 			}),
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					flagValues[commonKubeconfig.ExpirationFlag] = testExpiration
-				}),
-				cmpOpts: []testUtils.ValueComparisonOption{
-					testUtils.WithAllowUnexported(inputModel{}),
-				},
-			},
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[expirationFlag] = "1h"
+			}),
 		},
 		{
-			name:    "by id and name",
-			wantErr: true,
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					flagValues[commonInstance.DisplayNameFlag] = testDisplayName
-				}),
-			},
+			description: "no flag values",
+			flagValues:  map[string]string{},
+			isValid:     false,
 		},
 		{
-			name:    "no flag values",
-			wantErr: true,
-			args: args{
-				flags: map[string]string{},
-			},
+			description: "project id missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, globalflags.ProjectIdFlag)
+			}),
+			isValid: false,
 		},
 		{
-			name:    "project id missing",
-			wantErr: &cliErr.ProjectIdError{},
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					delete(flagValues, globalflags.ProjectIdFlag)
-				}),
-			},
+			description: "project id invalid 1",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[globalflags.ProjectIdFlag] = ""
+			}),
+			isValid: false,
 		},
 		{
-			name:    "project id empty",
-			wantErr: "value cannot be empty",
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					flagValues[globalflags.ProjectIdFlag] = ""
-				}),
-			},
+			description: "project id invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
 		},
 		{
-			name:    "project id invalid",
-			wantErr: "invalid UUID length",
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
-				}),
-			},
+			description: "instance id missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, instanceIdFlag)
+			}),
+			isValid: false,
 		},
 		{
-			name:    "instance id missing",
-			wantErr: true,
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					delete(flagValues, commonInstance.InstanceIdFlag)
-				}),
-			},
+			description: "disable writing and invalid output format",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[disableWritingFlag] = "true"
+			}),
+			isValid: false,
 		},
 		{
-			name:    "instance id empty",
-			wantErr: "id may not be empty",
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					flagValues[commonInstance.InstanceIdFlag] = ""
-				}),
-			},
-		},
-		{
-			name:    "instance id too long",
-			wantErr: "id is too long",
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					flagValues[commonInstance.InstanceIdFlag] = "invalid-instance-id"
-				}),
-			},
-		},
-		{
-			name:    "instance id too short",
-			wantErr: "id is too short",
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					flagValues[commonInstance.InstanceIdFlag] = "id"
-				}),
-			},
-		},
-		{
-			name:    "name too short",
-			wantErr: "name is too short",
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					delete(flagValues, commonInstance.InstanceIdFlag)
-					flagValues[commonInstance.DisplayNameFlag] = "foo"
-				}),
-			},
-		},
-		{
-			name:    "name too long",
-			wantErr: "name is too long",
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					delete(flagValues, commonInstance.InstanceIdFlag)
-					flagValues[commonInstance.DisplayNameFlag] = "foofoofoo"
-				}),
-			},
-		},
-		{
-			name:    "disable writing and invalid output format",
-			wantErr: "valid output formats for this command are",
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					flagValues[commonKubeconfig.DisableWritingFlag] = "true"
-					flagValues[globalflags.OutputFormatFlag.Name()] = print.PrettyOutputFormat
-				}),
-			},
-		},
-		{
-			name:    "disable writing and default output format",
-			wantErr: "must be used with --output-format",
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					flagValues[commonKubeconfig.DisableWritingFlag] = "true"
-				}),
-			},
-		},
-		{
-			name: "disable writing and valid output format",
-			want: fixtureByIdInputModel(func(model *inputModel) {
+			description: "disable writing and valid output format",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[disableWritingFlag] = "true"
+				flagValues[globalflags.OutputFormatFlag.Name()] = print.YAMLOutputFormat
+			}),
+			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.DisableWriting = true
 				model.OutputFormat = print.YAMLOutputFormat
 			}),
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					flagValues[commonKubeconfig.DisableWritingFlag] = "true"
-					flagValues[globalflags.OutputFormatFlag.Name()] = print.YAMLOutputFormat
-				}),
-				cmpOpts: []testUtils.ValueComparisonOption{
-					testUtils.WithAllowUnexported(inputModel{}),
-				},
-			},
+			isValid: true,
 		},
 		{
-			name:    "invalid expiration format",
-			wantErr: "invalid time string format",
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					flagValues[commonKubeconfig.ExpirationFlag] = "invalid"
-				}),
-			},
+			description: "invalid expiration format",
+			isValid:     false,
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[expirationFlag] = "invalid"
+			}),
 		},
 		{
-			name:    "expiration too short",
-			wantErr: "expiration is too small",
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					flagValues[commonKubeconfig.ExpirationFlag] = "1s"
-				}),
-			},
+			description: "expiration too short",
+			isValid:     false,
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[expirationFlag] = "1s"
+			}),
 		},
 		{
-			name:    "expiration too long",
-			wantErr: "expiration is too large",
-			args: args{
-				flags: fixtureFlagValues(func(flagValues map[string]string) {
-					flagValues[commonKubeconfig.ExpirationFlag] = "13M"
-				}),
-			},
+			description: "expiration too long",
+			isValid:     false,
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[expirationFlag] = "13M"
+			}),
+		},
+		{
+			description: "enable overwrite",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[overwriteFlag] = "true"
+			}),
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Overwrite = true
+			}),
+			isValid: true,
+		},
+		{
+			description: "disable overwrite",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[overwriteFlag] = "false"
+			}),
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Overwrite = false
+			}),
+			isValid: true,
 		},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			caseOpts := []testUtils.ParseInputCaseOption{}
-			if len(tt.args.cmpOpts) > 0 {
-				caseOpts = append(caseOpts, testUtils.WithParseInputCmpOptions(tt.args.cmpOpts...))
-			}
-
-			testUtils.RunParseInputCase(t, testUtils.ParseInputTestCase[*inputModel]{
-				Name:       tt.name,
-				Flags:      tt.args.flags,
-				WantModel:  tt.want,
-				WantErr:    tt.wantErr,
-				CmdFactory: NewCmd,
-				ParseInputFunc: func(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
-					return parseInput(p, cmd)
-				},
-			}, caseOpts...)
-		})
-	}
-}
-
-func TestRun(t *testing.T) {
-	type args struct {
-		model  *inputModel
-		client client.APIClient
-		waiter kubeconfigWaiter
-	}
-
-	tests := []struct {
-		name    string
-		wantErr error
-		args    args
-	}{
-		{
-			name: "run by id success",
-			args: args{
-				model:  fixtureByIdInputModel(),
-				client: &mockAPIClient{},
-				waiter: &mockKubeconfigWaiter{},
-			},
-		},
-		{
-			name: "run by name success",
-			args: args{
-				model:  fixtureByNameInputModel(),
-				client: &mockAPIClient{},
-				waiter: &mockKubeconfigWaiter{},
-			},
-		},
-		{
-			name:    "no id or name",
-			wantErr: &commonErr.NoIdentifierError{},
-			args: args{
-				model: fixtureInputModel(false, func(model *inputModel) {
-					model.identifier = nil
-				}),
-				client: &mockAPIClient{},
-				waiter: &mockKubeconfigWaiter{},
-			},
-		},
-		{
-			name:    "instance not found error",
-			wantErr: &cliErr.RequestFailedError{},
-			args: args{
-				model:  fixtureByIdInputModel(),
-				client: &mockAPIClient{},
-				waiter: &mockKubeconfigWaiter{waitNotFound: true},
-			},
-		},
-		{
-			name:    "get kubeconfig by id API error",
-			wantErr: &cliErr.RequestFailedError{},
-			args: args{
-				model:  fixtureByIdInputModel(),
-				client: &mockAPIClient{},
-				waiter: &mockKubeconfigWaiter{waitFails: true},
-			},
-		},
-		{
-			name:    "get kubeconfig by name API error",
-			wantErr: &cliErr.RequestFailedError{},
-			args: args{
-				model:  fixtureByNameInputModel(),
-				client: &mockAPIClient{},
-				waiter: &mockKubeconfigWaiter{waitFails: true},
-			},
-		},
-		{
-			name:    "identifier invalid",
-			wantErr: &commonErr.InvalidIdentifierError{},
-			args: args{
-				model: fixtureInputModel(false, func(model *inputModel) {
-					model.identifier = &commonValidation.Identifier{
-						Flag:  "unknown-flag",
-						Value: "some-value",
-					}
-				}),
-				client: &mockAPIClient{},
-				waiter: &mockKubeconfigWaiter{},
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// Override production waiterProvider package level variable for testing
-			prodWaiterProvider := waiterProvider
-			waiterProvider = &testWaiterFactoryProvider{waiter: tt.args.waiter}
-			defer func() { waiterProvider = prodWaiterProvider }()
-
-			_, err := run(testCtx, tt.args.model, tt.args.client)
-			testUtils.AssertError(t, err, tt.wantErr)
+		t.Run(tt.description, func(t *testing.T) {
+			testutils.TestParseInput(t, NewCmd, func(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
+				return parseInput(p, cmd)
+			}, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
 	}
 }
 
 func TestBuildRequest(t *testing.T) {
-	type args struct {
-		model  *inputModel
-		client client.APIClient
-	}
-
 	tests := []struct {
-		name    string
-		wantErr error
-		want    *createRequestSpec
-		args    args
+		description     string
+		expectedRequest edge.ApiGetKubeconfigByInstanceIdRequest
+		model           *inputModel
 	}{
 		{
-			name: "by id",
-			want: &createRequestSpec{
-				ProjectID:  testProjectId,
-				Region:     testRegion,
-				InstanceId: testInstanceId,
-				Expiration: int64(commonKubeconfig.ExpirationSecondsDefault),
-			},
-			args: args{
-				model:  fixtureByIdInputModel(),
-				client: &mockAPIClient{},
-			},
+			description:     "base",
+			model:           fixtureInputModel(),
+			expectedRequest: fixtureRequest(),
 		},
 		{
-			name: "by name",
-			want: &createRequestSpec{
-				ProjectID:    testProjectId,
-				Region:       testRegion,
-				InstanceName: testDisplayName,
-				Expiration:   int64(commonKubeconfig.ExpirationSecondsDefault),
-			},
-			args: args{
-				model:  fixtureByNameInputModel(),
-				client: &mockAPIClient{},
-			},
-		},
-		{
-			name:    "no id or name",
-			wantErr: &commonErr.NoIdentifierError{},
-			args: args{
-				model: fixtureInputModel(false, func(model *inputModel) {
-					model.identifier = nil
-				}),
-				client: &mockAPIClient{},
-			},
-		},
-		{
-			name:    "identifier invalid",
-			wantErr: &commonErr.InvalidIdentifierError{},
-			args: args{
-				model: fixtureInputModel(false, func(model *inputModel) {
-					model.identifier = &commonValidation.Identifier{
-						Flag:  "unknown-flag",
-						Value: "some-value",
-					}
-				}),
-				client: &mockAPIClient{},
-			},
+			description: "expiration time",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Expiration = uint64(2592000)
+			}),
+			expectedRequest: fixtureRequest().ExpirationSeconds(int64(2592000)),
 		},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := buildRequest(testCtx, tt.args.model, tt.args.client)
-			if !testUtils.AssertError(t, err, tt.wantErr) {
-				return
-			}
-			testUtils.AssertValue(t, got, tt.want, testUtils.WithIgnoreFields(createRequestSpec{}, "Execute"))
-		})
-	}
-}
-
-func TestGetWaiterFactory(t *testing.T) {
-	type args struct {
-		model *inputModel
-	}
-
-	tests := []struct {
-		name    string
-		wantErr error
-		want    bool
-		args    args
-	}{
-		{
-			name: "by id",
-			want: true,
-			args: args{
-				model: fixtureByIdInputModel(),
-			},
-		},
-		{
-			name: "by name",
-			want: true,
-			args: args{
-				model: fixtureByNameInputModel(),
-			},
-		},
-		{
-			name:    "no id or name",
-			wantErr: &commonErr.NoIdentifierError{},
-			want:    false,
-			args: args{
-				model: fixtureInputModel(false, func(model *inputModel) {
-					model.identifier = nil
-				}),
-			},
-		},
-		{
-			name:    "unknown identifier",
-			wantErr: &commonErr.InvalidIdentifierError{},
-			want:    false,
-			args: args{
-				model: fixtureInputModel(false, func(model *inputModel) {
-					model.identifier.Flag = "unknown"
-				}),
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := getWaiterFactory(testCtx, tt.args.model)
-			if !testUtils.AssertError(t, err, tt.wantErr) {
-				return
+		t.Run(tt.description, func(t *testing.T) {
+			request, err := buildRequest(testCtx, tt.model, testClient)
+			if err != nil {
+				t.Fatalf("cannot create request: %v", err)
 			}
 
-			if tt.want && got == nil {
-				t.Fatal("expected non-nil waiter factory")
-			}
-			if !tt.want && got != nil {
-				t.Fatal("expected nil waiter factory")
+			diff := cmp.Diff(request, tt.expectedRequest,
+				cmp.AllowUnexported(tt.expectedRequest, edge.DefaultAPIService{}),
+				cmpopts.EquateComparable(testCtx),
+			)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
 			}
 		})
 	}
@@ -708,7 +285,7 @@ func TestOutputResult(t *testing.T) {
 			name:    "no kubeconfig",
 			wantErr: true,
 			args: args{
-				model:      fixtureByIdInputModel(),
+				model:      fixtureInputModel(),
 				kubeconfig: nil,
 			},
 		},
@@ -716,14 +293,14 @@ func TestOutputResult(t *testing.T) {
 			name:    "kubeconfig with nil kubeconfig data",
 			wantErr: true,
 			args: args{
-				model:      fixtureByIdInputModel(),
+				model:      fixtureInputModel(),
 				kubeconfig: &edge.Kubeconfig{Kubeconfig: nil},
 			},
 		},
 		{
 			name: "output json with disable writing",
 			args: args{
-				model: fixtureByIdInputModel(func(model *inputModel) {
+				model: fixtureInputModel(func(model *inputModel) {
 					model.OutputFormat = print.JSONOutputFormat
 					model.DisableWriting = true
 				}),
@@ -733,7 +310,7 @@ func TestOutputResult(t *testing.T) {
 		{
 			name: "output yaml with disable writing",
 			args: args{
-				model: fixtureByIdInputModel(func(model *inputModel) {
+				model: fixtureInputModel(func(model *inputModel) {
 					model.OutputFormat = print.YAMLOutputFormat
 					model.DisableWriting = true
 				}),
@@ -743,36 +320,7 @@ func TestOutputResult(t *testing.T) {
 		{
 			name: "output default with disable writing",
 			args: args{
-				model: fixtureByIdInputModel(func(model *inputModel) {
-					model.DisableWriting = true
-				}),
-				kubeconfig: &edge.Kubeconfig{Kubeconfig: testKubeconfigMap()},
-			},
-		},
-		{
-			name: "output by name with json format and disable writing",
-			args: args{
-				model: fixtureByNameInputModel(func(model *inputModel) {
-					model.OutputFormat = print.JSONOutputFormat
-					model.DisableWriting = true
-				}),
-				kubeconfig: &edge.Kubeconfig{Kubeconfig: testKubeconfigMap()},
-			},
-		},
-		{
-			name: "output by name with yaml format and disable writing",
-			args: args{
-				model: fixtureByNameInputModel(func(model *inputModel) {
-					model.OutputFormat = print.YAMLOutputFormat
-					model.DisableWriting = true
-				}),
-				kubeconfig: &edge.Kubeconfig{Kubeconfig: testKubeconfigMap()},
-			},
-		},
-		{
-			name: "output by name default with disable writing",
-			args: args{
-				model: fixtureByNameInputModel(func(model *inputModel) {
+				model: fixtureInputModel(func(model *inputModel) {
 					model.DisableWriting = true
 				}),
 				kubeconfig: &edge.Kubeconfig{Kubeconfig: testKubeconfigMap()},
@@ -781,7 +329,7 @@ func TestOutputResult(t *testing.T) {
 		{
 			name: "file writing enabled (default behavior)",
 			args: args{
-				model: fixtureByIdInputModel(func(model *inputModel) {
+				model: fixtureInputModel(func(model *inputModel) {
 					model.AssumeYes = true
 				}),
 				kubeconfig: &edge.Kubeconfig{Kubeconfig: testKubeconfigMap()},
@@ -790,7 +338,7 @@ func TestOutputResult(t *testing.T) {
 		{
 			name: "file writing with overwrite enabled",
 			args: args{
-				model: fixtureByIdInputModel(func(model *inputModel) {
+				model: fixtureInputModel(func(model *inputModel) {
 					model.Overwrite = true
 					model.AssumeYes = true
 				}),
@@ -800,7 +348,7 @@ func TestOutputResult(t *testing.T) {
 		{
 			name: "file writing with switch context enabled",
 			args: args{
-				model: fixtureByIdInputModel(func(model *inputModel) {
+				model: fixtureInputModel(func(model *inputModel) {
 					model.SwitchContext = true
 					model.AssumeYes = true
 				}),
@@ -814,7 +362,7 @@ func TestOutputResult(t *testing.T) {
 			params := testparams.NewTestParams()
 
 			err := outputResult(params.Printer, tt.args.model.OutputFormat, tt.args.model, tt.args.kubeconfig)
-			testUtils.AssertError(t, err, tt.wantErr)
+			testutils.AssertError(t, err, tt.wantErr)
 		})
 	}
 }
