@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -53,7 +53,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *postgresflex.ApiListUsersRequest)) postgresflex.ApiListUsersRequest {
-	request := testClient.DefaultAPI.ListUsers(testCtx, testProjectId, testRegion, testInstanceId)
+	request := testClient.DefaultAPI.ListUsers(testCtx, testProjectId, testRegion, testInstanceId).Size(100)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -144,9 +144,20 @@ func TestBuildRequest(t *testing.T) {
 		expectedRequest postgresflex.ApiListUsersRequest
 	}{
 		{
-			description:     "base",
-			model:           fixtureInputModel(),
+			description: "base",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Limit = nil
+			}),
 			expectedRequest: fixtureRequest(),
+		},
+		{
+			description: "limit flag is set",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Limit = new(int64(12))
+			}),
+			expectedRequest: fixtureRequest(func(request *postgresflex.ApiListUsersRequest) {
+				*request = request.Size(12)
+			}),
 		},
 	}
 
@@ -169,19 +180,47 @@ func Test_outputResult(t *testing.T) {
 	type args struct {
 		outputFormat  string
 		instanceLabel string
-		users         []postgresflex.ListUsersResponseItem
+		users         []postgresflex.ListUser
 	}
 	tests := []struct {
 		name    string
 		args    args
 		wantErr bool
 	}{
-		{"empty", args{}, false},
-		{"standard", args{users: []postgresflex.ListUsersResponseItem{{}}}, false},
-		{"complete", args{instanceLabel: "label", users: []postgresflex.ListUsersResponseItem{{
-			Id:       new(string),
-			Username: new(string),
-		}}}, false},
+		{
+			name: "users is nil",
+			args: args{
+				users: nil,
+			},
+			wantErr: false,
+		},
+		{
+			name: "users is empty",
+			args: args{
+				users: []postgresflex.ListUser{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty user in users slice",
+			args: args{
+				users: []postgresflex.ListUser{{}},
+			},
+			wantErr: false,
+		},
+		{
+			name: "complete",
+			args: args{
+				instanceLabel: "label",
+				users: []postgresflex.ListUser{
+					{
+						Id:   int64(42),
+						Name: "username",
+					},
+				},
+			},
+			wantErr: false,
+		},
 	}
 	params := testparams.NewTestParams()
 	for _, tt := range tests {

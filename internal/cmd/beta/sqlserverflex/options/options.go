@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	sqlserverflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -181,7 +182,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputModel, apiClient sqlserverflex.DefaultAPI) error {
-	var flavors *sqlserverflex.ListFlavorsResponse
+	var flavors []sqlserverflex.ListFlavors
 	var versions *sqlserverflex.ListVersionsResponse
 	var storages *sqlserverflex.ListStoragesResponse
 	var userRoles *sqlserverflex.ListRolesResponse
@@ -190,7 +191,7 @@ func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputM
 	var err error
 
 	if model.Flavors {
-		flavors, err = apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Execute()
+		flavors, err = sqlserverflexUtils.ListAllFlavors(ctx, apiClient, model.ProjectId, model.Region)
 		if err != nil {
 			return fmt.Errorf("get SQL Server Flex flavors: %w", err)
 		}
@@ -229,10 +230,10 @@ func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputM
 	return outputResult(p, model, flavors, versions, storages, userRoles, dbCollations, dbCompatibilities)
 }
 
-func outputResult(p *print.Printer, model *inputModel, flavors *sqlserverflex.ListFlavorsResponse, versions *sqlserverflex.ListVersionsResponse, storages *sqlserverflex.ListStoragesResponse, userRoles *sqlserverflex.ListRolesResponse, dbCollations *sqlserverflex.ListCollationsResponse, dbCompatibilities *sqlserverflex.ListCompatibilityResponse) error {
+func outputResult(p *print.Printer, model *inputModel, flavors []sqlserverflex.ListFlavors, versions *sqlserverflex.ListVersionsResponse, storages *sqlserverflex.ListStoragesResponse, userRoles *sqlserverflex.ListRolesResponse, dbCollations *sqlserverflex.ListCollationsResponse, dbCompatibilities *sqlserverflex.ListCompatibilityResponse) error {
 	options := &options{}
 	if flavors != nil {
-		options.Flavors = flavors.Flavors
+		options.Flavors = flavors
 	}
 	if versions != nil {
 		options.Versions = versions.Versions

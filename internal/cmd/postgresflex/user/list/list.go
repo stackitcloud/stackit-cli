@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -18,7 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	postgresflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -69,7 +68,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get PostgreSQL Flex users: %w", err)
 			}
-			users := resp.Items
+			users := resp.Users
 
 			// Truncate output
 			if model.Limit != nil && len(users) > int(*model.Limit) {
@@ -123,10 +122,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiListUsersRequest {
 	req := apiClient.DefaultAPI.ListUsers(ctx, model.ProjectId, model.Region, model.InstanceId)
+
+	if model.Limit != nil {
+		req = req.Size(*model.Limit)
+	} else {
+		// default page size is only 10
+		req = req.Size(100)
+	}
+
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat, instanceLabel string, users []postgresflex.ListUsersResponseItem) error {
+func outputResult(p *print.Printer, outputFormat, instanceLabel string, users []postgresflex.ListUser) error {
 	return p.OutputResult(outputFormat, users, func() error {
 		if len(users) == 0 {
 			p.Outputf("No users found for instance %q\n", instanceLabel)
@@ -137,8 +144,8 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, users []
 		for i := range users {
 			user := users[i]
 			table.AddRow(
-				utils.PtrString(user.Id),
-				utils.PtrString(user.Username),
+				user.Id,
+				user.Name,
 			)
 		}
 		err := table.Display(p)

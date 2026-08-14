@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	"github.com/stackitcloud/stackit-sdk-go/services/serviceaccount"
+	serviceaccount "github.com/stackitcloud/stackit-sdk-go/services/serviceaccount/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -18,7 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/service-account/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -60,15 +59,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list service accounts: %w", err)
 			}
-			serviceAccounts := *resp.Items
-			if len(serviceAccounts) == 0 {
-				projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
-				if err != nil {
-					params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
-					projectLabel = model.ProjectId
-				}
-				params.Printer.Info("No service accounts found for project %q\n", projectLabel)
-				return nil
+			serviceAccounts := resp.Items
+
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
 			}
 
 			// Truncate output
@@ -76,7 +72,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				serviceAccounts = serviceAccounts[:*model.Limit]
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, serviceAccounts)
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, serviceAccounts)
 		},
 	}
 
@@ -112,19 +108,24 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceaccount.APIClient) serviceaccount.ApiListServiceAccountsRequest {
-	req := apiClient.ListServiceAccounts(ctx, model.ProjectId)
+	req := apiClient.DefaultAPI.ListServiceAccounts(ctx, model.ProjectId)
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat string, serviceAccounts []serviceaccount.ServiceAccount) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, serviceAccounts []serviceaccount.ServiceAccount) error {
 	return p.OutputResult(outputFormat, serviceAccounts, func() error {
+		if len(serviceAccounts) == 0 {
+			p.Outputf("No service accounts found for project %q\n", projectLabel)
+			return nil
+		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "EMAIL")
 		for i := range serviceAccounts {
 			account := serviceAccounts[i]
 			table.AddRow(
-				utils.PtrString(account.Id),
-				utils.PtrString(account.Email),
+				account.Id,
+				account.Email,
 			)
 		}
 		err := table.Display(p)

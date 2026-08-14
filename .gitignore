@@ -16,3 +16,6 @@ go.work.sum
 # Test coverage reports
 coverage.out
 coverage.html
+
+# Shell completions
+completions/

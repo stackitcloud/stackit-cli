@@ -8,7 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -25,24 +25,17 @@ var testRegion = "eu01"
 type mockSettings struct {
 	listFlavorsFails bool
 	listFlavorsResp  *postgresflex.ListFlavorsResponse
-	listStoragesResp *postgresflex.ListStoragesResponse
 	getInstanceFails bool
-	getInstanceResp  *postgresflex.InstanceResponse
+	getInstanceResp  *postgresflex.GetInstanceResponse
 }
 
 func newAPIClientMock(c mockSettings) postgresflex.DefaultAPI {
 	return postgresflex.DefaultAPIServiceMock{
-		GetInstanceExecuteMock: utils.Ptr(func(_ postgresflex.ApiGetInstanceRequest) (*postgresflex.InstanceResponse, error) {
+		GetInstanceExecuteMock: utils.Ptr(func(_ postgresflex.ApiGetInstanceRequest) (*postgresflex.GetInstanceResponse, error) {
 			if c.getInstanceFails {
 				return nil, fmt.Errorf("get instance failed")
 			}
 			return c.getInstanceResp, nil
-		}),
-		ListStoragesExecuteMock: utils.Ptr(func(_ postgresflex.ApiListStoragesRequest) (*postgresflex.ListStoragesResponse, error) {
-			if c.listFlavorsFails {
-				return nil, fmt.Errorf("list storages failed")
-			}
-			return c.listStoragesResp, nil
 		}),
 		ListFlavorsExecuteMock: utils.Ptr(func(_ postgresflex.ApiListFlavorsRequest) (*postgresflex.ListFlavorsResponse, error) {
 			if c.listFlavorsFails {
@@ -124,7 +117,6 @@ func fixtureStandardInputModel(mods ...func(model *inputModel)) *inputModel {
 		InstanceName:   utils.Ptr("example-name"),
 		ACL:            []string{"0.0.0.0/0"},
 		BackupSchedule: utils.Ptr("0 0 * * *"),
-		StorageClass:   utils.Ptr("class"),
 		StorageSize:    utils.Ptr(int64(10)),
 		Version:        utils.Ptr("5.0"),
 		Type:           utils.Ptr("Single"),
@@ -365,11 +357,11 @@ func TestBuildRequest(t *testing.T) {
 			isValid: true,
 			mockClientSettings: mockSettings{
 				listFlavorsResp: &postgresflex.ListFlavorsResponse{
-					Flavors: []postgresflex.Flavor{
+					Flavors: []postgresflex.ListFlavors{
 						{
-							Id:     utils.Ptr(testFlavorId),
-							Cpu:    utils.Ptr(int64(2)),
-							Memory: utils.Ptr(int64(4)),
+							Id:     testFlavorId,
+							Cpu:    int64(2),
+							Memory: int64(4),
 						},
 					},
 				},
@@ -388,11 +380,11 @@ func TestBuildRequest(t *testing.T) {
 			isValid: true,
 			mockClientSettings: mockSettings{
 				listFlavorsResp: &postgresflex.ListFlavorsResponse{
-					Flavors: []postgresflex.Flavor{
+					Flavors: []postgresflex.ListFlavors{
 						{
-							Id:     utils.Ptr(testFlavorId),
-							Cpu:    utils.Ptr(int64(2)),
-							Memory: utils.Ptr(int64(4)),
+							Id:     testFlavorId,
+							Cpu:    int64(2),
+							Memory: int64(4),
 						},
 					},
 				},
@@ -403,62 +395,20 @@ func TestBuildRequest(t *testing.T) {
 				}),
 		},
 		{
-			description: "update storage class only",
+			description: "update  size",
 			model: fixtureRequiredInputModel(func(model *inputModel) {
-				model.StorageClass = utils.Ptr("class")
-			}),
-			isValid: true,
-			mockClientSettings: mockSettings{
-				getInstanceResp: &postgresflex.InstanceResponse{
-					Item: &postgresflex.Instance{
-						Flavor: &postgresflex.Flavor{
-							Id: utils.Ptr(testFlavorId),
-						},
-					},
-				},
-				listStoragesResp: &postgresflex.ListStoragesResponse{
-					StorageClasses: []string{"class"},
-					StorageRange: &postgresflex.StorageRange{
-						Min: utils.Ptr(int64(10)),
-						Max: utils.Ptr(int64(100)),
-					},
-				},
-			},
-			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId).
-				PartialUpdateInstancePayload(postgresflex.PartialUpdateInstancePayload{
-					Storage: &postgresflex.StorageUpdate{
-						Class: utils.Ptr("class"),
-					},
-				}),
-		},
-		{
-			description: "update storage class and size",
-			model: fixtureRequiredInputModel(func(model *inputModel) {
-				model.StorageClass = utils.Ptr("class")
 				model.StorageSize = utils.Ptr(int64(10))
 			}),
 			isValid: true,
 			mockClientSettings: mockSettings{
-				getInstanceResp: &postgresflex.InstanceResponse{
-					Item: &postgresflex.Instance{
-						Flavor: &postgresflex.Flavor{
-							Id: utils.Ptr(testFlavorId),
-						},
-					},
-				},
-				listStoragesResp: &postgresflex.ListStoragesResponse{
-					StorageClasses: []string{"class"},
-					StorageRange: &postgresflex.StorageRange{
-						Min: utils.Ptr(int64(10)),
-						Max: utils.Ptr(int64(100)),
-					},
+				getInstanceResp: &postgresflex.GetInstanceResponse{
+					FlavorId: testFlavorId,
 				},
 			},
 			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId).
 				PartialUpdateInstancePayload(postgresflex.PartialUpdateInstancePayload{
 					Storage: &postgresflex.StorageUpdate{
-						Class: utils.Ptr("class"),
-						Size:  utils.Ptr(int64(10)),
+						Size: utils.Ptr(int64(10)),
 					},
 				}),
 		},
@@ -485,16 +435,16 @@ func TestBuildRequest(t *testing.T) {
 			),
 			mockClientSettings: mockSettings{
 				listFlavorsResp: &postgresflex.ListFlavorsResponse{
-					Flavors: []postgresflex.Flavor{
+					Flavors: []postgresflex.ListFlavors{
 						{
-							Id:     utils.Ptr(testFlavorId),
-							Cpu:    utils.Ptr(int64(2)),
-							Memory: utils.Ptr(int64(4)),
+							Id:     testFlavorId,
+							Cpu:    int64(2),
+							Memory: int64(4),
 						},
 						{
-							Id:     utils.Ptr("other-flavor"),
-							Cpu:    utils.Ptr(int64(1)),
-							Memory: utils.Ptr(int64(8)),
+							Id:     "other-flavor",
+							Cpu:    int64(1),
+							Memory: int64(8),
 						},
 					},
 				},
@@ -503,11 +453,7 @@ func TestBuildRequest(t *testing.T) {
 		},
 		{
 			description: "get instance fails",
-			model: fixtureRequiredInputModel(
-				func(model *inputModel) {
-					model.StorageClass = utils.Ptr("class")
-				},
-			),
+			model:       fixtureRequiredInputModel(),
 			mockClientSettings: mockSettings{
 				getInstanceFails: true,
 			},
@@ -524,56 +470,6 @@ func TestBuildRequest(t *testing.T) {
 			),
 			mockClientSettings: mockSettings{
 				listFlavorsFails: true,
-			},
-			isValid: false,
-		},
-		{
-			description: "invalid storage class",
-			model: fixtureRequiredInputModel(
-				func(model *inputModel) {
-					model.StorageClass = utils.Ptr("non-existing-class")
-				},
-			),
-			mockClientSettings: mockSettings{
-				getInstanceResp: &postgresflex.InstanceResponse{
-					Item: &postgresflex.Instance{
-						Flavor: &postgresflex.Flavor{
-							Id: utils.Ptr(testFlavorId),
-						},
-					},
-				},
-				listStoragesResp: &postgresflex.ListStoragesResponse{
-					StorageClasses: []string{"class"},
-					StorageRange: &postgresflex.StorageRange{
-						Min: utils.Ptr(int64(10)),
-						Max: utils.Ptr(int64(100)),
-					},
-				},
-			},
-			isValid: false,
-		},
-		{
-			description: "invalid storage size",
-			model: fixtureRequiredInputModel(
-				func(model *inputModel) {
-					model.StorageSize = utils.Ptr(int64(9))
-				},
-			),
-			mockClientSettings: mockSettings{
-				getInstanceResp: &postgresflex.InstanceResponse{
-					Item: &postgresflex.Instance{
-						Flavor: &postgresflex.Flavor{
-							Id: utils.Ptr(testFlavorId),
-						},
-					},
-				},
-				listStoragesResp: &postgresflex.ListStoragesResponse{
-					StorageClasses: []string{"class"},
-					StorageRange: &postgresflex.StorageRange{
-						Min: utils.Ptr(int64(10)),
-						Max: utils.Ptr(int64(100)),
-					},
-				},
 			},
 			isValid: false,
 		},
@@ -605,27 +501,34 @@ func Test_outputResult(t *testing.T) {
 	type args struct {
 		outputFormat  string
 		instanceLabel string
-		resp          *postgresflex.PartialUpdateInstanceResponse
+		resp          *postgresflex.GetInstanceResponse
 	}
 	tests := []struct {
 		name    string
 		args    args
 		wantErr bool
 	}{
-		{"empty model", args{}, true},
-		{"empty response", args{outputFormat: ""}, true},
-		{"standard", args{
-			outputFormat:  "",
-			instanceLabel: "test",
-			resp:          &postgresflex.PartialUpdateInstanceResponse{},
-		}, false},
-		{"complet", args{
-			outputFormat:  "",
-			instanceLabel: "test",
-			resp: &postgresflex.PartialUpdateInstanceResponse{
-				Item: &postgresflex.Instance{},
+		{
+			name:    "empty model",
+			args:    args{},
+			wantErr: true,
+		},
+		{
+			name: "empty response",
+			args: args{
+				outputFormat: "",
 			},
-		}, false},
+			wantErr: true,
+		},
+		{
+			name: "standard",
+			args: args{
+				outputFormat:  "",
+				instanceLabel: "test",
+				resp:          &postgresflex.GetInstanceResponse{},
+			},
+			wantErr: false,
+		},
 	}
 	params := testparams.NewTestParams()
 	for _, tt := range tests {

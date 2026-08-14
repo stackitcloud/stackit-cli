@@ -1,6 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
-// SPDX-FileCopyrightText: 2025 STACKIT GmbH & Co. KG
-
 package instance
 
 import (
@@ -20,7 +17,7 @@ import (
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "instance",
-		Short: "Provides functionality for edge instances.",
+		Short: "Provides functionality for Edge Cloud instances.",
 		Long:  "Provides functionality for STACKIT Edge Cloud (STEC) instance management.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,

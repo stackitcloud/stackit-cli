@@ -25,14 +25,11 @@ stackit postgresflex instance update INSTANCE_ID [flags]
 ```
       --acl strings              List of IP networks in CIDR notation which are allowed to access this instance (default [])
       --backup-schedule string   Backup schedule
-      --cpu int                  Number of CPUs
       --flavor-id string         ID of the flavor
   -h, --help                     Help for "stackit postgresflex instance update"
   -n, --name string              Instance name
-      --ram int                  Amount of RAM (in GB)
-      --storage-class string     Storage class
+      --retention-days string    The days for how long the backup files should be stored before cleaned up (32 to 90).
       --storage-size int         Storage size (in GB)
-      --type string              Instance type, (one of: [Replica, Single])
       --version string           Version
 ```
 

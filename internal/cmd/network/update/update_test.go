@@ -80,12 +80,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *iaas.ApiPartialUpdateNetworkRequest)) iaas.ApiPartialUpdateNetworkRequest {
+func fixtureRequest(mods ...func(payload *iaas.PartialUpdateNetworkPayload)) iaas.ApiPartialUpdateNetworkRequest {
 	request := testClient.DefaultAPI.PartialUpdateNetwork(testCtx, testProjectId, testRegion, testNetworkId)
-	request = request.PartialUpdateNetworkPayload(fixturePayload())
-	for _, mod := range mods {
-		mod(&request)
-	}
+	payload := fixturePayload(mods...)
+	request = request.PartialUpdateNetworkPayload(payload)
 	return request
 }
 
@@ -318,6 +316,28 @@ func TestBuildRequest(t *testing.T) {
 			description:     "base",
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
+		},
+		{
+			description: "not setting IPv4DnsNameServers does not result in nil pointer dereference",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.IPv4DnsNameServers = nil
+				model.IPv4Gateway = new("1.1.1.1")
+			}),
+			expectedRequest: fixtureRequest(func(payload *iaas.PartialUpdateNetworkPayload) {
+				payload.Ipv4.Nameservers = nil
+				payload.Ipv4.Gateway = *iaas.NewNullableString(new("1.1.1.1"))
+			}),
+		},
+		{
+			description: "not setting IPv6DnsNameServers does not result in nil pointer dereference",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.IPv6DnsNameServers = nil
+				model.IPv6Gateway = new("1.1.1.1")
+			}),
+			expectedRequest: fixtureRequest(func(payload *iaas.PartialUpdateNetworkPayload) {
+				payload.Ipv6.Nameservers = nil
+				payload.Ipv6.Gateway = *iaas.NewNullableString(new("1.1.1.1"))
+			}),
 		},
 	}
 

@@ -12,7 +12,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stackitcloud/stackit-sdk-go/services/serviceaccount"
+	serviceaccount "github.com/stackitcloud/stackit-sdk-go/services/serviceaccount/v2api"
 )
 
 var projectIdFlag = globalflags.ProjectIdFlag
@@ -20,7 +20,7 @@ var projectIdFlag = globalflags.ProjectIdFlag
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &serviceaccount.APIClient{}
+var testClient = &serviceaccount.APIClient{DefaultAPI: &serviceaccount.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -49,7 +49,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *serviceaccount.ApiListServiceAccountsRequest)) serviceaccount.ApiListServiceAccountsRequest {
-	request := testClient.ListServiceAccounts(testCtx, testProjectId)
+	request := testClient.DefaultAPI.ListServiceAccounts(testCtx, testProjectId)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -138,7 +138,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
+				cmpopts.EquateComparable(testCtx, serviceaccount.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -150,6 +150,7 @@ func TestBuildRequest(t *testing.T) {
 func TestOutputResult(t *testing.T) {
 	type args struct {
 		outputFormat    string
+		projectLabel    string
 		serviceAccounts []serviceaccount.ServiceAccount
 	}
 	tests := []struct {
@@ -180,7 +181,7 @@ func TestOutputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.serviceAccounts); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.projectLabel, tt.args.serviceAccounts); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

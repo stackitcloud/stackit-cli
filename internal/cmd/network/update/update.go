@@ -180,8 +180,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	var payloadIPv6 *iaas.UpdateNetworkIPv6Body
 
 	if model.IPv6DnsNameServers != nil || model.NoIPv6Gateway || model.IPv6Gateway != nil {
-		payloadIPv6 = &iaas.UpdateNetworkIPv6Body{
-			Nameservers: *model.IPv6DnsNameServers,
+		payloadIPv6 = &iaas.UpdateNetworkIPv6Body{}
+
+		if model.IPv6DnsNameServers != nil {
+			payloadIPv6.Nameservers = *model.IPv6DnsNameServers
 		}
 
 		if model.NoIPv6Gateway {
@@ -192,8 +194,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	}
 
 	if model.IPv4DnsNameServers != nil || model.NoIPv4Gateway || model.IPv4Gateway != nil {
-		payloadIPv4 = &iaas.UpdateNetworkIPv4Body{
-			Nameservers: *model.IPv4DnsNameServers,
+		payloadIPv4 = &iaas.UpdateNetworkIPv4Body{}
+
+		if model.IPv4DnsNameServers != nil {
+			payloadIPv4.Nameservers = *model.IPv4DnsNameServers
 		}
 
 		if model.NoIPv4Gateway {

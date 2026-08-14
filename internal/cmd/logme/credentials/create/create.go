@@ -7,7 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
-	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v1api"
+	logme "github.com/stackitcloud/stackit-sdk-go/services/logme/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -57,7 +57,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			instanceLabel, err := logmeUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId)
+			instanceLabel, err := logmeUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
 				instanceLabel = model.InstanceId
@@ -108,7 +108,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *logme.APIClient) logme.ApiCreateCredentialsRequest {
-	req := apiClient.DefaultAPI.CreateCredentials(ctx, model.ProjectId, model.InstanceId)
+	req := apiClient.DefaultAPI.CreateCredentials(ctx, model.ProjectId, model.Region, model.InstanceId)
 	return req
 }
 

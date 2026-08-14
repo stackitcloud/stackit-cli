@@ -21,8 +21,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
-	mariadb "github.com/stackitcloud/stackit-sdk-go/services/mariadb/v1api"
-	"github.com/stackitcloud/stackit-sdk-go/services/mariadb/v1api/wait"
+	mariadb "github.com/stackitcloud/stackit-sdk-go/services/mariadb/v2api"
+	"github.com/stackitcloud/stackit-sdk-go/services/mariadb/v2api/wait"
 )
 
 const (
@@ -114,7 +114,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating instance", func() error {
-					_, err = wait.CreateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, resp.InstanceId).WaitWithContext(ctx)
+					_, err = wait.CreateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, resp.InstanceId).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
@@ -187,12 +187,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient mariadb.DefaultAPI) (mariadb.ApiCreateInstanceRequest, error) {
-	req := apiClient.CreateInstance(ctx, model.ProjectId)
+	req := apiClient.CreateInstance(ctx, model.ProjectId, model.Region)
 
 	var planId *string
 	var err error
 
-	offerings, err := apiClient.ListOfferings(ctx, model.ProjectId).Execute()
+	offerings, err := apiClient.ListOfferings(ctx, model.ProjectId, model.Region).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get MariaDB offerings: %w", err)
 	}

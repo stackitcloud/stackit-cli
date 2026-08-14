@@ -25,8 +25,7 @@ stackit postgresflex instance delete INSTANCE_ID [flags]
 ### Options
 
 ```
-  -f, --force   Force deletion of a delayed deleted instance
-  -h, --help    Help for "stackit postgresflex instance delete"
+  -h, --help   Help for "stackit postgresflex instance delete"
 ```
 
 ### Options inherited from parent commands

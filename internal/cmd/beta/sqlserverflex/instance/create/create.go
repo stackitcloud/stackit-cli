@@ -36,6 +36,11 @@ const (
 	versionFlag        = "version"
 	editionFlag        = "edition"
 	retentionDaysFlag  = "retention-days"
+
+	encryptionKekKeyIdFlag       = "encryption-kek-key-id"
+	encryptionKekKeyringIdFlag   = "encryption-kek-keyring-id"
+	encryptionKekKeyVersionFlag  = "encryption-kek-key-version"
+	encryptionServiceAccountFlag = "encryption-service-account"
 )
 
 type inputModel struct {
@@ -51,6 +56,11 @@ type inputModel struct {
 	StorageSize    *int64
 	Version        string
 	RetentionDays  int32
+
+	EncryptionKekKeyId       *string
+	EncryptionKekKeyringId   *string
+	EncryptionKekKeyVersion  *string
+	EncryptionServiceAccount *string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -134,9 +144,15 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(versionFlag, "", "SQLServer version")
 	cmd.Flags().String(editionFlag, "", "Edition of the SQLServer instance")
 	cmd.Flags().Int32(retentionDaysFlag, 0, "The days for how long the backup files should be stored before being cleaned up")
+	cmd.Flags().String(encryptionKekKeyIdFlag, "", "The key identifier")
+	cmd.Flags().String(encryptionKekKeyringIdFlag, "", "The keyring identifier")
+	cmd.Flags().String(encryptionKekKeyVersionFlag, "", "The key version")
+	cmd.Flags().String(encryptionServiceAccountFlag, "", "The service account")
 
 	err := flags.MarkFlagsRequired(cmd, instanceNameFlag, backupScheduleFlag, retentionDaysFlag, storageClassFlag, storageSizeFlag, versionFlag)
 	cobra.CheckErr(err)
+
+	cmd.MarkFlagsRequiredTogether(encryptionKekKeyIdFlag, encryptionKekKeyringIdFlag, encryptionKekKeyVersionFlag, encryptionServiceAccountFlag)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
@@ -174,6 +190,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		StorageSize:     flags.FlagToInt64Pointer(p, cmd, storageSizeFlag),
 		Version:         flags.FlagToStringValue(p, cmd, versionFlag),
 		RetentionDays:   flags.FlagWithDefaultToInt32Value(p, cmd, retentionDaysFlag),
+
+		EncryptionKekKeyId:       flags.FlagToStringPointer(p, cmd, encryptionKekKeyIdFlag),
+		EncryptionKekKeyringId:   flags.FlagToStringPointer(p, cmd, encryptionKekKeyringIdFlag),
+		EncryptionKekKeyVersion:  flags.FlagToStringPointer(p, cmd, encryptionKekKeyVersionFlag),
+		EncryptionServiceAccount: flags.FlagToStringPointer(p, cmd, encryptionServiceAccountFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -186,13 +207,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlserverfle
 	var flavorId string
 	var err error
 
-	flavors, err := apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Execute()
+	flavors, err := sqlserverflexUtils.ListAllFlavors(ctx, apiClient, model.ProjectId, model.Region)
 	if err != nil {
 		return req, fmt.Errorf("get SQLServer Flex flavors: %w", err)
 	}
 
 	if model.FlavorId == nil {
-		flavorId, err = sqlserverflexUtils.LoadFlavorId(*model.CPU, *model.RAM, flavors.Flavors)
+		flavorId, err = sqlserverflexUtils.LoadFlavorId(*model.CPU, *model.RAM, flavors)
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 			if !errors.As(err, &dsaInvalidPlanError) {
@@ -201,7 +222,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlserverfle
 			return req, err
 		}
 	} else {
-		err := sqlserverflexUtils.ValidateFlavorId(*model.FlavorId, flavors.Flavors)
+		err := sqlserverflexUtils.ValidateFlavorId(*model.FlavorId, flavors)
 		if err != nil {
 			return req, err
 		}
@@ -217,8 +238,22 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlserverfle
 		return req, err
 	}
 
+	var encryption *sqlserverflex.InstanceEncryption
+	if model.EncryptionKekKeyId != nil && model.EncryptionKekKeyringId != nil && model.EncryptionKekKeyVersion != nil && model.EncryptionServiceAccount != nil {
+		encryption = &sqlserverflex.InstanceEncryption{
+			KekKeyId:       *model.EncryptionKekKeyId,
+			KekKeyRingId:   *model.EncryptionKekKeyringId,
+			KekKeyVersion:  *model.EncryptionKekKeyVersion,
+			ServiceAccount: *model.EncryptionServiceAccount,
+		}
+		if model.ACL == nil {
+			model.ACL = make([]string, 0)
+		}
+	}
+
 	req = req.CreateInstancePayload(sqlserverflex.CreateInstancePayload{
-		Name: model.InstanceName,
+		Name:       model.InstanceName,
+		Encryption: encryption,
 		Network: sqlserverflex.CreateInstancePayloadNetwork{
 			Acl: model.ACL,
 		},

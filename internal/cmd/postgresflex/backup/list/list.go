@@ -6,6 +6,8 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
+	"time"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,20 +17,14 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/client"
 	postgresflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/postgresflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-
-	"time"
 
 	"github.com/spf13/cobra"
-	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v2api"
+	postgresflex "github.com/stackitcloud/stackit-sdk-go/services/postgresflex/v3api"
 )
 
 const (
-	instanceIdFlag          = "instance-id"
-	limitFlag               = "limit"
-	backupExpireYearOffset  = 0
-	backupExpireMonthOffset = 0
-	backupExpireDayOffset   = 30
+	instanceIdFlag = "instance-id"
+	limitFlag      = "limit"
 )
 
 type inputModel struct {
@@ -80,14 +76,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get backups for PostgreSQL Flex instance %q: %w", instanceLabel, err)
 			}
-			backups := resp.Items
 
-			// Truncate output
-			if model.Limit != nil && len(backups) > int(*model.Limit) {
-				backups = backups[:*model.Limit]
-			}
-
-			return outputResult(params.Printer, model.OutputFormat, instanceLabel, backups)
+			return outputResult(params.Printer, model.OutputFormat, instanceLabel, resp.Backups)
 		},
 	}
 
@@ -126,32 +116,43 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiListBackupsRequest {
 	req := apiClient.DefaultAPI.ListBackups(ctx, model.ProjectId, model.Region, *model.InstanceId)
+
+	if model.Limit != nil {
+		req = req.Size(*model.Limit)
+	} else {
+		// default page size is only 10
+		req = req.Size(100)
+	}
+
 	return req
 }
 
-func outputResult(p *print.Printer, outputFormat, instanceLabel string, backups []postgresflex.Backup) error {
+func outputResult(p *print.Printer, outputFormat, instanceLabel string, backups []postgresflex.BackupData) error {
 	return p.OutputResult(outputFormat, backups, func() error {
 		if len(backups) == 0 {
 			p.Outputf("No backups found for instance %q", instanceLabel)
 			return nil
 		}
+
 		table := tables.NewTable()
-		table.SetHeader("ID", "CREATED AT", "EXPIRES AT", "BACKUP SIZE")
-		for i := range backups {
-			backup := backups[i]
+		table.SetHeader("ID", "COMPLETED AT", "RETAINED UNTIL", "BACKUP SIZE")
 
-			backupStartTime, err := time.Parse(time.RFC3339, utils.PtrString(backup.StartTime))
+		for _, backup := range backups {
+			backupCompletionTime, err := time.Parse(time.RFC3339, backup.CompletionTime)
 			if err != nil {
-				return fmt.Errorf("parse backup start time: %w", err)
+				return fmt.Errorf("parse backup completion time: %w", err)
 			}
-			backupExpireDate := backupStartTime.AddDate(backupExpireYearOffset, backupExpireMonthOffset, backupExpireDayOffset).Format(time.DateOnly)
 
-			backupSize := utils.PtrByteSizeDefault(backup.Size, "n/a")
+			backupRetainedUntilTime, err := time.Parse(time.RFC3339, backup.RetainedUntil)
+			if err != nil {
+				return fmt.Errorf("parse backup retained until time: %w", err)
+			}
+
 			table.AddRow(
-				utils.PtrString(backup.Id),
-				utils.PtrString(backup.StartTime),
-				backupExpireDate,
-				backupSize,
+				backup.Id,
+				backupCompletionTime,
+				backupRetainedUntilTime,
+				backup.Size,
 			)
 		}
 		err := table.Display(p)
