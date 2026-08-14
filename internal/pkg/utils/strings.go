@@ -67,6 +67,16 @@ func JoinStringPtr[T ~string](vals *[]T, sep string) string {
 	return b.String()
 }
 
+// SortedKeys returns the string keys of a map, sorted alphabetically.
+func SortedKeys[V any](m map[string]V) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	slices.Sort(keys)
+	return keys
+}
+
 // Truncate trims the passed string (if it is not nil). If the input string is
 // longer than the given length, it is truncated to _maxLen_ and a ellipsis (…)
 // is attached. Therefore the resulting string has at most length _maxLen-1_
