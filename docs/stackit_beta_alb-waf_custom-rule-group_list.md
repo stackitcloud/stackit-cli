@@ -40,5 +40,5 @@ stackit beta alb-waf custom-rule-group list [flags]
 
 ### SEE ALSO
 
-* [stackit beta alb-waf custom-rule-group](./stackit_beta_alb-waf_custom-rule-group.md)	 - Provides functionality for alb-waf Custom Rule Group
+* [stackit beta alb-waf custom-rule-group](./stackit_beta_alb-waf_custom-rule-group.md)	 - Provides functionality for custom rule groups of the ALB WAF
 
