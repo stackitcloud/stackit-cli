@@ -2,10 +2,13 @@ package instance
 
 import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/instance/create"
+	dbcollation "github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/instance/db-collation"
+	dbcompatibility "github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/instance/db-compatibility"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/instance/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/instance/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/instance/list"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/instance/update"
+	userrole "github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/instance/user-role"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -31,4 +34,7 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(describe.NewCmd(params))
 	cmd.AddCommand(list.NewCmd(params))
 	cmd.AddCommand(update.NewCmd(params))
+	cmd.AddCommand(dbcollation.NewCmd(params))
+	cmd.AddCommand(dbcompatibility.NewCmd(params))
+	cmd.AddCommand(userrole.NewCmd(params))
 }

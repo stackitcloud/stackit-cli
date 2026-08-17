@@ -2,9 +2,11 @@ package sqlserverflex
 
 import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/database"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/flavor"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/instance"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/options"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/user"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex/version"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -27,6 +29,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(database.NewCmd(params))
 	cmd.AddCommand(instance.NewCmd(params))
-	cmd.AddCommand(options.NewCmd(params))
+	cmd.AddCommand(options.NewCmd(params)) //nolint:staticcheck // Command is deprecated but must be kept for backward compatibility
 	cmd.AddCommand(user.NewCmd(params))
+	cmd.AddCommand(version.NewCmd(params))
+	cmd.AddCommand(flavor.NewCmd(params))
 }

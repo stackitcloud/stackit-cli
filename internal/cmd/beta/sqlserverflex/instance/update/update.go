@@ -30,9 +30,12 @@ const (
 	aclFlag            = "acl"
 	backupScheduleFlag = "backup-schedule"
 	flavorIdFlag       = "flavor-id"
-	cpuFlag            = "cpu"
-	ramFlag            = "ram"
 	versionFlag        = "version"
+
+	// Deprecated: cpuFlag is deprecated and will be removed after 2027-02-28. Use flavorIdFlag instead.
+	cpuFlag = "cpu"
+	// Deprecated: ramFlag is deprecated and will be removed after 2027-02-28. Use flavorIdFlag instead.
+	ramFlag = "ram"
 )
 
 type inputModel struct {
@@ -43,9 +46,12 @@ type inputModel struct {
 	ACL            []string
 	BackupSchedule *string
 	FlavorId       *string
-	CPU            *int64
-	RAM            *int64
 	Version        *string
+
+	// Deprecated: CPU is deprecated and will be removed after 2027-02-28. Use FlavorId instead.
+	CPU *int64
+	// Deprecated: RAM is deprecated and will be removed after 2027-02-28. Use FlavorId instead.
+	RAM *int64
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -68,6 +74,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
+			}
+
+			// Deprecated: remove after 2027-02-28, once flavor-id is the only supported way to select a flavor.
+			if model.FlavorId == nil && (model.CPU != nil || model.RAM != nil) {
+				params.Printer.Warn("The --%s/--%s flags are deprecated, determining flavor ID by CPU and RAM. This behavior is deprecated, the --%s flag will be required after 2027-02-28.\n", cpuFlag, ramFlag, flavorIdFlag)
 			}
 
 			// Configure API client
@@ -131,6 +142,14 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(cpuFlag, 0, "Number of CPUs")
 	cmd.Flags().Int64(ramFlag, 0, "Amount of RAM (in GB)")
 	cmd.Flags().String(versionFlag, "", "Version")
+
+	// Deprecated: remove after 2027-02-28
+	err := cmd.Flags().MarkDeprecated(cpuFlag, fmt.Sprintf("will be removed after 2027-02-28. Use the --%s flag instead.", flavorIdFlag))
+	cobra.CheckErr(err)
+	err = cmd.Flags().MarkDeprecated(ramFlag, fmt.Sprintf("will be removed after 2027-02-28. Use the --%s flag instead.", flavorIdFlag))
+	cobra.CheckErr(err)
+	cmd.MarkFlagsMutuallyExclusive(flavorIdFlag, cpuFlag)
+	cmd.MarkFlagsMutuallyExclusive(flavorIdFlag, ramFlag)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {

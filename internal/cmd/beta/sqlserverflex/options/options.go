@@ -21,17 +21,26 @@ import (
 )
 
 const (
-	flavorsFlag           = "flavors"
-	versionsFlag          = "versions"
-	storagesFlag          = "storages"
-	userRolesFlag         = "user-roles"
-	dbCollationsFlag      = "db-collations"
+	// Deprecated: Will be removed after 2027-02-28.
+	flavorsFlag = "flavors"
+	// Deprecated: Will be removed after 2027-02-28.
+	versionsFlag = "versions"
+	// Deprecated: Will be removed after 2027-02-28.
+	storagesFlag = "storages"
+	// Deprecated: Will be removed after 2027-02-28.
+	userRolesFlag = "user-roles"
+	// Deprecated: Will be removed after 2027-02-28.
+	dbCollationsFlag = "db-collations"
+	// Deprecated: Will be removed after 2027-02-28.
 	dbCompatibilitiesFlag = "db-compatibilities"
 
-	flavorIdFlag   = "flavor-id"
+	// Deprecated: Will be removed after 2027-02-28.
+	flavorIdFlag = "flavor-id"
+	// Deprecated: Will be removed after 2027-02-28.
 	instanceIdFlag = "instance-id"
 )
 
+// Deprecated: Will be removed after 2027-02-28.
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 
@@ -46,6 +55,7 @@ type inputModel struct {
 	InstanceId *string
 }
 
+// Deprecated: Will be removed after 2027-02-28.
 type options struct {
 	Flavors           []sqlserverflex.ListFlavors `json:"flavors,omitempty"`
 	Versions          []sqlserverflex.Version     `json:"versions,omitempty"`
@@ -55,26 +65,32 @@ type options struct {
 	DBCompatibilities *instanceDBCompatibilities  `json:"dbCompatibilities,omitempty"`
 }
 
+// Deprecated: Will be removed after 2027-02-28.
 type flavorStorages struct {
 	FlavorId string                              `json:"flavorId"`
 	Storages *sqlserverflex.ListStoragesResponse `json:"storages"`
 }
 
+// Deprecated: Will be removed after 2027-02-28.
 type instanceUserRoles struct {
 	InstanceId string   `json:"instanceId"`
 	UserRoles  []string `json:"userRoles"`
 }
 
+// Deprecated: Will be removed after 2027-02-28.
 type instanceDBCollations struct {
 	InstanceId   string                               `json:"instanceId"`
 	DBCollations []sqlserverflex.DatabaseGetcollation `json:"dbCollations"`
 }
 
+// Deprecated: Will be removed after 2027-02-28.
 type instanceDBCompatibilities struct {
 	InstanceId        string                                   `json:"instanceId"`
 	DBCompatibilities []sqlserverflex.DatabaseGetcompatibility `json:"dbCompatibilities"`
 }
 
+// Deprecated: Will be removed after 2027-02-28. Use "flavor list", "flavor describe", "version list",
+// "instance user-role list", "instance db-collation list" and "instance db-compatibility list" instead.
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "options",
@@ -95,6 +111,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				`List SQL Server Flex user roles and database compatibilities for a given instance. The IDs of existing instances can be obtained by running "$ stackit beta sqlserverflex instance list"`,
 				"$ stackit beta sqlserverflex options --user-roles --db-compatibilities --instance-id <INSTANCE_ID>"),
 		),
+		Deprecated: `command "stackit beta sqlserverflex options" is deprecated and will be removed after 2027-02-28. Please use "stackit beta sqlserverflex flavor list", "stackit beta sqlserverflex flavor describe", "stackit beta sqlserverflex version list", "stackit beta sqlserverflex instance user-role list", "stackit beta sqlserverflex instance db-collation list" and "stackit beta sqlserverflex instance db-compatibility list" instead.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 			model, err := parseInput(params.Printer, cmd, args)
@@ -121,6 +138,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	return cmd
 }
 
+// Deprecated: Will be removed after 2027-02-28.
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(flavorsFlag, false, "Lists supported flavors")
 	cmd.Flags().Bool(versionsFlag, false, "Lists supported versions")
@@ -132,6 +150,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(instanceIdFlag, "", `The instance ID to show user roles, database collations and database compatibilities for. Only relevant when "--user-roles", "--db-collations" or "--db-compatibilities" is passed`)
 }
 
+// Deprecated: Will be removed after 2027-02-28.
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
@@ -181,6 +200,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
+// Deprecated: Will be removed after 2027-02-28.
 func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputModel, apiClient sqlserverflex.DefaultAPI) error {
 	var flavors []sqlserverflex.ListFlavors
 	var versions *sqlserverflex.ListVersionsResponse
@@ -230,6 +250,7 @@ func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputM
 	return outputResult(p, model, flavors, versions, storages, userRoles, dbCollations, dbCompatibilities)
 }
 
+// Deprecated: Will be removed after 2027-02-28.
 func outputResult(p *print.Printer, model *inputModel, flavors []sqlserverflex.ListFlavors, versions *sqlserverflex.ListVersionsResponse, storages *sqlserverflex.ListStoragesResponse, userRoles *sqlserverflex.ListRolesResponse, dbCollations *sqlserverflex.ListCollationsResponse, dbCompatibilities *sqlserverflex.ListCompatibilityResponse) error {
 	options := &options{}
 	if flavors != nil {
@@ -294,6 +315,7 @@ func outputResult(p *print.Printer, model *inputModel, flavors []sqlserverflex.L
 	})
 }
 
+// Deprecated: Will be removed after 2027-02-28.
 func buildFlavorsTable(flavors []sqlserverflex.ListFlavors) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Flavors")
@@ -305,6 +327,7 @@ func buildFlavorsTable(flavors []sqlserverflex.ListFlavors) tables.Table {
 	return table
 }
 
+// Deprecated: Will be removed after 2027-02-28.
 func buildVersionsTable(versions []sqlserverflex.Version) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Versions")
@@ -316,6 +339,7 @@ func buildVersionsTable(versions []sqlserverflex.Version) tables.Table {
 	return table
 }
 
+// Deprecated: Will be removed after 2027-02-28.
 func buildStoragesTable(storagesResp sqlserverflex.ListStoragesResponse) tables.Table {
 	storages := storagesResp.StorageClasses
 	table := tables.NewTable()
@@ -329,6 +353,7 @@ func buildStoragesTable(storagesResp sqlserverflex.ListStoragesResponse) tables.
 	return table
 }
 
+// Deprecated: Will be removed after 2027-02-28.
 func buildUserRoles(roles *instanceUserRoles) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("User Roles")
@@ -339,6 +364,7 @@ func buildUserRoles(roles *instanceUserRoles) tables.Table {
 	return table
 }
 
+// Deprecated: Will be removed after 2027-02-28.
 func buildDBCollationsTable(dbCollations []sqlserverflex.DatabaseGetcollation) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("DB Collations")
@@ -352,6 +378,7 @@ func buildDBCollationsTable(dbCollations []sqlserverflex.DatabaseGetcollation) t
 	return table
 }
 
+// Deprecated: Will be removed after 2027-02-28.
 func buildDBCompatibilitiesTable(dbCompatibilities []sqlserverflex.DatabaseGetcompatibility) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("DB Compatibilities")

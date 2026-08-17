@@ -47,7 +47,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			"  $ stackit beta sqlserverflex user reset-password USER_ID --instance-id INSTANCE_ID",
 			"Please refer to https://docs.stackit.cloud/products/databases/sqlserver-flex/how-tos/create-logins-and-users-in-sqlserver-flex-instances/ for additional information.",
 			"The allowed user roles for your instance can be obtained by running:",
-			"  $ stackit beta sqlserverflex options --user-roles --instance-id INSTANCE_ID",
+			"  $ stackit beta sqlserverflex instance user-role list --instance-id INSTANCE_ID",
 		),
 		Example: examples.Build(
 			examples.NewExample(
