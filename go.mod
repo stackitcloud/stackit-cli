@@ -10,7 +10,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/inhies/go-bytesize v0.0.0-20220417184213-4913239db9cf
 	github.com/jedib0t/go-pretty/v6 v6.8.2
-	github.com/lmittmann/tint v1.1.3
+	github.com/lmittmann/tint v1.2.0
 	github.com/mattn/go-colorable v0.1.15
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
@@ -20,7 +20,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.15.2
 	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.16.0
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.21.0
-	github.com/stackitcloud/stackit-sdk-go/services/edge v0.13.0
+	github.com/stackitcloud/stackit-sdk-go/services/edge v0.13.1
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.14.0
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/intake v0.7.1
@@ -270,7 +270,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.1.0
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.9.0
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.24.0
-	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.1.1
+	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.2.1
 	github.com/stackitcloud/stackit-sdk-go/services/redis v1.1.0
 	github.com/stackitcloud/stackit-sdk-go/services/sfs v0.9.0
 	github.com/subosito/gotenv v1.6.0 // indirect
