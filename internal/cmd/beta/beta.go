@@ -6,6 +6,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb"
+	albwaf "github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb-waf"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/cdn"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/edge"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake"
@@ -45,6 +46,7 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(sqlserverflex.NewCmd(params))
 	cmd.AddCommand(sfs.NewCmd(params))
 	cmd.AddCommand(alb.NewCmd(params))
+	cmd.AddCommand(albwaf.NewCmd(params))
 	cmd.AddCommand(edge.NewCmd(params))
 	cmd.AddCommand(intake.NewCmd(params))
 	cmd.AddCommand(cdn.NewCmd(params))
