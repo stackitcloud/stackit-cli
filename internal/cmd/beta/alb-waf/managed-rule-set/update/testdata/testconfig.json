@@ -1,0 +1,14 @@
+{
+  "groups": {
+    "942": {
+      "rules": {
+        "942100": {
+          "mode": "MODE_DISABLED"
+        },
+        "942190": {
+          "mode": "MODE_LOG_ONLY"
+        }
+      }
+    }
+  }
+}

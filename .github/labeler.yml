@@ -1,0 +1,80 @@
+# access
+"domain:Access":
+- changed-files:
+  - any-glob-to-any-file:
+    - "internal/cmd/alb/*"
+    - "internal/cmd/albwaf/*"
+    - "internal/cmd/cdn/*"
+    - "internal/cmd/certificates/*"
+    - "internal/cmd/loadbalancer/*"
+    - "internal/cmd/vpn/*"
+# runtimes
+"domain:Runtimes":
+- changed-files:
+  - any-glob-to-any-file:
+    - "internal/cmd/ske/*"
+    - "internal/cmd/scf/*"
+    - "internal/cmd/edge/*"
+# support
+# no support domain sdk modules available yet
+# central services
+"domain:CentralServices":
+- changed-files:
+  - any-glob-to-any-file:
+    - "internal/cmd/dns/*"
+    - "internal/cmd/git/*"
+    - "internal/cmd/intake/*"
+    - "internal/cmd/kms/*"
+    - "internal/cmd/kms/*"
+    - "internal/cmd/logs/*"
+    - "internal/cmd/modelserving/*"
+    - "internal/cmd/observability/*"
+    - "internal/cmd/rabbitmq/*"
+    - "internal/cmd/redis/*"
+    - "internal/cmd/opensearch/*"
+    - "internal/cmd/logme/*"
+    - "internal/cmd/telemetryrouter/*"
+    - "internal/cmd/telemetrylink/*"
+    - "internal/cmd/secretsmanager/*"
+    - "internal/cmd/dremio/*"
+    - "internal/cmd/modelexperiments/*"
+    - "internal/cmd/ufw/*"
+    - "internal/cmd/workflows/*"
+    - "internal/cmd/valkey/*"
+# databases
+"domain:Databases":
+- changed-files:
+  - any-glob-to-any-file:
+    - "internal/cmd/mongodbflex/*"
+    - "internal/cmd/mariadb/*"
+    - "internal/cmd/sqlserverflex/*"
+    - "internal/cmd/postgresflex/*"
+# IaaS
+"domain:IaaS":
+- changed-files:
+  - any-glob-to-any-file:
+    - "internal/cmd/network-area/*"
+    - "internal/cmd/network/*"
+    - "internal/cmd/network-interface/*"
+    - "internal/cmd/public-ip/*"
+    - "internal/cmd/server/*"
+    - "internal/cmd/volume/*"
+    - "internal/cmd/security-group/*"
+    - "internal/cmd/image/*"
+    - "internal/cmd/objectstorage/*"
+    - "internal/cmd/runcommand/*"
+    - "internal/cmd/serverbackup/*"
+    - "internal/cmd/serverupdate/*"
+    - "internal/cmd/sfs/*"
+    - "internal/cmd/automation/*"
+# core platform
+"domain:CorePlatform":
+- changed-files:
+  - any-glob-to-any-file:
+    - "internal/cmd/auditlog/*"
+    - "internal/cmd/authorization/*"
+    - "internal/cmd/organization/*"
+    - "internal/cmd/project/*"
+    - "internal/cmd/serviceaccount/*"
+    - "internal/cmd/serviceenablement/*"
+    - "internal/cmd/cost/*"

@@ -10,17 +10,18 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/inhies/go-bytesize v0.0.0-20220417184213-4913239db9cf
 	github.com/jedib0t/go-pretty/v6 v6.8.2
-	github.com/lmittmann/tint v1.1.3
+	github.com/lmittmann/tint v1.2.0
 	github.com/mattn/go-colorable v0.1.15
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
 	github.com/stackitcloud/stackit-sdk-go/core v0.26.0
 	github.com/stackitcloud/stackit-sdk-go/services/alb v0.14.2
+	github.com/stackitcloud/stackit-sdk-go/services/albwaf v0.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.15.2
-	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.16.0
+	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.19.0
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.21.0
-	github.com/stackitcloud/stackit-sdk-go/services/edge v0.13.0
+	github.com/stackitcloud/stackit-sdk-go/services/edge v0.13.1
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.14.0
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/intake v0.7.1
@@ -35,15 +36,15 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.5.2
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.20.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.7.0
-	github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.0
-	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.16.1
-	github.com/stackitcloud/stackit-sdk-go/services/vpn v0.14.0
+	github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.1
+	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.17.0
+	github.com/stackitcloud/stackit-sdk-go/services/vpn v0.15.0
 	github.com/zalando/go-keyring v0.2.8
 	golang.org/x/mod v0.38.0
 	golang.org/x/oauth2 v0.36.0
 	golang.org/x/term v0.45.0
 	golang.org/x/text v0.40.0
-	k8s.io/apimachinery v0.36.2
+	k8s.io/apimachinery v0.36.3
 	k8s.io/client-go v0.36.2
 )
 
@@ -242,7 +243,7 @@ require (
 	mvdan.cc/gofumpt v0.9.2 // indirect
 	mvdan.cc/unparam v0.0.0-20251027182757-5beb8c8f8f15 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
-	sigs.k8s.io/structured-merge-diff/v6 v6.3.2 // indirect
+	sigs.k8s.io/structured-merge-diff/v6 v6.3.3 // indirect
 )
 
 require (
@@ -270,9 +271,9 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.1.0
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.9.0
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.24.0
-	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.1.1
+	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.2.1
 	github.com/stackitcloud/stackit-sdk-go/services/redis v1.1.0
-	github.com/stackitcloud/stackit-sdk-go/services/sfs v0.9.0
+	github.com/stackitcloud/stackit-sdk-go/services/sfs v0.11.1
 	github.com/subosito/gotenv v1.6.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

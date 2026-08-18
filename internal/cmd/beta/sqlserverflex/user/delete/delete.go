@@ -7,6 +7,10 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
+	"github.com/spf13/cobra"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
+	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api/wait"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,9 +19,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/client"
 	sqlserverflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/utils"
-
-	"github.com/spf13/cobra"
-	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 )
 
 const (
@@ -85,7 +87,22 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("delete SQLServer Flex user: %w", err)
 			}
 
-			params.Printer.Info("Deleted user %q of instance %q\n", userLabel, instanceLabel)
+			// Wait for async operation, if async mode not enabled
+			if !model.Async {
+				err := spinner.Run(params.Printer, "Deleting SQLServer Flex user", func() error {
+					_, err = wait.DeleteUserWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId, model.UserId).WaitWithContext(ctx)
+					return err
+				})
+				if err != nil {
+					return fmt.Errorf("wait for SQLServer Flex user deletion: %w", err)
+				}
+			}
+
+			operationState := "Deleted"
+			if model.Async {
+				operationState = "Triggered deletion of"
+			}
+			params.Printer.Info("%s user %q of instance %q\n", operationState, userLabel, instanceLabel)
 			return nil
 		},
 	}

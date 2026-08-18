@@ -23,7 +23,7 @@ import (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	SortBy string
+	SortBy cdn.ListDistributionsSortByParameter
 	Limit  *int32
 }
 
@@ -34,9 +34,9 @@ const (
 
 var sortByFlag = flags.StringEnumFlag(
 	"sort-by",
-	[]string{"id", "createdAt", "updatedAt", "originUrl", "status", "originUrlRelated"},
+	cdn.AllowedListDistributionsSortByParameterEnumValues,
 	"Sort entries by a specific field,",
-	flags.StringEnumDefaultValue("createdAt"),
+	flags.StringEnumDefaultValue(cdn.LISTDISTRIBUTIONSSORTBYPARAMETER_CREATED_AT),
 )
 
 func NewCmd(params *types.CmdParams) *cobra.Command {

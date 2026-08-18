@@ -26,6 +26,7 @@ stackit config unset [flags]
 ### Options
 
 ```
+      --alb-waf-custom-endpoint                             ALB WAF API base URL. If unset, uses the default base URL
       --allowed-url-domain                                  Domain name, used for the verification of the URLs that are given in the IDP endpoint and curl commands. If unset, defaults to stackit.cloud
       --assume-yes                                          If set, skips all confirmation prompts
       --async                                               Configuration option to run commands asynchronously

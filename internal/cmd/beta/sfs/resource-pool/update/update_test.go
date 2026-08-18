@@ -92,7 +92,7 @@ func fixtureRequest(mods ...func(request *sfs.ApiUpdateResourcePoolRequest)) sfs
 		PerformanceClass:    &testResourcePoolPerformanceClass,
 		SizeGigabytes:       *sfs.NewNullableInt32(&testResourcePoolSizeInGB),
 		SnapshotsAreVisible: &testSnapshotsVisible,
-		SnapshotPolicyId:    &testSnapshotPolicyId,
+		SnapshotPolicyId:    *sfs.NewNullableString(&testSnapshotPolicyId),
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -313,7 +313,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest, sfs.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
-				cmp.AllowUnexported(sfs.NullableInt32{}),
+				cmp.AllowUnexported(sfs.NullableInt32{}, sfs.NullableString{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
