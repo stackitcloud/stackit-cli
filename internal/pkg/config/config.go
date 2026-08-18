@@ -25,6 +25,7 @@ const (
 
 	AuthorizationCustomEndpointKey     = "authorization_custom_endpoint"
 	AlbCustomEndpoint                  = "alb_custom _endpoint"
+	AlbWafCustomEndpointKey            = "alb_waf_custom_endpoint"
 	DNSCustomEndpointKey               = "dns_custom_endpoint"
 	EdgeCustomEndpointKey              = "edge_custom_endpoint"
 	LoadBalancerCustomEndpointKey      = "load_balancer_custom_endpoint"
@@ -92,6 +93,7 @@ var ConfigKeys = []string{
 	AllowedUrlDomainKey,
 
 	AlbCustomEndpoint,
+	AlbWafCustomEndpointKey,
 	AuthorizationCustomEndpointKey,
 	CDNCustomEndpointKey,
 	DNSCustomEndpointKey,
@@ -212,6 +214,7 @@ func setConfigDefaults() {
 	viper.SetDefault(GitCustomEndpointKey, "")
 	viper.SetDefault(IntakeCustomEndpointKey, "")
 	viper.SetDefault(AlbCustomEndpoint, "")
+	viper.SetDefault(AlbWafCustomEndpointKey, "")
 	viper.SetDefault(LogsCustomEndpointKey, "")
 	viper.SetDefault(CDNCustomEndpointKey, "")
 	viper.SetDefault(VPNCustomEndpointKey, "")

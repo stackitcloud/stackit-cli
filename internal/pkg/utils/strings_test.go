@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/stackitcloud/stackit-sdk-go/core/utils"
@@ -26,6 +27,42 @@ func TestTruncate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := Truncate(tt.args.s, tt.args.maxLen); got != tt.want {
 				t.Errorf("Truncate() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestSortedKeys(t *testing.T) {
+	tests := []struct {
+		name  string
+		input map[string]int
+		want  []string
+	}{
+		{
+			name:  "nil map",
+			input: nil,
+			want:  []string{},
+		},
+		{
+			name:  "empty map",
+			input: map[string]int{},
+			want:  []string{},
+		},
+		{
+			name:  "single element",
+			input: map[string]int{"b": 1},
+			want:  []string{"b"},
+		},
+		{
+			name:  "multiple elements unsorted",
+			input: map[string]int{"c": 3, "a": 1, "b": 2},
+			want:  []string{"a", "b", "c"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := SortedKeys(tt.input); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("SortedKeys() = %v, want %v", got, tt.want)
 			}
 		})
 	}

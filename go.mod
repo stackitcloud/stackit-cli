@@ -17,6 +17,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stackitcloud/stackit-sdk-go/core v0.26.0
 	github.com/stackitcloud/stackit-sdk-go/services/alb v0.14.2
+	github.com/stackitcloud/stackit-sdk-go/services/albwaf v0.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.15.2
 	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.19.0
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.21.0
@@ -36,7 +37,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.20.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.7.0
 	github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.0
-	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.16.1
+	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.17.0
 	github.com/stackitcloud/stackit-sdk-go/services/vpn v0.14.0
 	github.com/zalando/go-keyring v0.2.8
 	golang.org/x/mod v0.38.0
@@ -270,7 +271,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.1.0
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.9.0
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.24.0
-	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.1.1
+	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.2.1
 	github.com/stackitcloud/stackit-sdk-go/services/redis v1.1.0
 	github.com/stackitcloud/stackit-sdk-go/services/sfs v0.9.0
 	github.com/subosito/gotenv v1.6.0 // indirect
