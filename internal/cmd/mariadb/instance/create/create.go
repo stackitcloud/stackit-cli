@@ -35,8 +35,8 @@ const (
 	sgwAclFlag               = "acl"
 	syslogFlag               = "syslog"
 	planIdFlag               = "plan-id"
-	planNameFlag             = "plan-name"
-	versionFlag              = "version"
+	planNameFlag             = "plan-name" // Deprecated: Will be removed after 2027-02-28. Use --plan-id instead.
+	versionFlag              = "version"   // Deprecated: Will be removed after 2027-02-28. Use --plan-id instead.
 )
 
 type inputModel struct {
@@ -62,9 +62,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Long:  "Creates a MariaDB instance.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
-			examples.NewExample(
-				`Create a MariaDB instance with name "my-instance" and specify plan by name and version`,
-				"$ stackit mariadb instance create --name my-instance --plan-name stackit-mariadb-1.2.10-replica --version 10.6"),
 			examples.NewExample(
 				`Create a MariaDB instance with name "my-instance" and specify plan by ID`,
 				"$ stackit mariadb instance create --name my-instance --plan-id xxx"),
@@ -144,6 +141,11 @@ func configureFlags(cmd *cobra.Command) {
 
 	err := flags.MarkFlagsRequired(cmd, instanceNameFlag)
 	cobra.CheckErr(err)
+
+	err = cmd.Flags().MarkDeprecated(planNameFlag, "Will be removed after 2027-02-28. Use the --plan-id flag instead.")
+	cobra.CheckErr(err)
+	err = cmd.Flags().MarkDeprecated(versionFlag, "Will be removed after 2027-02-28. Use the --plan-id flag instead.")
+	cobra.CheckErr(err)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
@@ -190,15 +192,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient mariadb.Defa
 	req := apiClient.CreateInstance(ctx, model.ProjectId, model.Region)
 
 	var planId *string
-	var err error
-
-	offerings, err := apiClient.ListOfferings(ctx, model.ProjectId, model.Region).Execute()
-	if err != nil {
-		return req, fmt.Errorf("get MariaDB offerings: %w", err)
-	}
 
 	if model.PlanId == nil {
-		planId, err = mariadbUtils.LoadPlanId(model.PlanName, model.Version, offerings)
+		// Deprecated: resolving a plan by --plan-name/--version will be removed after 2027-02-28. Use --plan-id instead.
+		offerings, err := apiClient.ListOfferings(ctx, model.ProjectId, model.Region).Execute()
+		if err != nil {
+			return req, fmt.Errorf("get MariaDB offerings: %w", err)
+		}
+		planId, err = mariadbUtils.LoadPlanId(model.PlanName, model.Version, offerings) //nolint:staticcheck // deprecated but still supported until 2027-02-28
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 			if !errors.As(err, &dsaInvalidPlanError) {
@@ -207,10 +208,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient mariadb.Defa
 			return req, err
 		}
 	} else {
-		err := mariadbUtils.ValidatePlanId(*model.PlanId, offerings)
-		if err != nil {
-			return req, err
-		}
 		planId = model.PlanId
 	}
 	var sgwAcl *string

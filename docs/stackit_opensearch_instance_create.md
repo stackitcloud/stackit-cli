@@ -13,9 +13,6 @@ stackit opensearch instance create [flags]
 ### Examples
 
 ```
-  Create an OpenSearch instance with name "my-instance" and specify plan by name and version
-  $ stackit opensearch instance create --name my-instance --plan-name stackit-opensearch-1.2.10-replica --version 2
-
   Create an OpenSearch instance with name "my-instance" and specify plan by ID
   $ stackit opensearch instance create --name my-instance --plan-id xxx
 
@@ -35,10 +32,8 @@ stackit opensearch instance create [flags]
       --monitoring-instance-id string   Monitoring instance ID
   -n, --name string                     Instance name
       --plan-id string                  Plan ID
-      --plan-name string                Plan name
       --plugin strings                  Plugins (multiple of: [repository-s3, repository-azure, analysis-phonetic]) (default [])
       --syslog strings                  Syslog
-      --version string                  Instance OpenSearch version
 ```
 
 ### Options inherited from parent commands
