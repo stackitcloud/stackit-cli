@@ -278,6 +278,7 @@ func TestBuildRequest(t *testing.T) {
 				cmp.AllowUnexported(tt.expectedResult),
 				cmpopts.IgnoreUnexported(vpn.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
+				cmp.AllowUnexported(vpn.NullableString{}, vpn.DefaultAPIService{}),
 			)
 			if diff != "" {
 				t.Fatalf("data does not match: %s", diff)
