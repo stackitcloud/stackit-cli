@@ -36,14 +36,14 @@ stackit beta vpn connection create [flags]
       --tunnel1-phase1-dh-groups strings               Tunnel 1 Phase 1 DH Groups.
                                                        The Diffie-Hellman Group. Required, except if AEAD algorithms are selected. (multiple of: [modp1024, modp2048, ecp256, ecp384, modp2048s256]) (default [])
       --tunnel1-phase1-encryption-algorithms strings   Required: Tunnel 1 Phase 1 Encryption Algorithms (multiple of: [aes256, aes128gcm16, aes256gcm16]) (default [])
-      --tunnel1-phase1-integrity-algorithms strings    Required: Tunnel 1 Phase 1 Integrity Algorithms (multiple of: [sha1, sha2_256, sha2_384]) (default [])
+      --tunnel1-phase1-integrity-algorithms strings    Required: Tunnel 1 Phase 1 Integrity Algorithms (multiple of: [sha1, sha2_256, sha2_384, sha2_512]) (default [])
       --tunnel1-phase1-rekey-time int                  Tunnel 1 Phase 1 Rekey Time.
                                                        Time to schedule a IKE re-keying (in seconds).
       --tunnel1-phase2-dh-groups strings               Tunnel 1 Phase 2 DH Groups (multiple of: [modp1024, modp2048, ecp256, ecp384, modp2048s256]) (default [])
       --tunnel1-phase2-dpd-action string               Tunnel 1 Phase 2 DPD Action.
                                                        Action to perform for this CHILD_SA on DPD timeout. "clear": Closes the CHILD_SA and does not take further action. "restart": immediately tries to re-negotiate the CILD_SA under a fresh IKE_SA. (one of: [clear, restart])
       --tunnel1-phase2-encryption-algorithms strings   Required: Tunnel 1 Phase 2 Encryption Algorithms (multiple of: [aes256, aes128gcm16, aes256gcm16]) (default [])
-      --tunnel1-phase2-integrity-algorithms strings    Required: Tunnel 1 Phase 2 Integrity Algorithms (multiple of: [sha1, sha2_256, sha2_384]) (default [])
+      --tunnel1-phase2-integrity-algorithms strings    Required: Tunnel 1 Phase 2 Integrity Algorithms (multiple of: [sha1, sha2_256, sha2_384, sha2_512]) (default [])
       --tunnel1-phase2-rekey-time int                  Tunnel 1 Phase 2 Rekey Time.
                                                        Time to schedule a Child SA re-keying (in seconds).
       --tunnel1-phase2-start-action string             Tunnel 1 Phase 2 Start Action.
@@ -58,14 +58,14 @@ stackit beta vpn connection create [flags]
       --tunnel2-phase1-dh-groups strings               Tunnel 2 Phase 1 DH Groups
                                                        The Diffie-Hellman Group. Required, except if AEAD algorithms are selected. (multiple of: [modp1024, modp2048, ecp256, ecp384, modp2048s256]) (default [])
       --tunnel2-phase1-encryption-algorithms strings   Required: Tunnel 2 Phase 1 Encryption Algorithms (multiple of: [aes256, aes128gcm16, aes256gcm16]) (default [])
-      --tunnel2-phase1-integrity-algorithms strings    Required: Tunnel 2 Phase 1 Integrity Algorithms (multiple of: [sha1, sha2_256, sha2_384]) (default [])
+      --tunnel2-phase1-integrity-algorithms strings    Required: Tunnel 2 Phase 1 Integrity Algorithms (multiple of: [sha1, sha2_256, sha2_384, sha2_512]) (default [])
       --tunnel2-phase1-rekey-time int                  Tunnel 2 Phase 1 Rekey Time.
                                                        Time to schedule a IKE re-keying (in seconds).
       --tunnel2-phase2-dh-groups strings               Tunnel 2 Phase 2 DH Groups (multiple of: [modp1024, modp2048, ecp256, ecp384, modp2048s256]) (default [])
       --tunnel2-phase2-dpd-action string               Tunnel 2 Phase 2 DPD Action.
                                                        Action to perform for this CHILD_SA on DPD timeout. "clear": Closes the CHILD_SA and does not take further action. "restart": immediately tries to re-negotiate the CILD_SA under a fresh IKE_SA. (one of: [clear, restart])
       --tunnel2-phase2-encryption-algorithms strings   Required: Tunnel 2 Phase 2 Encryption Algorithms (multiple of: [aes256, aes128gcm16, aes256gcm16]) (default [])
-      --tunnel2-phase2-integrity-algorithms strings    Required: Tunnel 2 Phase 2 Integrity Algorithms (multiple of: [sha1, sha2_256, sha2_384]) (default [])
+      --tunnel2-phase2-integrity-algorithms strings    Required: Tunnel 2 Phase 2 Integrity Algorithms (multiple of: [sha1, sha2_256, sha2_384, sha2_512]) (default [])
       --tunnel2-phase2-rekey-time int                  Tunnel 2 Phase 2 Rekey Time.
                                                        Time to schedule a Child SA re-keying (in seconds).
       --tunnel2-phase2-start-action string             Tunnel 2 Phase 2 Start Action.
