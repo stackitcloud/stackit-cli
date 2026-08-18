@@ -9,6 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
+	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -18,6 +19,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/client"
 	sqlserverflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 )
 
 const (
@@ -88,6 +90,17 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("create SQLServer Flex user: %w", err)
 			}
 
+			// Wait for async operation, if async mode not enabled
+			if !model.Async {
+				err := spinner.Run(params.Printer, "Creating SQLServer Flex user", func() error {
+					_, err = wait.CreateUserWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId, resp.Id).WaitWithContext(ctx)
+					return err
+				})
+				if err != nil {
+					return fmt.Errorf("wait for SQLServer Flex user creation: %w", err)
+				}
+			}
+
 			return outputResult(params.Printer, model, instanceLabel, resp)
 		},
 	}
@@ -137,7 +150,12 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, use
 		if user == nil {
 			return fmt.Errorf("user response is empty")
 		}
-		p.Outputf("Created user for instance %q. User ID: %d\n\n", instanceLabel, user.Id)
+
+		operationState := "Created"
+		if model.Async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s user for instance %q. User ID: %d\n\n", operationState, instanceLabel, user.Id)
 		p.Outputf("Username: %s\n", user.Username)
 		p.Outputf("Password: %s\n", user.Password)
 		if len(user.Roles) != 0 {

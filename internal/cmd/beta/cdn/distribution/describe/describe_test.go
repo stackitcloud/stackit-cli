@@ -10,7 +10,6 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	cdn "github.com/stackitcloud/stackit-sdk-go/services/cdn/v1api"
-	"github.com/stackitcloud/stackit-sdk-go/services/cdn/v1api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
@@ -79,7 +78,7 @@ func fixtureResponse(mods ...func(resp *cdn.GetDistributionResponse)) *cdn.GetDi
 			Errors:    nil,
 			Id:        testDistributionID,
 			ProjectId: testProjectID,
-			Status:    wait.DISTRIBUTIONSTATUS_ACTIVE,
+			Status:    cdn.DISTRIBUTIONSTATUS_ACTIVE,
 			UpdatedAt: testTime,
 			Waf:       nil,
 		},
