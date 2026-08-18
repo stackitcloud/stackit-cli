@@ -138,7 +138,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClie
 		PerformanceClass:    model.PerformanceClass,
 		SizeGigabytes:       *sfs.NewNullableInt32(model.SizeGigabytes),
 		SnapshotsAreVisible: model.SnapshotsVisible,
-		SnapshotPolicyId:    model.SnapshotPolicyId,
+		SnapshotPolicyId:    *sfs.NewNullableString(model.SnapshotPolicyId),
 	})
 	return req
 }
