@@ -650,8 +650,8 @@ github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.7.0 h1:TNZH
 github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.7.0/go.mod h1:fXq3TmVLb4JMSve989NFFViMFoYa83s7M3hJWgN6mdQ=
 github.com/stackitcloud/stackit-sdk-go/services/sfs v0.11.1 h1:EF9vDpfyjREUOPZVuvOlkkovf90vdRZrWJbLZFml9W0=
 github.com/stackitcloud/stackit-sdk-go/services/sfs v0.11.1/go.mod h1:jMlBoXqrPNX5nXbo6oT7exalqilw1jiLPoIp4Cn0CdI=
-github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.0 h1:eu9PhRdL2GkXpHtf4NN9YBCUYcARdvAwq+g/FW4hmi4=
-github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.0/go.mod h1:TbqmZhLMofmfl+HhVl6oHYcI3zvXTm1vRjN3A/fOkM4=
+github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.1 h1:dSkUoaMip0uA8tnRERjT8A/3JFpx7Gux0qpxI5oGO1k=
+github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.1/go.mod h1:TbqmZhLMofmfl+HhVl6oHYcI3zvXTm1vRjN3A/fOkM4=
 github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.17.0 h1:skiTu1l1H0gumo9kosp5fSzrjWDZWcUM5pBH6aqUaG8=
 github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.17.0/go.mod h1:AiUoMAqQcOlMgDtkVJlqI7P/VGD5xjN3dYjERGnwN/M=
 github.com/stackitcloud/stackit-sdk-go/services/vpn v0.15.0 h1:JpMJjWBa6fwNNcAHoq00v+8+DwMD0/fe4WPjvbHdY2o=
