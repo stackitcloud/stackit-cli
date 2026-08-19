@@ -1,0 +1,145 @@
+package delete
+
+import (
+	"context"
+	"fmt"
+	"strconv"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+
+	"github.com/spf13/cobra"
+	sqlserverflex "github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api"
+	"github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex/v3api/wait"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/client"
+	sqlserverflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/sqlserverflex/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
+)
+
+const (
+	userIdArg = "USER_ID"
+
+	instanceIdFlag = "instance-id"
+)
+
+type inputModel struct {
+	*globalflags.GlobalFlagModel
+
+	InstanceId string
+	UserId     int64
+}
+
+func NewCmd(params *types.CmdParams) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   fmt.Sprintf("delete %s", userIdArg),
+		Short: "Deletes a SQLServer Flex user",
+		Long: fmt.Sprintf("%s\n%s",
+			"Deletes a SQLServer Flex user by ID. You can get the IDs of users for an instance by running:",
+			"  $ stackit sqlserverflex user list --instance-id <INSTANCE_ID>",
+		),
+		Example: examples.Build(
+			examples.NewExample(
+				`Delete a SQLServer Flex user with ID "xxx" for instance with ID "yyy"`,
+				"$ stackit sqlserverflex user delete xxx --instance-id yyy"),
+		),
+		Args: args.SingleArg(userIdArg, nil),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			model, err := parseInput(params.Printer, cmd, args)
+			if err != nil {
+				return err
+			}
+
+			// Configure API client
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
+			if err != nil {
+				return err
+			}
+
+			instanceLabel, err := sqlserverflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+				instanceLabel = model.InstanceId
+			}
+
+			userLabel, err := sqlserverflexUtils.GetUserName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.UserId, model.Region)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get user name: %v", err)
+				userLabel = fmt.Sprintf("%d", model.UserId)
+			}
+
+			prompt := fmt.Sprintf("Are you sure you want to delete user %q of instance %q? (This cannot be undone)", userLabel, instanceLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
+			}
+
+			// Call API
+			req := buildRequest(ctx, model, apiClient)
+			err = req.Execute()
+			if err != nil {
+				return fmt.Errorf("delete SQLServer Flex user: %w", err)
+			}
+
+			// Wait for async operation, if async mode not enabled
+			if !model.Async {
+				err := spinner.Run(params.Printer, "Deleting SQLServer Flex user", func() error {
+					_, err = wait.DeleteUserWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId, model.UserId).WaitWithContext(ctx)
+					return err
+				})
+				if err != nil {
+					return fmt.Errorf("wait for SQLServer Flex user deletion: %w", err)
+				}
+			}
+
+			operationState := "Deleted"
+			if model.Async {
+				operationState = "Triggered deletion of"
+			}
+			params.Printer.Info("%s user %q of instance %q\n", operationState, userLabel, instanceLabel)
+			return nil
+		},
+	}
+	configureFlags(cmd)
+	return cmd
+}
+
+func configureFlags(cmd *cobra.Command) {
+	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance ID")
+
+	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
+	cobra.CheckErr(err)
+}
+
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+	userIdStr := inputArgs[0]
+	userId, err := strconv.ParseInt(userIdStr, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id %q: %w", userIdStr, err)
+	}
+
+	globalFlags := globalflags.Parse(p, cmd)
+	if globalFlags.ProjectId == "" {
+		return nil, &errors.ProjectIdError{}
+	}
+
+	model := inputModel{
+		GlobalFlagModel: globalFlags,
+		InstanceId:      flags.FlagToStringValue(p, cmd, instanceIdFlag),
+		UserId:          userId,
+	}
+
+	p.DebugInputModel(model)
+	return &model, nil
+}
+
+func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverflex.APIClient) sqlserverflex.ApiDeleteUserRequest {
+	req := apiClient.DefaultAPI.DeleteUser(ctx, model.ProjectId, model.Region, model.InstanceId, model.UserId)
+	return req
+}
