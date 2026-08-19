@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	ServiceCmd = "beta sqlserverflex"
+	ServiceCmd = "sqlserverflex"
 )
 
 func ValidateFlavorId(flavorId string, flavors []sqlserverflex.ListFlavors) error {
