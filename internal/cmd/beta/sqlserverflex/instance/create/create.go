@@ -29,8 +29,6 @@ const (
 	aclFlag            = "acl"
 	backupScheduleFlag = "backup-schedule"
 	flavorIdFlag       = "flavor-id"
-	cpuFlag            = "cpu"
-	ramFlag            = "ram"
 	storageClassFlag   = "storage-class"
 	storageSizeFlag    = "storage-size"
 	versionFlag        = "version"
@@ -41,6 +39,11 @@ const (
 	encryptionKekKeyringIdFlag   = "encryption-kek-keyring-id"
 	encryptionKekKeyVersionFlag  = "encryption-kek-key-version"
 	encryptionServiceAccountFlag = "encryption-service-account"
+
+	// Deprecated: cpuFlag is deprecated and will be removed after 2027-02-28. Use flavorIdFlag instead.
+	cpuFlag = "cpu"
+	// Deprecated: ramFlag is deprecated and will be removed after 2027-02-28. Use flavorIdFlag instead.
+	ramFlag = "ram"
 )
 
 type inputModel struct {
@@ -50,8 +53,6 @@ type inputModel struct {
 	ACL            []string
 	BackupSchedule string
 	FlavorId       *string
-	CPU            *int64
-	RAM            *int64
 	StorageClass   string
 	StorageSize    *int64
 	Version        string
@@ -61,6 +62,11 @@ type inputModel struct {
 	EncryptionKekKeyringId   *string
 	EncryptionKekKeyVersion  *string
 	EncryptionServiceAccount *string
+
+	// Deprecated: CPU is deprecated and will be removed after 2027-02-28. Use FlavorId instead.
+	CPU *int64
+	// Deprecated: RAM is deprecated and will be removed after 2027-02-28. Use FlavorId instead.
+	RAM *int64
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -71,18 +77,23 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a SQLServer Flex instance with name "my-instance" and specify flavor by ID. Other parameters are set to default values.
-  The flavor ID can be retrieved by running "$ stackit beta sqlserverflex options --flavors"`,
-				`$ stackit beta sqlserverflex instance create --name my-instance --flavor-id xxx --backup-schedule "0 1-3 * * *" --retention-days 30 --storage-class premium-perf2-stackit --storage-size 10 --version 2022`),
+				`Create a SQLServer Flex instance with name "my-instance" and specify flavor by ID.
+  The flavor ID can be retrieved by running "$ stackit beta sqlserverflex flavor list"`,
+				`$ stackit beta sqlserverflex instance create --name my-instance --flavor-id xxx --backup-schedule "0 2 * * *" --retention-days 30 --storage-class premium-perf2-stackit --storage-size 10 --version 2022 --acl 1.2.3.0/24`),
 			examples.NewExample(
-				`Create a SQLServer Flex instance with name "my-instance", specify flavor by CPU and RAM, set storage size to 20 GB, and restrict access to a specific range of IP addresses. Other parameters are set to default values`,
-				`$ stackit beta sqlserverflex instance create --name my-instance --cpu 1 --ram 4 --storage-size 20 --backup-schedule "0 1-3 * * *" --retention-days 30 --storage-class premium-perf2-stackit --storage-size 10 --version 2022 --acl 1.2.3.0/24`),
+				`Create a SQLServer Flex instance with name "my-instance", specify flavor by ID, set storage size to 20 GB, and restrict access to a specific range of IP addresses.`,
+				`$ stackit beta sqlserverflex instance create --name my-instance --flavor-id xxx --storage-size 20 --backup-schedule "0 2 * * *" --retention-days 30 --storage-class premium-perf2-stackit --version 2022 --acl 1.2.3.0/24`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
+			}
+
+			// Deprecated: remove after 2027-02-28, once flavor-id is the only supported way to select a flavor.
+			if model.FlavorId == nil {
+				params.Printer.Warn("The --%s flag is not set, determining flavor ID by CPU and RAM. This behavior is deprecated, the --%s flag will be required after 2027-02-28.\n", flavorIdFlag, flavorIdFlag)
 			}
 
 			// Configure API client
@@ -136,7 +147,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(instanceNameFlag, "n", "", "Instance name")
 	cmd.Flags().Var(flags.CIDRSliceFlag(), aclFlag, "The access control list (ACL). Must contain at least one valid subnet, for instance '0.0.0.0/0' for open access (discouraged), '1.2.3.0/24 for a public IP range of an organization, '1.2.3.4/32' for a single IP range, etc.")
 	cmd.Flags().String(backupScheduleFlag, "", "Backup schedule")
-	cmd.Flags().String(flavorIdFlag, "", "ID of the flavor")
+	cmd.Flags().String(flavorIdFlag, "", "ID of the flavor. This flag will be required after 2027-02-28.")
 	cmd.Flags().Int64(cpuFlag, 0, "Number of CPUs")
 	cmd.Flags().Int64(ramFlag, 0, "Amount of RAM (in GB)")
 	cmd.Flags().Int64(storageSizeFlag, 0, "Storage size (in GB)")
@@ -153,6 +164,15 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 
 	cmd.MarkFlagsRequiredTogether(encryptionKekKeyIdFlag, encryptionKekKeyringIdFlag, encryptionKekKeyVersionFlag, encryptionServiceAccountFlag)
+
+	// Deprecated: remove after 2027-02-28
+	err = cmd.Flags().MarkDeprecated(cpuFlag, fmt.Sprintf("will be removed after 2027-02-28. Use the --%s flag instead.", flavorIdFlag))
+	cobra.CheckErr(err)
+	err = cmd.Flags().MarkDeprecated(ramFlag, fmt.Sprintf("will be removed after 2027-02-28. Use the --%s flag instead.", flavorIdFlag))
+	cobra.CheckErr(err)
+	cmd.MarkFlagsRequiredTogether(cpuFlag, ramFlag)
+	cmd.MarkFlagsMutuallyExclusive(flavorIdFlag, cpuFlag)
+	cmd.MarkFlagsMutuallyExclusive(flavorIdFlag, ramFlag)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {

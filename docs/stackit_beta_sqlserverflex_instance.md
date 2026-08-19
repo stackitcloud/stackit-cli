@@ -31,8 +31,11 @@ stackit beta sqlserverflex instance [flags]
 
 * [stackit beta sqlserverflex](./stackit_beta_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
 * [stackit beta sqlserverflex instance create](./stackit_beta_sqlserverflex_instance_create.md)	 - Creates a SQLServer Flex instance
+* [stackit beta sqlserverflex instance db-collation](./stackit_beta_sqlserverflex_instance_db-collation.md)	 - Provides functionality for SQLServer Flex database collations
+* [stackit beta sqlserverflex instance db-compatibility](./stackit_beta_sqlserverflex_instance_db-compatibility.md)	 - Provides functionality for SQLServer Flex database compatibilities
 * [stackit beta sqlserverflex instance delete](./stackit_beta_sqlserverflex_instance_delete.md)	 - Deletes a SQLServer Flex instance
 * [stackit beta sqlserverflex instance describe](./stackit_beta_sqlserverflex_instance_describe.md)	 - Shows details  of a SQLServer Flex instance
 * [stackit beta sqlserverflex instance list](./stackit_beta_sqlserverflex_instance_list.md)	 - Lists all SQLServer Flex instances
 * [stackit beta sqlserverflex instance update](./stackit_beta_sqlserverflex_instance_update.md)	 - Updates a SQLServer Flex instance
+* [stackit beta sqlserverflex instance user-role](./stackit_beta_sqlserverflex_instance_user-role.md)	 - Provides functionality for SQLServer Flex user roles
 
