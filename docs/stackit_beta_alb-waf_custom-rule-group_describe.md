@@ -1,19 +1,26 @@
-## stackit beta alb-waf
+## stackit beta alb-waf custom-rule-group describe
 
-Manages the Web Application Firewall (WAF) for application loadbalancers
+Shows details of an ALB WAF custom rule group
 
 ### Synopsis
 
-Manage the lifecycle of Web Application Firewall (WAF) configurations for application loadbalancers.
+Shows details of a STACKIT Application Load Balancer (ALB) Web Application Firewall (WAF) custom rule group.
 
 ```
-stackit beta alb-waf [flags]
+stackit beta alb-waf custom-rule-group describe CUSTOM_RULE_GROUP_NAME [flags]
+```
+
+### Examples
+
+```
+  Show details of an ALB WAF custom rule group with name "my-custom-rule-group"
+  $ stackit beta alb-waf custom-rule-group describe my-custom-rule-group
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta alb-waf"
+  -h, --help   Help for "stackit beta alb-waf custom-rule-group describe"
 ```
 
 ### Options inherited from parent commands
@@ -29,7 +36,5 @@ stackit beta alb-waf [flags]
 
 ### SEE ALSO
 
-* [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
 * [stackit beta alb-waf custom-rule-group](./stackit_beta_alb-waf_custom-rule-group.md)	 - Provides functionality for custom rule groups of the ALB WAF
-* [stackit beta alb-waf managed-rule-set](./stackit_beta_alb-waf_managed-rule-set.md)	 - Provides functionality for managed rule sets of the ALB WAF
 
