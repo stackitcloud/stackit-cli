@@ -14,21 +14,7 @@ const (
 	service = "mariadb"
 )
 
-func ValidatePlanId(planId string, offerings *mariadb.ListOfferingsResponse) error {
-	for _, offer := range offerings.Offerings {
-		for _, plan := range offer.Plans {
-			if strings.EqualFold(plan.Id, planId) {
-				return nil
-			}
-		}
-	}
-
-	return &errors.DSAInvalidPlanError{
-		Service: service,
-		Details: fmt.Sprintf("You provided plan ID %q, which is invalid.", planId),
-	}
-}
-
+// Deprecated: resolving a plan by --plan-name/--version will be removed after 2027-02-28. Use --plan-id instead.
 func LoadPlanId(planName, version string, offerings *mariadb.ListOfferingsResponse) (*string, error) {
 	availableVersions := ""
 	availablePlanNames := ""

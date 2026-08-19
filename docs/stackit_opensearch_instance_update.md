@@ -31,10 +31,8 @@ stackit opensearch instance update INSTANCE_ID [flags]
       --metrics-prefix string           Metrics prefix
       --monitoring-instance-id string   Monitoring instance ID
       --plan-id string                  Plan ID
-      --plan-name string                Plan name
       --plugin strings                  Plugins (multiple of: [repository-s3, repository-azure, analysis-phonetic]) (default [])
       --syslog strings                  Syslog
-      --version string                  Instance OpenSearch version
 ```
 
 ### Options inherited from parent commands
