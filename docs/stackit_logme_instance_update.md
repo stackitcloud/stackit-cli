@@ -32,9 +32,7 @@ stackit logme instance update INSTANCE_ID [flags]
       --monitoring-instance-id string   Monitoring instance ID
   -n, --name string                     Instance name
       --plan-id string                  Plan ID
-      --plan-name string                Plan name
       --syslog strings                  Syslog
-      --version string                  Instance LogMe version
 ```
 
 ### Options inherited from parent commands

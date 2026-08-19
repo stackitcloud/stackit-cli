@@ -36,8 +36,8 @@ const (
 	sgwAclFlag               = "acl"
 	syslogFlag               = "syslog"
 	planIdFlag               = "plan-id"
-	planNameFlag             = "plan-name"
-	versionFlag              = "version"
+	planNameFlag             = "plan-name" // Deprecated: Will be removed after 2027-02-28. Use --plan-id instead.
+	versionFlag              = "version"   // Deprecated: Will be removed after 2027-02-28. Use --plan-id instead.
 )
 
 var flagPlugins = flags.StringEnumSliceFlag(
@@ -152,6 +152,11 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), planIdFlag, "Plan ID")
 	cmd.Flags().String(planNameFlag, "", "Plan name")
 	cmd.Flags().String(versionFlag, "", "Instance RabbitMQ version")
+
+	err := cmd.Flags().MarkDeprecated(planNameFlag, "Will be removed after 2027-02-28. Use the --plan-id flag instead.")
+	cobra.CheckErr(err)
+	err = cmd.Flags().MarkDeprecated(versionFlag, "Will be removed after 2027-02-28. Use the --plan-id flag instead.")
+	cobra.CheckErr(err)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -210,6 +215,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 type rabbitMQClient interface {
 	PartialUpdateInstance(ctx context.Context, projectId, regionId, instanceId string) rabbitmq.ApiPartialUpdateInstanceRequest
+	// Deprecated: resolving a plan by --plan-name/--version will be removed after 2027-02-28. Use --plan-id instead.
 	ListOfferings(ctx context.Context, projectId, regionId string) rabbitmq.ApiListOfferingsRequest
 }
 
@@ -217,15 +223,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient rabbitMQClie
 	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 
 	var planId *string
-	var err error
-
-	offerings, err := apiClient.ListOfferings(ctx, model.ProjectId, model.Region).Execute()
-	if err != nil {
-		return req, fmt.Errorf("get RabbitMQ offerings: %w", err)
-	}
 
 	if model.PlanId == nil && model.PlanName != "" && model.Version != "" {
-		planId, err = rabbitmqUtils.LoadPlanId(model.PlanName, model.Version, offerings)
+		// Deprecated: resolving a plan by --plan-name/--version will be removed after 2027-02-28. Use --plan-id instead.
+		offerings, err := apiClient.ListOfferings(ctx, model.ProjectId, model.Region).Execute() //nolint:staticcheck // deprecated but still supported until 2027-02-28
+		if err != nil {
+			return req, fmt.Errorf("get RabbitMQ offerings: %w", err)
+		}
+		planId, err = rabbitmqUtils.LoadPlanId(model.PlanName, model.Version, offerings) //nolint:staticcheck // deprecated but still supported until 2027-02-28
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 			if !errors.As(err, &dsaInvalidPlanError) {
@@ -235,12 +240,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient rabbitMQClie
 		}
 	} else {
 		// planId is not required for update operation
-		if model.PlanId != nil {
-			err := rabbitmqUtils.ValidatePlanId(*model.PlanId, offerings)
-			if err != nil {
-				return req, err
-			}
-		}
 		planId = model.PlanId
 	}
 

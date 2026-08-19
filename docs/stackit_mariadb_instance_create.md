@@ -13,9 +13,6 @@ stackit mariadb instance create [flags]
 ### Examples
 
 ```
-  Create a MariaDB instance with name "my-instance" and specify plan by name and version
-  $ stackit mariadb instance create --name my-instance --plan-name stackit-mariadb-1.2.10-replica --version 10.6
-
   Create a MariaDB instance with name "my-instance" and specify plan by ID
   $ stackit mariadb instance create --name my-instance --plan-id xxx
 
@@ -35,9 +32,7 @@ stackit mariadb instance create [flags]
       --monitoring-instance-id string   Monitoring instance ID
   -n, --name string                     Instance name
       --plan-id string                  Plan ID
-      --plan-name string                Plan name
       --syslog strings                  Syslog
-      --version string                  Instance MariaDB version
 ```
 
 ### Options inherited from parent commands
