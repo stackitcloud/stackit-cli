@@ -13,9 +13,6 @@ stackit redis instance create [flags]
 ### Examples
 
 ```
-  Create a Redis instance with name "my-instance" and specify plan by name and version
-  $ stackit redis instance create --name my-instance --plan-name stackit-redis-1.2.10-replica --version 6
-
   Create a Redis instance with name "my-instance" and specify plan by ID
   $ stackit redis instance create --name my-instance --plan-id xxx
 
@@ -35,9 +32,7 @@ stackit redis instance create [flags]
       --monitoring-instance-id string   Monitoring instance ID
   -n, --name string                     Instance name
       --plan-id string                  Plan ID
-      --plan-name string                Plan name
       --syslog strings                  Syslog
-      --version string                  Instance Redis version
 ```
 
 ### Options inherited from parent commands

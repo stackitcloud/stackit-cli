@@ -13,9 +13,6 @@ stackit logme instance create [flags]
 ### Examples
 
 ```
-  Create a LogMe instance with name "my-instance" and specify plan by name and version
-  $ stackit logme instance create --name my-instance --plan-name stackit-logme2-1.2.50-replica --version 2
-
   Create a LogMe instance with name "my-instance" and specify plan by ID
   $ stackit logme instance create --name my-instance --plan-id xxx
 
@@ -35,9 +32,7 @@ stackit logme instance create [flags]
       --monitoring-instance-id string   Monitoring instance ID
   -n, --name string                     Instance name
       --plan-id string                  Plan ID
-      --plan-name string                Plan name
       --syslog strings                  Syslog
-      --version string                  Instance LogMe version
 ```
 
 ### Options inherited from parent commands
