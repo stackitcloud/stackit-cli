@@ -1,0 +1,41 @@
+## stackit sqlserverflex instance
+
+Provides functionality for SQLServer Flex instances
+
+### Synopsis
+
+Provides functionality for SQLServer Flex instances.
+
+```
+stackit sqlserverflex instance [flags]
+```
+
+### Options
+
+```
+  -h, --help   Help for "stackit sqlserverflex instance"
+```
+
+### Options inherited from parent commands
+
+```
+  -y, --assume-yes             If set, skips all confirmation prompts
+      --async                  If set, runs the command asynchronously
+  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string      Project ID
+      --region string          Target region for region-specific requests
+      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+```
+
+### SEE ALSO
+
+* [stackit sqlserverflex](./stackit_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit sqlserverflex instance create](./stackit_sqlserverflex_instance_create.md)	 - Creates a SQLServer Flex instance
+* [stackit sqlserverflex instance db-collation](./stackit_sqlserverflex_instance_db-collation.md)	 - Provides functionality for SQLServer Flex database collations
+* [stackit sqlserverflex instance db-compatibility](./stackit_sqlserverflex_instance_db-compatibility.md)	 - Provides functionality for SQLServer Flex database compatibilities
+* [stackit sqlserverflex instance delete](./stackit_sqlserverflex_instance_delete.md)	 - Deletes a SQLServer Flex instance
+* [stackit sqlserverflex instance describe](./stackit_sqlserverflex_instance_describe.md)	 - Shows details  of a SQLServer Flex instance
+* [stackit sqlserverflex instance list](./stackit_sqlserverflex_instance_list.md)	 - Lists all SQLServer Flex instances
+* [stackit sqlserverflex instance update](./stackit_sqlserverflex_instance_update.md)	 - Updates a SQLServer Flex instance
+* [stackit sqlserverflex instance user-role](./stackit_sqlserverflex_instance_user-role.md)	 - Provides functionality for SQLServer Flex user roles
+
