@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/sqlserverflex"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	affinityGroups "github.com/stackitcloud/stackit-cli/internal/cmd/affinity-groups"
@@ -203,6 +204,7 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(affinityGroups.NewCmd(params))
 	cmd.AddCommand(git.NewCmd(params))
 	cmd.AddCommand(kms.NewCmd(params))
+	cmd.AddCommand(sqlserverflex.NewCmd(params))
 }
 
 // traverseCommands calls f for c and all of its children.

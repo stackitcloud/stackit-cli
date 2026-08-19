@@ -11,7 +11,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/edge"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sfs"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/sqlserverflex"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/vpn"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -43,7 +42,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
-	cmd.AddCommand(sqlserverflex.NewCmd(params))
 	cmd.AddCommand(sfs.NewCmd(params))
 	cmd.AddCommand(alb.NewCmd(params))
 	cmd.AddCommand(albwaf.NewCmd(params))
