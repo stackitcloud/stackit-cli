@@ -97,13 +97,10 @@ For more details on the available plans, run:
   For more details on the available plans, run:
 	$ stackit %s plans`
 
-	DSA_INVALID_INPUT_PLAN = `the instance plan was not correctly provided. 
+	DSA_INVALID_INPUT_PLAN = `the instance plan was not correctly provided.
 
-Either provide the plan ID:
+Provide the plan ID:
   $ %[1]s --plan-id <PLAN ID> [flags]
-
-or provide plan name and version:
-  $ %[1]s --plan-name <PLAN NAME> --version <VERSION> [flags]
 
 For more details on the available plans, run:
   $ stackit %[2]s plans`

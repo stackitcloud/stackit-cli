@@ -35,8 +35,8 @@ const (
 	sgwAclFlag               = "acl"
 	syslogFlag               = "syslog"
 	planIdFlag               = "plan-id"
-	planNameFlag             = "plan-name"
-	versionFlag              = "version"
+	planNameFlag             = "plan-name" // Deprecated: Will be removed after 2027-02-28. Use --plan-id instead.
+	versionFlag              = "version"   // Deprecated: Will be removed after 2027-02-28. Use --plan-id instead.
 )
 
 type inputModel struct {
@@ -143,6 +143,11 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), planIdFlag, "Plan ID")
 	cmd.Flags().String(planNameFlag, "", "Plan name")
 	cmd.Flags().String(versionFlag, "", "Instance MariaDB version")
+
+	err := cmd.Flags().MarkDeprecated(planNameFlag, "Will be removed after 2027-02-28. Use the --plan-id flag instead.")
+	cobra.CheckErr(err)
+	err = cmd.Flags().MarkDeprecated(versionFlag, "Will be removed after 2027-02-28. Use the --plan-id flag instead.")
+	cobra.CheckErr(err)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -201,15 +206,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient mariadb.Defa
 	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 
 	var planId *string
-	var err error
-
-	offerings, err := apiClient.ListOfferings(ctx, model.ProjectId, model.Region).Execute()
-	if err != nil {
-		return req, fmt.Errorf("get MariaDB offerings: %w", err)
-	}
 
 	if model.PlanId == nil && model.PlanName != "" && model.Version != "" {
-		planId, err = mariadbUtils.LoadPlanId(model.PlanName, model.Version, offerings)
+		// Deprecated: resolving a plan by --plan-name/--version will be removed after 2027-02-28. Use --plan-id instead.
+		offerings, err := apiClient.ListOfferings(ctx, model.ProjectId, model.Region).Execute()
+		if err != nil {
+			return req, fmt.Errorf("get MariaDB offerings: %w", err)
+		}
+		planId, err = mariadbUtils.LoadPlanId(model.PlanName, model.Version, offerings) //nolint:staticcheck // deprecated but still supported until 2027-02-28
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 			if !errors.As(err, &dsaInvalidPlanError) {
@@ -219,12 +223,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient mariadb.Defa
 		}
 	} else {
 		// planId is not required for update operation
-		if model.PlanId != nil {
-			err := mariadbUtils.ValidatePlanId(*model.PlanId, offerings)
-			if err != nil {
-				return req, err
-			}
-		}
 		planId = model.PlanId
 	}
 
