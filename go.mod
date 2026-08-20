@@ -31,7 +31,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.24.0
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.8.0
-	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.18.1
+	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.18.2
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.7.0
 	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.5.2
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.20.0
