@@ -24,7 +24,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/edge v0.13.1
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.14.0
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.13.0
-	github.com/stackitcloud/stackit-sdk-go/services/intake v0.7.1
+	github.com/stackitcloud/stackit-sdk-go/services/intake v0.11.1
 	github.com/stackitcloud/stackit-sdk-go/services/logs v0.10.1
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.1.0
