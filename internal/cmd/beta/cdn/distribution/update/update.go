@@ -298,7 +298,8 @@ func buildRequest(ctx context.Context, apiClient *cdn.APIClient, model *inputMod
 	}
 	if model.Loki != nil {
 		loki := &cdn.LokiLogSinkPatch{}
-		cfg.LogSink = *cdn.NewNullableLokiLogSinkPatch(loki)
+		logSink := cdn.LokiLogSinkPatchAsConfigPatchLogSink(loki)
+		cfg.LogSink = *cdn.NewNullableConfigPatchLogSink(&logSink)
 		if model.Loki.PushURL != "" {
 			loki.PushUrl = utils.Ptr(model.Loki.PushURL)
 		}

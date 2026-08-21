@@ -19,17 +19,17 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/alb v0.17.1
 	github.com/stackitcloud/stackit-sdk-go/services/albwaf v0.13.1
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.15.2
-	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.19.0
-	github.com/stackitcloud/stackit-sdk-go/services/dns v0.21.0
+	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.20.0
+	github.com/stackitcloud/stackit-sdk-go/services/dns v0.22.1
 	github.com/stackitcloud/stackit-sdk-go/services/edge v0.13.1
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.14.0
-	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.13.0
+	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.14.1
 	github.com/stackitcloud/stackit-sdk-go/services/intake v0.11.1
 	github.com/stackitcloud/stackit-sdk-go/services/logs v0.10.1
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.1.0
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.12.0
-	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.24.0
+	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.24.2
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.8.0
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.18.2
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.7.0
@@ -37,7 +37,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.20.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.7.1
 	github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.1
-	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.17.0
+	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.18.0
 	github.com/stackitcloud/stackit-sdk-go/services/vpn v0.15.0
 	github.com/zalando/go-keyring v0.2.8
 	golang.org/x/mod v0.39.0
