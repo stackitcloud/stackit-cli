@@ -301,13 +301,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *cdn.APIClie
 		payload.DefaultCacheDuration = utils.Ptr(model.DefaultCacheDuration)
 	}
 	if model.Loki != nil {
-		payload.LogSink = &cdn.LokiLogSinkCreate{
-			Credentials: cdn.LokiLogSinkCredentials{
-				Password: model.Loki.Password,
-				Username: model.Loki.Username,
+		payload.LogSink = &cdn.CreateDistributionPayloadLogSink{
+			LokiLogSinkCreate: &cdn.LokiLogSinkCreate{
+				Credentials: cdn.LokiLogSinkCredentials{
+					Password: model.Loki.Password,
+					Username: model.Loki.Username,
+				},
+				PushUrl: model.Loki.PushURL,
+				Type:    "loki",
 			},
-			PushUrl: model.Loki.PushURL,
-			Type:    "loki",
 		}
 	}
 	payload.MonthlyLimitBytes = model.MonthlyLimitBytes
