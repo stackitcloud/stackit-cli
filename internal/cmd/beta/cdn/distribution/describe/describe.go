@@ -125,8 +125,8 @@ func buildDistributionTable(d *cdn.Distribution) tables.Table {
 		defaultCacheDuration = *d.Config.DefaultCacheDuration.Get()
 	}
 	logSinkPushUrl := ""
-	if d.Config.LogSink != nil && d.Config.LogSink.PushUrl != "" {
-		logSinkPushUrl = d.Config.LogSink.PushUrl
+	if d.Config.LogSink != nil && d.Config.LogSink.LokiLogSink != nil && d.Config.LogSink.LokiLogSink.PushUrl != "" {
+		logSinkPushUrl = d.Config.LogSink.LokiLogSink.PushUrl
 	}
 	monthlyLimitBytes := ""
 	if d.Config.MonthlyLimitBytes.IsSet() && d.Config.MonthlyLimitBytes.Get() != nil {
