@@ -109,7 +109,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				tokenEndpoint, err := auth.GetIDPTokenEndpoint(params.Printer)
+				getTokenEndpoint := auth.GetIDPTokenEndpoint
+				if statelessIDPMode {
+					getTokenEndpoint = auth.GetIDPTokenEndpointStateless
+				}
+				tokenEndpoint, err := getTokenEndpoint(params.Printer)
 				if err != nil {
 					return fmt.Errorf("get IDP token endpoint: %w", err)
 				}
@@ -186,11 +190,11 @@ func parseClusterConfig(p *print.Printer, cmd *cobra.Command, idpMode, workloadI
 		}
 	}
 
-	if clusterName := flags.FlagToStringValue(p, cmd, clusterNameFlag); clusterName != "" {
-		clusterConfig.ClusterName = clusterName
+	if clusterConfig.ClusterName == "" {
+		clusterConfig.ClusterName = flags.FlagToStringValue(p, cmd, clusterNameFlag)
 	}
-	if organizationID := flags.FlagToStringValue(p, cmd, organizationFlag); organizationID != "" {
-		clusterConfig.OrganizationID = organizationID
+	if clusterConfig.OrganizationID == "" {
+		clusterConfig.OrganizationID = flags.FlagToStringValue(p, cmd, organizationFlag)
 	}
 	globalFlags := globalflags.Parse(p, cmd)
 	if clusterConfig.STACKITProjectID == "" {

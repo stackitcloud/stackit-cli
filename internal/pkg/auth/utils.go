@@ -71,14 +71,20 @@ func retrieveIDPWellKnownConfigWithStorage(p *print.Printer, persistTokenEndpoin
 	return idpWellKnownConfig, nil
 }
 
-// GetIDPTokenEndpoint returns the configured IdP token endpoint without requiring
-// authentication storage. Persisted configuration is reused when available.
+// GetIDPTokenEndpoint returns the persisted IdP token endpoint when available and
+// falls back to endpoint discovery.
 func GetIDPTokenEndpoint(p *print.Printer) (string, error) {
 	tokenEndpoint, err := GetAuthField(IDP_TOKEN_ENDPOINT)
 	if err == nil && tokenEndpoint != "" {
 		return tokenEndpoint, nil
 	}
 
+	return GetIDPTokenEndpointStateless(p)
+}
+
+// GetIDPTokenEndpointStateless discovers the IdP token endpoint without reading
+// from or writing to authentication storage.
+func GetIDPTokenEndpointStateless(p *print.Printer) (string, error) {
 	wellKnownConfig, err := retrieveIDPWellKnownConfigWithStorage(p, false)
 	if err != nil {
 		return "", err

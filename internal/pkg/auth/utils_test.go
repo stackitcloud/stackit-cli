@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -8,6 +10,7 @@ import (
 	"github.com/zalando/go-keyring"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 )
 
 func TestGetWellKnownConfig(t *testing.T) {
@@ -227,5 +230,49 @@ func TestParseWellKnownConfigWithoutStorage(t *testing.T) {
 	}
 	if storedTokenEndpoint != existingEndpoint {
 		t.Fatalf("Expected token endpoint not to be changed, got %q", storedTokenEndpoint)
+	}
+}
+
+func TestGetIDPTokenEndpointStatelessIgnoresStorage(t *testing.T) {
+	viper.Reset()
+	t.Cleanup(viper.Reset)
+	keyring.MockInit()
+
+	const storedEndpoint = "https://stored.stackit.cloud/oauth"
+	if err := SetAuthField(IDP_TOKEN_ENDPOINT, storedEndpoint); err != nil {
+		t.Fatalf("Set stored token endpoint: %v", err)
+	}
+
+	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"issuer":"https://issuer.stackit.cloud/endpoint","authorization_endpoint":"https://auth.stackit.cloud/endpoint","token_endpoint":"https://discovered.stackit.cloud/oauth"}`))
+	}))
+	defer server.Close()
+
+	originalTransport := http.DefaultTransport
+	http.DefaultTransport = server.Client().Transport
+	t.Cleanup(func() {
+		http.DefaultTransport = originalTransport
+	})
+	viper.Set(config.IdentityProviderCustomWellKnownConfigurationKey, server.URL)
+	viper.Set(config.AllowedUrlDomainKey, "")
+
+	params := testparams.NewTestParams()
+	params.Printer.AssumeYes = true
+	actual, err := GetIDPTokenEndpointStateless(params.Printer)
+	if err != nil {
+		t.Fatalf("Get stateless token endpoint: %v", err)
+	}
+	const discoveredEndpoint = "https://discovered.stackit.cloud/oauth"
+	if actual != discoveredEndpoint {
+		t.Fatalf("Expected discovered endpoint %q, got %q", discoveredEndpoint, actual)
+	}
+
+	actualStoredEndpoint, err := GetAuthField(IDP_TOKEN_ENDPOINT)
+	if err != nil {
+		t.Fatalf("Get stored token endpoint: %v", err)
+	}
+	if actualStoredEndpoint != storedEndpoint {
+		t.Fatalf("Expected stored endpoint to remain %q, got %q", storedEndpoint, actualStoredEndpoint)
 	}
 }

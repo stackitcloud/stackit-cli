@@ -115,6 +115,8 @@ func TestParseClusterConfigWithoutExecClusterInfo(t *testing.T) {
 func TestParseClusterConfigUsesExecClusterInfo(t *testing.T) {
 	viper.Reset()
 	t.Cleanup(viper.Reset)
+	viper.Set(config.ProjectIdKey, uuid.NewString())
+	viper.Set(config.RegionKey, "conflicting-region")
 	t.Setenv(envServiceAccountEmail, "workload@sa.stackit.cloud")
 
 	configJSON, err := json.Marshal(fixtureClusterConfig())
@@ -129,6 +131,12 @@ func TestParseClusterConfigUsesExecClusterInfo(t *testing.T) {
 	params := testparams.NewTestParams()
 	cmd := &cobra.Command{}
 	configureFlags(cmd)
+	if err := cmd.Flags().Set(clusterNameFlag, "conflicting-cluster"); err != nil {
+		t.Fatalf("set cluster name flag: %v", err)
+	}
+	if err := cmd.Flags().Set(organizationFlag, uuid.NewString()); err != nil {
+		t.Fatalf("set organization flag: %v", err)
+	}
 	actual, err := parseClusterConfig(params.Printer, cmd, true, true, true)
 	if err != nil {
 		t.Fatalf("parse cluster config: %v", err)
