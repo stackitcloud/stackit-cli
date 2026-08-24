@@ -22,20 +22,24 @@ import (
 )
 
 const (
+	// Deprecated: Will be removed after 2027-08-31.
 	limitFlag = "limit"
 )
 
+// Deprecated: Will be removed after 2027-08-31.
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Limit *int64
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "list",
-		Short: "Lists all Redis instances",
-		Long:  "Lists all Redis instances.",
-		Args:  args.NoArgs,
+		Use:        "list",
+		Short:      "Lists all Redis instances",
+		Long:       "Lists all Redis instances.",
+		Deprecated: "\nCommand `stackit redis instance list` is deprecated and will be removed after 2027-08-31. Please use `stackit valkey instance list` instead.",
+		Args:       args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				`List all Redis instances`,
@@ -89,10 +93,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	return cmd
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
@@ -116,11 +122,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func buildRequest(ctx context.Context, model *inputModel, apiClient *redis.APIClient) redis.ApiListInstancesRequest {
 	req := apiClient.DefaultAPI.ListInstances(ctx, model.ProjectId, model.Region)
 	return req
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func outputResult(p *print.Printer, outputFormat, projectLabel string, instances []redis.Instance) error {
 	return p.OutputResult(outputFormat, instances, func() error {
 		if len(instances) == 0 {
