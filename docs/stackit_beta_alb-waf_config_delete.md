@@ -1,19 +1,26 @@
-## stackit beta alb-waf
+## stackit beta alb-waf config delete
 
-Manages the Web Application Firewall (WAF) for application loadbalancers
+Deletes an ALB WAF configuration
 
 ### Synopsis
 
-Manage the lifecycle of Web Application Firewall (WAF) configurations for application loadbalancers.
+Deletes a STACKIT Application Load Balancer (ALB) Web Application Firewall (WAF) configuration.
 
 ```
-stackit beta alb-waf [flags]
+stackit beta alb-waf config delete NAME [flags]
+```
+
+### Examples
+
+```
+  Delete an ALB WAF configuration with name "my-waf-config"
+  $ stackit beta alb-waf config delete my-waf-config
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta alb-waf"
+  -h, --help   Help for "stackit beta alb-waf config delete"
 ```
 
 ### Options inherited from parent commands
@@ -29,8 +36,5 @@ stackit beta alb-waf [flags]
 
 ### SEE ALSO
 
-* [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
 * [stackit beta alb-waf config](./stackit_beta_alb-waf_config.md)	 - Provides functionality for WAF configurations of the ALB WAF
-* [stackit beta alb-waf custom-rule-group](./stackit_beta_alb-waf_custom-rule-group.md)	 - Provides functionality for custom rule groups of the ALB WAF
-* [stackit beta alb-waf managed-rule-set](./stackit_beta_alb-waf_managed-rule-set.md)	 - Provides functionality for managed rule sets of the ALB WAF
 
