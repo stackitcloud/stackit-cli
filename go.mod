@@ -18,7 +18,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/core v0.26.0
 	github.com/stackitcloud/stackit-sdk-go/services/alb v0.17.1
 	github.com/stackitcloud/stackit-sdk-go/services/albwaf v0.13.1
-	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.15.2
+	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.15.3
 	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.20.0
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.22.1
 	github.com/stackitcloud/stackit-sdk-go/services/edge v0.13.1
@@ -32,8 +32,8 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.24.2
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.8.0
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.18.2
-	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.7.0
-	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.5.2
+	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.7.1
+	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.5.4
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.20.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.7.1
 	github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.1
@@ -43,7 +43,7 @@ require (
 	golang.org/x/mod v0.39.0
 	golang.org/x/oauth2 v0.36.0
 	golang.org/x/term v0.45.0
-	golang.org/x/text v0.40.0
+	golang.org/x/text v0.41.0
 	k8s.io/apimachinery v0.36.3
 	k8s.io/client-go v0.36.2
 )
@@ -266,7 +266,7 @@ require (
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/stackitcloud/stackit-sdk-go/services/kms v1.11.0
-	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.15.0
+	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.15.1
 	github.com/stackitcloud/stackit-sdk-go/services/logme v1.3.0
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.1.0
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.9.1
