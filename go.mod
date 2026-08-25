@@ -43,7 +43,7 @@ require (
 	golang.org/x/mod v0.39.0
 	golang.org/x/oauth2 v0.36.0
 	golang.org/x/term v0.45.0
-	golang.org/x/text v0.40.0
+	golang.org/x/text v0.41.0
 	k8s.io/apimachinery v0.36.3
 	k8s.io/client-go v0.36.2
 )
