@@ -268,7 +268,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/kms v1.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.15.1
 	github.com/stackitcloud/stackit-sdk-go/services/logme v1.3.0
-	github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.1.0
+	github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.3.0
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.9.1
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.24.0
 	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.2.1
