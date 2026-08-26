@@ -23,7 +23,7 @@ const (
 	testPurpose     = kms.PURPOSE_ASYMMETRIC_ENCRYPT_DECRYPT
 	testDescription = "my key description"
 	testImportOnly  = "true"
-	testProtection  = kms.PROTECTION_SOFTWARE
+	testProtection  = "software"
 )
 
 type testCtxKey struct{}

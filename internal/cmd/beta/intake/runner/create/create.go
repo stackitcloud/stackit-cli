@@ -89,7 +89,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(p.Printer, "Creating STACKIT Intake Runner", func() error {
-					_, err = wait.CreateOrUpdateIntakeRunnerWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, resp.GetId()).WaitWithContext(ctx)
+					_, err = wait.CreateIntakeRunnerWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, resp.GetId()).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {

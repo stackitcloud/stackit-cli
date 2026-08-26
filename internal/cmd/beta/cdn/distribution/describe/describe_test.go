@@ -328,8 +328,10 @@ func TestOutputResult(t *testing.T) {
 					r.Distribution.Config.BlockedCountries = []string{"US", "CN"}
 					r.Distribution.Config.BlockedIps = []string{"127.0.0.1"}
 					r.Distribution.Config.DefaultCacheDuration = *cdn.NewNullableString(utils.Ptr("P1DT2H30M"))
-					r.Distribution.Config.LogSink = &cdn.LokiLogSink{
-						PushUrl: "https://logs.example.com",
+					r.Distribution.Config.LogSink = &cdn.ConfigLogSink{
+						LokiLogSink: &cdn.LokiLogSink{
+							PushUrl: "https://logs.example.com",
+						},
 					}
 					monthlyLimit := int64(104857600)
 					r.Distribution.Config.MonthlyLimitBytes = *cdn.NewNullableInt64(&monthlyLimit)

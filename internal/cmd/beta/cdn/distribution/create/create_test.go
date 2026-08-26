@@ -167,10 +167,12 @@ func payloadBucketBackend() func(payload *cdn.CreateDistributionPayload) {
 
 func payloadLoki() func(payload *cdn.CreateDistributionPayload) {
 	return func(payload *cdn.CreateDistributionPayload) {
-		payload.LogSink = &cdn.LokiLogSinkCreate{
-			Type:        "loki",
-			PushUrl:     "https://loki.example.com",
-			Credentials: *cdn.NewLokiLogSinkCredentials("", "loki-user"),
+		payload.LogSink = &cdn.CreateDistributionPayloadLogSink{
+			LokiLogSinkCreate: &cdn.LokiLogSinkCreate{
+				Type:        "loki",
+				PushUrl:     "https://loki.example.com",
+				Credentials: *cdn.NewLokiLogSinkCredentials("", "loki-user"),
+			},
 		}
 	}
 }

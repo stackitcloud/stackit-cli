@@ -245,12 +245,13 @@ func TestBuildRequest(t *testing.T) {
 					payload.Config.DefaultCacheDuration = *cdn.NewNullableString(utils.Ptr(testCacheDuration))
 					monthlyLimitBytes := testMonthlyLimitBytes
 					payload.Config.MonthlyLimitBytes = *cdn.NewNullableInt64(&monthlyLimitBytes)
-					payload.Config.LogSink = *cdn.NewNullableLokiLogSinkPatch(
+					logSink := cdn.LokiLogSinkPatchAsConfigPatchLogSink(
 						&cdn.LokiLogSinkPatch{
 							Credentials: cdn.NewLokiLogSinkCredentials("loki-pass", "loki-user"),
 							PushUrl:     utils.Ptr("https://loki.example.com"),
 						},
 					)
+					payload.Config.LogSink = *cdn.NewNullableConfigPatchLogSink(&logSink)
 					payload.Config.Optimizer = &cdn.OptimizerPatch{
 						Enabled: utils.Ptr(true),
 					}
@@ -315,7 +316,7 @@ func TestBuildRequest(t *testing.T) {
 					cdn.ApiPatchDistributionRequest{},
 					cdn.NullableString{},
 					cdn.NullableInt64{},
-					cdn.NullableLokiLogSinkPatch{},
+					cdn.NullableConfigPatchLogSink{},
 					cdn.DefaultAPIService{},
 				),
 				cmpopts.EquateComparable(testCtx),
