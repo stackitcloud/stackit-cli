@@ -43,7 +43,7 @@ var (
 	)
 	protectionFlag = flags.StringEnumFlag(
 		"protection",
-		kms.AllowedProtectionEnumValues,
+		[]string{"software", "hsm"},
 		"The underlying system that is responsible for protecting the key material.")
 )
 
@@ -55,7 +55,7 @@ type inputModel struct {
 	Description *string
 	Name        *string
 	Purpose     kms.WrappingPurpose
-	Protection  kms.Protection
+	Protection  string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
