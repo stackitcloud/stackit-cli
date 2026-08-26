@@ -167,7 +167,7 @@ func TestOutputResult(t *testing.T) {
 				Id:           testKeyID,
 				ImportOnly:   true,
 				KeyRingId:    testKeyRingID,
-				Protection:   kms.PROTECTION_SOFTWARE,
+				Protection:   "software",
 				Purpose:      kms.PURPOSE_SYMMETRIC_ENCRYPT_DECRYPT,
 				State:        kms.KEYSTATE_ACTIVE,
 			},
