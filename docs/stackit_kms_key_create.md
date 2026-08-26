@@ -41,7 +41,7 @@ stackit kms key create [flags]
       --import-only          States whether versions can be created or only imported
       --keyring-id string    ID of the KMS key ring
       --name string          The display name to distinguish multiple keys
-      --protection string    The underlying system that is responsible for protecting the key material. (one of: [software])
+      --protection string    The underlying system that is responsible for protecting the key material. (one of: [software, hsm])
       --purpose string       Purpose of the key. (one of: [symmetric_encrypt_decrypt, asymmetric_encrypt_decrypt, message_authentication_code, asymmetric_sign_verify])
 ```
 
