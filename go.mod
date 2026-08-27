@@ -26,8 +26,8 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.14.1
 	github.com/stackitcloud/stackit-sdk-go/services/intake v0.11.1
 	github.com/stackitcloud/stackit-sdk-go/services/logs v0.10.1
-	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.12.0
-	github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.1.0
+	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.12.1
+	github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.3.0
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.24.2
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.8.0
@@ -45,7 +45,7 @@ require (
 	golang.org/x/term v0.45.0
 	golang.org/x/text v0.41.0
 	k8s.io/apimachinery v0.36.3
-	k8s.io/client-go v0.36.2
+	k8s.io/client-go v0.36.3
 )
 
 require (
@@ -268,7 +268,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/kms v1.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.15.1
 	github.com/stackitcloud/stackit-sdk-go/services/logme v1.3.0
-	github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.1.0
+	github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.3.0
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.9.1
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.24.0
 	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.2.1
@@ -277,7 +277,7 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.36.2 // indirect
+	k8s.io/api v0.36.3 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/utils v0.0.0-20260210185600-b8788abfbbc2
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
