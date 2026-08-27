@@ -41,10 +41,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create credentials for a Valkey instance with ID "xxx"`,
-				"$ stackit beta valkey credentials create --instance-id xxx"),
+				"$ stackit valkey credentials create --instance-id xxx"),
 			examples.NewExample(
 				`Create credentials for a Valkey instance and show the password in the output`,
-				"$ stackit beta valkey credentials create --instance-id xxx --show-password"),
+				"$ stackit valkey credentials create --instance-id xxx --show-password"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

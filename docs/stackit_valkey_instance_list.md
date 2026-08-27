@@ -14,13 +14,13 @@ stackit valkey instance list [flags]
 
 ```
   List all Valkey instances
-  $ stackit beta valkey instance list
+  $ stackit valkey instance list
 
   List all Valkey instances in JSON format
-  $ stackit beta valkey instance list --output-format json
+  $ stackit valkey instance list --output-format json
 
   List up to 10 Valkey instances
-  $ stackit beta valkey instance list --limit 10
+  $ stackit valkey instance list --limit 10
 ```
 
 ### Options

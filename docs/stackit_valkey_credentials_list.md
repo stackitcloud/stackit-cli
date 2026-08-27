@@ -14,13 +14,13 @@ stackit valkey credentials list [flags]
 
 ```
   List all credentials' IDs for a Valkey instance with ID "xxx"
-  $ stackit beta valkey credentials list --instance-id xxx
+  $ stackit valkey credentials list --instance-id xxx
 
   List all credentials' IDs for a Valkey instance with ID "xxx" in JSON format
-  $ stackit beta valkey credentials list --instance-id xxx --output-format json
+  $ stackit valkey credentials list --instance-id xxx --output-format json
 
   List up to 10 credentials' IDs for a Valkey instance with ID "xxx"
-  $ stackit beta valkey credentials list --instance-id xxx --limit 10
+  $ stackit valkey credentials list --instance-id xxx --limit 10
 ```
 
 ### Options

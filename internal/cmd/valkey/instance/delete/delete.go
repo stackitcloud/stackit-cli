@@ -38,7 +38,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Delete a Valkey instance with ID "xxx"`,
-				"$ stackit beta valkey instance delete xxx"),
+				"$ stackit valkey instance delete xxx"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

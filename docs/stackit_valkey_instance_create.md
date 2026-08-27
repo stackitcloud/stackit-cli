@@ -14,13 +14,13 @@ stackit valkey instance create [flags]
 
 ```
   Create a Valkey instance with name "my-instance" and specify plan by name and version
-  $ stackit beta valkey instance create --name my-instance --plan-name stackit-keyvalue-1.2.10-replica --version 8
+  $ stackit valkey instance create --name my-instance --plan-name stackit-keyvalue-1.2.10-replica --version 8
 
   Create a Valkey instance with name "my-instance" and specify plan by ID
-  $ stackit beta valkey instance create --name my-instance --plan-id xxx
+  $ stackit valkey instance create --name my-instance --plan-id xxx
 
   Create a Valkey instance with name "my-instance" and specify IP range which is allowed to access it
-  $ stackit beta valkey instance create --name my-instance --plan-id xxx --acl 1.2.3.0/24
+  $ stackit valkey instance create --name my-instance --plan-id xxx --acl 1.2.3.0/24
 ```
 
 ### Options

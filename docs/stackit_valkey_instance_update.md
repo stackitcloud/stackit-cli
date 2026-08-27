@@ -14,13 +14,13 @@ stackit valkey instance update INSTANCE_ID [flags]
 
 ```
   Update the plan of a Valkey instance with ID "xxx" by plan ID
-  $ stackit beta valkey instance update xxx --plan-id yyy
+  $ stackit valkey instance update xxx --plan-id yyy
 
   Update the plan of a Valkey instance with ID "xxx" by name and version
-  $ stackit beta valkey instance update xxx --plan-name stackit-keyvalue-1.2.10-replica --version 8
+  $ stackit valkey instance update xxx --plan-name stackit-keyvalue-1.2.10-replica --version 8
 
   Update the range of IPs allowed to access a Valkey instance with ID "xxx"
-  $ stackit beta valkey instance update xxx --acl 1.2.3.0/24
+  $ stackit valkey instance update xxx --acl 1.2.3.0/24
 ```
 
 ### Options

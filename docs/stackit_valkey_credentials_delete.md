@@ -14,7 +14,7 @@ stackit valkey credentials delete CREDENTIALS_ID [flags]
 
 ```
   Delete credentials with ID "xxx" of a Valkey instance with ID "yyy"
-  $ stackit beta valkey credentials delete xxx --instance-id yyy
+  $ stackit valkey credentials delete xxx --instance-id yyy
 ```
 
 ### Options

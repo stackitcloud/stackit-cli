@@ -68,13 +68,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a Valkey instance with name "my-instance" and specify plan by name and version`,
-				"$ stackit beta valkey instance create --name my-instance --plan-name stackit-keyvalue-1.2.10-replica --version 8"),
+				"$ stackit valkey instance create --name my-instance --plan-name stackit-keyvalue-1.2.10-replica --version 8"),
 			examples.NewExample(
 				`Create a Valkey instance with name "my-instance" and specify plan by ID`,
-				"$ stackit beta valkey instance create --name my-instance --plan-id xxx"),
+				"$ stackit valkey instance create --name my-instance --plan-id xxx"),
 			examples.NewExample(
 				`Create a Valkey instance with name "my-instance" and specify IP range which is allowed to access it`,
-				"$ stackit beta valkey instance create --name my-instance --plan-id xxx --acl 1.2.3.0/24"),
+				"$ stackit valkey instance create --name my-instance --plan-id xxx --acl 1.2.3.0/24"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -248,10 +248,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient valkey.Defau
 }
 
 func outputResult(p *print.Printer, model *inputModel, projectLabel, instanceId string, resp *valkey.CreateInstanceResponse) error {
+	if model == nil {
+		return fmt.Errorf("no model passed")
+	}
 	return p.OutputResult(model.OutputFormat, resp, func() error {
-		if model == nil {
-			return fmt.Errorf("no model passed")
-		}
 		if resp == nil {
 			return fmt.Errorf("no response defined")
 		}

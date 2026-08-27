@@ -40,7 +40,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Delete credentials with ID "xxx" of a Valkey instance with ID "yyy"`,
-				"$ stackit beta valkey credentials delete xxx --instance-id yyy"),
+				"$ stackit valkey credentials delete xxx --instance-id yyy"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

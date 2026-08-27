@@ -14,10 +14,10 @@ stackit valkey credentials create [flags]
 
 ```
   Create credentials for a Valkey instance with ID "xxx"
-  $ stackit beta valkey credentials create --instance-id xxx
+  $ stackit valkey credentials create --instance-id xxx
 
   Create credentials for a Valkey instance and show the password in the output
-  $ stackit beta valkey credentials create --instance-id xxx --show-password
+  $ stackit valkey credentials create --instance-id xxx --show-password
 ```
 
 ### Options

@@ -14,7 +14,7 @@ stackit valkey instance delete INSTANCE_ID [flags]
 
 ```
   Delete a Valkey instance with ID "xxx"
-  $ stackit beta valkey instance delete xxx
+  $ stackit valkey instance delete xxx
 ```
 
 ### Options

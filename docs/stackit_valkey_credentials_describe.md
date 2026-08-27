@@ -14,10 +14,10 @@ stackit valkey credentials describe CREDENTIALS_ID [flags]
 
 ```
   Get details of credentials with ID "xxx" from a Valkey instance with ID "yyy"
-  $ stackit beta valkey credentials describe xxx --instance-id yyy
+  $ stackit valkey credentials describe xxx --instance-id yyy
 
   Get details of credentials with ID "xxx" from a Valkey instance with ID "yyy" in JSON format
-  $ stackit beta valkey credentials describe xxx --instance-id yyy --output-format json
+  $ stackit valkey credentials describe xxx --instance-id yyy --output-format json
 ```
 
 ### Options
