@@ -205,6 +205,7 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(affinityGroups.NewCmd(params))
 	cmd.AddCommand(git.NewCmd(params))
 	cmd.AddCommand(kms.NewCmd(params))
+	cmd.AddCommand(sqlserverflex.NewCmd(params))
 	cmd.AddCommand(valkey.NewCmd(params))
 }
 
