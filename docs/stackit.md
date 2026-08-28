@@ -60,5 +60,6 @@ stackit [flags]
 * [stackit service-account](./stackit_service-account.md)	 - Provides functionality for service accounts
 * [stackit ske](./stackit_ske.md)	 - Provides functionality for SKE
 * [stackit sqlserverflex](./stackit_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
+* [stackit valkey](./stackit_valkey.md)	 - Provides functionality for Valkey
 * [stackit volume](./stackit_volume.md)	 - Provides functionality for volumes
 

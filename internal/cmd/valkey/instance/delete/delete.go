@@ -1,0 +1,116 @@
+package delete
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/spf13/cobra"
+	valkey "github.com/stackitcloud/stackit-sdk-go/services/valkey/v2api"
+	"github.com/stackitcloud/stackit-sdk-go/services/valkey/v2api/wait"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/valkey/client"
+	valkeyUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/valkey/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+)
+
+const (
+	instanceIdArg = "INSTANCE_ID"
+)
+
+type inputModel struct {
+	*globalflags.GlobalFlagModel
+	InstanceId string
+}
+
+func NewCmd(params *types.CmdParams) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   fmt.Sprintf("delete %s", instanceIdArg),
+		Short: "Deletes a Valkey instance",
+		Long:  "Deletes a Valkey instance.",
+		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
+		Example: examples.Build(
+			examples.NewExample(
+				`Delete a Valkey instance with ID "xxx"`,
+				"$ stackit valkey instance delete xxx"),
+		),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			model, err := parseInput(params.Printer, cmd, args)
+			if err != nil {
+				return err
+			}
+
+			// Configure API client
+			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
+			if err != nil {
+				return err
+			}
+
+			instanceLabel, err := valkeyUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+				instanceLabel = model.InstanceId
+			}
+
+			prompt := fmt.Sprintf("Are you sure you want to delete instance %q? (This cannot be undone)", instanceLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
+			}
+
+			// Call API
+			req := buildRequest(ctx, model, apiClient)
+			err = req.Execute()
+			if err != nil {
+				return fmt.Errorf("delete Valkey instance: %w", err)
+			}
+
+			// Wait for async operation, if async mode not enabled
+			if !model.Async {
+				err := spinner.Run(params.Printer, "Deleting instance", func() error {
+					_, err = wait.DeleteInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId).WaitWithContext(ctx)
+					return err
+				})
+				if err != nil {
+					return fmt.Errorf("wait for Valkey instance deletion: %w", err)
+				}
+			}
+
+			operationState := "Deleted"
+			if model.Async {
+				operationState = "Triggered deletion of"
+			}
+			params.Printer.Outputf("%s instance %q\n", operationState, instanceLabel)
+			return nil
+		},
+	}
+	return cmd
+}
+
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+	instanceId := inputArgs[0]
+
+	globalFlags := globalflags.Parse(p, cmd)
+	if globalFlags.ProjectId == "" {
+		return nil, &errors.ProjectIdError{}
+	}
+
+	model := inputModel{
+		GlobalFlagModel: globalFlags,
+		InstanceId:      instanceId,
+	}
+
+	p.DebugInputModel(model)
+	return &model, nil
+}
+
+func buildRequest(ctx context.Context, model *inputModel, apiClient *valkey.APIClient) valkey.ApiDeleteInstanceRequest {
+	return apiClient.DefaultAPI.DeleteInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
+}
