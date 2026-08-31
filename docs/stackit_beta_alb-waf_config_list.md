@@ -1,19 +1,30 @@
-## stackit beta alb-waf
+## stackit beta alb-waf config list
 
-Manages the Web Application Firewall (WAF) for application loadbalancers
+Lists all ALB WAF configurations
 
 ### Synopsis
 
-Manage the lifecycle of Web Application Firewall (WAF) configurations for application loadbalancers.
+Lists all STACKIT Application Load Balancer (ALB) Web Application Firewall (WAF) configurations.
 
 ```
-stackit beta alb-waf [flags]
+stackit beta alb-waf config list [flags]
+```
+
+### Examples
+
+```
+  List all ALB WAF configurations
+  $ stackit beta alb-waf config list
+
+  List the first 10 ALB WAF configurations
+  $ stackit beta alb-waf config list --limit=10
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta alb-waf"
+  -h, --help        Help for "stackit beta alb-waf config list"
+      --limit int   Limit the output to the first n elements
 ```
 
 ### Options inherited from parent commands
@@ -29,8 +40,5 @@ stackit beta alb-waf [flags]
 
 ### SEE ALSO
 
-* [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
 * [stackit beta alb-waf config](./stackit_beta_alb-waf_config.md)	 - Provides functionality for WAF configurations of the ALB WAF
-* [stackit beta alb-waf custom-rule-group](./stackit_beta_alb-waf_custom-rule-group.md)	 - Provides functionality for custom rule groups of the ALB WAF
-* [stackit beta alb-waf managed-rule-set](./stackit_beta_alb-waf_managed-rule-set.md)	 - Provides functionality for managed rule sets of the ALB WAF
 
