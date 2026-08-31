@@ -350,6 +350,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex
 		return postgresflex.ApiCreateInstanceRequest{}, fmt.Errorf("storage size is nil")
 	} else if model.Version == nil {
 		return postgresflex.ApiCreateInstanceRequest{}, fmt.Errorf("version is nil")
+	} else if model.StorageClass == nil {
+		return postgresflex.ApiCreateInstanceRequest{}, fmt.Errorf("storage class is nil")
 	}
 
 	req = req.CreateInstancePayload(postgresflex.CreateInstancePayload{
@@ -363,7 +365,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex
 		},
 		RetentionDays: *postgresflex.NewNullableInt32(model.RetentionDays),
 		Storage: postgresflex.StorageCreate{
-			Class: model.StorageClass,
+			Class: *model.StorageClass,
 			Size:  *model.StorageSize,
 		},
 		Version: *model.Version,
