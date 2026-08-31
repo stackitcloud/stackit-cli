@@ -176,10 +176,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex
 	if model.StorageSize == nil {
 		return postgresflex.ApiCloneInstanceRequest{}, fmt.Errorf("storage size is nil")
 	}
+	if model.StorageClass == nil {
+		return postgresflex.ApiCloneInstanceRequest{}, fmt.Errorf("storage class is nil")
+	}
 
 	payload := postgresflex.CloneInstancePayload{
 		InstanceOverrides: postgresflex.CloneInstanceOverrides{
-			Class: model.StorageClass,
+			Class: *model.StorageClass,
 			Size:  *model.StorageSize,
 			Name:  model.InstanceName,
 		},

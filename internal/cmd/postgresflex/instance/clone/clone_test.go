@@ -130,7 +130,8 @@ func fixturePayload(mods ...func(payload *postgresflex.CloneInstancePayload)) po
 
 	payload := postgresflex.CloneInstancePayload{
 		InstanceOverrides: postgresflex.CloneInstanceOverrides{
-			Size: testStorageSize,
+			Class: testStorageClass,
+			Size:  testStorageSize,
 		},
 		PointInTime: testRecoveryTimestamp,
 	}
@@ -302,6 +303,7 @@ func TestBuildRequest(t *testing.T) {
 			description: "base",
 			model: fixtureRequiredInputModel(
 				func(model *inputModel) {
+					model.StorageClass = utils.Ptr(testStorageClass)
 					model.StorageSize = utils.Ptr(testStorageSize)
 				},
 			),
@@ -318,7 +320,7 @@ func TestBuildRequest(t *testing.T) {
 			expectedRequest: testClient.DefaultAPI.CloneInstance(testCtx, testProjectId, testRegion, testInstanceId).
 				CloneInstancePayload(postgresflex.CloneInstancePayload{
 					InstanceOverrides: postgresflex.CloneInstanceOverrides{
-						Class: utils.Ptr("class"),
+						Class: "class",
 						Size:  testStorageSize,
 					},
 					PointInTime: testRecoveryTimestamp,
@@ -327,7 +329,16 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "storage size missing",
 			model: fixtureRequiredInputModel(func(model *inputModel) {
+				model.StorageClass = utils.Ptr(testStorageClass)
 				model.StorageSize = nil
+			}),
+			isValid: false,
+		},
+		{
+			description: "storage class missing",
+			model: fixtureRequiredInputModel(func(model *inputModel) {
+				model.StorageClass = nil
+				model.StorageSize = utils.Ptr(testStorageSize)
 			}),
 			isValid: false,
 		},
@@ -341,7 +352,7 @@ func TestBuildRequest(t *testing.T) {
 			expectedRequest: testClient.DefaultAPI.CloneInstance(testCtx, testProjectId, testRegion, testInstanceId).
 				CloneInstancePayload(postgresflex.CloneInstancePayload{
 					InstanceOverrides: postgresflex.CloneInstanceOverrides{
-						Class: utils.Ptr("class"),
+						Class: "class",
 						Size:  int64(10),
 					},
 					PointInTime: testRecoveryTimestamp,
