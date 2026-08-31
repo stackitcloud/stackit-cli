@@ -22,7 +22,7 @@ const (
 	testDisplayName = "my-key"
 	testPurpose     = kms.WRAPPINGPURPOSE_WRAP_ASYMMETRIC_KEY
 	testDescription = "my key description"
-	testProtection  = kms.PROTECTION_SOFTWARE
+	testProtection  = "software"
 )
 
 type testCtxKey struct{}
