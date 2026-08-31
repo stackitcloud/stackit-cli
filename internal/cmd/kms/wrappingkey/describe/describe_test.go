@@ -158,7 +158,7 @@ func TestOutputResult(t *testing.T) {
 				Algorithm:   kms.WRAPPINGALGORITHM_RSA_2048_OAEP_SHA256,
 				ExpiresAt:   testTime,
 				KeyRingId:   testKeyRingID,
-				Protection:  kms.PROTECTION_SOFTWARE,
+				Protection:  "software",
 				PublicKey:   utils.Ptr("-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQ...\n-----END PUBLIC KEY-----"),
 				Purpose:     kms.WRAPPINGPURPOSE_WRAP_ASYMMETRIC_KEY,
 			},
