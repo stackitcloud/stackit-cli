@@ -188,7 +188,7 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(postgresflex.NewCmd(params))
 	cmd.AddCommand(project.NewCmd(params))
 	cmd.AddCommand(rabbitmq.NewCmd(params))
-	cmd.AddCommand(redis.NewCmd(params))
+	cmd.AddCommand(redis.NewCmd(params)) //nolint:staticcheck // deprecated but still supported until 2027-08-31
 	cmd.AddCommand(secretsmanager.NewCmd(params))
 	cmd.AddCommand(serviceaccount.NewCmd(params))
 	cmd.AddCommand(ske.NewCmd(params))
