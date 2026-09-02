@@ -3,6 +3,8 @@ package update
 import (
 	"context"
 	"fmt"
+	"io/fs"
+	"strings"
 
 	"github.com/spf13/cobra"
 	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
@@ -29,7 +31,47 @@ const (
 	passwordFlag    = "password"
 	userTypeFlag    = "type"
 	labelsFlag      = "labels"
+
+	interactivePasswordPlaceholder = "__INTERACTIVE__"
 )
+
+type secretUpdateFlag struct {
+	printer  *print.Printer
+	fs       fs.FS
+	value    string
+	isPrompt bool
+}
+
+func (f *secretUpdateFlag) String() string {
+	return f.value
+}
+
+func (f *secretUpdateFlag) Set(value string) error {
+	if value == interactivePasswordPlaceholder {
+		f.isPrompt = true
+		return nil
+	}
+	if strings.HasPrefix(value, "@") {
+		path := strings.Trim(value[1:], `"'`)
+		bytes, err := fs.ReadFile(f.fs, path)
+		if err != nil {
+			return fmt.Errorf("reading secret %s: %w", passwordFlag, err)
+		}
+		val := strings.TrimRight(string(bytes), "\r\n")
+		if val == "" {
+			return fmt.Errorf("the provided secret file %q is empty", path)
+		}
+		f.value = val
+		return nil
+	}
+	f.printer.Warn("Passing a secret value on the command line is insecure and deprecated. This usage will stop working October 2026.\n")
+	f.value = value
+	return nil
+}
+
+func (f *secretUpdateFlag) Type() string {
+	return "string"
+}
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
@@ -43,6 +85,11 @@ type inputModel struct {
 }
 
 func NewCmd(p *types.CmdParams) *cobra.Command {
+	password := &secretUpdateFlag{
+		printer: p.Printer,
+		fs:      p.Fs,
+	}
+
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", userIdArg),
 		Short: "Updates an Intake User",
@@ -53,8 +100,11 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 				`Update the display name of an Intake User`,
 				`$ stackit beta intake user update xxx --intake-id yyy --display-name "new-user-name"`),
 			examples.NewExample(
-				`Update the password and description for an Intake User`,
-				`$ stackit beta intake user update xxx --intake-id yyy --password "NewSecret123\!" --description "Updated description"`),
+				`Update the password interactively for an Intake User`,
+				`$ stackit beta intake user update xxx --intake-id yyy --password`),
+			examples.NewExample(
+				`Update the password and description for an Intake User from a file`,
+				`$ stackit beta intake user update xxx --intake-id yyy --password @./secret.txt --description "Updated description"`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -82,7 +132,6 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 					_, err = wait.UpdateIntakeUserWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.IntakeId, model.UserId).WaitWithContext(ctx)
 					return err
 				})
-
 				if err != nil {
 					return fmt.Errorf("wait for STACKIT Intake User update: %w", err)
 				}
@@ -91,16 +140,16 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			return outputResult(p.Printer, model, resp)
 		},
 	}
-	configureFlags(cmd, p)
+	configureFlags(cmd, password)
 	return cmd
 }
 
-func configureFlags(cmd *cobra.Command, p *types.CmdParams) {
+func configureFlags(cmd *cobra.Command, password *secretUpdateFlag) {
 	cmd.Flags().Var(flags.UUIDFlag(), intakeIdFlag, "Intake ID")
 	cmd.Flags().String(displayNameFlag, "", "Display name")
 	cmd.Flags().String(descriptionFlag, "", "Description")
-	password := flags.SecretFlag(passwordFlag, p)
-	cmd.Flags().Var(password, passwordFlag, password.Usage()+" Must contain lower, upper, number, and special characters (min 12 chars)")
+	cmd.Flags().Var(password, passwordFlag, "Password. Can be a string (deprecated) or a file path, if prefixed with '@' (example: @./secret.txt). If provided without a value, you will be prompted interactively. Must contain lower, upper, digits, and special characters (min 12 chars).")
+	cmd.Flags().Lookup(passwordFlag).NoOptDefVal = interactivePasswordPlaceholder
 	cmd.Flags().String(userTypeFlag, "", "Type of user. One of 'intake' or 'dead-letter'")
 	cmd.Flags().StringToString(labelsFlag, nil, `Labels in key=value format, separated by commas. Example: --labels "key1=value1,key2=value2".`)
 
@@ -116,13 +165,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		return nil, &cliErr.ProjectIdError{}
 	}
 
+	password, err := parsePassword(p, cmd)
+	if err != nil {
+		return nil, err
+	}
+
 	model := &inputModel{
 		GlobalFlagModel: globalFlags,
 		IntakeId:        flags.FlagToStringValue(p, cmd, intakeIdFlag),
 		UserId:          userId,
 		DisplayName:     flags.FlagToStringPointer(p, cmd, displayNameFlag),
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
-		Password:        flags.SecretFlagToStringPointer(p, cmd, passwordFlag),
+		Password:        password,
 		UserType:        flags.FlagToStringPointer(p, cmd, userTypeFlag),
 		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelsFlag),
 	}
@@ -133,6 +187,29 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	p.DebugInputModel(model)
 	return model, nil
+}
+
+func parsePassword(p *print.Printer, cmd *cobra.Command) (*string, error) {
+	flag := cmd.Flag(passwordFlag)
+	if flag == nil || !flag.Changed {
+		return nil, nil
+	}
+	if secretFlag, ok := flag.Value.(*secretUpdateFlag); ok && secretFlag.isPrompt {
+		input, err := p.PromptForPassword("enter new password: ")
+		if err != nil {
+			return nil, fmt.Errorf("prompt for password: %w", err)
+		}
+		input = strings.TrimRight(input, "\r\n")
+		if input == "" {
+			return nil, fmt.Errorf("password cannot be empty")
+		}
+		return &input, nil
+	}
+	val := strings.TrimRight(flag.Value.String(), "\r\n")
+	if val == "" {
+		return nil, fmt.Errorf("the provided password (or secret file) is empty")
+	}
+	return &val, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIClient) intake.ApiUpdateIntakeUserRequest {
@@ -156,16 +233,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIC
 
 func outputResult(p *print.Printer, model *inputModel, resp *intake.IntakeUserResponse) error {
 	return p.OutputResult(model.OutputFormat, resp, func() error {
-		if resp == nil {
-			p.Outputf("Triggered update of Intake User for intake %q, but no user ID was returned.\n", model.IntakeId)
-			return nil
-		}
-
 		operationState := "Updated"
 		if model.Async {
 			operationState = "Triggered update of"
 		}
-		p.Outputf("%s Intake User for intake %q. User ID: %s\n", operationState, model.IntakeId, resp.Id)
+		p.Outputf("%s Intake User %s\n", operationState, model.UserId)
 		return nil
 	})
 }
