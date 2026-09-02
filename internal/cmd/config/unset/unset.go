@@ -203,7 +203,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				viper.Set(config.RabbitMQCustomEndpointKey, "")
 			}
 			if model.RedisCustomEndpoint {
-				viper.Set(config.RedisCustomEndpointKey, "")
+				viper.Set(config.RedisCustomEndpointKey, "") //nolint:staticcheck // deprecated but still supported until 2027-08-31
 			}
 			if model.ResourceManagerCustomEndpoint {
 				viper.Set(config.ResourceManagerEndpointKey, "")
