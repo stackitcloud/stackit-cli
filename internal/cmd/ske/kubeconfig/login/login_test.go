@@ -18,13 +18,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/stackitcloud/stackit-sdk-go/core/clients"
 	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientauthenticationv1 "k8s.io/client-go/pkg/apis/clientauthentication/v1"
 	"k8s.io/client-go/rest"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -246,20 +246,72 @@ func TestGetAccessTokenFromEnvironmentWithoutStoredSession(t *testing.T) {
 }
 
 func TestWorkloadIdentityConfigured(t *testing.T) {
-	tokenPath := t.TempDir() + "/token"
-	if err := os.WriteFile(tokenPath, []byte("federated-token"), 0o600); err != nil {
-		t.Fatalf("write federated token: %v", err)
+	tests := []struct {
+		name      string
+		configure func(t *testing.T)
+		expected  bool
+	}{
+		{
+			name: "explicit OIDC",
+			configure: func(t *testing.T) {
+				t.Setenv(auth.EnvUseOIDC, "1")
+			},
+			expected: true,
+		},
+		{
+			name: "static federated token",
+			configure: func(t *testing.T) {
+				t.Setenv(auth.EnvServiceAccountFederatedToken, "federated-token")
+			},
+			expected: true,
+		},
+		{
+			name: "federated token file",
+			configure: func(t *testing.T) {
+				t.Setenv(auth.EnvFederatedTokenFile, "/projected/token")
+			},
+			expected: true,
+		},
+		{
+			name: "GitHub Actions",
+			configure: func(t *testing.T) {
+				t.Setenv(auth.EnvGitHubRequestURL, "https://github.example.test/oidc")
+				t.Setenv(auth.EnvGitHubRequestToken, "request-token")
+			},
+			expected: true,
+		},
+		{
+			name: "Azure DevOps",
+			configure: func(t *testing.T) {
+				t.Setenv(auth.EnvAzureOIDCRequestURI, "https://azure.example.test/oidc")
+				t.Setenv(auth.EnvAzureAccessToken, "access-token")
+			},
+			expected: true,
+		},
+		{
+			name:      "missing token source",
+			configure: func(_ *testing.T) {},
+			expected:  false,
+		},
+		{
+			name: "missing service account email",
+			configure: func(t *testing.T) {
+				t.Setenv(envServiceAccountEmail, "")
+				t.Setenv(auth.EnvServiceAccountFederatedToken, "federated-token")
+			},
+			expected: false,
+		},
 	}
-	t.Setenv(envServiceAccountEmail, "workload@sa.stackit.cloud")
-	t.Setenv(clients.FederatedTokenFileEnv, tokenPath)
 
-	if !workloadIdentityConfigured() {
-		t.Fatal("Expected workload identity to be configured")
-	}
-
-	t.Setenv(envServiceAccountEmail, "")
-	if workloadIdentityConfigured() {
-		t.Fatal("Expected workload identity not to be configured without a service account email")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clearOIDCTokenSourceEnv(t)
+			t.Setenv(envServiceAccountEmail, "workload@sa.stackit.cloud")
+			tt.configure(t)
+			if actual := workloadIdentityConfigured(); actual != tt.expected {
+				t.Fatalf("workloadIdentityConfigured() = %t, want %t", actual, tt.expected)
+			}
+		})
 	}
 }
 
@@ -297,20 +349,82 @@ func TestGetWorkloadIdentityAccessToken(t *testing.T) {
 	}))
 	defer server.Close()
 
-	tokenPath := t.TempDir() + "/token"
-	if err := os.WriteFile(tokenPath, []byte(federatedToken), 0o600); err != nil {
-		t.Fatalf("write federated token: %v", err)
+	tests := []struct {
+		name      string
+		configure func(t *testing.T)
+	}{
+		{
+			name: "static federated token",
+			configure: func(t *testing.T) {
+				t.Setenv(auth.EnvServiceAccountFederatedToken, federatedToken)
+			},
+		},
+		{
+			name: "federated token file",
+			configure: func(t *testing.T) {
+				tokenPath := t.TempDir() + "/token"
+				if err := os.WriteFile(tokenPath, []byte(federatedToken), 0o600); err != nil {
+					t.Fatalf("write federated token: %v", err)
+				}
+				t.Setenv(auth.EnvFederatedTokenFile, tokenPath)
+			},
+		},
+		{
+			name: "GitHub Actions",
+			configure: func(t *testing.T) {
+				oidcServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+					w.Header().Set("Content-Type", "application/json")
+					_ = json.NewEncoder(w).Encode(map[string]string{"value": federatedToken})
+				}))
+				t.Cleanup(oidcServer.Close)
+				t.Setenv(auth.EnvGitHubRequestURL, oidcServer.URL)
+				t.Setenv(auth.EnvGitHubRequestToken, "request-token")
+			},
+		},
+		{
+			name: "Azure DevOps",
+			configure: func(t *testing.T) {
+				oidcServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+					w.Header().Set("Content-Type", "application/json")
+					_ = json.NewEncoder(w).Encode(map[string]string{"oidcToken": federatedToken})
+				}))
+				t.Cleanup(oidcServer.Close)
+				t.Setenv(auth.EnvAzureOIDCRequestURI, oidcServer.URL)
+				t.Setenv(auth.EnvAzureAccessToken, "access-token")
+			},
+		},
 	}
-	t.Setenv(envServiceAccountEmail, serviceAccountEmail)
-	t.Setenv(clients.FederatedTokenFileEnv, tokenPath)
-	t.Setenv("STACKIT_IDP_TOKEN_ENDPOINT", server.URL)
 
-	actual, err := getWorkloadIdentityAccessToken()
-	if err != nil {
-		t.Fatalf("get workload identity access token: %v", err)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clearOIDCTokenSourceEnv(t)
+			t.Setenv(envServiceAccountEmail, serviceAccountEmail)
+			t.Setenv("STACKIT_IDP_TOKEN_ENDPOINT", server.URL)
+			tt.configure(t)
+
+			actual, err := getWorkloadIdentityAccessToken()
+			if err != nil {
+				t.Fatalf("get workload identity access token: %v", err)
+			}
+			if actual != accessToken {
+				t.Fatalf("Expected access token %q, got %q", accessToken, actual)
+			}
+		})
 	}
-	if actual != accessToken {
-		t.Fatalf("Expected access token %q, got %q", accessToken, actual)
+}
+
+func clearOIDCTokenSourceEnv(t *testing.T) {
+	t.Helper()
+	for _, env := range []string{
+		auth.EnvUseOIDC,
+		auth.EnvServiceAccountFederatedToken,
+		auth.EnvFederatedTokenFile,
+		auth.EnvGitHubRequestURL,
+		auth.EnvGitHubRequestToken,
+		auth.EnvAzureOIDCRequestURI,
+		auth.EnvAzureAccessToken,
+	} {
+		t.Setenv(env, "")
 	}
 }
 

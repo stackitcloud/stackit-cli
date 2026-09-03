@@ -450,7 +450,13 @@ func workloadIdentityConfigured() bool {
 }
 
 func getWorkloadIdentityAccessToken() (string, error) {
-	roundTripper, err := sdkAuth.SetupAuth(&sdkConfig.Configuration{WorkloadIdentityFederation: true})
+	// A nil token function intentionally preserves the SDK's projected-token-file fallback.
+	tokenFunc, _ := auth.OIDCTokenFunc()
+	roundTripper, err := sdkAuth.SetupAuth(&sdkConfig.Configuration{
+		WorkloadIdentityFederation:       true,
+		ServiceAccountEmail:              auth.OIDCServiceAccountEmail(),
+		ServiceAccountFederatedTokenFunc: tokenFunc,
+	})
 	if err != nil {
 		return "", fmt.Errorf("configure workload identity federation: %w", err)
 	}
