@@ -30,7 +30,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.3.0
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.24.2
-	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.9.1
+	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.10.0
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.18.2
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.7.1
 	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.5.4
