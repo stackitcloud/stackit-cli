@@ -444,11 +444,11 @@ func workloadIdentityConfigured() bool {
 	if os.Getenv(envServiceAccountEmail) == "" {
 		return false
 	}
-	if os.Getenv(clients.FederatedTokenFileEnv) != "" {
-		return true
-	}
-	fileInfo, err := os.Stat(defaultFederatedTokenPath)
-	return err == nil && !fileInfo.IsDir()
+    if auth.IsOIDCEnabled() {
+        return true
+    }
+    _, err := auth.OIDCTokenFunc()
+    return err == nil
 }
 
 func getWorkloadIdentityAccessToken() (string, error) {
