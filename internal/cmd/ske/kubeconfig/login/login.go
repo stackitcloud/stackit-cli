@@ -24,7 +24,6 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 
 	sdkAuth "github.com/stackitcloud/stackit-sdk-go/core/auth"
-	"github.com/stackitcloud/stackit-sdk-go/core/clients"
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 	ske "github.com/stackitcloud/stackit-sdk-go/services/ske/v2api"
 
@@ -49,9 +48,8 @@ const (
 	clusterNameFlag  = "cluster-name"
 	organizationFlag = "organization-id"
 
-	envAccessToken            = "STACKIT_ACCESS_TOKEN"
-	envServiceAccountEmail    = "STACKIT_SERVICE_ACCOUNT_EMAIL"
-	defaultFederatedTokenPath = "/var/run/secrets/stackit.cloud/serviceaccount/token" //nolint:gosec // Public path, not a credential.
+	envAccessToken         = "STACKIT_ACCESS_TOKEN"
+	envServiceAccountEmail = "STACKIT_SERVICE_ACCOUNT_EMAIL"
 )
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -190,17 +188,17 @@ func parseClusterConfig(p *print.Printer, cmd *cobra.Command, idpMode, workloadI
 		}
 	}
 
-	if clusterConfig.ClusterName == "" {
-		clusterConfig.ClusterName = flags.FlagToStringValue(p, cmd, clusterNameFlag)
+	if clusterName := flags.FlagToStringValue(p, cmd, clusterNameFlag); clusterName != "" {
+		clusterConfig.ClusterName = clusterName
 	}
-	if clusterConfig.OrganizationID == "" {
-		clusterConfig.OrganizationID = flags.FlagToStringValue(p, cmd, organizationFlag)
+	if organizationID := flags.FlagToStringValue(p, cmd, organizationFlag); organizationID != "" {
+		clusterConfig.OrganizationID = organizationID
 	}
 	globalFlags := globalflags.Parse(p, cmd)
-	if clusterConfig.STACKITProjectID == "" {
+	if globalFlags.ProjectId != "" {
 		clusterConfig.STACKITProjectID = globalFlags.ProjectId
 	}
-	if clusterConfig.Region == "" {
+	if globalFlags.Region != "" {
 		clusterConfig.Region = globalFlags.Region
 	}
 
@@ -444,11 +442,11 @@ func workloadIdentityConfigured() bool {
 	if os.Getenv(envServiceAccountEmail) == "" {
 		return false
 	}
-    if auth.IsOIDCEnabled() {
-        return true
-    }
-    _, err := auth.OIDCTokenFunc()
-    return err == nil
+	if auth.IsOIDCEnabled() {
+		return true
+	}
+	_, err := auth.OIDCTokenFunc()
+	return err == nil
 }
 
 func getWorkloadIdentityAccessToken() (string, error) {

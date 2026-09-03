@@ -112,11 +112,15 @@ func TestParseClusterConfigWithoutExecClusterInfo(t *testing.T) {
 	}
 }
 
-func TestParseClusterConfigUsesExecClusterInfo(t *testing.T) {
+func TestParseClusterConfigPrefersExplicitConfiguration(t *testing.T) {
 	viper.Reset()
 	t.Cleanup(viper.Reset)
-	viper.Set(config.ProjectIdKey, uuid.NewString())
-	viper.Set(config.RegionKey, "conflicting-region")
+	explicitProjectID := uuid.NewString()
+	explicitRegion := "explicit-region"
+	explicitClusterName := "explicit-cluster"
+	explicitOrganizationID := uuid.NewString()
+	viper.Set(config.ProjectIdKey, explicitProjectID)
+	viper.Set(config.RegionKey, explicitRegion)
 	t.Setenv(envServiceAccountEmail, "workload@sa.stackit.cloud")
 
 	configJSON, err := json.Marshal(fixtureClusterConfig())
@@ -131,12 +135,44 @@ func TestParseClusterConfigUsesExecClusterInfo(t *testing.T) {
 	params := testparams.NewTestParams()
 	cmd := &cobra.Command{}
 	configureFlags(cmd)
-	if err := cmd.Flags().Set(clusterNameFlag, "conflicting-cluster"); err != nil {
+	if err := cmd.Flags().Set(clusterNameFlag, explicitClusterName); err != nil {
 		t.Fatalf("set cluster name flag: %v", err)
 	}
-	if err := cmd.Flags().Set(organizationFlag, uuid.NewString()); err != nil {
+	if err := cmd.Flags().Set(organizationFlag, explicitOrganizationID); err != nil {
 		t.Fatalf("set organization flag: %v", err)
 	}
+	actual, err := parseClusterConfig(params.Printer, cmd, true, true, true)
+	if err != nil {
+		t.Fatalf("parse cluster config: %v", err)
+	}
+	expected := fixtureClusterConfig(func(config *clusterConfig) {
+		config.STACKITProjectID = explicitProjectID
+		config.Region = explicitRegion
+		config.ClusterName = explicitClusterName
+		config.OrganizationID = explicitOrganizationID
+	})
+	if diff := cmp.Diff(actual, expected, cmpopts.IgnoreFields(clusterConfig{}, "cacheKey")); diff != "" {
+		t.Fatalf("Data does not match: %s", diff)
+	}
+}
+
+func TestParseClusterConfigUsesExecClusterInfoAsFallback(t *testing.T) {
+	viper.Reset()
+	t.Cleanup(viper.Reset)
+	t.Setenv(envServiceAccountEmail, "workload@sa.stackit.cloud")
+
+	configJSON, err := json.Marshal(fixtureClusterConfig())
+	if err != nil {
+		t.Fatalf("marshal cluster config: %v", err)
+	}
+	setExecCredentialEnv(t, &clientauthenticationv1.Cluster{
+		Server: "https://api.example.stackit.cloud",
+		Config: runtime.RawExtension{Raw: configJSON},
+	})
+
+	params := testparams.NewTestParams()
+	cmd := &cobra.Command{}
+	configureFlags(cmd)
 	actual, err := parseClusterConfig(params.Printer, cmd, true, true, true)
 	if err != nil {
 		t.Fatalf("parse cluster config: %v", err)
