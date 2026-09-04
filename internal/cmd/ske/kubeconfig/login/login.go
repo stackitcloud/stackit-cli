@@ -59,7 +59,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Long: fmt.Sprintf("%s\n%s\n%s",
 			"Login plugin for kubernetes clients, that creates short-lived credentials to authenticate against a STACKIT Kubernetes Engine (SKE) cluster.",
 			"First you need to obtain a kubeconfig for use with the login command (first or second example).",
-			"Secondly you use the kubeconfig with your chosen Kubernetes client (third example), the client will automatically retrieve the credentials via the STACKIT CLI.",
+			"Secondly you use the kubeconfig with your chosen Kubernetes client (third example), the client will automatically retrieve the credentials via the STACKIT CLI.\n\n"+
+				"Project ID and region are resolved with the following precedence:\n\n"+
+				"| Explicit flag | Global config | Exec cluster config | Result |\n"+
+				"| --- | --- | --- | --- |\n"+
+				"| Not set | Set | Not set | Global config |\n"+
+				"| Set | Set | Not set | Explicit flag |\n"+
+				"| Not set | Set | Set | Exec cluster config |\n"+
+				"| Set | Set | Set | Explicit flag |",
 		),
 		Args: args.NoArgs,
 		Example: examples.Build(
@@ -195,10 +202,10 @@ func parseClusterConfig(p *print.Printer, cmd *cobra.Command, idpMode, workloadI
 		clusterConfig.OrganizationID = organizationID
 	}
 	globalFlags := globalflags.Parse(p, cmd)
-	if globalFlags.ProjectId != "" {
+	if flagWasExplicitlySet(cmd, globalflags.ProjectIdFlag) || clusterConfig.STACKITProjectID == "" {
 		clusterConfig.STACKITProjectID = globalFlags.ProjectId
 	}
-	if globalFlags.Region != "" {
+	if flagWasExplicitlySet(cmd, globalflags.RegionFlag) || clusterConfig.Region == "" {
 		clusterConfig.Region = globalFlags.Region
 	}
 
@@ -227,6 +234,11 @@ func parseClusterConfig(p *print.Printer, cmd *cobra.Command, idpMode, workloadI
 	clusterConfig.cacheKey = fmt.Sprintf("ske-login-%x", sha256.Sum256([]byte(clusterIdentity+"\x00"+authIdentity+idpSuffix)))
 
 	return clusterConfig, nil
+}
+
+func flagWasExplicitlySet(cmd *cobra.Command, name string) bool {
+	flag := cmd.Flag(name)
+	return flag != nil && flag.Changed
 }
 
 func loadExecCredentialFromEnv() (runtime.Object, error) {

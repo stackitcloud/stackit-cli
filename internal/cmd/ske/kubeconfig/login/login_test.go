@@ -26,6 +26,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
@@ -112,15 +113,104 @@ func TestParseClusterConfigWithoutExecClusterInfo(t *testing.T) {
 	}
 }
 
-func TestParseClusterConfigPrefersExplicitConfiguration(t *testing.T) {
+func TestParseClusterConfigPrecedence(t *testing.T) {
+	globalProjectID := uuid.NewString()
+	flagProjectID := uuid.NewString()
+	globalRegion := "global-region"
+	flagRegion := "flag-region"
+
+	tests := []struct {
+		name           string
+		clusterConfig  bool
+		explicitFlags  bool
+		expectedID     string
+		expectedRegion string
+	}{
+		{
+			name:           "global config without exec cluster config",
+			expectedID:     globalProjectID,
+			expectedRegion: globalRegion,
+		},
+		{
+			name:           "explicit flags without exec cluster config",
+			explicitFlags:  true,
+			expectedID:     flagProjectID,
+			expectedRegion: flagRegion,
+		},
+		{
+			name:           "exec cluster config overrides global config",
+			clusterConfig:  true,
+			expectedID:     testProjectId,
+			expectedRegion: testRegion,
+		},
+		{
+			name:           "explicit flags override exec cluster config",
+			clusterConfig:  true,
+			explicitFlags:  true,
+			expectedID:     flagProjectID,
+			expectedRegion: flagRegion,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			viper.Reset()
+			t.Cleanup(viper.Reset)
+			t.Setenv(envServiceAccountEmail, "workload@sa.stackit.cloud")
+
+			globalConfig := fmt.Sprintf(`{"project_id":%q,"region":%q}`, globalProjectID, globalRegion)
+			viper.SetConfigType("json")
+			if err := viper.ReadConfig(strings.NewReader(globalConfig)); err != nil {
+				t.Fatalf("read global config: %v", err)
+			}
+
+			execConfig := fixtureClusterConfig()
+			if !tt.clusterConfig {
+				execConfig.STACKITProjectID = ""
+				execConfig.Region = ""
+			}
+			configJSON, err := json.Marshal(execConfig)
+			if err != nil {
+				t.Fatalf("marshal cluster config: %v", err)
+			}
+			setExecCredentialEnv(t, &clientauthenticationv1.Cluster{
+				Server: "https://api.example.stackit.cloud",
+				Config: runtime.RawExtension{Raw: configJSON},
+			})
+
+			params := testparams.NewTestParams()
+			cmd := &cobra.Command{}
+			if err := globalflags.Configure(cmd.Flags()); err != nil {
+				t.Fatalf("configure global flags: %v", err)
+			}
+			configureFlags(cmd)
+			if tt.explicitFlags {
+				if err := cmd.Flags().Set(globalflags.ProjectIdFlag, flagProjectID); err != nil {
+					t.Fatalf("set project ID flag: %v", err)
+				}
+				if err := cmd.Flags().Set(globalflags.RegionFlag, flagRegion); err != nil {
+					t.Fatalf("set region flag: %v", err)
+				}
+			}
+
+			actual, err := parseClusterConfig(params.Printer, cmd, true, true, true)
+			if err != nil {
+				t.Fatalf("parse cluster config: %v", err)
+			}
+			expected := fixtureClusterConfig(func(config *clusterConfig) {
+				config.STACKITProjectID = tt.expectedID
+				config.Region = tt.expectedRegion
+			})
+			if diff := cmp.Diff(actual, expected, cmpopts.IgnoreFields(clusterConfig{}, "cacheKey")); diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestParseClusterConfigPrefersExplicitClusterIdentity(t *testing.T) {
 	viper.Reset()
 	t.Cleanup(viper.Reset)
-	explicitProjectID := uuid.NewString()
-	explicitRegion := "explicit-region"
-	explicitClusterName := "explicit-cluster"
-	explicitOrganizationID := uuid.NewString()
-	viper.Set(config.ProjectIdKey, explicitProjectID)
-	viper.Set(config.RegionKey, explicitRegion)
 	t.Setenv(envServiceAccountEmail, "workload@sa.stackit.cloud")
 
 	configJSON, err := json.Marshal(fixtureClusterConfig())
@@ -132,6 +222,8 @@ func TestParseClusterConfigPrefersExplicitConfiguration(t *testing.T) {
 		Config: runtime.RawExtension{Raw: configJSON},
 	})
 
+	explicitClusterName := "explicit-cluster"
+	explicitOrganizationID := uuid.NewString()
 	params := testparams.NewTestParams()
 	cmd := &cobra.Command{}
 	configureFlags(cmd)
@@ -141,13 +233,12 @@ func TestParseClusterConfigPrefersExplicitConfiguration(t *testing.T) {
 	if err := cmd.Flags().Set(organizationFlag, explicitOrganizationID); err != nil {
 		t.Fatalf("set organization flag: %v", err)
 	}
+
 	actual, err := parseClusterConfig(params.Printer, cmd, true, true, true)
 	if err != nil {
 		t.Fatalf("parse cluster config: %v", err)
 	}
 	expected := fixtureClusterConfig(func(config *clusterConfig) {
-		config.STACKITProjectID = explicitProjectID
-		config.Region = explicitRegion
 		config.ClusterName = explicitClusterName
 		config.OrganizationID = explicitOrganizationID
 	})
