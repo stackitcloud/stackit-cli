@@ -113,7 +113,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().StringP(productFlag, "p", "", "The source service (e.g., Load Balancer, Redis) where you want to attach a rule")
+	cmd.Flags().String(productFlag, "", "The source service (e.g., Load Balancer, Redis) where you want to attach a rule")
 	cmd.Flags().StringP(typeFlag, "t", "", "Type (ACL/SecurityRule/SecurityGroup/PublicIP) You can check /provider-options route for them")
 	cmd.Flags().StringP(sourceIpFlag, "s", "", "The IP (CIDR) to which the rule applies (e.g. 192.168.0.1/32)")
 	cmd.Flags().StringP(instanceIdFlag, "i", "", "Instance ID that will have attached your rule")
@@ -121,7 +121,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(descriptionFlag, "D", "", "Description")
 	cmd.Flags().StringP(etherTypeFlag, "e", "", "Specifies the bound of the rule (for security rules type)")
 	cmd.Flags().StringP(portRangeFlag, "r", "", "Port range (the Port range to which the rule applies, for security rules type)")
-	cmd.Flags().StringP(protocolFlag, "o", "", "The network protocol (e.g. TCP, UDP, ICMP, for security rules type)")
+	cmd.Flags().String(protocolFlag, "", "The network protocol (e.g. TCP, UDP, ICMP, for security rules type)")
 	cmd.Flags().Int32P(offsetFlag, "f", -1, "Offset - Position in the ACL list of an instance, will be ignored at creation")
 	cmd.Flags().StringP(securityGroupIdFlag, "g", "", "Security group ID - The ID of the Security Group")
 
