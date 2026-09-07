@@ -93,7 +93,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			if resp.Rules == nil {
-				params.Printer.Info("(...)", projectLabel)
+				params.Printer.Info("(...) %s", projectLabel)
 				return nil
 			}
 
