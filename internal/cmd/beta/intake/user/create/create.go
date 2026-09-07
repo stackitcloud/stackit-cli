@@ -3,7 +3,6 @@ package create
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/spf13/cobra"
 	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
@@ -128,16 +127,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	password, err := parsePassword(p, cmd)
-	if err != nil {
-		return nil, err
-	}
-
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		DisplayName:     flags.FlagToStringPointer(p, cmd, displayNameFlag),
 		IntakeId:        flags.FlagToStringPointer(p, cmd, intakeIdFlag),
-		Password:        password,
+		Password:        flags.SecretFlagToStringPointer(p, cmd, passwordFlag),
 		UserType:        flags.FlagToStringPointer(p, cmd, userTypeFlag),
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelsFlag),
@@ -145,31 +139,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 
 	p.DebugInputModel(model)
 	return &model, nil
-}
-
-func parsePassword(p *print.Printer, cmd *cobra.Command) (*string, error) {
-	if cmd.Flag(passwordFlag).Changed {
-		val, err := cmd.Flags().GetString(passwordFlag)
-		if err != nil {
-			return nil, fmt.Errorf("reading password: %w", err)
-		}
-		val = strings.TrimRight(val, "\r\n")
-		if val == "" {
-			return nil, fmt.Errorf("the provided password (or secret file) is empty")
-		}
-		return &val, nil
-	}
-
-	password := flags.SecretFlagToStringPointer(p, cmd, passwordFlag)
-	if password != nil {
-		trimmed := strings.TrimRight(*password, "\r\n")
-		if trimmed == "" {
-			return nil, fmt.Errorf("password cannot be empty")
-		}
-		return &trimmed, nil
-	}
-
-	return nil, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIClient) intake.ApiCreateIntakeUserRequest {

@@ -3,8 +3,6 @@ package update
 import (
 	"context"
 	"fmt"
-	"io/fs"
-	"strings"
 
 	"github.com/spf13/cobra"
 	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
@@ -31,47 +29,7 @@ const (
 	passwordFlag    = "password"
 	userTypeFlag    = "type"
 	labelsFlag      = "labels"
-
-	interactivePasswordPlaceholder = "__INTERACTIVE__"
 )
-
-type secretUpdateFlag struct {
-	printer  *print.Printer
-	fs       fs.FS
-	value    string
-	isPrompt bool
-}
-
-func (f *secretUpdateFlag) String() string {
-	return f.value
-}
-
-func (f *secretUpdateFlag) Set(value string) error {
-	if value == interactivePasswordPlaceholder {
-		f.isPrompt = true
-		return nil
-	}
-	if strings.HasPrefix(value, "@") {
-		path := strings.Trim(value[1:], `"'`)
-		bytes, err := fs.ReadFile(f.fs, path)
-		if err != nil {
-			return fmt.Errorf("reading secret %s: %w", passwordFlag, err)
-		}
-		val := strings.TrimRight(string(bytes), "\r\n")
-		if val == "" {
-			return fmt.Errorf("the provided secret file %q is empty", path)
-		}
-		f.value = val
-		return nil
-	}
-	f.printer.Warn("Passing a secret value on the command line is insecure and deprecated. This usage will stop working October 2026.\n")
-	f.value = value
-	return nil
-}
-
-func (f *secretUpdateFlag) Type() string {
-	return "string"
-}
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
@@ -85,11 +43,6 @@ type inputModel struct {
 }
 
 func NewCmd(p *types.CmdParams) *cobra.Command {
-	password := &secretUpdateFlag{
-		printer: p.Printer,
-		fs:      p.Fs,
-	}
-
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", userIdArg),
 		Short: "Updates an Intake User",
@@ -140,16 +93,16 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			return outputResult(p.Printer, model, resp)
 		},
 	}
-	configureFlags(cmd, password)
+	configureFlags(cmd, p)
 	return cmd
 }
 
-func configureFlags(cmd *cobra.Command, password *secretUpdateFlag) {
+func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.Flags().Var(flags.UUIDFlag(), intakeIdFlag, "Intake ID")
 	cmd.Flags().String(displayNameFlag, "", "Display name")
 	cmd.Flags().String(descriptionFlag, "", "Description")
-	cmd.Flags().Var(password, passwordFlag, "Password. Can be a string (deprecated) or a file path, if prefixed with '@' (example: @./secret.txt). If provided without a value, you will be prompted interactively. Must contain lower, upper, digits, and special characters (min 12 chars).")
-	cmd.Flags().Lookup(passwordFlag).NoOptDefVal = interactivePasswordPlaceholder
+	password := flags.SecretFlag(passwordFlag, params)
+	cmd.Flags().Var(password, passwordFlag, password.Usage())
 	cmd.Flags().String(userTypeFlag, "", "Type of user. One of 'intake' or 'dead-letter'")
 	cmd.Flags().StringToString(labelsFlag, nil, `Labels in key=value format, separated by commas. Example: --labels "key1=value1,key2=value2".`)
 
@@ -165,18 +118,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	password, err := parsePassword(p, cmd)
-	if err != nil {
-		return nil, err
-	}
-
 	model := &inputModel{
 		GlobalFlagModel: globalFlags,
 		IntakeId:        flags.FlagToStringValue(p, cmd, intakeIdFlag),
 		UserId:          userId,
 		DisplayName:     flags.FlagToStringPointer(p, cmd, displayNameFlag),
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
-		Password:        password,
+		Password:        flags.SecretFlagToStringPointer(p, cmd, passwordFlag),
 		UserType:        flags.FlagToStringPointer(p, cmd, userTypeFlag),
 		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelsFlag),
 	}
@@ -187,29 +135,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	p.DebugInputModel(model)
 	return model, nil
-}
-
-func parsePassword(p *print.Printer, cmd *cobra.Command) (*string, error) {
-	flag := cmd.Flag(passwordFlag)
-	if flag == nil || !flag.Changed {
-		return nil, nil
-	}
-	if secretFlag, ok := flag.Value.(*secretUpdateFlag); ok && secretFlag.isPrompt {
-		input, err := p.PromptForPassword("enter new password: ")
-		if err != nil {
-			return nil, fmt.Errorf("prompt for password: %w", err)
-		}
-		input = strings.TrimRight(input, "\r\n")
-		if input == "" {
-			return nil, fmt.Errorf("password cannot be empty")
-		}
-		return &input, nil
-	}
-	val := strings.TrimRight(flag.Value.String(), "\r\n")
-	if val == "" {
-		return nil, fmt.Errorf("the provided password (or secret file) is empty")
-	}
-	return &val, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIClient) intake.ApiUpdateIntakeUserRequest {
