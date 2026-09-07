@@ -20,12 +20,17 @@ import (
 )
 
 const (
-	flavorsFlag  = "flavors"
+	// Deprecated: Will be removed after 2027-03-07.
+	flavorsFlag = "flavors"
+	// Deprecated: Will be removed after 2027-03-07.
 	versionsFlag = "versions"
+	// Deprecated: Will be removed after 2027-03-07.
 	storagesFlag = "storages"
+	// Deprecated: Will be removed after 2027-03-07.
 	flavorIdFlag = "flavor-id"
 )
 
+// Deprecated: Will be removed after 2027-03-07.
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 
@@ -35,17 +40,20 @@ type inputModel struct {
 	FlavorId *string
 }
 
+// Deprecated: Will be removed after 2027-03-07.
 type options struct {
 	Flavors  []mongodbflex.InstanceFlavor `json:"flavors,omitempty"`
 	Versions []string                     `json:"versions,omitempty"`
 	Storages *flavorStorages              `json:"flavorStorages,omitempty"`
 }
 
+// Deprecated: Will be removed after 2027-03-07.
 type flavorStorages struct {
 	FlavorId string                            `json:"flavorId"`
 	Storages *mongodbflex.ListStoragesResponse `json:"storages"`
 }
 
+// Deprecated: Will be removed after 2027-03-07.
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "options",
@@ -63,6 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				`List MongoDB Flex storage options for a given flavor. The flavor ID can be retrieved by running "$ stackit mongodbflex options --flavors"`,
 				"$ stackit mongodbflex options --storages --flavor-id <FLAVOR_ID>"),
 		),
+		Deprecated: `Command "stackit mongodbflex options" command is deprecated and will be removed after 2027-03-07. Please use "stackit mongodbflex version list", "stackit mongodbflex flavor list" and "stackit mongodbflex storage list" commands instead.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 			model, err := parseInput(params.Printer, cmd, args)
@@ -89,6 +98,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	return cmd
 }
 
+// Deprecated: Will be removed after 2027-03-07.
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(flavorsFlag, false, "Lists supported flavors")
 	cmd.Flags().Bool(versionsFlag, false, "Lists supported versions")
@@ -96,6 +106,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(flavorIdFlag, "", `The flavor ID to show storages for. Only relevant when "--storages" is passed`)
 }
 
+// Deprecated: Will be removed after 2027-03-07.
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	flavors := flags.FlagToBoolValue(p, cmd, flavorsFlag)
@@ -128,12 +139,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
+// Deprecated: Will be removed after 2027-03-07.
 type mongoDBFlexOptionsClient interface {
 	ListFlavors(ctx context.Context, projectId, region string) mongodbflex.ApiListFlavorsRequest
 	ListVersions(ctx context.Context, projectId, region string) mongodbflex.ApiListVersionsRequest
 	ListStorages(ctx context.Context, projectId, flavorId, region string) mongodbflex.ApiListStoragesRequest
 }
 
+// Deprecated: Will be removed after 2027-03-07.
 func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputModel, apiClient mongoDBFlexOptionsClient) error {
 	var flavors *mongodbflex.ListFlavorsResponse
 	var versions *mongodbflex.ListVersionsResponse
@@ -162,6 +175,7 @@ func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputM
 	return outputResult(p, model, flavors, versions, storages)
 }
 
+// Deprecated: Will be removed after 2027-03-07.
 func outputResult(p *print.Printer, model *inputModel, flavors *mongodbflex.ListFlavorsResponse, versions *mongodbflex.ListVersionsResponse, storages *mongodbflex.ListStoragesResponse) error {
 	if model == nil || model.GlobalFlagModel == nil {
 		return fmt.Errorf("model is nil")
@@ -186,6 +200,7 @@ func outputResult(p *print.Printer, model *inputModel, flavors *mongodbflex.List
 	})
 }
 
+// Deprecated: Will be removed after 2027-03-07.
 func outputResultAsTable(p *print.Printer, model *inputModel, options *options) error {
 	if model == nil {
 		return fmt.Errorf("model is nil")
@@ -212,6 +227,7 @@ func outputResultAsTable(p *print.Printer, model *inputModel, options *options) 
 	return nil
 }
 
+// Deprecated: Will be removed after 2027-03-07.
 func buildFlavorsTable(flavors []mongodbflex.InstanceFlavor) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Flavors")
@@ -229,6 +245,7 @@ func buildFlavorsTable(flavors []mongodbflex.InstanceFlavor) tables.Table {
 	return table
 }
 
+// Deprecated: Will be removed after 2027-03-07.
 func buildVersionsTable(versions []string) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Versions")
@@ -240,6 +257,7 @@ func buildVersionsTable(versions []string) tables.Table {
 	return table
 }
 
+// Deprecated: Will be removed after 2027-03-07.
 func buildStoragesTable(storagesResp mongodbflex.ListStoragesResponse) tables.Table {
 	storages := storagesResp.StorageClasses
 	table := tables.NewTable()
