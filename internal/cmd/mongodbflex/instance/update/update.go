@@ -30,11 +30,12 @@ const (
 	aclFlag            = "acl"
 	backupScheduleFlag = "backup-schedule"
 	flavorIdFlag       = "flavor-id"
-	cpuFlag            = "cpu"
-	ramFlag            = "ram"
 	storageClassFlag   = "storage-class"
 	storageSizeFlag    = "storage-size"
 	versionFlag        = "version"
+
+	cpuFlag = "cpu" // Deprecated: Will be removed after 2027-03-07. Flavor id should be used instead.
+	ramFlag = "ram" // Deprecated: Will be removed after 2027-03-07. Flavor id should be used instead.
 )
 
 var typeFlag = flags.StringEnumFlag(
@@ -51,12 +52,12 @@ type inputModel struct {
 	ACL            *[]string
 	BackupSchedule *string
 	FlavorId       *string
-	CPU            *int32
-	RAM            *int32
 	StorageClass   *string
 	StorageSize    *int64
 	Version        *string
 	Type           *string
+	CPU            *int32 // Deprecated: Will be removed after 2027-03-07.
+	RAM            *int32 // Deprecated: Will be removed after 2027-03-07.
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -70,7 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				"$ stackit mongodbflex instance update xxx --name my-new-name"),
 			examples.NewExample(
 				`Update the version of a MongoDB Flex instance`,
-				"$ stackit mongodbflex instance update xxx --version 6.0"),
+				"$ stackit mongodbflex instance update xxx --version 8.0"),
 		),
 		Args: args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -133,12 +134,21 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.CIDRSliceFlag(), aclFlag, "Lists of IP networks in CIDR notation which are allowed to access this instance")
 	cmd.Flags().String(backupScheduleFlag, "", "Backup schedule")
 	cmd.Flags().String(flavorIdFlag, "", "ID of the flavor")
-	cmd.Flags().Int32(cpuFlag, 0, "Number of CPUs")
-	cmd.Flags().Int32(ramFlag, 0, "Amount of RAM (in GB)")
 	cmd.Flags().String(storageClassFlag, "", "Storage class")
 	cmd.Flags().Int64(storageSizeFlag, 0, "Storage size (in GB)")
 	cmd.Flags().String(versionFlag, "", "Version")
+	cmd.Flags().Int32(cpuFlag, 0, "Number of CPUs")        // Deprecated: Will be removed after 2027-03-07.
+	cmd.Flags().Int32(ramFlag, 0, "Amount of RAM (in GB)") // Deprecated: Will be removed after 2027-03-07.
 	typeFlag.Register(cmd.Flags())
+
+	// Deprecated: Will be removed after 2027-03-07.
+	err := cmd.Flags().MarkDeprecated(cpuFlag, fmt.Sprintf("Will be removed after 2027-03-07. Use the --%s flag instead.", flavorIdFlag))
+	cobra.CheckErr(err)
+	err = cmd.Flags().MarkDeprecated(ramFlag, fmt.Sprintf("Will be removed after 2027-03-07. Use the --%s flag instead.", flavorIdFlag))
+	cobra.CheckErr(err)
+	cmd.MarkFlagsRequiredTogether(cpuFlag, ramFlag)
+	cmd.MarkFlagsMutuallyExclusive(flavorIdFlag, cpuFlag)
+	cmd.MarkFlagsMutuallyExclusive(flavorIdFlag, ramFlag)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -179,52 +189,63 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		ACL:             acl,
 		BackupSchedule:  backupSchedule,
 		FlavorId:        flavorId,
-		CPU:             cpu,
-		RAM:             ram,
 		StorageClass:    storageClass,
 		StorageSize:     storageSize,
 		Version:         version,
 		Type:            instanceType,
+
+		// deprecated fields
+		CPU: cpu,
+		RAM: ram,
 	}
 
 	p.DebugInputModel(model)
 	return &model, nil
 }
 
-type MongoDBFlexClient interface {
-	PartialUpdateInstance(ctx context.Context, projectId, instanceId, region string) mongodbflex.ApiPartialUpdateInstanceRequest
-	GetInstance(ctx context.Context, projectId, instanceId, region string) mongodbflex.ApiGetInstanceRequest
-	ListFlavors(ctx context.Context, projectId, region string) mongodbflex.ApiListFlavorsRequest
-	ListStorages(ctx context.Context, projectId, flavorId, region string) mongodbflex.ApiListStoragesRequest
-}
-
-func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexClient) (mongodbflex.ApiPartialUpdateInstanceRequest, error) {
-	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.InstanceId, model.Region)
-
+func buildRequest(ctx context.Context, model *inputModel, apiClient mongodbflex.DefaultAPI) (mongodbflex.ApiPartialUpdateInstanceRequest, error) {
 	var flavorId *string
 	var err error
+
+	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.InstanceId, model.Region)
+
+	currentInstance, err := apiClient.GetInstance(ctx, model.ProjectId, model.InstanceId, model.Region).Execute()
+	if err != nil {
+		return req, fmt.Errorf("get MongoDB Flex instance: %w", err)
+	}
 
 	flavors, err := apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get MongoDB Flex flavors: %w", err)
 	}
 
+	// if cpu/ram flags are used instead of the flavor id flag
 	if model.FlavorId == nil && (model.RAM != nil || model.CPU != nil) {
 		ram := model.RAM
 		cpu := model.CPU
+
+		// if only one of the cpu/ram flags is set
 		if model.RAM == nil || model.CPU == nil {
-			currentInstance, err := apiClient.GetInstance(ctx, model.ProjectId, model.InstanceId, model.Region).Execute()
-			if err != nil {
-				return req, fmt.Errorf("get MongoDB Flex instance: %w", err)
+			var currentFlavor *mongodbflex.InstanceFlavor
+			for _, f := range flavors.Flavors {
+				if f.Id == currentInstance.Item.Flavor.Id {
+					currentFlavor = &f
+				}
 			}
+
+			if currentFlavor == nil {
+				return req, fmt.Errorf("flavor %s not found", currentInstance.Item.Flavor.GetId())
+			}
+
 			if model.RAM == nil {
-				ram = currentInstance.Item.Flavor.Memory
+				ram = currentFlavor.Memory
 			}
 			if model.CPU == nil {
-				cpu = currentInstance.Item.Flavor.Cpu
+				cpu = currentFlavor.Cpu
 			}
 		}
-		flavorId, err = mongodbflexUtils.LoadFlavorId(*cpu, *ram, &flavors.Flavors)
+
+		flavorId, err = mongodbflexUtils.LoadFlavorId(*cpu, *ram, &flavors.Flavors) //nolint:staticcheck // SA1019 - deprecated but still supported until 2027-03-07
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 			if !errors.As(err, &dsaInvalidPlanError) {
@@ -233,31 +254,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 			return req, err
 		}
 	} else if model.FlavorId != nil {
-		err := mongodbflexUtils.ValidateFlavorId(*model.FlavorId, flavors.Flavors)
-		if err != nil {
-			return req, err
-		}
 		flavorId = model.FlavorId
-	}
-
-	var storages *mongodbflex.ListStoragesResponse
-	if model.StorageClass != nil || model.StorageSize != nil {
-		validationFlavorId := flavorId
-		if validationFlavorId == nil {
-			currentInstance, err := apiClient.GetInstance(ctx, model.ProjectId, model.InstanceId, model.Region).Execute()
-			if err != nil {
-				return req, fmt.Errorf("get MongoDB Flex instance: %w", err)
-			}
-			validationFlavorId = currentInstance.Item.Flavor.Id
-		}
-		storages, err = apiClient.ListStorages(ctx, model.ProjectId, *validationFlavorId, model.Region).Execute()
-		if err != nil {
-			return req, fmt.Errorf("get MongoDB Flex storages: %w", err)
-		}
-		err = mongodbflexUtils.ValidateStorage(model.StorageClass, model.StorageSize, storages, *validationFlavorId)
-		if err != nil {
-			return req, err
-		}
 	}
 
 	var payloadAcl *mongodbflex.ACL
