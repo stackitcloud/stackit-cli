@@ -22,7 +22,6 @@ import (
 const (
 	tokenIDArg      = "TOKEN_ID"
 	instanceIDFlag  = "instance-id"
-	regionFlag      = "region"
 	nameFlag        = "name"
 	descriptionFlag = "description"
 	labelFlag       = "label"
@@ -32,7 +31,6 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	TokenID     string
 	InstanceID  string
-	Region      string
 	Name        *string
 	Description *string
 	Labels      *map[string]string
@@ -67,7 +65,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(nameFlag, "", "Token name")
 	cmd.Flags().String(descriptionFlag, "", "Token description")
 	cmd.Flags().StringToString(labelFlag, nil, `Labels as key-value pairs, e.g. "--label env=prod"`)
-	_ = flags.MarkFlagsRequired(cmd, instanceIDFlag, regionFlag)
+	_ = flags.MarkFlagsRequired(cmd, instanceIDFlag)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -83,7 +81,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	if len(labels) > 0 {
 		labelsPtr = &labels
 	}
-	model := &inputModel{GlobalFlagModel: globalFlags, TokenID: inputArgs[0], InstanceID: flags.FlagToStringValue(p, cmd, instanceIDFlag), Region: flags.FlagToStringValue(p, cmd, regionFlag), Name: flags.FlagToStringPointer(p, cmd, nameFlag), Description: flags.FlagToStringPointer(p, cmd, descriptionFlag), Labels: labelsPtr}
+	model := &inputModel{GlobalFlagModel: globalFlags, TokenID: inputArgs[0], InstanceID: flags.FlagToStringValue(p, cmd, instanceIDFlag), Name: flags.FlagToStringPointer(p, cmd, nameFlag), Description: flags.FlagToStringPointer(p, cmd, descriptionFlag), Labels: labelsPtr}
 	p.DebugInputModel(model)
 	return model, nil
 }
@@ -97,7 +95,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *modelexperi
 		}
 	}
 	payload := modelexperiments.PartialUpdateInstanceTokenPayload{Name: model.Name, Description: model.Description, Labels: &labels}
-	return apiClient.DefaultAPI.PartialUpdateInstanceToken(ctx, model.ProjectId, model.Region, model.TokenID, model.InstanceID).PartialUpdateInstanceTokenPayload(payload)
+	return apiClient.DefaultAPI.PartialUpdateInstanceToken(ctx, model.ProjectId, model.GlobalFlagModel.Region, model.TokenID, model.InstanceID).PartialUpdateInstanceTokenPayload(payload)
 }
 
 func outputResult(p *print.Printer, outputFormat string, resp *modelexperiments.PartialUpdateInstanceTokenResponse) error {

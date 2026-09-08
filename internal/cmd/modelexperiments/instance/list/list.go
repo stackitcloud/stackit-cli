@@ -58,12 +58,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 
-	configureFlags(cmd)
-
 	return cmd
-}
-
-func configureFlags(cmd *cobra.Command) {
 }
 
 func parseInput(
@@ -94,7 +89,7 @@ func buildListInstancesRequest(
 	return apiClient.DefaultAPI.ListInstances(
 		ctx,
 		model.ProjectId,
-		model.GlobalFlagModel.Region,
+		model.Region,
 	)
 }
 

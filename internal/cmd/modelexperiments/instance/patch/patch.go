@@ -159,7 +159,7 @@ func buildPatchInstanceRequest(
 	req := apiClient.DefaultAPI.PartialUpdateInstance(
 		ctx,
 		model.ProjectId,
-		model.GlobalFlagModel.Region,
+		model.Region,
 		model.InstanceId,
 	)
 

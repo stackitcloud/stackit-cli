@@ -22,14 +22,12 @@ import (
 const (
 	tokenIDArg     = "TOKEN_ID"
 	instanceIDFlag = "instance-id"
-	regionFlag     = "region"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	TokenID    string
 	InstanceID string
-	Region     string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -64,7 +62,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIDFlag, "ID of the instance")
-	_ = flags.MarkFlagsRequired(cmd, instanceIDFlag, regionFlag)
+	_ = flags.MarkFlagsRequired(cmd, instanceIDFlag)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -72,7 +70,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
 	}
-	model := &inputModel{GlobalFlagModel: globalFlags, TokenID: inputArgs[0], InstanceID: flags.FlagToStringValue(p, cmd, instanceIDFlag), Region: flags.FlagToStringValue(p, cmd, regionFlag)}
+	model := &inputModel{GlobalFlagModel: globalFlags, TokenID: inputArgs[0], InstanceID: flags.FlagToStringValue(p, cmd, instanceIDFlag)}
 	p.DebugInputModel(model)
 	return model, nil
 }

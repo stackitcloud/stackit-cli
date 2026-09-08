@@ -20,7 +20,6 @@ import (
 
 const (
 	instanceIDFlag  = "instance-id"
-	regionFlag      = "region"
 	nameFlag        = "name"
 	descriptionFlag = "description"
 	labelFlag       = "label"
@@ -30,7 +29,6 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	InstanceID  string
-	Region      string
 	Name        string
 	Description *string
 	Labels      *map[string]string
@@ -63,7 +61,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(descriptionFlag, "", "Token description")
 	cmd.Flags().StringToString(labelFlag, nil, `Labels as key-value pairs, e.g. "--label env=prod"`)
 	cmd.Flags().String(ttlDurationFlag, "", "Token time to live duration")
-	_ = flags.MarkFlagsRequired(cmd, instanceIDFlag, regionFlag, nameFlag)
+	_ = flags.MarkFlagsRequired(cmd, instanceIDFlag, nameFlag)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
@@ -79,7 +77,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	if len(labels) > 0 {
 		labelsPtr = &labels
 	}
-	model := &inputModel{GlobalFlagModel: globalFlags, InstanceID: flags.FlagToStringValue(p, cmd, instanceIDFlag), Region: flags.FlagToStringValue(p, cmd, regionFlag), Name: flags.FlagToStringValue(p, cmd, nameFlag), Description: flags.FlagToStringPointer(p, cmd, descriptionFlag), Labels: labelsPtr, TTLDuration: flags.FlagToStringPointer(p, cmd, ttlDurationFlag)}
+	model := &inputModel{GlobalFlagModel: globalFlags, InstanceID: flags.FlagToStringValue(p, cmd, instanceIDFlag), Name: flags.FlagToStringValue(p, cmd, nameFlag), Description: flags.FlagToStringPointer(p, cmd, descriptionFlag), Labels: labelsPtr, TTLDuration: flags.FlagToStringPointer(p, cmd, ttlDurationFlag)}
 	if model.Name == "" {
 		return nil, fmt.Errorf("%s flag is required", nameFlag)
 	}
@@ -89,7 +87,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *modelexperiments.APIClient) modelexperiments.ApiCreateInstanceTokenRequest {
 	payload := modelexperiments.CreateInstanceTokenPayload{Name: model.Name, Description: model.Description, Labels: model.Labels, TtlDuration: model.TTLDuration}
-	return apiClient.DefaultAPI.CreateInstanceToken(ctx, model.ProjectId, model.Region, model.InstanceID).CreateInstanceTokenPayload(payload)
+	return apiClient.DefaultAPI.CreateInstanceToken(ctx, model.ProjectId, model.GlobalFlagModel.Region, model.InstanceID).CreateInstanceTokenPayload(payload)
 }
 
 func outputResult(p *print.Printer, outputFormat string, resp *modelexperiments.CreateInstanceTokenResponse) error {

@@ -25,14 +25,14 @@ var testInstanceID = uuid.NewString()
 var testTokenID = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(map[string]string)) map[string]string {
-	values := map[string]string{projectIDFlag: testProjectID, instanceIDFlag: testInstanceID, regionFlag: "eu01"}
+	values := map[string]string{projectIDFlag: testProjectID, instanceIDFlag: testInstanceID, globalflags.RegionFlag: "eu01"}
 	for _, mod := range mods {
 		mod(values)
 	}
 	return values
 }
 func fixtureInputModel() *inputModel {
-	return &inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{ProjectId: testProjectID, Region: "eu01", Verbosity: globalflags.VerbosityDefault}, TokenID: testTokenID, InstanceID: testInstanceID, Region: "eu01"}
+	return &inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{ProjectId: testProjectID, Region: "eu01", Verbosity: globalflags.VerbosityDefault}, TokenID: testTokenID, InstanceID: testInstanceID}
 }
 func fixtureRequest() modelexperiments.ApiDeleteInstanceTokenRequest {
 	return testClient.DefaultAPI.DeleteInstanceToken(testContext, testProjectID, "eu01", testTokenID, testInstanceID)

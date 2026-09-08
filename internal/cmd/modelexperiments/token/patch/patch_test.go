@@ -27,14 +27,14 @@ var testInstanceID = uuid.NewString()
 var testTokenID = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(map[string]string)) map[string]string {
-	values := map[string]string{projectIDFlag: testProjectID, instanceIDFlag: testInstanceID, regionFlag: "eu01"}
+	values := map[string]string{projectIDFlag: testProjectID, instanceIDFlag: testInstanceID, globalflags.RegionFlag: "eu01"}
 	for _, mod := range mods {
 		mod(values)
 	}
 	return values
 }
 func fixtureInputModel(mods ...func(*inputModel)) *inputModel {
-	model := &inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{ProjectId: testProjectID, Region: "eu01", Verbosity: globalflags.VerbosityDefault}, TokenID: testTokenID, InstanceID: testInstanceID, Region: "eu01"}
+	model := &inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{ProjectId: testProjectID, Region: "eu01", Verbosity: globalflags.VerbosityDefault}, TokenID: testTokenID, InstanceID: testInstanceID}
 	for _, mod := range mods {
 		mod(model)
 	}

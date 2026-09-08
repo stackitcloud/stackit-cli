@@ -123,7 +123,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildCreateInstanceRequest(ctx context.Context, model *inputModel, apiClient *modelexperiments.APIClient) modelexperiments.ApiCreateInstanceRequest {
-	req := apiClient.DefaultAPI.CreateInstance(ctx, model.ProjectId, model.GlobalFlagModel.Region)
+	req := apiClient.DefaultAPI.CreateInstance(ctx, model.ProjectId, model.Region)
 
 	payload := modelexperiments.CreateInstancePayload{
 		Name: model.Name,
