@@ -1,10 +1,10 @@
 ## stackit valkey instance create
 
-Creates a Valkey instance
+Creates a Key Value Store (valkey) instance
 
 ### Synopsis
 
-Creates a Valkey instance.
+Creates a Key Value Store (valkey) instance.
 
 ```
 stackit valkey instance create [flags]
@@ -13,13 +13,13 @@ stackit valkey instance create [flags]
 ### Examples
 
 ```
-  Create a Valkey instance with name "my-instance" and specify plan by name and version
+  Create a Key Value Store (valkey) instance with name "my-instance" and specify plan by name and version
   $ stackit valkey instance create --name my-instance --plan-name stackit-keyvalue-1.2.10-replica --version 8
 
-  Create a Valkey instance with name "my-instance" and specify plan by ID
+  Create a Key Value Store (valkey) instance with name "my-instance" and specify plan by ID
   $ stackit valkey instance create --name my-instance --plan-id xxx
 
-  Create a Valkey instance with name "my-instance" and specify IP range which is allowed to access it
+  Create a Key Value Store (valkey) instance with name "my-instance" and specify IP range which is allowed to access it
   $ stackit valkey instance create --name my-instance --plan-id xxx --acl 1.2.3.0/24
 ```
 
@@ -39,7 +39,7 @@ stackit valkey instance create [flags]
       --plan-name string                Plan name
       --repl-backlog-size string        Replication backlog size (e.g. "1mb")
       --syslog strings                  Syslog
-      --version string                  Instance Valkey version
+      --version string                  Instance Key Value Store (valkey) version
 ```
 
 ### Options inherited from parent commands
@@ -55,5 +55,5 @@ stackit valkey instance create [flags]
 
 ### SEE ALSO
 
-* [stackit valkey instance](./stackit_valkey_instance.md)	 - Provides functionality for Valkey instances
+* [stackit valkey instance](./stackit_valkey_instance.md)	 - Provides functionality for Key Value Store (valkey) instances
 

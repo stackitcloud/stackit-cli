@@ -33,18 +33,18 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Lists all credentials' IDs for a Valkey instance",
-		Long:  "Lists all credentials' IDs for a Valkey instance.",
+		Short: "Lists all credentials' IDs for a Key Value Store (valkey) instance",
+		Long:  "Lists all credentials' IDs for a Key Value Store (valkey) instance.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all credentials' IDs for a Valkey instance with ID "xxx"`,
+				`List all credentials' IDs for a Key Value Store (valkey) instance with ID "xxx"`,
 				"$ stackit valkey credentials list --instance-id xxx"),
 			examples.NewExample(
-				`List all credentials' IDs for a Valkey instance with ID "xxx" in JSON format`,
+				`List all credentials' IDs for a Key Value Store (valkey) instance with ID "xxx" in JSON format`,
 				"$ stackit valkey credentials list --instance-id xxx --output-format json"),
 			examples.NewExample(
-				`List up to 10 credentials' IDs for a Valkey instance with ID "xxx"`,
+				`List up to 10 credentials' IDs for a Key Value Store (valkey) instance with ID "xxx"`,
 				"$ stackit valkey credentials list --instance-id xxx --limit 10"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -64,7 +64,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("list Valkey credentials: %w", err)
+				return fmt.Errorf("list Key Value Store (valkey) credentials: %w", err)
 			}
 			credentials := resp.CredentialsList
 

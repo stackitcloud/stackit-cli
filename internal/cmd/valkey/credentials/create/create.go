@@ -35,15 +35,15 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Creates credentials for a Valkey instance",
-		Long:  "Creates credentials (username and password) for a Valkey instance.",
+		Short: "Creates credentials for a Key Value Store (valkey) instance",
+		Long:  "Creates credentials (username and password) for a Key Value Store (valkey) instance.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create credentials for a Valkey instance with ID "xxx"`,
+				`Create credentials for a Key Value Store (valkey) instance with ID "xxx"`,
 				"$ stackit valkey credentials create --instance-id xxx"),
 			examples.NewExample(
-				`Create credentials for a Valkey instance and show the password in the output`,
+				`Create credentials for a Key Value Store (valkey) instance and show the password in the output`,
 				"$ stackit valkey credentials create --instance-id xxx --show-password"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -75,7 +75,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("create Valkey credentials: %w", err)
+				return fmt.Errorf("create Key Value Store (valkey) credentials: %w", err)
 			}
 
 			credentialsId := resp.Id
@@ -87,7 +87,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 					return err
 				})
 				if err != nil {
-					return fmt.Errorf("wait for Valkey credentials creation: %w", err)
+					return fmt.Errorf("wait for Key Value Store (valkey) credentials creation: %w", err)
 				}
 			}
 

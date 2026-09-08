@@ -1,10 +1,10 @@
 ## stackit valkey credentials create
 
-Creates credentials for a Valkey instance
+Creates credentials for a Key Value Store (valkey) instance
 
 ### Synopsis
 
-Creates credentials (username and password) for a Valkey instance.
+Creates credentials (username and password) for a Key Value Store (valkey) instance.
 
 ```
 stackit valkey credentials create [flags]
@@ -13,10 +13,10 @@ stackit valkey credentials create [flags]
 ### Examples
 
 ```
-  Create credentials for a Valkey instance with ID "xxx"
+  Create credentials for a Key Value Store (valkey) instance with ID "xxx"
   $ stackit valkey credentials create --instance-id xxx
 
-  Create credentials for a Valkey instance and show the password in the output
+  Create credentials for a Key Value Store (valkey) instance and show the password in the output
   $ stackit valkey credentials create --instance-id xxx --show-password
 ```
 
@@ -41,5 +41,5 @@ stackit valkey credentials create [flags]
 
 ### SEE ALSO
 
-* [stackit valkey credentials](./stackit_valkey_credentials.md)	 - Provides functionality for Valkey credentials
+* [stackit valkey credentials](./stackit_valkey_credentials.md)	 - Provides functionality for Key Value Store (valkey) credentials
 

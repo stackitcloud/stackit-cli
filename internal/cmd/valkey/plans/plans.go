@@ -31,19 +31,19 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "plans",
-		Short: "Lists all Valkey service plans",
-		Long:  "Lists all Valkey service plans.",
+		Short: "Lists all Key Value Store (valkey) service plans",
+		Long:  "Lists all Key Value Store (valkey) service plans.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				"Lists all Valkey service plans",
+				"Lists all Key Value Store (valkey) service plans",
 				"$ stackit valkey plans",
 			),
 			examples.NewExample(
-				`List all Valkey service plans in JSON format`,
+				`List all Key Value Store (valkey) service plans in JSON format`,
 				"$ stackit valkey plans --output-format json"),
 			examples.NewExample(
-				`List up to 10 Valkey service plans`,
+				`List up to 10 Key Value Store (valkey) service plans`,
 				"$ stackit valkey plans --limit 10"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -61,7 +61,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiclient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("get Valkey service plans: %w", err)
+				return fmt.Errorf("get Key Value Store (valkey) service plans: %w", err)
 			}
 			plans := resp.Offerings
 
