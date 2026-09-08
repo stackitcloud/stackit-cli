@@ -45,8 +45,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    "eu01",
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		Name:   "example",
-		Region: "eu01",
+		Name: "example",
 	}
 	for _, mod := range mods {
 		mod(model)

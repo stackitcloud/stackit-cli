@@ -37,8 +37,6 @@ type inputModel struct {
 	Description *string
 	Labels      *map[string]*string
 	Retention   *string
-
-	Region string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -139,8 +137,6 @@ func parseInput(
 		Description: flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		Labels:      labelsPtr,
 		Retention:   flags.FlagToStringPointer(p, cmd, retentionFlag),
-
-		Region: flags.FlagToStringValue(p, cmd, globalflags.RegionFlag),
 	}
 
 	if model.Name == nil &&
@@ -163,7 +159,7 @@ func buildPatchInstanceRequest(
 	req := apiClient.DefaultAPI.PartialUpdateInstance(
 		ctx,
 		model.ProjectId,
-		model.Region,
+		model.GlobalFlagModel.Region,
 		model.InstanceId,
 	)
 

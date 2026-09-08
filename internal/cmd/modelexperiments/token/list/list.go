@@ -13,6 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/modelexperiments/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	modelexperiments "github.com/stackitcloud/stackit-sdk-go/services/modelexperiments/v1api"
@@ -72,5 +73,17 @@ func outputResult(p *print.Printer, outputFormat string, resp *modelexperiments.
 	if resp == nil {
 		return fmt.Errorf("response is nil")
 	}
-	return p.OutputResult(outputFormat, resp.Tokens, func() error { return nil })
+	return p.OutputResult(outputFormat, resp.Tokens, func() error {
+		if len(resp.Tokens) == 0 {
+			p.Outputf("No instance tokens found\n")
+			return nil
+		}
+
+		table := tables.NewTable()
+		table.SetHeader("ID", "NAME", "DESCRIPTION")
+		for _, token := range resp.Tokens {
+			table.AddRow(token.Id, token.Name, token.Description)
+		}
+		return table.Display(p)
+	})
 }

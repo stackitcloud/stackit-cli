@@ -82,5 +82,8 @@ func outputResult(p *print.Printer, outputFormat string, resp *modelexperiments.
 	if resp == nil || resp.Token.Name == "" {
 		return fmt.Errorf("response token is nil")
 	}
-	return p.OutputResult(outputFormat, resp.Token, func() error { return nil })
+	return p.OutputResult(outputFormat, resp.Token, func() error {
+		p.Outputf("Instance token %q (ID: %s)\n", resp.Token.Name, resp.Token.Id)
+		return nil
+	})
 }

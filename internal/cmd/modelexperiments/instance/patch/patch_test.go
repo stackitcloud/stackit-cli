@@ -54,7 +54,6 @@ func fixtureInputModel(
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId: testInstanceId,
-		Region:     "eu01",
 	}
 
 	for _, mod := range mods {

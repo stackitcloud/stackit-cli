@@ -9,7 +9,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/modelexperiments/client"
@@ -26,7 +25,6 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	InstanceId string
-	Region     string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -80,7 +78,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	_ = flags.MarkFlagsRequired(cmd, globalflags.RegionFlag)
 }
 
 func parseInput(
@@ -97,7 +94,6 @@ func parseInput(
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceId:      inputArgs[0],
-		Region:          flags.FlagToStringValue(p, cmd, globalflags.RegionFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -113,7 +109,7 @@ func buildDeleteInstanceRequest(
 	return apiClient.DefaultAPI.DeleteInstance(
 		ctx,
 		model.ProjectId,
-		model.Region,
+		model.GlobalFlagModel.Region,
 		model.InstanceId,
 	)
 }

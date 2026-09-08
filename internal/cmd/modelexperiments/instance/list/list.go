@@ -9,10 +9,10 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/modelexperiments/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	modelexperiments "github.com/stackitcloud/stackit-sdk-go/services/modelexperiments/v1api"
@@ -20,7 +20,6 @@ import (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	Region string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -65,7 +64,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	_ = flags.MarkFlagsRequired(cmd, globalflags.RegionFlag)
 }
 
 func parseInput(
@@ -81,7 +79,6 @@ func parseInput(
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
-		Region:          flags.FlagToStringValue(p, cmd, globalflags.RegionFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -97,7 +94,7 @@ func buildListInstancesRequest(
 	return apiClient.DefaultAPI.ListInstances(
 		ctx,
 		model.ProjectId,
-		model.Region,
+		model.GlobalFlagModel.Region,
 	)
 }
 
@@ -111,6 +108,23 @@ func outputResult(
 	}
 
 	return p.OutputResult(outputFormat, resp.Instances, func() error {
-		return nil
+		if len(resp.Instances) == 0 {
+			p.Outputf("No instances found\n")
+			return nil
+		}
+
+		table := tables.NewTable()
+		table.SetHeader("ID", "NAME", "REGION", "STATUS")
+
+		for _, instance := range resp.Instances {
+			table.AddRow(
+				instance.Id,
+				instance.Name,
+				instance.Region,
+				instance.State,
+			)
+		}
+
+		return table.Display(p)
 	})
 }

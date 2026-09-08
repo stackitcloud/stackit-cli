@@ -33,7 +33,6 @@ type inputModel struct {
 	Description *string
 	Labels      *map[string]string
 	Retention   *string
-	Region      string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -117,7 +116,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		Labels:          labelsPtr,
 		Retention:       flags.FlagToStringPointer(p, cmd, retentionFlag),
-		Region:          flags.FlagToStringValue(p, cmd, globalflags.RegionFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -125,7 +123,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildCreateInstanceRequest(ctx context.Context, model *inputModel, apiClient *modelexperiments.APIClient) modelexperiments.ApiCreateInstanceRequest {
-	req := apiClient.DefaultAPI.CreateInstance(ctx, model.ProjectId, model.Region)
+	req := apiClient.DefaultAPI.CreateInstance(ctx, model.ProjectId, model.GlobalFlagModel.Region)
 
 	payload := modelexperiments.CreateInstancePayload{
 		Name: model.Name,
