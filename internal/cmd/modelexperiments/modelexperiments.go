@@ -2,6 +2,7 @@ package modelexperiments
 
 import (
 	"github.com/spf13/cobra"
+
 	"github.com/stackitcloud/stackit-cli/internal/cmd/modelexperiments/instance"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/modelexperiments/token"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"

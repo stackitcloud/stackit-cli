@@ -2,6 +2,7 @@ package token
 
 import (
 	"github.com/spf13/cobra"
+
 	"github.com/stackitcloud/stackit-cli/internal/cmd/modelexperiments/token/create"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/modelexperiments/token/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/modelexperiments/token/get"
