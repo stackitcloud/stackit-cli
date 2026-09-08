@@ -110,7 +110,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(descriptionFlag, "D", "", "Description")
 	cmd.Flags().StringP(etherTypeFlag, "e", "", "Specifies the bound of the rule (for security rules type)")
 	cmd.Flags().StringP(portRangeFlag, "r", "", "Port range (the Port range to which the rule applies, for security rules type)")
-	cmd.Flags().StringP(protocolFlag, "o", "", "The network protocol (e.g. TCP, UDP, ICMP, for security rules type)")
+	cmd.Flags().String(protocolFlag, "", "The network protocol (e.g. TCP, UDP, ICMP, for security rules type)")
 
 	err := flags.MarkFlagsRequired(cmd, sourceIpFlag)
 	cobra.CheckErr(err)
