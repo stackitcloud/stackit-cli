@@ -32,12 +32,12 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", instanceIdArg),
-		Short: "Deletes a Valkey instance",
-		Long:  "Deletes a Valkey instance.",
+		Short: "Deletes a Key Value Store (valkey) instance",
+		Long:  "Deletes a Key Value Store (valkey) instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete a Valkey instance with ID "xxx"`,
+				`Delete a Key Value Store (valkey) instance with ID "xxx"`,
 				"$ stackit valkey instance delete xxx"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -69,7 +69,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			err = req.Execute()
 			if err != nil {
-				return fmt.Errorf("delete Valkey instance: %w", err)
+				return fmt.Errorf("delete Key Value Store (valkey) instance: %w", err)
 			}
 
 			// Wait for async operation, if async mode not enabled
@@ -79,7 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 					return err
 				})
 				if err != nil {
-					return fmt.Errorf("wait for Valkey instance deletion: %w", err)
+					return fmt.Errorf("wait for Key Value Store (valkey) instance deletion: %w", err)
 				}
 			}
 

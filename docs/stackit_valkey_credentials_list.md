@@ -1,10 +1,10 @@
 ## stackit valkey credentials list
 
-Lists all credentials' IDs for a Valkey instance
+Lists all credentials' IDs for a Key Value Store (valkey) instance
 
 ### Synopsis
 
-Lists all credentials' IDs for a Valkey instance.
+Lists all credentials' IDs for a Key Value Store (valkey) instance.
 
 ```
 stackit valkey credentials list [flags]
@@ -13,13 +13,13 @@ stackit valkey credentials list [flags]
 ### Examples
 
 ```
-  List all credentials' IDs for a Valkey instance with ID "xxx"
+  List all credentials' IDs for a Key Value Store (valkey) instance with ID "xxx"
   $ stackit valkey credentials list --instance-id xxx
 
-  List all credentials' IDs for a Valkey instance with ID "xxx" in JSON format
+  List all credentials' IDs for a Key Value Store (valkey) instance with ID "xxx" in JSON format
   $ stackit valkey credentials list --instance-id xxx --output-format json
 
-  List up to 10 credentials' IDs for a Valkey instance with ID "xxx"
+  List up to 10 credentials' IDs for a Key Value Store (valkey) instance with ID "xxx"
   $ stackit valkey credentials list --instance-id xxx --limit 10
 ```
 
@@ -44,5 +44,5 @@ stackit valkey credentials list [flags]
 
 ### SEE ALSO
 
-* [stackit valkey credentials](./stackit_valkey_credentials.md)	 - Provides functionality for Valkey credentials
+* [stackit valkey credentials](./stackit_valkey_credentials.md)	 - Provides functionality for Key Value Store (valkey) credentials
 

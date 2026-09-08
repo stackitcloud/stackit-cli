@@ -1,10 +1,10 @@
 ## stackit valkey plans
 
-Lists all Valkey service plans
+Lists all Key Value Store (valkey) service plans
 
 ### Synopsis
 
-Lists all Valkey service plans.
+Lists all Key Value Store (valkey) service plans.
 
 ```
 stackit valkey plans [flags]
@@ -13,13 +13,13 @@ stackit valkey plans [flags]
 ### Examples
 
 ```
-  Lists all Valkey service plans
+  Lists all Key Value Store (valkey) service plans
   $ stackit valkey plans
 
-  List all Valkey service plans in JSON format
+  List all Key Value Store (valkey) service plans in JSON format
   $ stackit valkey plans --output-format json
 
-  List up to 10 Valkey service plans
+  List up to 10 Key Value Store (valkey) service plans
   $ stackit valkey plans --limit 10
 ```
 
@@ -43,5 +43,5 @@ stackit valkey plans [flags]
 
 ### SEE ALSO
 
-* [stackit valkey](./stackit_valkey.md)	 - Provides functionality for Valkey
+* [stackit valkey](./stackit_valkey.md)	 - Provides functionality for Key Value Store (valkey)
 

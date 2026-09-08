@@ -65,7 +65,7 @@ func LoadPlanId(planName, version string, offerings *valkey.ListOfferingsRespons
 func GetInstanceName(ctx context.Context, apiClient valkey.DefaultAPI, projectId, instanceId, region string) (string, error) {
 	resp, err := apiClient.GetInstance(ctx, projectId, region, instanceId).Execute()
 	if err != nil {
-		return "", fmt.Errorf("get Valkey instance: %w", err)
+		return "", fmt.Errorf("get Key Value Store (valkey) instance: %w", err)
 	}
 	return resp.Name, nil
 }
@@ -73,7 +73,7 @@ func GetInstanceName(ctx context.Context, apiClient valkey.DefaultAPI, projectId
 func GetCredentialsUsername(ctx context.Context, apiClient valkey.DefaultAPI, projectId, instanceId, credentialsId, region string) (string, error) {
 	resp, err := apiClient.GetCredentials(ctx, projectId, region, instanceId, credentialsId).Execute()
 	if err != nil {
-		return "", fmt.Errorf("get Valkey credentials: %w", err)
+		return "", fmt.Errorf("get Key Value Store (valkey) credentials: %w", err)
 	}
 	if resp.Raw == nil {
 		return "", nil

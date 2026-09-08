@@ -1,10 +1,10 @@
 ## stackit valkey instance list
 
-Lists all Valkey instances
+Lists all Key Value Store (valkey) instances
 
 ### Synopsis
 
-Lists all Valkey instances.
+Lists all Key Value Store (valkey) instances.
 
 ```
 stackit valkey instance list [flags]
@@ -13,13 +13,13 @@ stackit valkey instance list [flags]
 ### Examples
 
 ```
-  List all Valkey instances
+  List all Key Value Store (valkey) instances
   $ stackit valkey instance list
 
-  List all Valkey instances in JSON format
+  List all Key Value Store (valkey) instances in JSON format
   $ stackit valkey instance list --output-format json
 
-  List up to 10 Valkey instances
+  List up to 10 Key Value Store (valkey) instances
   $ stackit valkey instance list --limit 10
 ```
 
@@ -43,5 +43,5 @@ stackit valkey instance list [flags]
 
 ### SEE ALSO
 
-* [stackit valkey instance](./stackit_valkey_instance.md)	 - Provides functionality for Valkey instances
+* [stackit valkey instance](./stackit_valkey_instance.md)	 - Provides functionality for Key Value Store (valkey) instances
 
