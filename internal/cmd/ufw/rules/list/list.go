@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	ufw "github.com/stackitcloud/stackit-sdk-go/services/ufw/v1api"
+
 	serviceEnablementClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/service-enablement/client"
 	serviceEnablementUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/service-enablement/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-	ufw "github.com/stackitcloud/stackit-sdk-go/services/ufw/v1api"
 
 	"github.com/spf13/cobra"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"

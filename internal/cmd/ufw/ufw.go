@@ -1,11 +1,12 @@
 package ufw
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ufw/rules"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+
+	"github.com/spf13/cobra"
 )
 
 func NewCmd(params *types.CmdParams) *cobra.Command {

@@ -7,10 +7,11 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
+	ufw "github.com/stackitcloud/stackit-sdk-go/services/ufw/v1api"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	ufw "github.com/stackitcloud/stackit-sdk-go/services/ufw/v1api"
 )
 
 type testCtxKey struct{}

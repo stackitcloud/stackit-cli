@@ -7,12 +7,12 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/spf13/cobra"
+
+	ufw "github.com/stackitcloud/stackit-sdk-go/services/ufw/v1api"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	ufw "github.com/stackitcloud/stackit-sdk-go/services/ufw/v1api"
 )
 
 type testCtxKey struct{}
@@ -172,10 +172,7 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			parseInputWrapper := func(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
-				return parseInput(p, cmd)
-			}
-			testutils.TestParseInput(t, NewCmd, parseInputWrapper, tt.expectedModel, nil, tt.flagValues, tt.isValid)
+			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, nil, tt.flagValues, tt.isValid)
 		})
 	}
 }
