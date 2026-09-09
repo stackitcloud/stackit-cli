@@ -25,17 +25,10 @@ import (
 )
 
 const (
-	productFlag         = "product"
-	typeFlag            = "type"
-	sourceIpFlag        = "sourceIp"
-	instanceIdFlag      = "instanceId"
-	directionFlag       = "direction"
-	descriptionFlag     = "description"
-	etherTypeFlag       = "etherType"
-	portRangeFlag       = "portRange"
-	protocolFlag        = "protocol"
-	offsetFlag          = "offset"
-	securityGroupIdFlag = "securityGroupId"
+	productFlag    = "product"
+	typeFlag       = "type"
+	sourceIpFlag   = "sourceIp"
+	instanceIdFlag = "instanceId"
 )
 
 type inputModel struct {
@@ -121,17 +114,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().String(productFlag, "", "The source service (e.g., Load Balancer, Redis) where you want to attach a rule")
+	cmd.Flags().String(productFlag, "", "The source service (e.g., Edge Cloud, Redis) where you want to attach a rule")
 	cmd.Flags().StringP(typeFlag, "t", "", "Type (ACL/SecurityRule/SecurityGroup) You can check /provider-options route for them. Unfortunately, this field could be only ACL for the CLI version")
 	cmd.Flags().StringP(sourceIpFlag, "s", "", "The IP (CIDR) to which the rule applies (e.g. 192.168.0.1/32)")
 	cmd.Flags().StringP(instanceIdFlag, "i", "", "Instance ID that will have attached your rule")
-	cmd.Flags().StringP(directionFlag, "d", "", "Direction (the direction of the traffic, typically ingress or egress, for security rules type)")
-	cmd.Flags().StringP(descriptionFlag, "D", "", "Description")
-	cmd.Flags().StringP(etherTypeFlag, "e", "", "Specifies the bound of the rule (for security rules type)")
-	cmd.Flags().StringP(portRangeFlag, "r", "", "Port range (the Port range to which the rule applies, for security rules type)")
-	cmd.Flags().String(protocolFlag, "", "The network protocol (e.g. TCP, UDP, ICMP, for security rules type)")
-	cmd.Flags().Int32P(offsetFlag, "f", -1, "Offset - Position in the ACL list of an instance, will be ignored at creation")
-	cmd.Flags().StringP(securityGroupIdFlag, "g", "", "Security group ID - The ID of the Security Group")
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)
@@ -159,17 +145,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 
-		Product:         flags.FlagToStringPointer(p, cmd, productFlag),
-		Type:            flags.FlagToStringPointer(p, cmd, typeFlag),
-		SourceIp:        flags.FlagToStringPointer(p, cmd, sourceIpFlag),
-		InstanceId:      flags.FlagToStringPointer(p, cmd, instanceIdFlag),
-		Direction:       flags.FlagToStringPointer(p, cmd, directionFlag),
-		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
-		EtherType:       flags.FlagToStringPointer(p, cmd, etherTypeFlag),
-		PortRange:       flags.FlagToStringPointer(p, cmd, portRangeFlag),
-		Protocol:        flags.FlagToStringPointer(p, cmd, protocolFlag),
-		Offset:          flags.FlagToInt32Pointer(p, cmd, offsetFlag),
-		SecurityGroupId: flags.FlagToStringPointer(p, cmd, securityGroupIdFlag),
+		Product:    flags.FlagToStringPointer(p, cmd, productFlag),
+		Type:       flags.FlagToStringPointer(p, cmd, typeFlag),
+		SourceIp:   flags.FlagToStringPointer(p, cmd, sourceIpFlag),
+		InstanceId: flags.FlagToStringPointer(p, cmd, instanceIdFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -179,28 +158,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *ufw.APIClient) (ufw.ApiCreateRuleRequest, error) {
 	req := apiClient.DefaultAPI.CreateRule(ctx, model.ProjectId, model.Region)
 
-	//providerOptions, err := apiClient.DefaultAPI.ListProviderOptions(ctx, model.Region).Execute()
-	//
-	//if err != nil {
-	//	return req, fmt.Errorf("get provider options: %w", err)
-	//}
-	//
-	//if *model.Type != types.Types {
-	//	return req, fmt.Errorf("invalid rule type: %s", *model.Type)
-	//}
+	if *model.Type != "ACL" {
+		return req, fmt.Errorf("invalid rule type: %s", *model.Type)
+	}
 
 	req = req.CreateRulePayload(ufw.CreateRulePayload{
-		Product:         *model.Product,
-		Type:            *model.Type,
-		SourceIP:        *model.SourceIp,
-		InstanceId:      *model.InstanceId,
-		Direction:       model.Direction,
-		Description:     model.Description,
-		EtherType:       model.EtherType,
-		PortRange:       model.PortRange,
-		Protocol:        model.Protocol,
-		Offset:          model.Offset,
-		SecurityGroupId: model.SecurityGroupId,
+		Product:    *model.Product,
+		Type:       *model.Type,
+		SourceIP:   *model.SourceIp,
+		InstanceId: *model.InstanceId,
 	})
 
 	return req, nil
