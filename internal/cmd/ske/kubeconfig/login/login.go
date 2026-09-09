@@ -61,12 +61,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			"First you need to obtain a kubeconfig for use with the login command (first or second example).",
 			"Secondly you use the kubeconfig with your chosen Kubernetes client (third example), the client will automatically retrieve the credentials via the STACKIT CLI.\n\n"+
 				"Project ID and region are resolved with the following precedence:\n\n"+
-				"| Explicit flag | Global config | Exec cluster config | Result |\n"+
-				"| --- | --- | --- | --- |\n"+
-				"| Not set | Set | Not set | Global config |\n"+
-				"| Set | Set | Not set | Explicit flag |\n"+
-				"| Not set | Set | Set | Exec cluster config |\n"+
-				"| Set | Set | Set | Explicit flag |",
+				"| Explicit flag | Global config | Exec cluster config | Result              |\n"+
+				"| ------------- | ------------- | ------------------- | ------------------- |\n"+
+				"| Not set       | Set           | Not set             | Global config       |\n"+
+				"| Set           | Set           | Not set             | Explicit flag       |\n"+
+				"| Not set       | Set           | Set                 | Exec cluster config |\n"+
+				"| Set           | Set           | Set                 | Explicit flag       |",
 		),
 		Args: args.NoArgs,
 		Example: examples.Build(
