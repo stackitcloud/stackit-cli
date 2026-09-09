@@ -10,12 +10,12 @@ Secondly you use the kubeconfig with your chosen Kubernetes client (third exampl
 
 Project ID and region are resolved with the following precedence:
 
-| Explicit flag | Global config | Exec cluster config | Result |
-| --- | --- | --- | --- |
-| Not set | Set | Not set | Global config |
-| Set | Set | Not set | Explicit flag |
-| Not set | Set | Set | Exec cluster config |
-| Set | Set | Set | Explicit flag |
+| Explicit flag | Global config | Exec cluster config | Result              |
+| ------------- | ------------- | ------------------- | ------------------- |
+| Not set       | Set           | Not set             | Global config       |
+| Set           | Set           | Not set             | Explicit flag       |
+| Not set       | Set           | Set                 | Exec cluster config |
+| Set           | Set           | Set                 | Explicit flag       |
 
 ```
 stackit ske kubeconfig login [flags]
