@@ -14,10 +14,10 @@ stackit ufw rules describe INSTANCE_ID [flags]
 
 ```
   Get details of a UFW rule instance with ID "xxx"
-  $ stackit ufw rule instance describe xxx
+  $ stackit ufw rules describe xxx
 
   Get details of a UFW rule instance with ID "xxx" in JSON format
-  $ stackit ufw rule instance describe xxx --output-format json
+  $ stackit ufw rules describe xxx --output-format json
 ```
 
 ### Options

@@ -13,25 +13,21 @@ stackit ufw rules create [flags]
 ### Examples
 
 ```
-  Create a UFW rule instance of type ACL with sourceIp "1.1.1.1/32" of product "redis" for instance with id=ID
-  $ stackit ufw instance create --product redis --sourceIp 1.1.1.1/32 --type ACL --instanceId ID
+  Create a UFW rule instance of type ACL with sourceIp "1.1.1.1/32" of product "Redis" for instance with id=ID
+  $ stackit ufw rules create --product redis --sourceIp 1.1.1.1/32 --type ACL --instanceId ID
+
+  Create a UFW rule instance of type ACL with sourceIp "2.2.2.2/32" of product "Edge Cloud" for instance with id=ID
+  $ stackit ufw rules create --product edge-cloud --sourceIp 2.2.2.2/32 --type ACL --instanceId ID
 ```
 
 ### Options
 
 ```
-  -D, --description string       Description
-  -d, --direction string         Direction (the direction of the traffic, typically ingress or egress, for security rules type)
-  -e, --etherType string         Specifies the bound of the rule (for security rules type)
-  -h, --help                     Help for "stackit ufw rules create"
-  -i, --instanceId string        Instance ID that will have attached your rule
-  -f, --offset int32             Offset - Position in the ACL list of an instance, will be ignored at creation (default -1)
-  -r, --portRange string         Port range (the Port range to which the rule applies, for security rules type)
-      --product string           The source service (e.g., Load Balancer, Redis) where you want to attach a rule
-      --protocol string          The network protocol (e.g. TCP, UDP, ICMP, for security rules type)
-  -g, --securityGroupId string   Security group ID - The ID of the Security Group
-  -s, --sourceIp string          The IP (CIDR) to which the rule applies (e.g. 192.168.0.1/32)
-  -t, --type string              Type (ACL/SecurityRule/SecurityGroup/PublicIP) You can check /provider-options route for them
+  -h, --help                Help for "stackit ufw rules create"
+  -i, --instanceId string   Instance ID that will have attached your rule
+      --product string      The source service (e.g., Edge Cloud, Redis) where you want to attach a rule
+  -s, --sourceIp string     The IP (CIDR) to which the rule applies (e.g. 192.168.0.1/32)
+  -t, --type string         Type (ACL/SecurityRule/SecurityGroup) You can check /provider-options route for them. Unfortunately, this field could be only ACL for the CLI version
 ```
 
 ### Options inherited from parent commands

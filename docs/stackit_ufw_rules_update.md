@@ -13,20 +13,15 @@ stackit ufw rules update INSTANCE_ID [flags]
 ### Examples
 
 ```
-  Update a UFW rule instance with "1.1.1.1/32" as sourceIp for instance with id=ID
-  $ stackit ufw instance update ID --sourceIp 1.1.1.1/32
+  Update a UFW rule instance with "1.1.1.1/32" as sourceIp for instance with ID "xxx"
+  $ stackit ufw rules update xxx --sourceIp 1.1.1.1/32
 ```
 
 ### Options
 
 ```
-  -D, --description string   Description
-  -d, --direction string     Direction (the direction of the traffic, typically ingress or egress, for security rules type)
-  -e, --etherType string     Specifies the bound of the rule (for security rules type)
-  -h, --help                 Help for "stackit ufw rules update"
-  -r, --portRange string     Port range (the Port range to which the rule applies, for security rules type)
-      --protocol string      The network protocol (e.g. TCP, UDP, ICMP, for security rules type)
-  -s, --sourceIp string      The IP (CIDR) to which the rule applies (e.g. 192.168.0.1/32)
+  -h, --help              Help for "stackit ufw rules update"
+  -s, --sourceIp string   The IP (CIDR) to which the rule applies (e.g. 192.168.0.1/32)
 ```
 
 ### Options inherited from parent commands

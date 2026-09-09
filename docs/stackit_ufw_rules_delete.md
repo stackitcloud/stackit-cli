@@ -4,7 +4,7 @@ Deletes a UFW rule instance
 
 ### Synopsis
 
-Deletes a UFW rule instance.
+Deletes a STACKIT Unified Firewall (UFW) rule instance.
 
 ```
 stackit ufw rules delete INSTANCE_ID [flags]
@@ -14,7 +14,7 @@ stackit ufw rules delete INSTANCE_ID [flags]
 
 ```
   Delete a UFW rule instance with ID "xxx"
-  $ stackit ufw instance delete xxx
+  $ stackit ufw rules delete xxx
 ```
 
 ### Options
