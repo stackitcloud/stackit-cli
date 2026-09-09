@@ -13,13 +13,13 @@ stackit valkey instance update INSTANCE_ID [flags]
 ### Examples
 
 ```
-  Update the plan of a Key Value Store (valkey) instance with ID "xxx" by plan ID
+  Update the plan of a Valkey instance with ID "xxx" by plan ID
   $ stackit valkey instance update xxx --plan-id yyy
 
-  Update the plan of a Key Value Store (valkey) instance with ID "xxx" by name and version
+  Update the plan of a Valkey instance with ID "xxx" by name and version
   $ stackit valkey instance update xxx --plan-name stackit-keyvalue-1.2.10-replica --version 8
 
-  Update the range of IPs allowed to access a Key Value Store (valkey) instance with ID "xxx"
+  Update the range of IPs allowed to access a Valkey instance with ID "xxx"
   $ stackit valkey instance update xxx --acl 1.2.3.0/24
 ```
 
@@ -38,7 +38,7 @@ stackit valkey instance update INSTANCE_ID [flags]
       --plan-name string                Plan name
       --repl-backlog-size string        Replication backlog size (e.g. "1mb")
       --syslog strings                  Syslog
-      --version string                  Instance Key Value Store (valkey) version
+      --version string                  Instance Valkey version
 ```
 
 ### Options inherited from parent commands

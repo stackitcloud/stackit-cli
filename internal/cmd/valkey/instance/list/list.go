@@ -37,13 +37,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all Key Value Store (valkey) instances`,
+				`List all Valkey instances`,
 				"$ stackit valkey instance list"),
 			examples.NewExample(
-				`List all Key Value Store (valkey) instances in JSON format`,
+				`List all Valkey instances in JSON format`,
 				"$ stackit valkey instance list --output-format json"),
 			examples.NewExample(
-				`List up to 10 Key Value Store (valkey) instances`,
+				`List up to 10 Valkey instances`,
 				"$ stackit valkey instance list --limit 10"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -63,7 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("get Key Value Store (valkey) instances: %w", err)
+				return fmt.Errorf("get Valkey instances: %w", err)
 			}
 			instances := resp.Instances
 

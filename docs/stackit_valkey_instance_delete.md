@@ -13,7 +13,7 @@ stackit valkey instance delete INSTANCE_ID [flags]
 ### Examples
 
 ```
-  Delete a Key Value Store (valkey) instance with ID "xxx"
+  Delete a Valkey instance with ID "xxx"
   $ stackit valkey instance delete xxx
 ```
 
