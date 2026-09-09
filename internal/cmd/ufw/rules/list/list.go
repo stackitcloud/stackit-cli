@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	ufw "github.com/stackitcloud/stackit-sdk-go/services/ufw/v1api"
 
 	serviceEnablementClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/service-enablement/client"
@@ -155,8 +156,8 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resources
 			"DIRECTION", "PORT RANGE", "ETHER TYPE", "STATUS")
 		for i := range resources {
 			resource := resources[i]
-			table.AddRow(resource.Product, resource.SourceIP, resource.InstanceName, resource.Protocol, resource.Direction,
-				resource.PortRange, resource.EtherType, resource.Status)
+			table.AddRow(resource.Product, resource.SourceIP, utils.PtrString(resource.InstanceName), utils.PtrString(resource.Protocol),
+				utils.PtrString(resource.Direction), utils.PtrString(resource.PortRange), utils.PtrString(resource.EtherType), resource.Status)
 		}
 		err := table.Display(p)
 		if err != nil {
