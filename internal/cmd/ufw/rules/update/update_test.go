@@ -43,11 +43,6 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		globalflags.ProjectIdFlag: testProjectId,
 		globalflags.RegionFlag:    testRegion,
 		sourceIpFlag:              testSourceIp,
-		directionFlag:             "ingress",
-		descriptionFlag:           "example-description",
-		etherTypeFlag:             "IPv4",
-		portRangeFlag:             "80-443",
-		protocolFlag:              "TCP",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -62,13 +57,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		RuleRefId:   "", // Left blank because parseInput in the source file currently does not populate it
-		SourceIp:    new(testSourceIp),
-		Direction:   new("ingress"),
-		Description: new("example-description"),
-		EtherType:   new("IPv4"),
-		PortRange:   new("80-443"),
-		Protocol:    new("TCP"),
+		InstanceId: testRuleRefId,
+		SourceIp:   new(testSourceIp),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -79,11 +69,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 func fixtureRequest(mods ...func(request *ufw.ApiUpdateRuleRequest)) ufw.ApiUpdateRuleRequest {
 	request := testClient.DefaultAPI.UpdateRule(testCtx, testProjectId, testRegion, testRuleRefId)
 	request = request.UpdateRulePayload(ufw.UpdateRulePayload{
-		SourceIP:  testSourceIp,
-		Direction: new("ingress"),
-		EtherType: new("IPv4"),
-		PortRange: new("80-443"),
-		Protocol:  new("TCP"),
+		SourceIP: testSourceIp,
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -133,7 +119,8 @@ func TestParseInput(t *testing.T) {
 					Region:    testRegion,
 					Verbosity: globalflags.VerbosityDefault,
 				},
-				SourceIp: new(testSourceIp),
+				InstanceId: testRuleRefId,
+				SourceIp:   new(testSourceIp),
 			},
 		},
 		{
@@ -192,10 +179,8 @@ func TestBuildRequest(t *testing.T) {
 		expectedRequest ufw.ApiUpdateRuleRequest
 	}{
 		{
-			description: "base",
-			model: fixtureInputModel(func(model *inputModel) {
-				model.RuleRefId = testRuleRefId // Inject the ID that parseInput currently skips
-			}),
+			description:     "base",
+			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
 		},
 		{
@@ -206,8 +191,8 @@ func TestBuildRequest(t *testing.T) {
 					Region:    testRegion,
 					Verbosity: globalflags.VerbosityDefault,
 				},
-				RuleRefId: testRuleRefId,
-				SourceIp:  new(testSourceIp),
+				InstanceId: testRuleRefId,
+				SourceIp:   new(testSourceIp),
 			},
 			expectedRequest: testClient.DefaultAPI.UpdateRule(testCtx, testProjectId, testRegion, testRuleRefId).
 				UpdateRulePayload(ufw.UpdateRulePayload{

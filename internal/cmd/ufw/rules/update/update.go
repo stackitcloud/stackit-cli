@@ -25,12 +25,7 @@ import (
 const (
 	instanceIdArg = "INSTANCE_ID"
 
-	sourceIpFlag    = "sourceIp"
-	directionFlag   = "direction"
-	descriptionFlag = "description"
-	etherTypeFlag   = "etherType"
-	portRangeFlag   = "portRange"
-	protocolFlag    = "protocol"
+	sourceIpFlag = "sourceIp"
 )
 
 type inputModel struct {
@@ -107,11 +102,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(sourceIpFlag, "s", "", "The IP (CIDR) to which the rule applies (e.g. 192.168.0.1/32)")
-	cmd.Flags().StringP(directionFlag, "d", "", "Direction (the direction of the traffic, typically ingress or egress, for security rules type)")
-	cmd.Flags().StringP(descriptionFlag, "D", "", "Description")
-	cmd.Flags().StringP(etherTypeFlag, "e", "", "Specifies the bound of the rule (for security rules type)")
-	cmd.Flags().StringP(portRangeFlag, "r", "", "Port range (the Port range to which the rule applies, for security rules type)")
-	cmd.Flags().String(protocolFlag, "", "The network protocol (e.g. TCP, UDP, ICMP, for security rules type)")
 
 	err := flags.MarkFlagsRequired(cmd, sourceIpFlag)
 	cobra.CheckErr(err)
@@ -133,12 +123,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		GlobalFlagModel: globalFlags,
 		InstanceId:      instanceId,
 
-		SourceIp:    flags.FlagToStringPointer(p, cmd, sourceIpFlag),
-		Direction:   flags.FlagToStringPointer(p, cmd, directionFlag),
-		Description: flags.FlagToStringPointer(p, cmd, descriptionFlag),
-		EtherType:   flags.FlagToStringPointer(p, cmd, etherTypeFlag),
-		PortRange:   flags.FlagToStringPointer(p, cmd, portRangeFlag),
-		Protocol:    flags.FlagToStringPointer(p, cmd, protocolFlag),
+		SourceIp: flags.FlagToStringPointer(p, cmd, sourceIpFlag),
 	}
 
 	p.DebugInputModel(model)
@@ -148,14 +133,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 func buildRequest(ctx context.Context, model *inputModel, apiClient *ufw.APIClient) ufw.ApiUpdateRuleRequest {
 	req := apiClient.DefaultAPI.UpdateRule(ctx, model.ProjectId, model.Region, model.InstanceId)
 
-	// TODO - add logic for field checking: existing ACLs, correct product, type, instanceID maybe
-
 	req = req.UpdateRulePayload(ufw.UpdateRulePayload{
-		SourceIP:  *model.SourceIp,
-		Direction: model.Direction,
-		EtherType: model.EtherType,
-		PortRange: model.PortRange,
-		Protocol:  model.Protocol,
+		SourceIP: *model.SourceIp,
 	})
 
 	return req
