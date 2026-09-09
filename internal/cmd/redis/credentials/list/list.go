@@ -21,22 +21,27 @@ import (
 )
 
 const (
+	// Deprecated: Will be removed after 2027-08-31.
 	instanceIdFlag = "instance-id"
-	limitFlag      = "limit"
+	// Deprecated: Will be removed after 2027-08-31.
+	limitFlag = "limit"
 )
 
+// Deprecated: Will be removed after 2027-08-31.
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	InstanceId string
 	Limit      *int64
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "list",
-		Short: "Lists all credentials' IDs for a Redis instance",
-		Long:  "Lists all credentials' IDs for a Redis instance.",
-		Args:  args.NoArgs,
+		Use:        "list",
+		Short:      "Lists all credentials' IDs for a Redis instance",
+		Long:       "Lists all credentials' IDs for a Redis instance.",
+		Deprecated: "\nCommand `stackit redis credentials list` is deprecated and will be removed after 2027-08-31. Please use `stackit valkey credentials list` instead.",
+		Args:       args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				`List all credentials' IDs for a Redis instance`,
@@ -89,6 +94,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	return cmd
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance ID")
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
@@ -97,6 +103,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
@@ -121,11 +128,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func buildRequest(ctx context.Context, model *inputModel, apiClient *redis.APIClient) redis.ApiListCredentialsRequest {
 	req := apiClient.DefaultAPI.ListCredentials(ctx, model.ProjectId, model.Region, model.InstanceId)
 	return req
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func outputResult(p *print.Printer, outputFormat, instanceLabel string, credentials []redis.CredentialsListItem) error {
 	return p.OutputResult(outputFormat, credentials, func() error {
 		if len(credentials) == 0 {

@@ -20,22 +20,26 @@ import (
 )
 
 const (
+	// Deprecated: Will be removed after 2027-08-31.
 	instanceIdArg = "INSTANCE_ID"
-
+	// Deprecated: Will be removed after 2027-08-31.
 	aclParameterKey = "sgw_acl"
 )
 
+// Deprecated: Will be removed after 2027-08-31.
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	InstanceId string
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("describe %s", instanceIdArg),
-		Short: "Shows details  of a Redis instance",
-		Long:  "Shows details  of a Redis instance.",
-		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
+		Use:        fmt.Sprintf("describe %s", instanceIdArg),
+		Short:      "Shows details  of a Redis instance",
+		Long:       "Shows details  of a Redis instance.",
+		Deprecated: "\nCommand `stackit redis instance describe` is deprecated and will be removed after 2027-08-31. Please use `stackit valkey instance describe` instead.",
+		Args:       args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
 				`Get details of a Redis instance with ID "xxx"`,
@@ -69,6 +73,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	return cmd
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	instanceId := inputArgs[0]
 
@@ -86,11 +91,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func buildRequest(ctx context.Context, model *inputModel, apiClient *redis.APIClient) redis.ApiGetInstanceRequest {
 	req := apiClient.DefaultAPI.GetInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 	return req
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func outputResult(p *print.Printer, outputFormat string, instance *redis.Instance) error {
 	if instance == nil {
 		return fmt.Errorf("no instance passed")

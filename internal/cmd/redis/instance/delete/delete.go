@@ -22,20 +22,24 @@ import (
 )
 
 const (
+	// Deprecated: Will be removed after 2027-08-31.
 	instanceIdArg = "INSTANCE_ID"
 )
 
+// Deprecated: Will be removed after 2027-08-31.
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	InstanceId string
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("delete %s", instanceIdArg),
-		Short: "Deletes a Redis instance",
-		Long:  "Deletes a Redis instance.",
-		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
+		Use:        fmt.Sprintf("delete %s", instanceIdArg),
+		Short:      "Deletes a Redis instance",
+		Long:       "Deletes a Redis instance.",
+		Deprecated: "\nCommand `stackit redis instance delete` is deprecated and will be removed after 2027-08-31. Please use `stackit valkey instance delete` instead.",
+		Args:       args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
 				`Delete a Redis instance with ID "xxx"`,
@@ -95,6 +99,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	return cmd
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	instanceId := inputArgs[0]
 
@@ -112,6 +117,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func buildRequest(ctx context.Context, model *inputModel, apiClient *redis.APIClient) redis.ApiDeleteInstanceRequest {
 	req := apiClient.DefaultAPI.DeleteInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 	return req
