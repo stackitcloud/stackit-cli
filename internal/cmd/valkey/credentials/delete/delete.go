@@ -39,7 +39,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(credentialsIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete credentials with ID "xxx" of a Key Value Store (valkey) instance with ID "yyy"`,
+				`Delete credentials with ID "xxx" of a Valkey instance with ID "yyy"`,
 				"$ stackit valkey credentials delete xxx --instance-id yyy"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -77,7 +77,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 			err = req.Execute()
 			if err != nil {
-				return fmt.Errorf("delete Key Value Store (valkey) credentials: %w", err)
+				return fmt.Errorf("delete Valkey credentials: %w", err)
 			}
 
 			params.Printer.Info("Deleted credentials %s of instance %q\n", credentialsLabel, instanceLabel)

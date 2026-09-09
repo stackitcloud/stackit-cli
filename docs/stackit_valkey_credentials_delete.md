@@ -13,7 +13,7 @@ stackit valkey credentials delete CREDENTIALS_ID [flags]
 ### Examples
 
 ```
-  Delete credentials with ID "xxx" of a Key Value Store (valkey) instance with ID "yyy"
+  Delete credentials with ID "xxx" of a Valkey instance with ID "yyy"
   $ stackit valkey credentials delete xxx --instance-id yyy
 ```
 

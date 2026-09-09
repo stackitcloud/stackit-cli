@@ -13,10 +13,10 @@ stackit valkey credentials create [flags]
 ### Examples
 
 ```
-  Create credentials for a Key Value Store (valkey) instance with ID "xxx"
+  Create credentials for a Valkey instance with ID "xxx"
   $ stackit valkey credentials create --instance-id xxx
 
-  Create credentials for a Key Value Store (valkey) instance and show the password in the output
+  Create credentials for a Valkey instance and show the password in the output
   $ stackit valkey credentials create --instance-id xxx --show-password
 ```
 

@@ -13,13 +13,13 @@ stackit valkey plans [flags]
 ### Examples
 
 ```
-  Lists all Key Value Store (valkey) service plans
+  Lists all Valkey service plans
   $ stackit valkey plans
 
-  List all Key Value Store (valkey) service plans in JSON format
+  List all Valkey service plans in JSON format
   $ stackit valkey plans --output-format json
 
-  List up to 10 Key Value Store (valkey) service plans
+  List up to 10 Valkey service plans
   $ stackit valkey plans --limit 10
 ```
 

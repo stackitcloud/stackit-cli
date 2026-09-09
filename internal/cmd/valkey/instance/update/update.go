@@ -68,13 +68,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Update the plan of a Key Value Store (valkey) instance with ID "xxx" by plan ID`,
+				`Update the plan of a Valkey instance with ID "xxx" by plan ID`,
 				"$ stackit valkey instance update xxx --plan-id yyy"),
 			examples.NewExample(
-				`Update the plan of a Key Value Store (valkey) instance with ID "xxx" by name and version`,
+				`Update the plan of a Valkey instance with ID "xxx" by name and version`,
 				"$ stackit valkey instance update xxx --plan-name stackit-keyvalue-1.2.10-replica --version 8"),
 			examples.NewExample(
-				`Update the range of IPs allowed to access a Key Value Store (valkey) instance with ID "xxx"`,
+				`Update the range of IPs allowed to access a Valkey instance with ID "xxx"`,
 				"$ stackit valkey instance update xxx --acl 1.2.3.0/24"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -106,13 +106,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			req, err := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				if _, ok := errors.AsType[*cliErr.DSAInvalidPlanError](err); !ok {
-					return fmt.Errorf("build Key Value Store (valkey) instance update request: %w", err)
+					return fmt.Errorf("build Valkey instance update request: %w", err)
 				}
 				return err
 			}
 			err = req.Execute()
 			if err != nil {
-				return fmt.Errorf("update Key Value Store (valkey) instance: %w", err)
+				return fmt.Errorf("update Valkey instance: %w", err)
 			}
 
 			// Wait for async operation, if async mode not enabled
@@ -122,7 +122,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 					return err
 				})
 				if err != nil {
-					return fmt.Errorf("wait for Key Value Store (valkey) instance update: %w", err)
+					return fmt.Errorf("wait for Valkey instance update: %w", err)
 				}
 			}
 
@@ -143,7 +143,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringSlice(syslogFlag, []string{}, "Syslog")
 	cmd.Flags().Var(flags.UUIDFlag(), planIdFlag, "Plan ID")
 	cmd.Flags().String(planNameFlag, "", "Plan name")
-	cmd.Flags().String(versionFlag, "", "Instance Key Value Store (valkey) version")
+	cmd.Flags().String(versionFlag, "", "Instance Valkey version")
 
 	cmd.Flags().Int32(minReplicasToWriteFlag, 0, "Minimum number of replicas that must acknowledge a write for it to be accepted")
 	cmd.Flags().String(replBacklogSizeFlag, "", "Replication backlog size (e.g. \"1mb\")")
@@ -218,7 +218,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient valkey.Defau
 	if model.PlanId != nil || model.PlanName != "" {
 		offerings, err := apiClient.ListOfferings(ctx, model.ProjectId, model.Region).Execute()
 		if err != nil {
-			return req, fmt.Errorf("get Key Value Store (valkey) offerings: %w", err)
+			return req, fmt.Errorf("get Valkey offerings: %w", err)
 		}
 
 		if model.PlanId != nil {
