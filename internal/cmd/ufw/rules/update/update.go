@@ -35,7 +35,7 @@ const (
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
-	RuleRefId string
+	InstanceId string
 
 	SourceIp    *string
 	Direction   *string
@@ -53,8 +53,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Update a UFW rule instance with "1.1.1.1/32" as sourceIp for instance with id=ID`,
-				"$ stackit ufw instance update ID --sourceIp 1.1.1.1/32"),
+				`Update a UFW rule instance with "1.1.1.1/32" as sourceIp for instance with ID "xxx"`,
+				"$ stackit ufw rules update xxx --sourceIp 1.1.1.1/32"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -117,7 +117,9 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+	instanceId := inputArgs[0]
+
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -129,6 +131,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
+		InstanceId:      instanceId,
 
 		SourceIp:    flags.FlagToStringPointer(p, cmd, sourceIpFlag),
 		Direction:   flags.FlagToStringPointer(p, cmd, directionFlag),
@@ -143,7 +146,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *ufw.APIClient) ufw.ApiUpdateRuleRequest {
-	req := apiClient.DefaultAPI.UpdateRule(ctx, model.ProjectId, model.Region, model.RuleRefId)
+	req := apiClient.DefaultAPI.UpdateRule(ctx, model.ProjectId, model.Region, model.InstanceId)
 
 	// TODO - add logic for field checking: existing ACLs, correct product, type, instanceID maybe
 
@@ -168,7 +171,7 @@ func outputResult(p *print.Printer, outputFormat string, async bool, projectLabe
 		if async {
 			operationState = "Triggered updating process of"
 		}
-		p.Outputf("%s rule for project %q. Rule refID: %s\n", operationState, projectLabel, utils.PtrString(rule.RefId))
+		p.Outputf("%s rule for project %q. New rule refID: %s\n", operationState, projectLabel, utils.PtrString(rule.RefId))
 		return nil
 	})
 }

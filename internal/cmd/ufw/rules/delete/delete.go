@@ -32,12 +32,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", instanceIdArg),
 		Short: "Deletes a UFW rule instance",
-		Long:  "Deletes a UFW rule instance.",
+		Long:  "Deletes a STACKIT Unified Firewall (UFW) rule instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
 				`Delete a UFW rule instance with ID "xxx"`,
-				"$ stackit ufw instance delete xxx"),
+				"$ stackit ufw rules delete xxx"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

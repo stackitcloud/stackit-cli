@@ -62,9 +62,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a UFW rule instance of type ACL with sourceIp "1.1.1.1/32" of product "redis" for instance with id=ID`,
-				"$ stackit ufw instance create --product redis --sourceIp 1.1.1.1/32 --type ACL --instanceId ID"),
-			// TODO add more examples for creating Security Rule and Group types
+				`Create a UFW rule instance of type ACL with sourceIp "1.1.1.1/32" of product "Redis" for instance with id=ID`,
+				"$ stackit ufw rules create --product redis --sourceIp 1.1.1.1/32 --type ACL --instanceId ID"),
+			examples.NewExample(
+				`Create a UFW rule instance of type ACL with sourceIp "2.2.2.2/32" of product "Edge Cloud" for instance with id=ID`,
+				"$ stackit ufw rules create --product edge-cloud --sourceIp 2.2.2.2/32 --type ACL --instanceId ID"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -90,7 +92,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			req := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient)
+			if err != nil {
+				return err
+			}
 
 			resp, err := req.Execute()
 			if err != nil {
@@ -117,7 +122,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(productFlag, "", "The source service (e.g., Load Balancer, Redis) where you want to attach a rule")
-	cmd.Flags().StringP(typeFlag, "t", "", "Type (ACL/SecurityRule/SecurityGroup/PublicIP) You can check /provider-options route for them")
+	cmd.Flags().StringP(typeFlag, "t", "", "Type (ACL/SecurityRule/SecurityGroup) You can check /provider-options route for them. Unfortunately, this field could be only ACL for the CLI version")
 	cmd.Flags().StringP(sourceIpFlag, "s", "", "The IP (CIDR) to which the rule applies (e.g. 192.168.0.1/32)")
 	cmd.Flags().StringP(instanceIdFlag, "i", "", "Instance ID that will have attached your rule")
 	cmd.Flags().StringP(directionFlag, "d", "", "Direction (the direction of the traffic, typically ingress or egress, for security rules type)")
@@ -171,10 +176,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *ufw.APIClient) ufw.ApiCreateRuleRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient *ufw.APIClient) (ufw.ApiCreateRuleRequest, error) {
 	req := apiClient.DefaultAPI.CreateRule(ctx, model.ProjectId, model.Region)
 
-	// TODO - add logic for field checking: existing ACLs, correct product, type, instanceID maybe
+	//providerOptions, err := apiClient.DefaultAPI.ListProviderOptions(ctx, model.Region).Execute()
+	//
+	//if err != nil {
+	//	return req, fmt.Errorf("get provider options: %w", err)
+	//}
+	//
+	//if *model.Type != types.Types {
+	//	return req, fmt.Errorf("invalid rule type: %s", *model.Type)
+	//}
 
 	req = req.CreateRulePayload(ufw.CreateRulePayload{
 		Product:         *model.Product,
@@ -190,7 +203,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ufw.APIClie
 		SecurityGroupId: model.SecurityGroupId,
 	})
 
-	return req
+	return req, nil
 }
 
 func outputResult(p *print.Printer, outputFormat string, async bool, projectLabel string, rule *ufw.CreateRuleResponse) error {

@@ -25,10 +25,11 @@ var (
 )
 
 const (
-	testRegion   = "eu01"
-	testProduct  = "redis"
-	testType     = "ACL"
-	testSourceIp = "1.1.1.1/32"
+	testRegion    = "eu01"
+	testProduct   = "redis"
+	testType      = "ACL"
+	testWrongType = "SecurityGroup"
+	testSourceIp  = "1.1.1.1/32"
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -182,6 +183,7 @@ func TestBuildRequest(t *testing.T) {
 		description     string
 		model           *inputModel
 		expectedRequest ufw.ApiCreateRuleRequest
+		isValid         bool
 	}{
 		{
 			description:     "base",
@@ -209,11 +211,32 @@ func TestBuildRequest(t *testing.T) {
 					InstanceId: testInstanceId,
 				}),
 		},
+		{
+			description: "required fields only, but wrong type",
+			model: &inputModel{
+				GlobalFlagModel: &globalflags.GlobalFlagModel{
+					ProjectId: testProjectId,
+					Region:    testRegion,
+					Verbosity: globalflags.VerbosityDefault,
+				},
+				Product:    new(testProduct),
+				Type:       new(testWrongType),
+				SourceIp:   new(testSourceIp),
+				InstanceId: new(testInstanceId),
+			},
+			expectedRequest: fixtureRequest(),
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			request, err := buildRequest(testCtx, tt.model, testClient)
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("error building request: %v", err)
+			}
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),

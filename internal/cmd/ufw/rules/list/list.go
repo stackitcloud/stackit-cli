@@ -152,12 +152,13 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resources
 		}
 
 		table := tables.NewTable()
-		table.SetHeader("PRODUCT", "SOURCE", "DEPLOYMENT TARGET", "PROTOCOL",
+		table.SetHeader("PRODUCT", "SOURCE", "DEPLOYMENT TARGET", "INSTANCE ID", "PROTOCOL",
 			"DIRECTION", "PORT RANGE", "ETHER TYPE", "STATUS")
 		for i := range resources {
 			resource := resources[i]
-			table.AddRow(resource.Product, resource.SourceIP, utils.PtrString(resource.InstanceName), utils.PtrString(resource.Protocol),
-				utils.PtrString(resource.Direction), utils.PtrString(resource.PortRange), utils.PtrString(resource.EtherType), resource.Status)
+			table.AddRow(resource.Product, resource.SourceIP, utils.PtrString(resource.InstanceName), resource.InstanceId,
+				utils.PtrString(resource.Protocol), utils.PtrString(resource.Direction), utils.PtrString(resource.PortRange),
+				utils.PtrString(resource.EtherType), resource.Status)
 		}
 		err := table.Display(p)
 		if err != nil {

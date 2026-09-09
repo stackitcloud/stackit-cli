@@ -36,10 +36,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Get details of a UFW rule instance with ID "xxx"`,
-				"$ stackit ufw rule instance describe xxx"),
+				"$ stackit ufw rules describe xxx"),
 			examples.NewExample(
 				`Get details of a UFW rule instance with ID "xxx" in JSON format`,
-				"$ stackit ufw rule instance describe xxx --output-format json"),
+				"$ stackit ufw rules describe xxx --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
