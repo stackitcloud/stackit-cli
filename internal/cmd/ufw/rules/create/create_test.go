@@ -40,13 +40,6 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		typeFlag:                  testType,
 		sourceIpFlag:              testSourceIp,
 		instanceIdFlag:            testInstanceId,
-		directionFlag:             "ingress",
-		descriptionFlag:           "example-description",
-		etherTypeFlag:             "IPv4",
-		portRangeFlag:             "80-443",
-		protocolFlag:              "TCP",
-		offsetFlag:                "10",
-		securityGroupIdFlag:       "example-sec-group",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -61,17 +54,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		Product:         new(testProduct),
-		Type:            new(testType),
-		SourceIp:        new(testSourceIp),
-		InstanceId:      new(testInstanceId),
-		Direction:       new("ingress"),
-		Description:     new("example-description"),
-		EtherType:       new("IPv4"),
-		PortRange:       new("80-443"),
-		Protocol:        new("TCP"),
-		Offset:          new(int32(10)),
-		SecurityGroupId: new("example-sec-group"),
+		Product:    new(testProduct),
+		Type:       new(testType),
+		SourceIp:   new(testSourceIp),
+		InstanceId: new(testInstanceId),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -82,17 +68,10 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 func fixtureRequest(mods ...func(request *ufw.ApiCreateRuleRequest)) ufw.ApiCreateRuleRequest {
 	request := testClient.DefaultAPI.CreateRule(testCtx, testProjectId, testRegion)
 	request = request.CreateRulePayload(ufw.CreateRulePayload{
-		Product:         testProduct,
-		Type:            testType,
-		SourceIP:        testSourceIp,
-		InstanceId:      testInstanceId,
-		Direction:       new("ingress"),
-		Description:     new("example-description"),
-		EtherType:       new("IPv4"),
-		PortRange:       new("80-443"),
-		Protocol:        new("TCP"),
-		Offset:          new(int32(10)),
-		SecurityGroupId: new("example-sec-group"),
+		Product:    testProduct,
+		Type:       testType,
+		SourceIP:   testSourceIp,
+		InstanceId: testInstanceId,
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -212,7 +191,7 @@ func TestBuildRequest(t *testing.T) {
 				}),
 		},
 		{
-			description: "required fields only, but wrong type",
+			description: "required fields only but wrong type",
 			model: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
 					ProjectId: testProjectId,
