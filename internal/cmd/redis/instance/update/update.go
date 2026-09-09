@@ -25,20 +25,30 @@ import (
 )
 
 const (
+	// Deprecated: Will be removed after 2027-08-31.
 	instanceIdArg = "INSTANCE_ID"
 
-	enableMonitoringFlag     = "enable-monitoring"
-	graphiteFlag             = "graphite"
-	metricsFrequencyFlag     = "metrics-frequency"
-	metricsPrefixFlag        = "metrics-prefix"
+	// Deprecated: Will be removed after 2027-08-31.
+	enableMonitoringFlag = "enable-monitoring"
+	// Deprecated: Will be removed after 2027-08-31.
+	graphiteFlag = "graphite"
+	// Deprecated: Will be removed after 2027-08-31.
+	metricsFrequencyFlag = "metrics-frequency"
+	// Deprecated: Will be removed after 2027-08-31.
+	metricsPrefixFlag = "metrics-prefix"
+	// Deprecated: Will be removed after 2027-08-31.
 	monitoringInstanceIdFlag = "monitoring-instance-id"
-	sgwAclFlag               = "acl"
-	syslogFlag               = "syslog"
-	planIdFlag               = "plan-id"
-	planNameFlag             = "plan-name" // Deprecated: Will be removed after 2027-02-28. Use --plan-id instead.
-	versionFlag              = "version"   // Deprecated: Will be removed after 2027-02-28. Use --plan-id instead.
+	// Deprecated: Will be removed after 2027-08-31.
+	sgwAclFlag = "acl"
+	// Deprecated: Will be removed after 2027-08-31.
+	syslogFlag = "syslog"
+	// Deprecated: Will be removed after 2027-08-31.
+	planIdFlag   = "plan-id"
+	planNameFlag = "plan-name" // Deprecated: Will be removed after 2027-02-28. Use --plan-id instead.
+	versionFlag  = "version"   // Deprecated: Will be removed after 2027-02-28. Use --plan-id instead.
 )
 
+// Deprecated: Will be removed after 2027-08-31.
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	InstanceId string
@@ -55,12 +65,14 @@ type inputModel struct {
 	PlanId               *string
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("update %s", instanceIdArg),
-		Short: "Updates a Redis instance",
-		Long:  "Updates a Redis instance.",
-		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
+		Use:        fmt.Sprintf("update %s", instanceIdArg),
+		Short:      "Updates a Redis instance",
+		Long:       "Updates a Redis instance.",
+		Deprecated: "\nCommand `stackit redis instance update` is deprecated and will be removed after 2027-08-31. Please use `stackit valkey instance update` instead.",
+		Args:       args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
 				`Update the plan of a Redis instance with ID "xxx"`,
@@ -132,6 +144,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	return cmd
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(enableMonitoringFlag, false, "Enable monitoring")
 	cmd.Flags().String(graphiteFlag, "", "Graphite host")
@@ -150,6 +163,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	instanceId := inputArgs[0]
 
@@ -202,6 +216,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func buildRequest(ctx context.Context, model *inputModel, apiClient redis.DefaultAPI) (redis.ApiPartialUpdateInstanceRequest, error) {
 	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 

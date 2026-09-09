@@ -12,18 +12,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Deprecated: Will be removed after 2027-08-31.
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "credentials",
-		Short: "Provides functionality for Redis credentials",
-		Long:  "Provides functionality for Redis credentials.",
-		Args:  args.NoArgs,
-		Run:   utils.CmdHelp,
+		Use:        "credentials",
+		Short:      "Provides functionality for Redis credentials",
+		Long:       "Provides functionality for Redis credentials.",
+		Deprecated: "\nCommand `stackit redis credentials` is deprecated and will be removed after 2027-08-31. Please use `stackit valkey credentials` instead.",
+		Args:       args.NoArgs,
+		Run:        utils.CmdHelp,
 	}
 	addSubcommands(cmd, params)
 	return cmd
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(create.NewCmd(params))
 	cmd.AddCommand(delete.NewCmd(params))

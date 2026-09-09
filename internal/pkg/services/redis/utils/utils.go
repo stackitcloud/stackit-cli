@@ -11,6 +11,7 @@ import (
 )
 
 const (
+	// Deprecated: Will be removed after 2027-08-31.
 	service = "redis"
 )
 
@@ -48,6 +49,7 @@ func LoadPlanId(planName, version string, offerings *redis.ListOfferingsResponse
 	}
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func GetInstanceName(ctx context.Context, apiClient redis.DefaultAPI, projectId, instanceId, region string) (string, error) {
 	resp, err := apiClient.GetInstance(ctx, projectId, region, instanceId).Execute()
 	if err != nil {
@@ -56,6 +58,7 @@ func GetInstanceName(ctx context.Context, apiClient redis.DefaultAPI, projectId,
 	return resp.Name, nil
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func GetCredentialsUsername(ctx context.Context, apiClient redis.DefaultAPI, projectId, instanceId, credentialsId, region string) (string, error) {
 	resp, err := apiClient.GetCredentials(ctx, projectId, region, instanceId, credentialsId).Execute()
 	if err != nil {

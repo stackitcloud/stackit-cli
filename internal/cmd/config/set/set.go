@@ -212,7 +212,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.RabbitMQCustomEndpointKey, cmd.Flags().Lookup(rabbitMQCustomEndpointFlag))
 	cobra.CheckErr(err)
-	err = viper.BindPFlag(config.RedisCustomEndpointKey, cmd.Flags().Lookup(redisCustomEndpointFlag))
+	err = viper.BindPFlag(config.RedisCustomEndpointKey, cmd.Flags().Lookup(redisCustomEndpointFlag)) //nolint:staticcheck // deprecated but still supported until 2027-08-31
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.ResourceManagerEndpointKey, cmd.Flags().Lookup(resourceManagerCustomEndpointFlag))
 	cobra.CheckErr(err)

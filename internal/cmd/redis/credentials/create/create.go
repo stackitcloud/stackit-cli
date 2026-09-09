@@ -21,22 +21,27 @@ import (
 )
 
 const (
-	instanceIdFlag   = "instance-id"
+	// Deprecated: Will be removed after 2027-08-31.
+	instanceIdFlag = "instance-id"
+	// Deprecated: Will be removed after 2027-08-31.
 	showPasswordFlag = "show-password"
 )
 
+// Deprecated: Will be removed after 2027-08-31.
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	InstanceId   string
 	ShowPassword bool
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Creates credentials for a Redis instance",
-		Long:  "Creates credentials (username and password) for a Redis instance.",
-		Args:  args.NoArgs,
+		Use:        "create",
+		Short:      "Creates credentials for a Redis instance",
+		Long:       "Creates credentials (username and password) for a Redis instance.",
+		Deprecated: "\nCommand `stackit redis credentials create` is deprecated and will be removed after 2027-08-31. Please use `stackit valkey credentials create` instead.",
+		Args:       args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
 				`Create credentials for a Redis instance`,
@@ -84,6 +89,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	return cmd
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance ID")
 	cmd.Flags().BoolP(showPasswordFlag, "s", false, "Show password in output")
@@ -92,6 +98,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
@@ -108,11 +115,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func buildRequest(ctx context.Context, model *inputModel, apiClient *redis.APIClient) redis.ApiCreateCredentialsRequest {
 	req := apiClient.DefaultAPI.CreateCredentials(ctx, model.ProjectId, model.Region, model.InstanceId)
 	return req
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func outputResult(p *print.Printer, model inputModel, instanceLabel string, resp *redis.CredentialsResponse) error {
 	if model.GlobalFlagModel == nil {
 		return fmt.Errorf("no global flags defined")
