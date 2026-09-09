@@ -48,7 +48,7 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", instanceIdArg),
-		Short: "Updates an UFW rule instance",
+		Short: "Updates a UFW rule instance",
 		Long:  "Updates a STACKIT Unified Firewall (UFW) rule instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(

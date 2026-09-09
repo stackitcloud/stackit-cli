@@ -30,15 +30,15 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", instanceIdArg),
-		Short: "Shows details of an UFW rule instance",
-		Long:  "Shows details of an STACKIT Unified Firewall (UFW) rule instance.",
+		Short: "Shows details of a UFW rule instance",
+		Long:  "Shows details of a STACKIT Unified Firewall (UFW) rule instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Get details of an UFW rule instance with ID "xxx"`,
+				`Get details of a UFW rule instance with ID "xxx"`,
 				"$ stackit ufw rule instance describe xxx"),
 			examples.NewExample(
-				`Get details of an UFW rule instance with ID "xxx" in JSON format`,
+				`Get details of a UFW rule instance with ID "xxx" in JSON format`,
 				"$ stackit ufw rule instance describe xxx --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

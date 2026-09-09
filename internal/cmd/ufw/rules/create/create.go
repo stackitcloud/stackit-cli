@@ -57,7 +57,7 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Creates an UFW rule instance",
+		Short: "Creates a UFW rule instance",
 		Long:  "Creates a STACKIT Unified Firewall (UFW) rule instance.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
