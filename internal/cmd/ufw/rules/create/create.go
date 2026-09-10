@@ -159,7 +159,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ufw.APIClie
 	req := apiClient.DefaultAPI.CreateRule(ctx, model.ProjectId, model.Region)
 
 	if *model.Type != "ACL" {
-		return req, fmt.Errorf("invalid rule type: %s", *model.Type)
+		return req, fmt.Errorf("invalid rule type: %s, only ACL type supported for now", *model.Type)
 	}
 
 	req = req.CreateRulePayload(ufw.CreateRulePayload{
