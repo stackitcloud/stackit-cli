@@ -53,8 +53,11 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 				`Update the display name of an Intake User`,
 				`$ stackit beta intake user update xxx --intake-id yyy --display-name "new-user-name"`),
 			examples.NewExample(
-				`Update the password and description for an Intake User`,
-				`$ stackit beta intake user update xxx --intake-id yyy --password "NewSecret123\!" --description "Updated description"`),
+				`Update the password interactively for an Intake User`,
+				`$ stackit beta intake user update xxx --intake-id yyy --password`),
+			examples.NewExample(
+				`Update the password and description for an Intake User from a file`,
+				`$ stackit beta intake user update xxx --intake-id yyy --password @./secret.txt --description "Updated description"`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -82,7 +85,6 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 					_, err = wait.UpdateIntakeUserWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.IntakeId, model.UserId).WaitWithContext(ctx)
 					return err
 				})
-
 				if err != nil {
 					return fmt.Errorf("wait for STACKIT Intake User update: %w", err)
 				}
@@ -95,12 +97,12 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 	return cmd
 }
 
-func configureFlags(cmd *cobra.Command, p *types.CmdParams) {
+func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.Flags().Var(flags.UUIDFlag(), intakeIdFlag, "Intake ID")
 	cmd.Flags().String(displayNameFlag, "", "Display name")
 	cmd.Flags().String(descriptionFlag, "", "Description")
-	password := flags.SecretFlag(passwordFlag, p)
-	cmd.Flags().Var(password, passwordFlag, password.Usage()+" Must contain lower, upper, number, and special characters (min 12 chars)")
+	password := flags.SecretFlag(passwordFlag, params)
+	cmd.Flags().Var(password, passwordFlag, password.Usage())
 	cmd.Flags().String(userTypeFlag, "", "Type of user. One of 'intake' or 'dead-letter'")
 	cmd.Flags().StringToString(labelsFlag, nil, `Labels in key=value format, separated by commas. Example: --labels "key1=value1,key2=value2".`)
 
@@ -156,16 +158,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIC
 
 func outputResult(p *print.Printer, model *inputModel, resp *intake.IntakeUserResponse) error {
 	return p.OutputResult(model.OutputFormat, resp, func() error {
-		if resp == nil {
-			p.Outputf("Triggered update of Intake User for intake %q, but no user ID was returned.\n", model.IntakeId)
-			return nil
-		}
-
 		operationState := "Updated"
 		if model.Async {
 			operationState = "Triggered update of"
 		}
-		p.Outputf("%s Intake User for intake %q. User ID: %s\n", operationState, model.IntakeId, resp.Id)
+		p.Outputf("%s Intake User %s\n", operationState, model.UserId)
 		return nil
 	})
 }
