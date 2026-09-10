@@ -35,8 +35,8 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Creates credentials for a Valkey instance",
-		Long:  "Creates credentials (username and password) for a Valkey instance.",
+		Short: "Creates credentials for a Key Value Store (valkey) instance",
+		Long:  "Creates credentials (username and password) for a Key Value Store (valkey) instance.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

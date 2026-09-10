@@ -1,10 +1,10 @@
 ## stackit valkey instance describe
 
-Shows details of a Valkey instance
+Shows details of a Key Value Store (valkey) instance
 
 ### Synopsis
 
-Shows details of a Valkey instance.
+Shows details of a Key Value Store (valkey) instance.
 
 ```
 stackit valkey instance describe INSTANCE_ID [flags]
@@ -39,5 +39,5 @@ stackit valkey instance describe INSTANCE_ID [flags]
 
 ### SEE ALSO
 
-* [stackit valkey instance](./stackit_valkey_instance.md)	 - Provides functionality for Valkey instances
+* [stackit valkey instance](./stackit_valkey_instance.md)	 - Provides functionality for Key Value Store (valkey) instances
 

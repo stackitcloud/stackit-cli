@@ -1,10 +1,10 @@
 ## stackit valkey credentials delete
 
-Deletes credentials of a Valkey instance
+Deletes credentials of a Key Value Store (valkey) instance
 
 ### Synopsis
 
-Deletes credentials of a Valkey instance.
+Deletes credentials of a Key Value Store (valkey) instance.
 
 ```
 stackit valkey credentials delete CREDENTIALS_ID [flags]
@@ -37,5 +37,5 @@ stackit valkey credentials delete CREDENTIALS_ID [flags]
 
 ### SEE ALSO
 
-* [stackit valkey credentials](./stackit_valkey_credentials.md)	 - Provides functionality for Valkey credentials
+* [stackit valkey credentials](./stackit_valkey_credentials.md)	 - Provides functionality for Key Value Store (valkey) credentials
 

@@ -1,10 +1,10 @@
 ## stackit valkey plans
 
-Lists all Valkey service plans
+Lists all Key Value Store (valkey) service plans
 
 ### Synopsis
 
-Lists all Valkey service plans.
+Lists all Key Value Store (valkey) service plans.
 
 ```
 stackit valkey plans [flags]
@@ -43,5 +43,5 @@ stackit valkey plans [flags]
 
 ### SEE ALSO
 
-* [stackit valkey](./stackit_valkey.md)	 - Provides functionality for Valkey
+* [stackit valkey](./stackit_valkey.md)	 - Provides functionality for Key Value Store (valkey)
 

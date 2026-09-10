@@ -1,10 +1,10 @@
 ## stackit valkey credentials describe
 
-Shows details of credentials of a Valkey instance
+Shows details of credentials of a Key Value Store (valkey) instance
 
 ### Synopsis
 
-Shows details of credentials of a Valkey instance. The password will be shown in plain text in the output.
+Shows details of credentials of a Key Value Store (valkey) instance. The password will be shown in plain text in the output.
 
 ```
 stackit valkey credentials describe CREDENTIALS_ID [flags]
@@ -40,5 +40,5 @@ stackit valkey credentials describe CREDENTIALS_ID [flags]
 
 ### SEE ALSO
 
-* [stackit valkey credentials](./stackit_valkey_credentials.md)	 - Provides functionality for Valkey credentials
+* [stackit valkey credentials](./stackit_valkey_credentials.md)	 - Provides functionality for Key Value Store (valkey) credentials
 
