@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	ufw "github.com/stackitcloud/stackit-sdk-go/services/ufw/v1api"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	serviceEnablementClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/service-enablement/client"
 	serviceEnablementUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/service-enablement/utils"
