@@ -115,7 +115,7 @@ func outputResult(
 			table.AddRow(
 				instance.Id,
 				instance.Name,
-				instance.Region,
+				*instance.Region,
 				instance.State,
 			)
 		}

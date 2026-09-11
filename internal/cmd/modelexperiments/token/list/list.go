@@ -80,7 +80,11 @@ func outputResult(p *print.Printer, outputFormat string, resp *modelexperiments.
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "DESCRIPTION")
 		for _, token := range resp.Tokens {
-			table.AddRow(token.Id, token.Name, token.Description)
+			description := ""
+			if token.Description != nil {
+				description = *token.Description
+			}
+			table.AddRow(token.Id, token.Name, description)
 		}
 		return table.Display(p)
 	})
