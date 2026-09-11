@@ -56,6 +56,7 @@ const (
 	CDNCustomEndpointKey               = "cdn_custom_endpoint"
 	IntakeCustomEndpointKey            = "intake_custom_endpoint"
 	LogsCustomEndpointKey              = "logs_custom_endpoint"
+	UfwCustomEndpointKey               = "ufw_custom_endpoint"
 	ValkeyCustomEndpointKey            = "valkey_custom_endpoint"
 	VPNCustomEndpointKey               = "vpn_custom_endpoint"
 
