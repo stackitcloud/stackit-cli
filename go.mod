@@ -22,7 +22,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.20.0
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.22.1
 	github.com/stackitcloud/stackit-sdk-go/services/edge v0.13.1
-	github.com/stackitcloud/stackit-sdk-go/services/git v0.14.0
+	github.com/stackitcloud/stackit-sdk-go/services/git v0.14.1
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.14.1
 	github.com/stackitcloud/stackit-sdk-go/services/intake v0.11.1
 	github.com/stackitcloud/stackit-sdk-go/services/logs v0.10.1
@@ -267,15 +267,15 @@ require (
 	github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
-	github.com/stackitcloud/stackit-sdk-go/services/kms v1.13.0
-	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.15.1
+	github.com/stackitcloud/stackit-sdk-go/services/kms v1.13.1
+	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.15.2
 	github.com/stackitcloud/stackit-sdk-go/services/logme v1.3.0
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.3.0
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.9.1
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.25.0
 	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.3.0
-	github.com/stackitcloud/stackit-sdk-go/services/redis v1.4.0
-	github.com/stackitcloud/stackit-sdk-go/services/sfs v0.11.1
+	github.com/stackitcloud/stackit-sdk-go/services/redis v1.4.1
+	github.com/stackitcloud/stackit-sdk-go/services/sfs v0.11.2
 	github.com/subosito/gotenv v1.6.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
