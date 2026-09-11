@@ -58,6 +58,7 @@ const (
 	CDNCustomEndpointKey               = "cdn_custom_endpoint"
 	IntakeCustomEndpointKey            = "intake_custom_endpoint"
 	LogsCustomEndpointKey              = "logs_custom_endpoint"
+	TelemetryRouterCustomEndpointKey   = "telemetryrouter_custom_endpoint"
 	ValkeyCustomEndpointKey            = "valkey_custom_endpoint"
 	VPNCustomEndpointKey               = "vpn_custom_endpoint"
 
@@ -129,6 +130,7 @@ var ConfigKeys = []string{
 	ServiceAccountCustomEndpointKey,
 	ServiceEnablementCustomEndpointKey,
 	SfsCustomEndpointKey,
+	TelemetryRouterCustomEndpointKey,
 	TokenCustomEndpointKey,
 	ValkeyCustomEndpointKey,
 	VPNCustomEndpointKey,
@@ -225,6 +227,7 @@ func setConfigDefaults() {
 	viper.SetDefault(AlbCustomEndpoint, "")
 	viper.SetDefault(AlbWafCustomEndpointKey, "")
 	viper.SetDefault(LogsCustomEndpointKey, "")
+	viper.SetDefault(TelemetryRouterCustomEndpointKey, "")
 	viper.SetDefault(CDNCustomEndpointKey, "")
 	viper.SetDefault(ValkeyCustomEndpointKey, "")
 	viper.SetDefault(VPNCustomEndpointKey, "")
