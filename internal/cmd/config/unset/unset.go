@@ -56,6 +56,7 @@ const (
 	tokenCustomEndpointFlag             = "token-custom-endpoint"
 	intakeCustomEndpointFlag            = "intake-custom-endpoint"
 	logsCustomEndpointFlag              = "logs-custom-endpoint"
+	telemetryRouterCustomEndpointFlag   = "telemetryrouter-custom-endpoint"
 	cdnCustomEndpointFlag               = "cdn-custom-endpoint"
 	vpnCustomEndpointFlag               = "vpn-custom-endpoint"
 )
@@ -107,6 +108,7 @@ type inputModel struct {
 	TokenCustomEndpoint             bool
 	IntakeCustomEndpoint            bool
 	LogsCustomEndpoint              bool
+	TelemetryRouterCustomEndpoint   bool
 	CDNCustomEndpoint               bool
 	VpnCustomEndpoint               bool
 }
@@ -247,6 +249,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.LogsCustomEndpoint {
 				viper.Set(config.LogsCustomEndpointKey, "")
 			}
+			if model.TelemetryRouterCustomEndpoint {
+				viper.Set(config.TelemetryRouterCustomEndpointKey, "")
+			}
 			if model.SfsCustomEndpoint {
 				viper.Set(config.SfsCustomEndpointKey, "")
 			}
@@ -309,6 +314,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(tokenCustomEndpointFlag, false, "Custom token endpoint of the Service Account API, which is used to request access tokens when the service account authentication is activated. Not relevant for user authentication.")
 	cmd.Flags().Bool(intakeCustomEndpointFlag, false, "Intake API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(logsCustomEndpointFlag, false, "Logs API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(telemetryRouterCustomEndpointFlag, false, "TelemetryRouter API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(sfsCustomEndpointFlag, false, "SFS API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(cdnCustomEndpointFlag, false, "Custom CDN endpoint URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(vpnCustomEndpointFlag, false, "VPN API base URL. If unset, uses the default base URL")
@@ -357,6 +363,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		TokenCustomEndpoint:             flags.FlagToBoolValue(p, cmd, tokenCustomEndpointFlag),
 		IntakeCustomEndpoint:            flags.FlagToBoolValue(p, cmd, intakeCustomEndpointFlag),
 		LogsCustomEndpoint:              flags.FlagToBoolValue(p, cmd, logsCustomEndpointFlag),
+		TelemetryRouterCustomEndpoint:   flags.FlagToBoolValue(p, cmd, telemetryRouterCustomEndpointFlag),
 		CDNCustomEndpoint:               flags.FlagToBoolValue(p, cmd, cdnCustomEndpointFlag),
 		VpnCustomEndpoint:               flags.FlagToBoolValue(p, cmd, vpnCustomEndpointFlag),
 	}

@@ -47,5 +47,6 @@ stackit beta [flags]
 * [stackit beta edge-cloud](./stackit_beta_edge-cloud.md)	 - Provides functionality for Edge Cloud services.
 * [stackit beta intake](./stackit_beta_intake.md)	 - Provides functionality for intake
 * [stackit beta sfs](./stackit_beta_sfs.md)	 - Provides functionality for SFS (STACKIT File Storage)
+* [stackit beta telemetryrouter](./stackit_beta_telemetryrouter.md)	 - Provides functionality for TelemetryRouter
 * [stackit beta vpn](./stackit_beta_vpn.md)	 - Provides functionality for VPN
 
