@@ -650,8 +650,8 @@ github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.13.0 h1:o8+bH376
 github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.13.0/go.mod h1:yzlakB+f8ur4yAHR6lyCABO+HcEtZG3G2Faj6m5/uW8=
 github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.3.0 h1:jX0fN80M87/O8RVA+kNX1yioj+y30dHd6VrFC8OrRTA=
 github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.3.0/go.mod h1:TwfVVynB/+AKbccSOLk2qZpPL1tdK43BBAiACP6EtSg=
-github.com/stackitcloud/stackit-sdk-go/services/redis v1.4.0 h1:/f1sItmKRplpM8Kaa5LMnmfUPvnlgu5Tf+HV0w57pV0=
-github.com/stackitcloud/stackit-sdk-go/services/redis v1.4.0/go.mod h1:yjej6QfYoYdRIyKXlmbVz8fZYxbuUdl+QBkvLDPgA4k=
+github.com/stackitcloud/stackit-sdk-go/services/redis v1.4.1 h1:s3mXo6FGNEeMWqVPq7yaDgcOakEejRP7X9l7OaK7PEE=
+github.com/stackitcloud/stackit-sdk-go/services/redis v1.4.1/go.mod h1:6ihYZA22kityLgM0Pp7qROOomcZeUV0OsayOrd5vVe4=
 github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.24.2 h1:4UxxJmCSCwV8q4bT4G+D1JH8F9Gm6BKaLGixX5DVcvI=
 github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.24.2/go.mod h1:NEz3f+GV5G++BE9/MmZCsXJyCih7jtg0pZuSyG2sLEs=
 github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.10.1 h1:+0dl8HjYKEdhUZEr/7WcugPhNoZzf9PBnsQWJBDLtaY=
