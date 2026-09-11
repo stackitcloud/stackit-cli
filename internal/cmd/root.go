@@ -22,6 +22,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/logme"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/logs"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/mariadb"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/modelexperiments"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/mongodbflex"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/network"
 	networkArea "github.com/stackitcloud/stackit-cli/internal/cmd/network-area"
@@ -180,6 +181,7 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(logme.NewCmd(params))
 	cmd.AddCommand(logs.NewCmd(params))
 	cmd.AddCommand(mariadb.NewCmd(params))
+	cmd.AddCommand(modelexperiments.NewCmd(params))
 	cmd.AddCommand(mongodbflex.NewCmd(params))
 	cmd.AddCommand(objectstorage.NewCmd(params))
 	cmd.AddCommand(observability.NewCmd(params))

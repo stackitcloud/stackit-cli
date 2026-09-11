@@ -27,6 +27,7 @@ stackit [flags]
 ### SEE ALSO
 
 * [stackit affinity-group](./stackit_affinity-group.md)	 - Manage server affinity groups
+* [stackit ai-model-experiments](./stackit_ai-model-experiments.md)	 - Provides functionality for AI Model Experiments
 * [stackit auth](./stackit_auth.md)	 - Authenticates the STACKIT CLI
 * [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
 * [stackit config](./stackit_config.md)	 - Provides functionality for CLI configuration options
