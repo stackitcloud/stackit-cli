@@ -59,6 +59,7 @@ const (
 	tokenCustomEndpointFlag             = "token-custom-endpoint"
 	intakeCustomEndpointFlag            = "intake-custom-endpoint"
 	logsCustomEndpointFlag              = "logs-custom-endpoint"
+	telemetryRouterCustomEndpointFlag   = "telemetryrouter-custom-endpoint"
 	cdnCustomEndpointFlag               = "cdn-custom-endpoint"
 	vpnCustomEndpointFlag               = "vpn-custom-endpoint"
 )
@@ -113,6 +114,7 @@ type inputModel struct {
 	TokenCustomEndpoint             bool
 	IntakeCustomEndpoint            bool
 	LogsCustomEndpoint              bool
+	TelemetryRouterCustomEndpoint   bool
 	CDNCustomEndpoint               bool
 	VpnCustomEndpoint               bool
 }
@@ -301,6 +303,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				viper.Set(config.ScfCustomEndpointKey, "")
 			}
 
+			if model.TelemetryRouterCustomEndpoint {
+				viper.Set(config.TelemetryRouterCustomEndpointKey, "")
+			}
+
 			if model.SfsCustomEndpoint {
 				viper.Set(config.SfsCustomEndpointKey, "")
 			}
@@ -370,6 +376,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(intakeCustomEndpointFlag, false, "Intake API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(logsCustomEndpointFlag, false, "Logs API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(scfCustomEndpointFlag, false, "STACKIT Cloud Foundry API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(telemetryRouterCustomEndpointFlag, false, "Telemetry Router API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(sfsCustomEndpointFlag, false, "SFS API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(cdnCustomEndpointFlag, false, "Custom CDN endpoint URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(vpnCustomEndpointFlag, false, "VPN API base URL. If unset, uses the default base URL")
@@ -421,6 +428,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		TokenCustomEndpoint:             flags.FlagToBoolValue(p, cmd, tokenCustomEndpointFlag),
 		IntakeCustomEndpoint:            flags.FlagToBoolValue(p, cmd, intakeCustomEndpointFlag),
 		LogsCustomEndpoint:              flags.FlagToBoolValue(p, cmd, logsCustomEndpointFlag),
+		TelemetryRouterCustomEndpoint:   flags.FlagToBoolValue(p, cmd, telemetryRouterCustomEndpointFlag),
 		CDNCustomEndpoint:               flags.FlagToBoolValue(p, cmd, cdnCustomEndpointFlag),
 		VpnCustomEndpoint:               flags.FlagToBoolValue(p, cmd, vpnCustomEndpointFlag),
 	}
