@@ -624,8 +624,8 @@ github.com/stackitcloud/stackit-sdk-go/services/cdn v1.20.0 h1:p/8f/+Z+OtqX0cau2
 github.com/stackitcloud/stackit-sdk-go/services/cdn v1.20.0/go.mod h1:MHB1N3EQ9GuAduAQoNS+gb1MjrWJieszbpOso9TQv5s=
 github.com/stackitcloud/stackit-sdk-go/services/dns v0.22.1 h1:vC0GpKVKH1Tce9VNyZTMWbheyGGS9a9GZWv6H5/z4Ek=
 github.com/stackitcloud/stackit-sdk-go/services/dns v0.22.1/go.mod h1:FiYSv3D9rzgEVzi8Mpq5oYZBosrasa5uUYqVdEIbM1U=
-github.com/stackitcloud/stackit-sdk-go/services/edge v0.13.1 h1:N36I7MavPdDUb0GJXmwNzjEdypJEizW4eQi+/YOzedM=
-github.com/stackitcloud/stackit-sdk-go/services/edge v0.13.1/go.mod h1:Ylse6gqGJtsd5TVmvha+hoLd1QQHLKvhY5dO15+q5kg=
+github.com/stackitcloud/stackit-sdk-go/services/edge v0.13.2 h1:UDkXmgOAlP3y/u7FKp6/MaVxvSi38hNqnj1HytM6bU4=
+github.com/stackitcloud/stackit-sdk-go/services/edge v0.13.2/go.mod h1:hlUcPvOgH/CzZqH7u4SwV81qiismCVAtvw5pTAf6si4=
 github.com/stackitcloud/stackit-sdk-go/services/git v0.14.1 h1:7R5peSRer3Y83mfB6wcdCP0vhEjsq4myUdVhl24q6to=
 github.com/stackitcloud/stackit-sdk-go/services/git v0.14.1/go.mod h1:kz2pl17t9MNQx0+fNXg10ZAVfjmvOtsHB7VlAzu/Io8=
 github.com/stackitcloud/stackit-sdk-go/services/iaas v1.14.1 h1:P8XhOi8TLA7NbLHhxU8dCJjgQpha/65agos3pI59+vw=
@@ -652,8 +652,8 @@ github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.3.0 h1:j8327l7QFhd
 github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.3.0/go.mod h1:L+NlfC1hilLOqlLLukCj/UDnxlnNrc/oMikcw3Ansyw=
 github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.13.0 h1:o8+bH3763G5oU1Y8Bf5nkQ8kzqFO7su0VUpeSGKdoPY=
 github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.13.0/go.mod h1:yzlakB+f8ur4yAHR6lyCABO+HcEtZG3G2Faj6m5/uW8=
-github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.3.0 h1:jX0fN80M87/O8RVA+kNX1yioj+y30dHd6VrFC8OrRTA=
-github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.3.0/go.mod h1:TwfVVynB/+AKbccSOLk2qZpPL1tdK43BBAiACP6EtSg=
+github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.3.1 h1:6t+EJTR9HOFZGxDx8aagITGN5SfJKlVWnYn+b/y21X8=
+github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.3.1/go.mod h1:oGcpMIs2H/ldTQlTkYJUY4ZaVNi3MMRSMz0XpLDSKcU=
 github.com/stackitcloud/stackit-sdk-go/services/redis v1.4.1 h1:s3mXo6FGNEeMWqVPq7yaDgcOakEejRP7X9l7OaK7PEE=
 github.com/stackitcloud/stackit-sdk-go/services/redis v1.4.1/go.mod h1:6ihYZA22kityLgM0Pp7qROOomcZeUV0OsayOrd5vVe4=
 github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.24.2 h1:4UxxJmCSCwV8q4bT4G+D1JH8F9Gm6BKaLGixX5DVcvI=
@@ -680,10 +680,10 @@ github.com/stackitcloud/stackit-sdk-go/services/ufw v0.1.0 h1:LnDUxI7v507T341Smf
 github.com/stackitcloud/stackit-sdk-go/services/ufw v0.1.0/go.mod h1:c/JxzGai01jCK/5OCi0TxCUiQ1Gl7SboGuErflWxLqQ=
 github.com/stackitcloud/stackit-sdk-go/services/valkey v0.2.0 h1:RP9ITvjsPhA2+Xi9MhqYP9xkEsURyxYmRB3JKXIB5zc=
 github.com/stackitcloud/stackit-sdk-go/services/valkey v0.2.0/go.mod h1:etzt/a723p327dqha1V72cCoBWjUBS2DtHy3ZTac0SA=
-github.com/stackitcloud/stackit-sdk-go/services/valkey v0.3.0 h1:XC238ExUFeDHOlJzu4gcspsbcr5v70T/cuNuC/8tUZQ=
-github.com/stackitcloud/stackit-sdk-go/services/valkey v0.3.0/go.mod h1:etzt/a723p327dqha1V72cCoBWjUBS2DtHy3ZTac0SA=
-github.com/stackitcloud/stackit-sdk-go/services/vpn v0.15.0 h1:JpMJjWBa6fwNNcAHoq00v+8+DwMD0/fe4WPjvbHdY2o=
-github.com/stackitcloud/stackit-sdk-go/services/vpn v0.15.0/go.mod h1:toIjQk1dhxdUFVyCWJJja0w/0nFpDid8MWX0ukQfvfo=
+github.com/stackitcloud/stackit-sdk-go/services/valkey v0.3.1 h1:zAdxoRrUB5sIz73xAyXXQlZZ46Yc1p3rW1PerOLHNOk=
+github.com/stackitcloud/stackit-sdk-go/services/valkey v0.3.1/go.mod h1:8znHnd2b6rdEHSmW/36LQa4dMMaLuN8dwo3tD6arEic=
+github.com/stackitcloud/stackit-sdk-go/services/vpn v0.15.2 h1:82VZJaJPwcBKSj8WV8v0ujBvbkbMxFXIvvv0wU+0Be0=
+github.com/stackitcloud/stackit-sdk-go/services/vpn v0.15.2/go.mod h1:3OHHiMoNDwI63Vtvf5B/2Hc2hLlaCyTvPwg8N6T957s=
 github.com/stbenjam/no-sprintf-host-port v0.3.1 h1:AyX7+dxI4IdLBPtDbsGAyqiTSLpCP9hWRrXQDU4Cm/g=
 github.com/stbenjam/no-sprintf-host-port v0.3.1/go.mod h1:ODbZesTCHMVKthBHskvUUexdcNHAQRXk9NpSsL8p/HQ=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
