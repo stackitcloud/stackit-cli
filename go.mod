@@ -19,19 +19,19 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/alb v0.17.1
 	github.com/stackitcloud/stackit-sdk-go/services/albwaf v0.13.2
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.15.3
-	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.20.0
+	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.21.0
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.22.1
 	github.com/stackitcloud/stackit-sdk-go/services/edge v0.13.2
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.14.1
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.14.1
 	github.com/stackitcloud/stackit-sdk-go/services/intake v0.11.1
-	github.com/stackitcloud/stackit-sdk-go/services/logs v0.10.1
+	github.com/stackitcloud/stackit-sdk-go/services/logs v0.10.2
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.12.1
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.3.0
-	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.13.0
+	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.15.0
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.24.2
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.10.1
-	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.18.2
+	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.19.1
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.7.1
 	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.5.4
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.20.1
@@ -270,8 +270,8 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/kms v1.13.1
 	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.15.2
 	github.com/stackitcloud/stackit-sdk-go/services/logme v1.3.0
-	github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.3.0
-	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.9.1
+	github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.3.1
+	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.9.2
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.25.0
 	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.3.1
 	github.com/stackitcloud/stackit-sdk-go/services/redis v1.4.1
