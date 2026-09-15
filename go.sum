@@ -660,8 +660,8 @@ github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.19.1 h1:Mym5vq
 github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.19.1/go.mod h1:oFbKTkCFtp/RVjTeuv5caSuuEnf3/JG8zRDB4nbLYes=
 github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.7.1 h1:lU6kQgv2tWLKDkhBRhS3v9BSFoUwHAcUOkHEa52kPVA=
 github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.7.1/go.mod h1:BJeafbecuocdirGCAJ2Vz/rPSK/LRrB5lPBEacqd1eU=
-github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.5.4 h1:1198+2wS4fls0qA8gFkjVSjLHc8vffz4oxxbd0Noq+Y=
-github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.5.4/go.mod h1:/OHYZXQb9KXDdZK5J9C2YS6DJUD2i6ednZ1rK7zpDZ0=
+github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.5.5 h1:MjZnz7YJfBCUtYKaergQkH0ViSOA6wrxVzDX0KryxJc=
+github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.5.5/go.mod h1:HKXnp6C9LgkOXAGAlaYN0rVqNY2ue5oIKIPbtUzqqvc=
 github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.20.1 h1:zVVA/Puge2PK3G8lrGGolnQzxYwwsNUgfMyyRUUQc44=
 github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.20.1/go.mod h1:xJNa86o89czK2o60+s46vz8+NSKDTbQduFGFaztJnsA=
 github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.7.2 h1:ne+TBZTWUzIg47X5vRbeyPfJCA1tafIN3R20ADBIu2Q=
