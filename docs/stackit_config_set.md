@@ -32,6 +32,7 @@ stackit config set [flags]
       --alb-waf-custom-endpoint string                             ALB WAF API base URL, used in calls to this API
       --allowed-url-domain string                                  Domain name, used for the verification of the URLs that are given in the custom identity provider endpoint and "STACKIT curl" command
       --authorization-custom-endpoint string                       Authorization API base URL, used in calls to this API
+      --automation-custom-endpoint string                          Automation API base URL, used in calls to this API
       --cdn-custom-endpoint string                                 CDN API base URL, used in calls to this API
       --dns-custom-endpoint string                                 DNS API base URL, used in calls to this API
       --edge-custom-endpoint string                                Edge API base URL, used in calls to this API
