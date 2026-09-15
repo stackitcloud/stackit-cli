@@ -71,7 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				`List PostgreSQL Flex storage options for a given flavor. The flavor ID can be retrieved by running "$ stackit postgresflex options --flavors"`,
 				"$ stackit postgresflex options --storages --flavor-id <FLAVOR_ID>"),
 		),
-		Deprecated: `Command "stackit postgresflex options" is deprecated and will be removed after 2027-01-31. Please use "stackit postgresflex version list", "stackit postgresflex flavors list" and "stackit postgresflex flavor describe" instead.`,
+		Deprecated: `Command "stackit postgresflex options" is deprecated and will be removed after 2027-01-31. Please use "stackit postgresflex version list", "stackit postgresflex flavor list" and "stackit postgresflex flavor describe" instead.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 			model, err := parseInput(params.Printer, cmd, args)
