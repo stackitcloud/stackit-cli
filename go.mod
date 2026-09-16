@@ -20,11 +20,11 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/albwaf v0.13.2
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.15.3
 	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.21.0
-	github.com/stackitcloud/stackit-sdk-go/services/dns v0.22.1
+	github.com/stackitcloud/stackit-sdk-go/services/dns v0.23.1
 	github.com/stackitcloud/stackit-sdk-go/services/edge v0.13.2
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.14.1
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.14.1
-	github.com/stackitcloud/stackit-sdk-go/services/intake v0.11.1
+	github.com/stackitcloud/stackit-sdk-go/services/intake v0.11.2
 	github.com/stackitcloud/stackit-sdk-go/services/logs v0.10.2
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.12.1
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.3.0
@@ -33,9 +33,9 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.10.1
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.19.1
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.7.1
-	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.5.4
+	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.5.5
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.20.1
-	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.7.1
+	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.7.2
 	github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.1
 	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.18.0
 	github.com/stackitcloud/stackit-sdk-go/services/ufw v0.1.0
