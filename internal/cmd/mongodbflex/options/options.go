@@ -71,7 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				`List MongoDB Flex storage options for a given flavor. The flavor ID can be retrieved by running "$ stackit mongodbflex options --flavors"`,
 				"$ stackit mongodbflex options --storages --flavor-id <FLAVOR_ID>"),
 		),
-		Deprecated: `Command "stackit mongodbflex options" command is deprecated and will be removed after 2027-03-07. Please use "stackit mongodbflex version list", "stackit mongodbflex flavor list" and "stackit mongodbflex storage list" commands instead.`,
+		Deprecated: `Command "stackit mongodbflex options" is deprecated and will be removed after 2027-03-07. Please use "stackit mongodbflex version list", "stackit mongodbflex flavor list" and "stackit mongodbflex storage list" commands instead.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 			model, err := parseInput(params.Printer, cmd, args)
