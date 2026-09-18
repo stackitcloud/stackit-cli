@@ -1,19 +1,27 @@
-## stackit beta volume automation
+## stackit beta volume automation execution create
 
-Provides functionality for Volume Automation
+Creates a new Volume Automation Execution
 
 ### Synopsis
 
-Provides functionality for Volume Automation.
+Creates a new Volume Automation Execution.
 
 ```
-stackit beta volume automation [flags]
+stackit beta volume automation execution create [flags]
+```
+
+### Examples
+
+```
+  Create a new Volume Automation Execution for Automation with ID "xxx"
+  $ stackit beta volume automation execution create --automation-id xxx
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta volume automation"
+      --automation-id string   ID of the automation which should be executed
+  -h, --help                   Help for "stackit beta volume automation execution create"
 ```
 
 ### Options inherited from parent commands
@@ -29,7 +37,5 @@ stackit beta volume automation [flags]
 
 ### SEE ALSO
 
-* [stackit beta volume](./stackit_beta_volume.md)	 - Provides functionality for Volume
 * [stackit beta volume automation execution](./stackit_beta_volume_automation_execution.md)	 - Provides functionality for Volume Automation Execution
-* [stackit beta volume automation template](./stackit_beta_volume_automation_template.md)	 - Provides functionality for Volume Automation Templates
 

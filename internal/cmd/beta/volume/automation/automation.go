@@ -3,6 +3,7 @@ package automation
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/volume/automation/execution"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/volume/automation/template"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -21,5 +22,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
+	cmd.AddCommand(execution.NewCmd(params))
 	cmd.AddCommand(template.NewCmd(params))
 }
