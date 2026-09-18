@@ -1,10 +1,10 @@
 ## stackit valkey instance update
 
-Updates a Valkey instance
+Updates a Key Value Store (valkey) instance
 
 ### Synopsis
 
-Updates a Valkey instance.
+Updates a Key Value Store (valkey) instance.
 
 ```
 stackit valkey instance update INSTANCE_ID [flags]
@@ -54,5 +54,5 @@ stackit valkey instance update INSTANCE_ID [flags]
 
 ### SEE ALSO
 
-* [stackit valkey instance](./stackit_valkey_instance.md)	 - Provides functionality for Valkey instances
+* [stackit valkey instance](./stackit_valkey_instance.md)	 - Provides functionality for Key Value Store (valkey) instances
 

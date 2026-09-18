@@ -1,10 +1,10 @@
 ## stackit valkey instance delete
 
-Deletes a Valkey instance
+Deletes a Key Value Store (valkey) instance
 
 ### Synopsis
 
-Deletes a Valkey instance.
+Deletes a Key Value Store (valkey) instance.
 
 ```
 stackit valkey instance delete INSTANCE_ID [flags]
@@ -36,5 +36,5 @@ stackit valkey instance delete INSTANCE_ID [flags]
 
 ### SEE ALSO
 
-* [stackit valkey instance](./stackit_valkey_instance.md)	 - Provides functionality for Valkey instances
+* [stackit valkey instance](./stackit_valkey_instance.md)	 - Provides functionality for Key Value Store (valkey) instances
 

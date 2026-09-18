@@ -32,8 +32,8 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", instanceIdArg),
-		Short: "Deletes a Valkey instance",
-		Long:  "Deletes a Valkey instance.",
+		Short: "Deletes a Key Value Store (valkey) instance",
+		Long:  "Deletes a Key Value Store (valkey) instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
