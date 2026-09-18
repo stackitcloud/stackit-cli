@@ -17,8 +17,8 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stackitcloud/stackit-sdk-go/core v0.27.0
 	github.com/stackitcloud/stackit-sdk-go/services/alb v0.17.1
-	github.com/stackitcloud/stackit-sdk-go/services/albwaf v0.13.2
-	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.15.3
+	github.com/stackitcloud/stackit-sdk-go/services/albwaf v0.13.4
+	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.15.4
 	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.21.0
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.23.1
 	github.com/stackitcloud/stackit-sdk-go/services/edge v0.13.2
@@ -27,7 +27,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/intake v0.11.2
 	github.com/stackitcloud/stackit-sdk-go/services/logs v0.10.2
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.12.1
-	github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.3.0
+	github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.3.1
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.15.0
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.24.2
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.10.1
@@ -36,14 +36,14 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.5.5
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.20.1
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.7.2
-	github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.1
+	github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.2
 	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.18.0
 	github.com/stackitcloud/stackit-sdk-go/services/ufw v0.1.0
 	github.com/stackitcloud/stackit-sdk-go/services/valkey v0.3.1
 	github.com/stackitcloud/stackit-sdk-go/services/vpn v0.15.2
 	github.com/zalando/go-keyring v0.2.8
 	golang.org/x/mod v0.40.0
-	golang.org/x/oauth2 v0.36.0
+	golang.org/x/oauth2 v0.37.0
 	golang.org/x/term v0.45.0
 	golang.org/x/text v0.41.0
 	k8s.io/apimachinery v0.37.0

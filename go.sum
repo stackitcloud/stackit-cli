@@ -616,10 +616,10 @@ github.com/stackitcloud/stackit-sdk-go/core v0.27.0 h1:7lc6qStcFDFf8zHP4ORPa9joy
 github.com/stackitcloud/stackit-sdk-go/core v0.27.0/go.mod h1:WU1hhxnjXw2EV7CYa1nlEvNpMiRY6CvmIOaHuL3pOaA=
 github.com/stackitcloud/stackit-sdk-go/services/alb v0.17.1 h1:YOMgUO/0/FZPxOmkKIbEIjzpzJ2VFhfPn3ErID9qC40=
 github.com/stackitcloud/stackit-sdk-go/services/alb v0.17.1/go.mod h1:eK6oRB5Tmpt6KbXQ4UYBGg2LgW5bPtVoncL9E8JSRww=
-github.com/stackitcloud/stackit-sdk-go/services/albwaf v0.13.2 h1:zY0ArhTg++8oOAlytCRck3u41ZakAvU74ZkwBuMnipg=
-github.com/stackitcloud/stackit-sdk-go/services/albwaf v0.13.2/go.mod h1:4M9G1I64kZwlXO32ZoIpt0GAN4SpZ1SYerwCVVIBGoE=
-github.com/stackitcloud/stackit-sdk-go/services/authorization v0.15.3 h1:YEuymF48gnBNqBsraBN5pycBDEyXcFYy/2bCdF+H3eY=
-github.com/stackitcloud/stackit-sdk-go/services/authorization v0.15.3/go.mod h1:T/JF25XGJ3GqER/1L2N//DgY8x5tY7gA3N+/0nvmOWY=
+github.com/stackitcloud/stackit-sdk-go/services/albwaf v0.13.4 h1:KNEcAPj66Asb00V7f6v3Ku2d6ybP8PL1IwFQubUuxc0=
+github.com/stackitcloud/stackit-sdk-go/services/albwaf v0.13.4/go.mod h1:riXgEDfIjNdFjYk81zNnWt0npkv1+/P1iFRfFIt28Jo=
+github.com/stackitcloud/stackit-sdk-go/services/authorization v0.15.4 h1:YRfEQJxMn9B/yCf5ZGTsBzPLv69LM/jvvLuC8vb0Uf4=
+github.com/stackitcloud/stackit-sdk-go/services/authorization v0.15.4/go.mod h1:AVLUwOPKsoz6HvKzClu0a5OTjMOYS696gRjHUQvQH70=
 github.com/stackitcloud/stackit-sdk-go/services/cdn v1.21.0 h1:lCs1eq/OOTdwGrrkxkJ8qCnS6yLM4XZhznpML3nd1NI=
 github.com/stackitcloud/stackit-sdk-go/services/cdn v1.21.0/go.mod h1:NBgvZH5ekJ2hFCNI480C9MdJsa4989YGC1YgX5ELA48=
 github.com/stackitcloud/stackit-sdk-go/services/dns v0.23.1 h1:6hm7oYJeR5Bu8d+PeCvVLWjUXh78pSfdsCTZ7lu5qdc=
@@ -648,8 +648,8 @@ github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.9.2 h1:FvT1SDs4
 github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.9.2/go.mod h1:HNLjAqJrfBYfK/DT7Nrwh6LkArq6bn/ri+kgps3skjc=
 github.com/stackitcloud/stackit-sdk-go/services/observability v0.25.0 h1:r3URNI19iuD455mbceuL5ZIGxRTURUVNw240ukzc45A=
 github.com/stackitcloud/stackit-sdk-go/services/observability v0.25.0/go.mod h1:0fEZQHm729mBdvg4sNrAhM6KmHROHJSeS2FwCMRk46k=
-github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.3.0 h1:j8327l7QFhdL4ETg3kV9Q7Jle5GFYtfxMkBS3IvalDo=
-github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.3.0/go.mod h1:L+NlfC1hilLOqlLLukCj/UDnxlnNrc/oMikcw3Ansyw=
+github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.3.1 h1:xVv2Z/ddBJaY65dfGMOn5pC8OAENOpO2fnKp7nuH5Lo=
+github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.3.1/go.mod h1:dkyxl2NeE4ii/Nyn1Skce5n0XrSKGjp3TlhjOfc4t3Y=
 github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.15.0 h1:TSxUvRRMT8KsGatFGZsuqRWU05KDf2jmh5ZJ2MRsUXw=
 github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.15.0/go.mod h1:7Ka8vrinx+DjCXv6lqCVZbIkDIbrzA4qrkNjXr6MUDM=
 github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.3.1 h1:6t+EJTR9HOFZGxDx8aagITGN5SfJKlVWnYn+b/y21X8=
@@ -672,8 +672,8 @@ github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.7.2 h1:ne+T
 github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.7.2/go.mod h1:gmOQuuRATNTmHTuwCsJ6ko1AwHThYpvEkmD2uOYEJCQ=
 github.com/stackitcloud/stackit-sdk-go/services/sfs v0.11.2 h1:t2IsBrbZBbi26yRna07zUt9ZYaK60IWpnDbP8ETthjk=
 github.com/stackitcloud/stackit-sdk-go/services/sfs v0.11.2/go.mod h1:qXoH35kVrzVH3MLhlGcL5VlVHIpHool2eKMkggZbHEY=
-github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.1 h1:dSkUoaMip0uA8tnRERjT8A/3JFpx7Gux0qpxI5oGO1k=
-github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.1/go.mod h1:TbqmZhLMofmfl+HhVl6oHYcI3zvXTm1vRjN3A/fOkM4=
+github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.2 h1:4ApmRQGkcf/G/h1s19QsqH/vqE3oqfrdG1J/3/40iEM=
+github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.2/go.mod h1:YYwFQNYrYUpa4FeT/6pxky8vp7E7pPy2F6+Ptf469hg=
 github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.18.0 h1:k4dgOFQvkBhSNTtmFOZwMbkKf6ZCEGB/D1WQgiO9gwc=
 github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.18.0/go.mod h1:AiUoMAqQcOlMgDtkVJlqI7P/VGD5xjN3dYjERGnwN/M=
 github.com/stackitcloud/stackit-sdk-go/services/ufw v0.1.0 h1:LnDUxI7v507T341Smff/fVzSSRP59uIOUmcHAbUf1hE=
@@ -867,8 +867,8 @@ golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45/go.mod h1:gOpvHmFTYa4Iltr
 golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
 golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
 golang.org/x/oauth2 v0.0.0-20210514164344-f6687ab2804c/go.mod h1:KelEdhl1UZF7XfJ4dDtk6s++YSgaE7mD/BuKKDLBl4A=
-golang.org/x/oauth2 v0.36.0 h1:peZ/1z27fi9hUOFCAZaHyrpWG5lwe0RJEEEeH0ThlIs=
-golang.org/x/oauth2 v0.36.0/go.mod h1:YDBUJMTkDnJS+A4BP4eZBjCqtokkg1hODuPjwiGPO7Q=
+golang.org/x/oauth2 v0.37.0 h1:JUlcxA8oAtauLfiH8FX2/FkAWHAdi0QtGCGc+hofE98=
+golang.org/x/oauth2 v0.37.0/go.mod h1:IxwZNxUULJmpBFf9K/9NTMSIfZZuvuTy1gGxhigP/58=
 golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.0.0-20181108010431-42b317875d0f/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.0.0-20181221193216-37e7f081c4d4/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
