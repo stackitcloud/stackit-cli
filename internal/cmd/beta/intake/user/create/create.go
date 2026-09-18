@@ -49,11 +49,14 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a new Intake User with required parameters`,
-				`$ stackit beta intake user create --display-name intake-user --intake-id xxx --password "SuperSafepass123\!"`),
+				`Create a new Intake User. The password is entered interactively in the terminal`,
+				`$ stackit beta intake user create --display-name intake-user --intake-id xxx`),
+			examples.NewExample(
+				`Create a new Intake User providing the password from a file`,
+				`$ stackit beta intake user create --display-name intake-user --intake-id xxx --password @./secret.txt`),
 			examples.NewExample(
 				`Create a new Intake User for the dead-letter queue with labels`,
-				`$ stackit beta intake user create --display-name dlq-user --intake-id xxx --password "SuperSafepass123\!" --type dead-letter --labels "env=prod"`),
+				`$ stackit beta intake user create --display-name dlq-user --intake-id xxx --password @./secret.txt --type dead-letter --labels "env=prod"`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
@@ -109,12 +112,12 @@ func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.Flags().String(displayNameFlag, "", "Display name")
 	cmd.Flags().Var(flags.UUIDFlag(), intakeIdFlag, "The UUID of the Intake to associate the user with")
 	password := flags.SecretFlag(passwordFlag, params)
-	cmd.Flags().Var(password, passwordFlag, password.Usage()+" Must contain lower, upper, number, and special characters (min 12 chars)")
+	cmd.Flags().Var(password, passwordFlag, password.Usage()+" Must contain lower, upper, digits, and special characters (min 12 chars).")
 	cmd.Flags().String(userTypeFlag, string(intake.USERTYPE_INTAKE), "Type of user. One of 'intake' (default) or 'dead-letter'")
 	cmd.Flags().String(descriptionFlag, "", "Description")
 	cmd.Flags().StringToString(labelsFlag, nil, "Labels in key=value format, separated by commas")
 
-	err := flags.MarkFlagsRequired(cmd, displayNameFlag, intakeIdFlag, passwordFlag)
+	err := flags.MarkFlagsRequired(cmd, displayNameFlag, intakeIdFlag)
 	cobra.CheckErr(err)
 }
 
