@@ -672,6 +672,8 @@ github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.2 h1:4ApmRQGkcf/G/h1s1
 github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.2/go.mod h1:YYwFQNYrYUpa4FeT/6pxky8vp7E7pPy2F6+Ptf469hg=
 github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.18.0 h1:k4dgOFQvkBhSNTtmFOZwMbkKf6ZCEGB/D1WQgiO9gwc=
 github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.18.0/go.mod h1:AiUoMAqQcOlMgDtkVJlqI7P/VGD5xjN3dYjERGnwN/M=
+github.com/stackitcloud/stackit-sdk-go/services/telemetryrouter v0.5.2 h1:su5M+lv0+fsPjSY1KdC8sxoE8cB5kwNx8bSpEA6bxZE=
+github.com/stackitcloud/stackit-sdk-go/services/telemetryrouter v0.5.2/go.mod h1:G1irvS3PFNNnf5t5ub1UUl2Iha+lv2RYu6l/rx79tcM=
 github.com/stackitcloud/stackit-sdk-go/services/valkey v0.3.1 h1:zAdxoRrUB5sIz73xAyXXQlZZ46Yc1p3rW1PerOLHNOk=
 github.com/stackitcloud/stackit-sdk-go/services/valkey v0.3.1/go.mod h1:8znHnd2b6rdEHSmW/36LQa4dMMaLuN8dwo3tD6arEic=
 github.com/stackitcloud/stackit-sdk-go/services/vpn v0.15.2 h1:82VZJaJPwcBKSj8WV8v0ujBvbkbMxFXIvvv0wU+0Be0=

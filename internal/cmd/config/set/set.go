@@ -52,6 +52,7 @@ const (
 	tokenCustomEndpointFlag             = "token-custom-endpoint"
 	intakeCustomEndpointFlag            = "intake-custom-endpoint"
 	logsCustomEndpointFlag              = "logs-custom-endpoint"
+	telemetryRouterCustomEndpointFlag   = "telemetryrouter-custom-endpoint"
 	sfsCustomEndpointFlag               = "sfs-custom-endpoint"
 	cdnCustomEndpointFlag               = "cdn-custom-endpoint"
 	vpnCustomEndpointFlag               = "vpn-custom-endpoint"
@@ -173,6 +174,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(tokenCustomEndpointFlag, "", "Custom token endpoint of the Service Account API, which is used to request access tokens when the service account authentication is activated. Not relevant for user authentication.")
 	cmd.Flags().String(intakeCustomEndpointFlag, "", "Intake API base URL, used in calls to this API")
 	cmd.Flags().String(logsCustomEndpointFlag, "", "Logs API base URL, used in calls to this API")
+	cmd.Flags().String(telemetryRouterCustomEndpointFlag, "", "TelemetryRouter API base URL, used in calls to this API")
 	cmd.Flags().String(sfsCustomEndpointFlag, "", "SFS API base URL, used in calls to this API")
 	cmd.Flags().String(cdnCustomEndpointFlag, "", "CDN API base URL, used in calls to this API")
 	cmd.Flags().String(vpnCustomEndpointFlag, "", "VPN API base URL, used in calls to this API")
@@ -241,6 +243,8 @@ func configureFlags(cmd *cobra.Command) {
 	err = viper.BindPFlag(config.IntakeCustomEndpointKey, cmd.Flags().Lookup(intakeCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.LogsCustomEndpointKey, cmd.Flags().Lookup(logsCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.TelemetryRouterCustomEndpointKey, cmd.Flags().Lookup(telemetryRouterCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.SfsCustomEndpointKey, cmd.Flags().Lookup(sfsCustomEndpointFlag))
 	cobra.CheckErr(err)

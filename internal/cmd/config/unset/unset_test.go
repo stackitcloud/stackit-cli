@@ -48,6 +48,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 		tokenCustomEndpointFlag:           true,
 		intakeCustomEndpointFlag:          true,
 		logsCustomEndpointFlag:            true,
+		telemetryRouterCustomEndpointFlag: true,
 		cdnCustomEndpointFlag:             true,
 		vpnCustomEndpointFlag:             true,
 	}
@@ -96,6 +97,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		TokenCustomEndpoint:           true,
 		IntakeCustomEndpoint:          true,
 		LogsCustomEndpoint:            true,
+		TelemetryRouterCustomEndpoint: true,
 		CDNCustomEndpoint:             true,
 		VpnCustomEndpoint:             true,
 	}
@@ -160,6 +162,7 @@ func TestParseInput(t *testing.T) {
 				model.TokenCustomEndpoint = false
 				model.IntakeCustomEndpoint = false
 				model.LogsCustomEndpoint = false
+				model.TelemetryRouterCustomEndpoint = false
 				model.CDNCustomEndpoint = false
 				model.VpnCustomEndpoint = false
 			}),
@@ -362,6 +365,16 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.LogsCustomEndpoint = false
+			}),
+		},
+		{
+			description: "telemetryrouter custom endpoint empty",
+			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
+				flagValues[telemetryRouterCustomEndpointFlag] = false
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.TelemetryRouterCustomEndpoint = false
 			}),
 		},
 		{
