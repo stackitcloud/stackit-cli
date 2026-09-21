@@ -142,7 +142,7 @@ func outputResult(p *print.Printer, outputFormat, executionId, projectLabel stri
 			automationConfigTable.AddSeparator()
 			automationConfigTable.AddRow("CREATE TIME", execution.Automation.Config.CreateTime.Format(time.DateTime))
 			automationConfigTable.AddSeparator()
-			automationConfigTable.AddRow("UPDATE TIME", execution.Automation.Config.CreateTime.Format(time.DateTime))
+			automationConfigTable.AddRow("UPDATE TIME", execution.Automation.Config.UpdateTime.Format(time.DateTime))
 			automationConfigTable.AddSeparator()
 
 			content = append(content, automationConfigTable)

@@ -81,7 +81,7 @@ func TestParseInput(t *testing.T) {
 			isValid:     false,
 		},
 		{
-			description: "arg is no uuid",
+			description: "flag is no uuid",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[automationIdFlag] = "automation-id"
 			}),

@@ -67,7 +67,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Call API
 			resp, err := fetchExecutions(ctx, model, apiClient)
 			if err != nil {
-				return fmt.Errorf("list volume automation executions: %w", err)
+				return fmt.Errorf("fetch volume automation executions: %w", err)
 			}
 
 			// Get projectLabel
