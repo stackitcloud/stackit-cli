@@ -2,6 +2,8 @@ package application
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/sca/application/create"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/sca/application/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/sca/application/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/sca/application/list"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -24,4 +26,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(list.NewCmd(params))
 	cmd.AddCommand(describe.NewCmd(params))
+	cmd.AddCommand(create.NewCmd(params))
+	cmd.AddCommand(delete.NewCmd(params))
 }
