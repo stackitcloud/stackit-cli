@@ -31,6 +31,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.24.2
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.9.1
+	github.com/stackitcloud/stackit-sdk-go/services/sca v0.1.0
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.18.2
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.7.1
 	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.5.4
@@ -207,7 +208,6 @@ require (
 	github.com/sonatard/noctx v0.5.1 // indirect
 	github.com/sourcegraph/go-diff v0.7.0 // indirect
 	github.com/ssgreg/nlreturn/v2 v2.2.1 // indirect
-	github.com/stackitcloud/stackit-sdk-go/services/sca v0.0.0-20260907133539-142366f465a2 // indirect
 	github.com/stbenjam/no-sprintf-host-port v0.3.1 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/stretchr/testify v1.11.1 // indirect
