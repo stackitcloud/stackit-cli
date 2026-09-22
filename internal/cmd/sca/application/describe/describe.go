@@ -48,6 +48,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			ctx := context.Background()
 
 			model, err := parseInput(params.Printer, cmd, args)
+			if err != nil {
+				return err
+			}
 
 			// Configure API client
 			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
