@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/stackitcloud/stackit-sdk-go/core/experimental/paginate"
-	automation "github.com/stackitcloud/stackit-sdk-go/services/automation/v1betaapi"
+	automation "github.com/stackitcloud/stackit-sdk-go/services/automation/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"

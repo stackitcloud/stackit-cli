@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	automation "github.com/stackitcloud/stackit-sdk-go/services/automation/v1betaapi"
-	"github.com/stackitcloud/stackit-sdk-go/services/automation/v1betaapi/wait"
+	automation "github.com/stackitcloud/stackit-sdk-go/services/automation/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/automation/v1api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -64,7 +64,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 					return fmt.Errorf("create volume automation execution response is empty")
 				}
 				err = spinner.Run(params.Printer, "Creating automation execution", func() error {
-					_, err := wait.CreateVolumeExecutionWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.AutomationId, resp.Id).WaitWithContext(ctx)
+					_, err := wait.VolumeExecutionWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.AutomationId, resp.Id).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
