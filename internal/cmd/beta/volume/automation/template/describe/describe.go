@@ -3,10 +3,9 @@ package describe
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/spf13/cobra"
-	automation "github.com/stackitcloud/stackit-sdk-go/services/automation/v1betaapi"
+	automation "github.com/stackitcloud/stackit-sdk-go/services/automation/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -125,27 +124,19 @@ func outputResult(p *print.Printer, outputFormat, templateId, projectLabel strin
 		if template.Output != nil && len(template.Output.Steps) > 0 {
 			outputStepsTable := tables.NewTable()
 			outputStepsTable.SetTitle("OUTPUT STEPS")
+			outputStepsTable.SetHeader("NAME", "KIND", "DETAILS")
 			for _, step := range template.Output.Steps {
-				outputStepsTable.AddRow("NAME", step.Name)
-				outputStepsTable.AddSeparator()
+				var kind, details string
 				if step.Result != nil {
-					if step.Result.GetVolumeIDsResult != nil {
-						volumeIds := ""
-						if len(step.Result.GetVolumeIDsResult.VolumeIDs) > 0 {
-							volumeIds = strings.Join(step.Result.GetVolumeIDsResult.VolumeIDs, "\n")
-						}
-						outputStepsTable.AddRow("VOLUME IDS", volumeIds)
-						outputStepsTable.AddSeparator()
-					}
-					if step.Result.CreateSnapshotsResult != nil {
-						createdSnapshotIds := ""
-						if len(step.Result.CreateSnapshotsResult.CreatedSnapshotIDs) > 0 {
-							createdSnapshotIds = strings.Join(step.Result.CreateSnapshotsResult.CreatedSnapshotIDs, "\n")
-						}
-						outputStepsTable.AddRow("CREATED SNAPSHOT IDS", createdSnapshotIds)
-						outputStepsTable.AddSeparator()
+					kind = step.Result.Kind
+					// step.Result is an open object, so we need to read here the AdditionalProperties
+					for key, value := range utils.FlattenMap(step.Result.AdditionalProperties) {
+						details += fmt.Sprintf("%s: %v\n", key, value)
 					}
 				}
+
+				outputStepsTable.AddRow(step.Name, kind, details)
+				outputStepsTable.AddSeparator()
 			}
 			content = append(content, outputStepsTable)
 		}
