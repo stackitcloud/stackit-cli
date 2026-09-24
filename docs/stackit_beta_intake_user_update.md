@@ -26,13 +26,13 @@ stackit beta intake user update USER_ID [flags]
 ### Options
 
 ```
-      --description string                    Description
-      --display-name string                   Display name
-  -h, --help                                  Help for "stackit beta intake user update"
-      --intake-id string                      Intake ID
-      --labels stringToString                 Labels in key=value format, separated by commas. Example: --labels "key1=value1,key2=value2". (default [])
-      --password string[="__INTERACTIVE__"]   Password. Can be a string (deprecated) or a file path, if prefixed with '@' (example: @./secret.txt). If provided without a value, you will be prompted interactively. Must contain lower, upper, digits, and special characters (min 12 chars).
-      --type string                           Type of user. One of 'intake' or 'dead-letter'
+      --description string      Description
+      --display-name string     Display name
+  -h, --help                    Help for "stackit beta intake user update"
+      --intake-id string        Intake ID
+      --labels stringToString   Labels in key=value format, separated by commas. Example: --labels "key1=value1,key2=value2". (default [])
+      --password string         Password. Can be a string (deprecated) or a file path, if prefixed with '@' (example: @./secret.txt). Will be read from stdin when empty.
+      --type string             Type of user. One of 'intake' or 'dead-letter'
 ```
 
 ### Options inherited from parent commands
