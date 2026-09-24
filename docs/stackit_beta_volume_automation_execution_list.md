@@ -1,19 +1,31 @@
-## stackit beta volume automation
+## stackit beta volume automation execution list
 
-Provides functionality for Volume Automation
+List all Volume Automation Executions
 
 ### Synopsis
 
-Provides functionality for Volume Automation.
+List all Volume Automation Executions.
 
 ```
-stackit beta volume automation [flags]
+stackit beta volume automation execution list [flags]
+```
+
+### Examples
+
+```
+  List all Volume Automation Executions for Automation with ID "xxx"
+  $ stackit beta volume automation execution list --automation-id xxx
+
+  List up to 10 Volume Automation Executions for Automation with ID "xxx"
+  $ stackit beta volume automation execution list --automation-id xxx --limit 10
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit beta volume automation"
+      --automation-id string   Automation ID
+  -h, --help                   Help for "stackit beta volume automation execution list"
+      --limit int              Maximum number of entries to list
 ```
 
 ### Options inherited from parent commands
@@ -29,7 +41,5 @@ stackit beta volume automation [flags]
 
 ### SEE ALSO
 
-* [stackit beta volume](./stackit_beta_volume.md)	 - Provides functionality for Volume
 * [stackit beta volume automation execution](./stackit_beta_volume_automation_execution.md)	 - Provides functionality for Volume Automation Execution
-* [stackit beta volume automation template](./stackit_beta_volume_automation_template.md)	 - Provides functionality for Volume Automation Templates
 
