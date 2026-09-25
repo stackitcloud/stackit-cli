@@ -27,7 +27,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.14.1
 	github.com/stackitcloud/stackit-sdk-go/services/intake v0.11.2
 	github.com/stackitcloud/stackit-sdk-go/services/logs v0.10.2
-	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.12.1
+	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.12.2
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.3.1
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.15.0
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.24.2
