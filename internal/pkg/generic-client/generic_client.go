@@ -37,7 +37,7 @@ func ConfigureClientGeneric[T any](p *print.Printer, cliVersion, customEndpoint 
 
 	if p.IsVerbosityDebug() {
 		cfgOptions = append(cfgOptions,
-			sdkConfig.WithMiddleware(print.RequestResponseCapturer(p, nil)),
+			sdkConfig.WithMiddleware(print.RequestResponseCapturer(p)),
 		)
 	}
 
