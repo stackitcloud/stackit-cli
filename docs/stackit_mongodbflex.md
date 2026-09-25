@@ -31,7 +31,9 @@ stackit mongodbflex [flags]
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
 * [stackit mongodbflex backup](./stackit_mongodbflex_backup.md)	 - Provides functionality for MongoDB Flex instance backups
+* [stackit mongodbflex flavor](./stackit_mongodbflex_flavor.md)	 - Provides functionality for MongoDB Flex flavors
 * [stackit mongodbflex instance](./stackit_mongodbflex_instance.md)	 - Provides functionality for MongoDB Flex instances
-* [stackit mongodbflex options](./stackit_mongodbflex_options.md)	 - Lists MongoDB Flex options
+* [stackit mongodbflex storage](./stackit_mongodbflex_storage.md)	 - Provides functionality for MongoDB Flex storages for a certain flavor
 * [stackit mongodbflex user](./stackit_mongodbflex_user.md)	 - Provides functionality for MongoDB Flex users
+* [stackit mongodbflex version](./stackit_mongodbflex_version.md)	 - Provides functionality for MongoDB Flex versions
 

@@ -2,7 +2,6 @@ package create
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
@@ -29,16 +28,18 @@ const (
 	aclFlag            = "acl"
 	backupScheduleFlag = "backup-schedule"
 	flavorIdFlag       = "flavor-id"
-	cpuFlag            = "cpu"
-	ramFlag            = "ram"
 	storageClassFlag   = "storage-class"
 	storageSizeFlag    = "storage-size"
 	versionFlag        = "version"
+	defaultType        = "Replica"
 
-	defaultBackupSchedule = "0 0/6 * * *"
-	defaultStorageClass   = "premium-perf2-mongodb"
-	defaultStorageSize    = 10
-	defaultType           = "Replica"
+	cpuFlag = "cpu" // Deprecated: Will be removed after 2027-03-07.
+	ramFlag = "ram" // Deprecated: Will be removed after 2027-03-07.
+
+	defaultBackupSchedule = "0 0/6 * * *"           // Deprecated: Will be removed after 2027-03-07.
+	defaultStorageClass   = "premium-perf2-mongodb" // Deprecated: Will be removed after 2027-03-07.
+	defaultStorageSize    = 10                      // Deprecated: Will be removed after 2027-03-07.
+
 )
 
 var typeFlag = flags.StringEnumFlag(
@@ -53,14 +54,14 @@ type inputModel struct {
 
 	InstanceName   string
 	ACL            []string
-	BackupSchedule string
-	FlavorId       string
-	CPU            *int32
-	RAM            *int32
+	BackupSchedule *string
+	FlavorId       *string
 	StorageClass   *string
 	StorageSize    *int64
-	Version        string
+	Version        *string
 	Type           *string
+	CPU            *int32 // Deprecated: Will be removed after 2027-03-07.
+	RAM            *int32 // Deprecated: Will be removed after 2027-03-07.
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -71,14 +72,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a MongoDB Flex instance with name "my-instance", ACL 0.0.0.0/0 (open access) and specify flavor by CPU and RAM. Other parameters are set to default values`,
-				`$ stackit mongodbflex instance create --name my-instance --cpu 1 --ram 4 --acl 0.0.0.0/0`),
+				`Create a MongoDB Flex instance with name "my-instance", ACL 0.0.0.0/0 (open access).`,
+				`$ stackit mongodbflex instance create --name my-instance --flavor-id xxx --acl 0.0.0.0/0 --type Replica --storage-size 20 --version 8.0 --backup-schedule "6 6 * * *" --storage-size 10 --storage-class premium-perf2-mongodb`),
 			examples.NewExample(
-				`Create a MongoDB Flex instance with name "my-instance", ACL 0.0.0.0/0 (open access) and specify flavor by ID. Other parameters are set to default values`,
-				`$ stackit mongodbflex instance create --name my-instance --flavor-id xxx --acl 0.0.0.0/0`),
-			examples.NewExample(
-				`Create a MongoDB Flex instance with name "my-instance", allow access to a specific range of IP addresses, specify flavor by CPU and RAM and set storage size to 20 GB. Other parameters are set to default values`,
-				`$ stackit mongodbflex instance create --name my-instance --cpu 1 --ram 4 --acl 1.2.3.0/24 --storage-size 20`),
+				`Create a MongoDB Flex instance with name "my-instance", allow access to a specific range of IP addresses.`,
+				`$ stackit mongodbflex instance create --name my-instance --flavor-id xxx --acl 1.2.3.0/24 --type Replica --storage-size 20 --version 8.0 --backup-schedule "6 6 * * *" --storage-size 10 --storage-class premium-perf2-mongodb`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -100,19 +98,51 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
+			// load flavor id - remove after 2027-03-07
+			if model.FlavorId == nil {
+				// transform the model.FlavorId field from "*string" to "string" once this is removed
+				params.Printer.Warn("The --%s flag is not set, determining flavor ID by CPU und RAM. This behavior is deprecated, the --%s flag will be required after 2027-03-07.\n", flavorIdFlag, flavorIdFlag)
+			}
+			model.FlavorId, err = getFlavorId(ctx, model, apiClient.DefaultAPI)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "determining flavor id: %v", err)
+			}
+
+			// remove after 2027-03-07
+			if model.BackupSchedule == nil {
+				// transform the model.BackupSchedule field from "*string" to "string" once this is removed
+				params.Printer.Warn("The --%s flag is not set. Using the default value \"%s\". This behavior is deprecated, the --%s flag will be required after 2027-03-07.\n", backupScheduleFlag, defaultBackupSchedule, backupScheduleFlag)
+				model.BackupSchedule = utils.Ptr(defaultBackupSchedule)
+			}
+
+			// Fill in version, if needed - remove after 2027-03-07
+			if model.Version == nil {
+				params.Printer.Warn("The --%s flag is not set. Using the latest version as a default. This behavior is deprecated, the --%s flag will be required after 2027-03-07.\n", versionFlag, versionFlag)
+				// transform the model.Version field from "*string" to "string" once this is removed
+
+				version, err := mongodbflexUtils.GetLatestMongoDBVersion(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region) //nolint:staticcheck // SA1019 - deprecated but still supported until 2027-03-07
+				if err != nil {
+					return fmt.Errorf("get latest MongoDB version: %w", err)
+				}
+				model.Version = utils.Ptr(version)
+			}
+
+			// remove after 2027-03-07
+			if model.StorageSize == nil {
+				params.Printer.Warn("The --%s flag is not set. Using the default value (%d). This behavior is deprecated, the --%s flag will be required after 2027-03-07.\n", storageSizeFlag, defaultStorageSize, storageSizeFlag)
+				model.StorageSize = utils.Ptr(int64(defaultStorageSize))
+			}
+
+			// remove after 2027-03-07
+			if model.StorageClass == nil {
+				params.Printer.Warn("The --%s flag is not set. Using the default value (%s). This behavior is deprecated, the --%s flag will be required after 2027-03-07.\n", storageClassFlag, defaultStorageClass, storageClassFlag)
+				model.StorageClass = utils.Ptr(defaultStorageClass)
+			}
+
 			prompt := fmt.Sprintf("Are you sure you want to create a MongoDB Flex instance for project %q?", projectLabel)
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
-			}
-
-			// Fill in version, if needed
-			if model.Version == "" {
-				version, err := mongodbflexUtils.GetLatestMongoDBVersion(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region)
-				if err != nil {
-					return fmt.Errorf("get latest MongoDB version: %w", err)
-				}
-				model.Version = version
 			}
 
 			// Call API
@@ -147,17 +177,29 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(instanceNameFlag, "n", "", "Instance name")
 	cmd.Flags().Var(flags.CIDRSliceFlag(), aclFlag, "The access control list (ACL). Must contain at least one valid subnet, for instance '0.0.0.0/0' for open access (discouraged), '1.2.3.0/24 for a public IP range of an organization, '1.2.3.4/32' for a single IP range, etc.")
-	cmd.Flags().String(backupScheduleFlag, defaultBackupSchedule, "Backup schedule")
-	cmd.Flags().String(flavorIdFlag, "", "ID of the flavor")
-	cmd.Flags().Int32(cpuFlag, 0, "Number of CPUs")
-	cmd.Flags().Int32(ramFlag, 0, "Amount of RAM (in GB)")
-	cmd.Flags().String(storageClassFlag, defaultStorageClass, "Storage class")
-	cmd.Flags().Int64(storageSizeFlag, defaultStorageSize, "Storage size (in GB)")
-	cmd.Flags().String(versionFlag, "", "MongoDB version. Defaults to the latest version available")
+	cmd.Flags().String(backupScheduleFlag, defaultBackupSchedule, "Backup schedule. This flag will be required after 2027-03-07.")
+	cmd.Flags().String(flavorIdFlag, "", "ID of the flavor. This flag will be required after 2027-03-07.")
+	cmd.Flags().String(storageClassFlag, defaultStorageClass, "Storage class. This flag will be required after 2027-03-07.")
+	cmd.Flags().Int64(storageSizeFlag, defaultStorageSize, "Storage size (in GB). This flag will be required after 2027-03-07.")
+	cmd.Flags().String(versionFlag, "", "MongoDB version. Defaults to the latest version available. This flag will be required after 2027-03-07.")
 	typeFlag.Register(cmd.Flags())
 
+	// remove after 2027-03-07
+	cmd.Flags().Int32(cpuFlag, 0, "Number of CPUs")
+	cmd.Flags().Int32(ramFlag, 0, "Amount of RAM (in GB)")
+
+	// after 2027-03-07: add backupScheduleFlag, storageClassFlag, storageSizeFlag, versionFlag, flavorIdFlag, replicasFlag
 	err := flags.MarkFlagsRequired(cmd, instanceNameFlag, aclFlag)
 	cobra.CheckErr(err)
+
+	// remove after 2027-03-07
+	err = cmd.Flags().MarkDeprecated(cpuFlag, fmt.Sprintf("Will be removed after 2027-03-07. Use the --%s flag instead.", flavorIdFlag))
+	cobra.CheckErr(err)
+	err = cmd.Flags().MarkDeprecated(ramFlag, fmt.Sprintf("Will be removed after 2027-03-07. Use the --%s flag instead.", flavorIdFlag))
+	cobra.CheckErr(err)
+	cmd.MarkFlagsRequiredTogether(cpuFlag, ramFlag)
+	cmd.MarkFlagsMutuallyExclusive(flavorIdFlag, cpuFlag)
+	cmd.MarkFlagsMutuallyExclusive(flavorIdFlag, ramFlag)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
@@ -166,83 +208,86 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	storageSize := flags.FlagWithDefaultToInt64Value(p, cmd, storageSizeFlag)
-
-	flavorId := flags.FlagToStringValue(p, cmd, flavorIdFlag)
+	flavorId := flags.FlagToStringPointer(p, cmd, flavorIdFlag)
 	cpu := flags.FlagToInt32Pointer(p, cmd, cpuFlag)
 	ram := flags.FlagToInt32Pointer(p, cmd, ramFlag)
 
-	if flavorId == "" && (cpu == nil || ram == nil) {
+	// remove after 2027-03-07: flavor id flag will be required then
+	if flavorId == nil && (cpu == nil || ram == nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
 			Cmd: cmd,
 		}
 	}
-	if flavorId != "" && (cpu != nil || ram != nil) {
+	// remove after 2027-03-07: flavor id flag will be required then
+	if flavorId != nil && (cpu != nil || ram != nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
 			Cmd: cmd,
 		}
+	}
+
+	// remove after 2027-03-07: storage size flag will be required then (no pointer anymore)
+	var storageSize *int64
+	if cmd.Flags().Changed(storageSizeFlag) {
+		storageSize = flags.FlagToInt64Pointer(p, cmd, storageSizeFlag)
 	}
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceName:    flags.FlagToStringValue(p, cmd, instanceNameFlag),
 		ACL:             flags.FlagToStringSliceValue(p, cmd, aclFlag),
-		BackupSchedule:  flags.FlagWithDefaultToStringValue(p, cmd, backupScheduleFlag),
+		BackupSchedule:  flags.FlagToStringPointer(p, cmd, backupScheduleFlag),
 		FlavorId:        flavorId,
-		CPU:             cpu,
-		RAM:             ram,
-		StorageClass:    utils.Ptr(flags.FlagWithDefaultToStringValue(p, cmd, storageClassFlag)),
-		StorageSize:     &storageSize,
-		Version:         flags.FlagToStringValue(p, cmd, versionFlag),
+		StorageClass:    flags.FlagToStringPointer(p, cmd, storageClassFlag),
+		StorageSize:     storageSize,
+		Version:         flags.FlagToStringPointer(p, cmd, versionFlag),
 		Type:            typeFlag.Ptr(),
+
+		// remove after 2027-03-07: deprecated fields
+		CPU: cpu,
+		RAM: ram,
 	}
 
 	p.DebugInputModel(model)
 	return &model, nil
 }
 
-type MongoDBFlexClient interface {
-	CreateInstance(ctx context.Context, projectId, region string) mongodbflex.ApiCreateInstanceRequest
-	ListFlavors(ctx context.Context, projectId, region string) mongodbflex.ApiListFlavorsRequest
-	ListStorages(ctx context.Context, projectId, flavorId, region string) mongodbflex.ApiListStoragesRequest
-}
+// Deprecated: remove after 2027-03-07
+func getFlavorId(ctx context.Context, model *inputModel, apiClient mongodbflex.DefaultAPI) (*string, error) {
+	if model == nil {
+		return nil, fmt.Errorf("model is nil")
+	}
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexClient) (mongodbflex.ApiCreateInstanceRequest, error) {
-	req := apiClient.CreateInstance(ctx, model.ProjectId, model.Region)
+	if model.FlavorId != nil {
+		return model.FlavorId, nil
+	}
 
-	var flavorId string
-	var err error
-
+	// Load all flavors
 	flavors, err := apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Execute()
 	if err != nil {
-		return req, fmt.Errorf("get MongoDB Flex flavors: %w", err)
+		return nil, fmt.Errorf("loading flavors: %w", err)
 	}
 
-	if model.FlavorId == "" {
-		foundFlavorId, err := mongodbflexUtils.LoadFlavorId(*model.CPU, *model.RAM, &flavors.Flavors)
-		if err != nil {
-			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
-			if !errors.As(err, &dsaInvalidPlanError) {
-				return req, fmt.Errorf("load flavor ID: %w", err)
-			}
-			return req, err
+	for _, flavor := range flavors.Flavors {
+		if *flavor.Cpu == *model.CPU && *flavor.Memory == *model.RAM {
+			return flavor.Id, nil
 		}
-		flavorId = *foundFlavorId
-	} else {
-		err := mongodbflexUtils.ValidateFlavorId(model.FlavorId, flavors.Flavors)
-		if err != nil {
-			return req, err
-		}
-		flavorId = model.FlavorId
 	}
 
-	storages, err := apiClient.ListStorages(ctx, model.ProjectId, flavorId, model.Region).Execute()
-	if err != nil {
-		return req, fmt.Errorf("get MongoDB Flex storages: %w", err)
-	}
-	err = mongodbflexUtils.ValidateStorage(model.StorageClass, model.StorageSize, storages, flavorId)
-	if err != nil {
-		return req, err
+	return nil, fmt.Errorf("no matching flavor found")
+}
+
+func buildRequest(ctx context.Context, model *inputModel, apiClient mongodbflex.DefaultAPI) (mongodbflex.ApiCreateInstanceRequest, error) {
+	req := apiClient.CreateInstance(ctx, model.ProjectId, model.Region)
+
+	// remove after 2027-03-07
+	if model.BackupSchedule == nil {
+		return mongodbflex.ApiCreateInstanceRequest{}, fmt.Errorf("backup schedule is nil")
+	} else if model.StorageSize == nil {
+		return mongodbflex.ApiCreateInstanceRequest{}, fmt.Errorf("storage size is nil")
+	} else if model.Version == nil {
+		return mongodbflex.ApiCreateInstanceRequest{}, fmt.Errorf("version is nil")
+	} else if model.StorageClass == nil {
+		return mongodbflex.ApiCreateInstanceRequest{}, fmt.Errorf("storage class is nil")
 	}
 
 	replicas, err := mongodbflexUtils.GetInstanceReplicas(*model.Type)
@@ -253,18 +298,19 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient MongoDBFlexC
 	req = req.CreateInstancePayload(mongodbflex.CreateInstancePayload{
 		Name:           model.InstanceName,
 		Acl:            mongodbflex.ACL{Items: model.ACL},
-		BackupSchedule: model.BackupSchedule,
-		FlavorId:       flavorId,
+		BackupSchedule: *model.BackupSchedule,
+		FlavorId:       utils.PtrString(model.FlavorId),
 		Replicas:       replicas,
 		Storage: mongodbflex.Storage{
 			Class: model.StorageClass,
 			Size:  model.StorageSize,
 		},
-		Version: model.Version,
+		Version: *model.Version,
 		Options: map[string]string{
 			"type": *model.Type,
 		},
 	})
+
 	return req, nil
 }
 
