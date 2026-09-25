@@ -24,6 +24,7 @@ const (
 	AllowedUrlDomainKey                             = "allowed_url_domain"
 
 	AuthorizationCustomEndpointKey = "authorization_custom_endpoint"
+	AutomationCustomEndpointKey    = "automation_custom_endpoint"
 	AlbCustomEndpoint              = "alb_custom _endpoint"
 	AlbWafCustomEndpointKey        = "alb_waf_custom_endpoint"
 	DNSCustomEndpointKey           = "dns_custom_endpoint"
@@ -98,6 +99,7 @@ var ConfigKeys = []string{
 	AlbCustomEndpoint,
 	AlbWafCustomEndpointKey,
 	AuthorizationCustomEndpointKey,
+	AutomationCustomEndpointKey,
 	CDNCustomEndpointKey,
 	DNSCustomEndpointKey,
 	EdgeCustomEndpointKey,
@@ -199,6 +201,7 @@ func setConfigDefaults() {
 	viper.SetDefault(EdgeCustomEndpointKey, "")
 	viper.SetDefault(ObservabilityCustomEndpointKey, "")
 	viper.SetDefault(AuthorizationCustomEndpointKey, "")
+	viper.SetDefault(AutomationCustomEndpointKey, "")
 	viper.SetDefault(MongoDBFlexCustomEndpointKey, "")
 	viper.SetDefault(ObjectStorageCustomEndpointKey, "")
 	viper.SetDefault(OpenSearchCustomEndpointKey, "")

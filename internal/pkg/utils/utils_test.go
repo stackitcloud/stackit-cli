@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/spf13/viper"
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 	"github.com/stackitcloud/stackit-sdk-go/core/utils"
@@ -396,6 +397,89 @@ func TestMap(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := Map(tt.args.input, tt.args.mapFn); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Map() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFlattenMap(t *testing.T) {
+	tests := []struct {
+		name     string
+		inputMap map[string]interface{}
+		want     map[string]interface{}
+	}{
+		{
+			name: "single level map",
+			inputMap: map[string]interface{}{
+				"string": "value",
+				"slice":  []string{"string", "slice"},
+				"number": 2,
+				"bool":   true,
+				"nil":    nil,
+			},
+			want: map[string]interface{}{
+				"string": "value",
+				"slice":  []string{"string", "slice"},
+				"number": 2,
+				"bool":   true,
+				"nil":    nil,
+			},
+		},
+		{
+			name:     "nil input",
+			inputMap: nil,
+			want:     nil,
+		},
+		{
+			name: "multiple nested map (1 level)",
+			inputMap: map[string]interface{}{
+				"key1": map[string]interface{}{
+					"subkey1": "subvalue1",
+					"subkey2": "subvalue2",
+				},
+				"key2": "value2",
+			},
+			want: map[string]interface{}{
+				"key1.subkey1": "subvalue1",
+				"key1.subkey2": "subvalue2",
+				"key2":         "value2",
+			},
+		},
+		{
+			name: "multiple nested map (2 level)",
+			inputMap: map[string]interface{}{
+				"key1": map[string]interface{}{
+					"subkey1": "subvalue1",
+					"subkey2": map[string]interface{}{
+						"string":    "value",
+						"slice":     []string{"string", "slice"},
+						"number":    2,
+						"bool":      true,
+						"nil":       nil,
+						"empty_map": map[string]interface{}{},
+					},
+					"empty_map": map[string]interface{}{},
+				},
+				"key2": "value2",
+			},
+			want: map[string]interface{}{
+				"key1.subkey1":           "subvalue1",
+				"key1.subkey2.string":    "value",
+				"key1.subkey2.slice":     []string{"string", "slice"},
+				"key1.subkey2.number":    2,
+				"key1.subkey2.bool":      true,
+				"key1.subkey2.nil":       nil,
+				"key1.subkey2.empty_map": "",
+				"key1.empty_map":         "",
+				"key2":                   "value2",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := FlattenMap(tt.inputMap)
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("FlattenMap() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
