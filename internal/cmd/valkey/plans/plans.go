@@ -31,8 +31,8 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "plans",
-		Short: "Lists all Valkey service plans",
-		Long:  "Lists all Valkey service plans.",
+		Short: "Lists all Key Value Store (valkey) service plans",
+		Long:  "Lists all Key Value Store (valkey) service plans.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

@@ -1,10 +1,10 @@
 ## stackit valkey credentials
 
-Provides functionality for Valkey credentials
+Provides functionality for Key Value Store (valkey) credentials
 
 ### Synopsis
 
-Provides functionality for Valkey credentials.
+Provides functionality for Key Value Store (valkey) credentials.
 
 ```
 stackit valkey credentials [flags]
@@ -29,9 +29,9 @@ stackit valkey credentials [flags]
 
 ### SEE ALSO
 
-* [stackit valkey](./stackit_valkey.md)	 - Provides functionality for Valkey
-* [stackit valkey credentials create](./stackit_valkey_credentials_create.md)	 - Creates credentials for a Valkey instance
-* [stackit valkey credentials delete](./stackit_valkey_credentials_delete.md)	 - Deletes credentials of a Valkey instance
-* [stackit valkey credentials describe](./stackit_valkey_credentials_describe.md)	 - Shows details of credentials of a Valkey instance
-* [stackit valkey credentials list](./stackit_valkey_credentials_list.md)	 - Lists all credentials' IDs for a Valkey instance
+* [stackit valkey](./stackit_valkey.md)	 - Provides functionality for Key Value Store (valkey)
+* [stackit valkey credentials create](./stackit_valkey_credentials_create.md)	 - Creates credentials for a Key Value Store (valkey) instance
+* [stackit valkey credentials delete](./stackit_valkey_credentials_delete.md)	 - Deletes credentials of a Key Value Store (valkey) instance
+* [stackit valkey credentials describe](./stackit_valkey_credentials_describe.md)	 - Shows details of credentials of a Key Value Store (valkey) instance
+* [stackit valkey credentials list](./stackit_valkey_credentials_list.md)	 - Lists all credentials' IDs for a Key Value Store (valkey) instance
 

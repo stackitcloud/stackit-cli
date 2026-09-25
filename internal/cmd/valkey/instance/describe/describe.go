@@ -32,8 +32,8 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", instanceIdArg),
-		Short: "Shows details of a Valkey instance",
-		Long:  "Shows details of a Valkey instance.",
+		Short: "Shows details of a Key Value Store (valkey) instance",
+		Long:  "Shows details of a Key Value Store (valkey) instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
