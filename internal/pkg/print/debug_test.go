@@ -497,6 +497,18 @@ func TestBuildDebugStrFromHTTPResponse(t *testing.T) {
 			isValid: true,
 		},
 		{
+			description: "more headers",
+			inputResp: fixtureHTTPResponse(func(resp *http.Response) {
+				resp.Header.Add("X-Trace-Id", "trace-id")
+			}),
+			expected: []string{
+				"response from http://example.com: HTTP/1.1 200 OK",
+				"response headers: [Accept: application/json, Content-Length: 15, Content-Type: application/json, X-Trace-Id: trace-id]",
+				"response body: [key: value]",
+			},
+			isValid: true,
+		},
+		{
 			description: "empty body",
 			inputResp: fixtureHTTPResponse(func(resp *http.Response) { // nolint:bodyclose // false positive, body is closed in the test
 				resp.Body = nil
