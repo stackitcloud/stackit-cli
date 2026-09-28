@@ -104,6 +104,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient observability.DefaultAPI) observability.ApiCreateCredentialsRequest {
+	// empty payload because SDK sends json `null` otherwise, which service can't process
 	req := apiClient.CreateCredentials(ctx, model.InstanceId, model.ProjectId).CreateCredentialsPayload(observability.CreateCredentialsPayload{})
 	return req
 }
