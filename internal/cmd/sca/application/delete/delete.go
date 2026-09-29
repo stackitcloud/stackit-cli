@@ -13,6 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sca/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+	sca "github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi"
 )
 
 const (
@@ -57,7 +58,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := apiClient.DefaultAPI.DeleteApplication(ctx, model.ProjectId, model.EnvironmentID, model.ApplicationID)
+			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("delete application: %w", err)
@@ -98,4 +99,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	p.DebugInputModel(model)
 	return &model, nil
+}
+
+func buildRequest(ctx context.Context, model *inputModel, apiClient *sca.APIClient) sca.ApiDeleteApplicationRequest {
+	return apiClient.DefaultAPI.DeleteApplication(ctx, model.ProjectId, model.EnvironmentID, model.ApplicationID)
 }

@@ -1,7 +1,8 @@
-package describe
+package updatefrompayload
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -12,33 +13,35 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sca/client"
-	scautils "github.com/stackitcloud/stackit-cli/internal/pkg/services/sca/utils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 	sca "github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi"
+	"github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi/wait"
 )
 
 const (
 	applicationIDArg  = "APPLICATION_ID"
 	environmentIDFlag = "environment-id"
+	payloadFlag       = "payload"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	EnvironmentID string
 	ApplicationID string
+	Payload       *sca.UpdateApplicationPayload
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "describe",
-		Short: "Show details of a SCA application",
-		Long:  "Show details of a STACKIT Kubernetes Engine (SCA) application.",
+		Use:   "update-from-payload",
+		Short: "Update a SCA application from payload",
+		Long:  "Update a STACKIT Kubernetes Engine (SCA) application from payload.",
 		Args:  args.SingleArg(applicationIDArg, nil),
 		Example: examples.Build(
+			// TODO: fix examples
 			examples.NewExample(
-				`Get details of a SCA application with ID "xxx" from an environment with ID "yyy"`,
+				`Update a SCA application with ID "xxx" from an environment with ID "yyy"`,
 				"$ stackit sca application describe xxx --environment-id yyy"),
 			examples.NewExample(
 				`Get details of all SCA application with ID "xxx" from an environment with ID "yyy" in JSON format`,
@@ -67,10 +70,22 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("describe SCA application: %w", err)
+				return fmt.Errorf("update application: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, resp)
+			if !model.Async {
+				err := spinner.Run(params.Printer, fmt.Sprintf("Updating application with id %q", resp.GetId()), func() error {
+					_, err := wait.UpdateApplicationWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.EnvironmentID, resp.GetId()).WaitWithContext(ctx)
+					return err
+				})
+				if err != nil {
+					return fmt.Errorf("wait for application update: %w", err)
+				}
+			}
+
+			outputResult(params.Printer, model, resp)
+
+			return nil
 		},
 	}
 
@@ -78,47 +93,23 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	return cmd
 }
 
-func outputResult(p *print.Printer, outputFormat string, application *sca.Application) error {
-	return p.OutputResult(outputFormat, application, func() error {
-		if application == nil {
-			p.Outputf("No application found")
-			return nil
-		}
+func buildRequest(ctx context.Context, model *inputModel, apiClient *sca.APIClient) sca.ApiUpdateApplicationRequest {
+	return apiClient.DefaultAPI.UpdateApplication(ctx, model.ProjectId, model.EnvironmentID, model.ApplicationID).
+		UpdateApplicationPayload(*model.Payload)
+}
 
-		table := tables.NewTable()
-		table.SetTitle("Application")
-		table.AddRow("ID", utils.PtrString(application.Id))
-		table.AddSeparator()
-		table.AddRow("NAME", application.DisplayName)
-		table.AddSeparator()
-		table.AddRow("STATUS", scautils.ApplicationStatusToStr(application.RuntimeStatus.GetCurrentStatus()))
-		table.AddSeparator()
-		table.AddRow("STATE", scautils.ApplicationStateToStr(application.GetStopped()))
-		table.AddSeparator()
-		table.AddRow("INSTANCES", len(application.RuntimeStatus.Instances))
+func outputResult(p *print.Printer, model *inputModel, application *sca.Application) {
+	operationState := "Updated"
+	if model.Async {
+		operationState = "Triggered update of"
+	}
 
-		containersTable := tables.NewTable()
-		containersTable.SetTitle("Application Containers")
-		containersTable.SetHeader("NAME", "IMAGE", "CPU", "MEMORY")
-		for _, c := range application.Containers {
-			containersTable.AddRow(
-				c.Name,
-				c.Image,
-				*c.Cpu,
-				*c.Memory,
-			)
-		}
-		err := tables.DisplayTables(p, []tables.Table{table, containersTable})
-		if err != nil {
-			return fmt.Errorf("render table: %w", err)
-		}
-
-		return nil
-	})
+	p.Outputf("%s application for environment %s. Application ID: %s\n", operationState, application.GetEnvironmentId(), application.GetId())
 }
 
 func configureFlags(cmd *cobra.Command) {
-	cmd.Flags().Var(flags.UUIDFlag(), environmentIDFlag, "Environment ID (if not set uses default environment)")
+	cmd.Flags().Var(flags.UUIDFlag(), environmentIDFlag, "Environment ID (uses default environment if not set)")
+	cmd.Flags().Var(flags.ReadFromFileFlag(), payloadFlag, `Request payload (JSON). Can be a string or a file path, if prefixed with "@" (example: @./payload.json). If unset, will use a default payload (you can check it by running "stackit sca application generate-payload")`)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -134,16 +125,27 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		environmentID = globalFlags.ProjectId
 	}
 
+	payloadValue := flags.FlagToStringPointer(p, cmd, payloadFlag)
+	var payload *sca.UpdateApplicationPayload
+	if payloadValue != nil {
+		payload = &sca.UpdateApplicationPayload{}
+		err := json.Unmarshal([]byte(*payloadValue), payload)
+		if err != nil {
+			return nil, fmt.Errorf("enconde payload: %w", err)
+		}
+	}
+
+	payload.AdditionalProperties = nil
+
+	fmt.Printf("%+v\n", payload)
+
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		EnvironmentID:   environmentID,
 		ApplicationID:   applicationID,
+		Payload:         payload,
 	}
 
 	p.DebugInputModel(model)
 	return &model, nil
-}
-
-func buildRequest(ctx context.Context, model *inputModel, apiClient *sca.APIClient) sca.ApiGetApplicationRequest {
-	return apiClient.DefaultAPI.GetApplication(ctx, model.ProjectId, model.EnvironmentID, model.ApplicationID)
 }

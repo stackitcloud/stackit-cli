@@ -24,6 +24,10 @@ const (
 	environmentIDFlag = "environment-id"
 )
 
+type listApplicationsRequest interface {
+	Execute() (*sca.ListApplicationsResponse, error)
+}
+
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	EnvironmentID string
@@ -53,7 +57,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, nil)
 			if err != nil {
 				return err
 			}
@@ -65,10 +69,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			applications, err := makeRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient)
+			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list SCA applications: %w", err)
 			}
+
+			applications := resp.Items
 
 			// Truncate output
 			if model.Limit != nil && len(applications) > int(*model.Limit) {
@@ -96,7 +103,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -112,23 +119,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	return &model, nil
 }
 
-func makeRequest(ctx context.Context, model *inputModel, apiClient *sca.APIClient) ([]sca.ApplicationSummary, error) {
+func buildRequest(ctx context.Context, model *inputModel, apiClient *sca.APIClient) listApplicationsRequest {
 	// If environment ID is not defined, return all applications from the project
 	if model.EnvironmentID == "" {
-		resp, err := apiClient.DefaultAPI.ListProjectApplications(ctx, model.ProjectId).Execute()
-		if err != nil {
-			return nil, err
-		}
-
-		return resp.Items, err
+		return apiClient.DefaultAPI.ListProjectApplications(ctx, model.ProjectId)
 	}
 
-	resp, err := apiClient.DefaultAPI.ListApplications(ctx, model.ProjectId, model.EnvironmentID).Execute()
-	if err != nil {
-		return nil, err
-	}
-
-	return resp.Items, err
+	return apiClient.DefaultAPI.ListApplications(ctx, model.ProjectId, model.EnvironmentID)
 }
 
 func outputResult(p *print.Printer, outputFormat, projectLabel string, applications []sca.ApplicationSummary) error {

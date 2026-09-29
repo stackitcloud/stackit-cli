@@ -30,24 +30,28 @@ const (
 	minInstancesFlag  = "min-instances"
 	maxInstancesFlag  = "max-instances"
 	scaleToZeroFlag   = "scale-to-zero"
+	envVarsFlag       = "environment-vars"
+	commandsFlag      = "commands"
+	argsFlag          = "args"
+)
+
+const (
+	scalingTypeManual = "manual"
+	scalingTypeAuto   = "auto"
+
+	defaultPublic        = true
+	defaultPort          = 8080
+	defaultCPU           = 1000
+	defaultMemory        = 1024
+	defaultInstances     = 1
+	defaultContainerName = "container-1"
 )
 
 var scalingTypeFlag = flags.StringEnumFlag(
 	"scaling-type",
-	[]string{"manual", "auto"},
+	[]string{scalingTypeManual, scalingTypeAuto},
 	"Scaling type,",
-	flags.StringEnumDefaultValue("manual"),
-)
-
-const (
-	defaultPublic      = true
-	defaultPort        = 8080
-	defaultCPU         = 1000
-	defaultMemory      = 1024
-	defaultScalingType = "manual"
-	defaultInstances   = 1
-	// defaultMinInstances = 1
-	// defaultMaxInstances = 1
+	flags.StringEnumDefaultValue(scalingTypeManual),
 )
 
 type inputModel struct {
@@ -66,6 +70,9 @@ type inputModel struct {
 	ScaleToZero           bool
 	Concurrency           int32
 	RPS                   int32
+	EnvironmentVars       map[string]string
+	Commands              []string
+	Args                  []string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -75,18 +82,26 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Long:  "Create a STACKIT Kubernetes Engine (SCA) application.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
-			// TODO: fix examples
 			examples.NewExample(
-				`Create a SCA application with ID "xxx" from an environment with ID "yyy"`,
-				"$ stackit sca application describe xxx --environment-id yyy"),
+				`Create a SCA application with name "application-name" and image "my-image" for an environment with ID "yyy"`,
+				"$ stackit sca application create --name application-name --image my-image --environment-id yyy"),
 			examples.NewExample(
-				`Get details of all SCA application with ID "xxx" from an environment with ID "yyy" in JSON format`,
-				"$ stackit sca application describe xxx --environment-id yyy --output-format json"),
+				`Create a SCA application with name "application-name" and image "my-image" with 2 instances`,
+				"$ stackit sca application create --name application-name --image my-image --instances 2"),
+			examples.NewExample(
+				`Create a SCA application with name "application-name" and image "my-image" exposing port 8888 of the container`,
+				"$ stackit sca application create --name application-name --image my-image --port 8888"),
+			examples.NewExample(
+				`Create a SCA application with name "application-name" and image "my-image" disabling public networking`,
+				"$ stackit sca application create --name application-name --image my-image --public=false"),
+			examples.NewExample(
+				`Create a SCA application with name "application-name" and image "my-image" and environment variables ENV1=value1 and ENV2=value2`,
+				"$ stackit sca application create --name application-name --image my-image --environment-vars ENV1=value1,ENV2=value2"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -129,8 +144,29 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	return cmd
 }
 
+func buildScalingConfig(model *inputModel) sca.Scaling {
+	if model.ScalingType == scalingTypeAuto {
+		return sca.Scaling{
+			Type: sca.SCALINGTYPE_SCALING_TYPE_AUTO,
+			AutoScaling: &sca.AutoScaling{
+				MinInstances:     model.MinInstances,
+				MaxInstances:     model.MaxInstances,
+				AllowScaleToZero: &model.ScaleToZero,
+				Rules:            buildScalingRules(model),
+			},
+		}
+	}
+
+	return sca.Scaling{
+		Type: sca.SCALINGTYPE_SCALING_TYPE_MANUAL,
+		ManualScaling: &sca.ManualScaling{
+			Instances: model.Instances,
+		},
+	}
+}
+
 func buildScalingRules(model *inputModel) []sca.ScaleRule {
-	scaleRules := []sca.ScaleRule{}
+	var scaleRules []sca.ScaleRule
 	if model.Concurrency != 0 || model.RPS != 0 {
 		scaleRules = append(scaleRules, sca.ScaleRule{
 			Type: sca.RULETYPE_RULE_TYPE_HTTP,
@@ -145,49 +181,36 @@ func buildScalingRules(model *inputModel) []sca.ScaleRule {
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sca.APIClient) sca.ApiCreateApplicationRequest {
-	scaling := sca.Scaling{
-		Type: sca.SCALINGTYPE_SCALING_TYPE_MANUAL,
-		ManualScaling: &sca.ManualScaling{
-			Instances: model.Instances,
-		},
-	}
-	if model.ScalingType == "auto" {
-		rules := []sca.ScaleRule{
-			{
-				HttpRule: &sca.HttpScaleRule{
-					Concurrency: model.Concurrency,
-					Rps:         model.RPS,
-				},
-			},
-		}
-
-		scaling = sca.Scaling{
-			Type: sca.SCALINGTYPE_SCALING_TYPE_AUTO,
-			AutoScaling: &sca.AutoScaling{
-				MinInstances:     model.MinInstances,
-				MaxInstances:     model.MaxInstances,
-				AllowScaleToZero: &model.ScaleToZero,
-				Rules:            rules,
-			},
-		}
-
-	}
-
 	network := sca.Network{
 		PublicIngress: model.Public,
 		Port:          &model.ContainerExternalPort,
 	}
 
+	var envVars []sca.EnvVar
+	if model.EnvironmentVars != nil {
+		envVars = make([]sca.EnvVar, 0, len(model.EnvironmentVars))
+		for k, v := range model.EnvironmentVars {
+			envVars = append(envVars, sca.EnvVar{
+				Key:    k,
+				Value:  v,
+				Origin: sca.ENVVARTYPE_ENV_FROM_SOURCE_TYPE_MANUAL.Ptr(),
+			})
+		}
+	}
+
 	container := sca.Container{
-		Name:   "container-1",
-		Image:  model.Image,
-		Cpu:    &model.CPU,
-		Memory: &model.Memory,
+		Name:                 defaultContainerName,
+		Image:                model.Image,
+		Cpu:                  &model.CPU,
+		Memory:               &model.Memory,
+		EnvironmentVariables: envVars,
+		Command:              model.Commands,
+		Args:                 model.Args,
 	}
 
 	payload := sca.CreateApplicationPayload{
 		DisplayName: model.Name,
-		Scaling:     scaling,
+		Scaling:     buildScalingConfig(model),
 		Network:     network,
 		Containers:  []sca.Container{container},
 	}
@@ -214,20 +237,27 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Int32(cpuFlag, defaultCPU, "The dedicated virtual CPU processing power allocated per container instance")
 	cmd.Flags().Int32(memoryFlag, defaultMemory, "The total amount of memory (RAM) allocated per container instance")
 	scalingTypeFlag.Register(cmd.Flags())
-	// cmd.Flags().String(scalingTypeFlag, defaultScalingType, "")
-	cmd.Flags().Int32(instancesFlag, defaultInstances, "")
-	cmd.Flags().Int32(minInstancesFlag, 0, "")
-	cmd.Flags().Int32(maxInstancesFlag, 0, "")
-	cmd.Flags().Bool(maxInstancesFlag, false, "")
+	cmd.Flags().Int32(instancesFlag, defaultInstances, "The number of application instances (if manually scaled)")
+	cmd.Flags().Int32(minInstancesFlag, 0, "The minimum number of application instances (if autoscaling is enabled)")
+	cmd.Flags().Int32(maxInstancesFlag, 0, "The maximum number of application instances (if autoscaling is enabled)")
+	cmd.Flags().Bool(scaleToZeroFlag, false, "Enable scale to zero (if autoscaling is enabled)")
+	cmd.Flags().StringToString(envVarsFlag, nil, "Environment variables to inject into the application")
+	cmd.Flags().StringSlice(commandsFlag, nil, "Commands to execute in the application container")
+	cmd.Flags().StringSlice(argsFlag, nil, "Arguments to pass to the application container command")
 
 	cobra.CheckErr(flags.MarkFlagsRequired(cmd, nameFlag))
 	cobra.CheckErr(flags.MarkFlagsRequired(cmd, imageFlag))
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
+	}
+
+	var scalingType string
+	if scalingTypeFlagValue := scalingTypeFlag.Ptr(); scalingTypeFlagValue != nil && *scalingTypeFlagValue != "" {
+		scalingType = *scalingTypeFlagValue
 	}
 
 	extertalPort := flags.FlagWithDefaultToInt32Value(p, cmd, externalPortFlag)
@@ -236,6 +266,27 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 			Flag:    externalPortFlag,
 			Details: "must be a valid non-privileged port (from 1025 to 65535)",
 		}
+	}
+
+	instances := flags.FlagWithDefaultToInt32Value(p, cmd, instancesFlag)
+	if instances < 0 || instances > 10 {
+		return nil, &errors.FlagValidationError{
+			Flag:    instancesFlag,
+			Details: "must be an integer between 0 and 10",
+		}
+	}
+
+	cpu := flags.FlagWithDefaultToInt32Value(p, cmd, cpuFlag)
+	if cpu%1000 != 0 {
+		return nil, &errors.FlagValidationError{
+			Flag:    instancesFlag,
+			Details: "must be divisible by 1000",
+		}
+	}
+
+	var envVars map[string]string
+	if env := flags.FlagToStringToStringPointer(p, cmd, envVarsFlag); env != nil {
+		envVars = *env
 	}
 
 	environmentID := flags.FlagToStringValue(p, cmd, environmentIDFlag)
@@ -250,13 +301,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		Image:                 flags.FlagToStringValue(p, cmd, imageFlag),
 		Public:                flags.FlagToBoolValue(p, cmd, publicFlag),
 		ContainerExternalPort: extertalPort,
-		CPU:                   flags.FlagWithDefaultToInt32Value(p, cmd, cpuFlag),
+		CPU:                   cpu,
 		Memory:                flags.FlagWithDefaultToInt32Value(p, cmd, memoryFlag),
-		Instances:             flags.FlagWithDefaultToInt32Value(p, cmd, instancesFlag),
-		ScalingType:           flags.FlagToStringValue(p, cmd, scalingTypeFlag),
+		Instances:             instances,
+		ScalingType:           scalingType,
 		MinInstances:          flags.FlagWithDefaultToInt32Value(p, cmd, minInstancesFlag),
 		MaxInstances:          flags.FlagWithDefaultToInt32Value(p, cmd, maxInstancesFlag),
 		ScaleToZero:           flags.FlagToBoolValue(p, cmd, scaleToZeroFlag),
+		EnvironmentVars:       envVars,
+		Commands:              flags.FlagToStringSliceValue(p, cmd, commandsFlag),
+		Args:                  flags.FlagToStringSliceValue(p, cmd, argsFlag),
 	}
 
 	p.DebugInputModel(model)
