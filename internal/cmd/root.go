@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/sca"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/sqlserverflex"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
@@ -207,6 +208,7 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(kms.NewCmd(params))
 	cmd.AddCommand(sqlserverflex.NewCmd(params))
 	cmd.AddCommand(valkey.NewCmd(params))
+	cmd.AddCommand(sca.NewCmd(params))
 }
 
 // traverseCommands calls f for c and all of its children.
