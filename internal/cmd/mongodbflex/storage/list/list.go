@@ -68,7 +68,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("get MongoDB Flex storages: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, storages)
+			return outputResult(params.Printer, model, storages)
 		},
 	}
 
@@ -112,8 +112,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient mongodbflex.
 	return apiClient.ListStorages(ctx, model.ProjectId, *model.FlavorId, model.Region)
 }
 
-func outputResult(p *print.Printer, outputFormat string, storagesResp *mongodbflex.ListStoragesResponse) error {
-	return p.OutputResult(outputFormat, storagesResp, func() error {
+func outputResult(p *print.Printer, model *inputModel, storagesResp *mongodbflex.ListStoragesResponse) error {
+	if model == nil {
+		return fmt.Errorf("no model passed")
+	}
+	return p.OutputResult(model.OutputFormat, storagesResp, func() error {
 		if storagesResp == nil {
 			return fmt.Errorf("storages resp is empty")
 		}
@@ -121,6 +124,11 @@ func outputResult(p *print.Printer, outputFormat string, storagesResp *mongodbfl
 		if len(storages) == 0 {
 			p.Outputf("No MongoDB Flex storages found.")
 			return nil
+		}
+
+		// Truncate output
+		if model.Limit != nil && len(storages) > int(*model.Limit) {
+			storages = storages[:*model.Limit]
 		}
 
 		table := tables.NewTable()

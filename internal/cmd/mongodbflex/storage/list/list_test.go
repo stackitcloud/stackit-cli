@@ -7,7 +7,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -48,8 +47,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		FlavorId: utils.Ptr(testFlavorId),
-		Limit:    utils.Ptr(int64(10)),
+		FlavorId: new(testFlavorId),
+		Limit:    new(int64(10)),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -165,8 +164,8 @@ func TestBuildRequest(t *testing.T) {
 
 func Test_outputResult(t *testing.T) {
 	type args struct {
-		outputFormat string
-		storages     *mongodbflex.ListStoragesResponse
+		model    *inputModel
+		storages *mongodbflex.ListStoragesResponse
 	}
 	tests := []struct {
 		name    string
@@ -181,6 +180,7 @@ func Test_outputResult(t *testing.T) {
 		{
 			name: "storages slice is nil",
 			args: args{
+				model:    fixtureInputModel(),
 				storages: nil,
 			},
 			wantErr: true,
@@ -188,6 +188,7 @@ func Test_outputResult(t *testing.T) {
 		{
 			name: "storages slice is empty",
 			args: args{
+				model:    fixtureInputModel(),
 				storages: &mongodbflex.ListStoragesResponse{},
 			},
 			wantErr: false,
@@ -195,6 +196,7 @@ func Test_outputResult(t *testing.T) {
 		{
 			name: "empty storage class in storages",
 			args: args{
+				model: fixtureInputModel(),
 				storages: &mongodbflex.ListStoragesResponse{
 					StorageClasses: []string{},
 				},
@@ -205,7 +207,7 @@ func Test_outputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.storages); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.model, tt.args.storages); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

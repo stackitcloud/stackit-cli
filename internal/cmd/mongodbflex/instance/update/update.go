@@ -228,7 +228,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient mongodbflex.
 		if model.RAM == nil || model.CPU == nil {
 			var currentFlavor *mongodbflex.InstanceFlavor
 			for _, f := range flavors.Flavors {
-				if f.Id == currentInstance.Item.Flavor.Id {
+				if *f.Id == *currentInstance.Item.Flavor.Id {
 					currentFlavor = &f
 				}
 			}
