@@ -23,6 +23,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 		allowedUrlDomainFlag:                             true,
 
 		authorizationCustomEndpointFlag:   true,
+		automationCustomEndpointFlag:      true,
 		albWafCustomEndpointFlag:          true,
 		dnsCustomEndpointFlag:             true,
 		edgeCustomEndpointFlag:            true,
@@ -72,6 +73,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		AllowedUrlDomain:               true,
 
 		AuthorizationCustomEndpoint:   true,
+		AutomationCustomEndpoint:      true,
 		AlbWafCustomEndpoint:          true,
 		DNSCustomEndpoint:             true,
 		EdgeCustomEndpoint:            true,
@@ -137,6 +139,7 @@ func TestParseInput(t *testing.T) {
 				model.AllowedUrlDomain = false
 
 				model.AuthorizationCustomEndpoint = false
+				model.AutomationCustomEndpoint = false
 				model.AlbWafCustomEndpoint = false
 				model.DNSCustomEndpoint = false
 				model.EdgeCustomEndpoint = false
@@ -225,6 +228,16 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.ObservabilityCustomEndpoint = false
+			}),
+		},
+		{
+			description: "automation custom endpoint empty",
+			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
+				flagValues[automationCustomEndpointFlag] = false
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.AutomationCustomEndpoint = false
 			}),
 		},
 		{

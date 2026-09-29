@@ -258,6 +258,9 @@ func fixtureDistributions(count int) []cdn.Distribution {
 				Tls: cdn.TlsConfig{
 					AdditionalProperties: map[string]interface{}{},
 				},
+				CacheConfig: cdn.CacheConfig{
+					AdditionalProperties: map[string]interface{}{},
+				},
 				Regions:              []cdn.Region{cdn.REGION_EU},
 				BlockedCountries:     []string{},
 				BlockedIps:           []string{},

@@ -206,3 +206,47 @@ func Map[T, U any](input []T, mapFn func(T) U) []U {
 	}
 	return values
 }
+
+// FlattenMap flats a map. Nested maps will be added to the root map.
+// The keys in the output map will be dot-separated for nested maps.
+//
+// Example:
+// input:
+//
+//	{
+//	  "a": 1,
+//	  "b": {
+//	    "c": 2,
+//	    "d": {
+//	      "e": 3
+//	    }
+//	  }
+//	}
+//
+// output:
+//
+//	{
+//	  "a": 1,
+//	  "b.c": 2,
+//	  "b.d.e": 3
+//	}
+func FlattenMap(inputMap map[string]interface{}) map[string]interface{} {
+	if inputMap == nil {
+		return nil
+	}
+	outputMap := make(map[string]interface{})
+	for key, value := range inputMap {
+		if valueMap, ok := value.(map[string]interface{}); ok {
+			if len(valueMap) == 0 {
+				outputMap[key] = ""
+				continue
+			}
+			for nestedKey, nestedValue := range FlattenMap(valueMap) {
+				outputMap[key+"."+nestedKey] = nestedValue
+			}
+		} else {
+			outputMap[key] = value
+		}
+	}
+	return outputMap
+}
