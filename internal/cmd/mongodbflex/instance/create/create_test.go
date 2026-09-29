@@ -7,7 +7,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -56,12 +55,12 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		InstanceName:   "example-name",
 		ACL:            []string{"0.0.0.0/0"},
-		BackupSchedule: utils.Ptr("0 0/6 * * *"),
-		FlavorId:       utils.Ptr(testFlavorId),
-		StorageClass:   utils.Ptr("premium-perf4-mongodb"),
-		StorageSize:    utils.Ptr(int64(10)),
-		Version:        utils.Ptr("6.0"),
-		Type:           utils.Ptr("Replica"),
+		BackupSchedule: new("0 0/6 * * *"),
+		FlavorId:       new(testFlavorId),
+		StorageClass:   new("premium-perf4-mongodb"),
+		StorageSize:    new(int64(10)),
+		Version:        new("6.0"),
+		Type:           new("Replica"),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -86,8 +85,8 @@ func fixturePayload(mods ...func(payload *mongodbflex.CreateInstancePayload)) mo
 		FlavorId:       testFlavorId,
 		Replicas:       int32(3),
 		Storage: mongodbflex.Storage{
-			Class: utils.Ptr("premium-perf4-mongodb"),
-			Size:  utils.Ptr(int64(10)),
+			Class: new("premium-perf4-mongodb"),
+			Size:  new(int64(10)),
 		},
 		Version: "6.0",
 		Options: map[string]string{
@@ -136,8 +135,8 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.FlavorId = nil
-				model.CPU = utils.Ptr(int32(2))
-				model.RAM = utils.Ptr(int32(4))
+				model.CPU = new(int32(2))
+				model.RAM = new(int32(4))
 			}),
 		},
 		{

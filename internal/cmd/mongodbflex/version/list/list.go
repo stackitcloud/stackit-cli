@@ -86,7 +86,6 @@ func outputResult(p *print.Printer, outputFormat string, versions []string) erro
 
 		table := tables.NewTable()
 		table.SetTitle("Versions")
-		table.SetHeader("VERSION")
 
 		for _, v := range versions {
 			table.AddRow(v)

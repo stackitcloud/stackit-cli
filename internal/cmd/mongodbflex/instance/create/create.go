@@ -106,6 +106,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			model.FlavorId, err = getFlavorId(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "determining flavor id: %v", err)
+				return err
 			}
 
 			// remove after 2027-03-07

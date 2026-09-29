@@ -54,12 +54,18 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			flavors, err := buildRequest(ctx, model, apiClient.DefaultAPI).Execute()
+			flavorsResp, err := buildRequest(ctx, model, apiClient.DefaultAPI).Execute()
 			if err != nil {
 				return fmt.Errorf("get MongoDB Flex flavors: %w", err)
 			}
+			flavors := flavorsResp.Flavors
 
-			return outputResult(params.Printer, model.OutputFormat, flavors.Flavors)
+			// Truncate output
+			if model.Limit != nil && len(flavors) > int(*model.Limit) {
+				flavors = flavors[:*model.Limit]
+			}
+
+			return outputResult(params.Printer, model.OutputFormat, flavors)
 		},
 	}
 
