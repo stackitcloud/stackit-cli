@@ -6,6 +6,9 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	sca "github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi"
+	"github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi/wait"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,8 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sca/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-	sca "github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi"
-	"github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi/wait"
 )
 
 const (
@@ -39,13 +40,17 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Long:  "Update a STACKIT Kubernetes Engine (SCA) application from payload.",
 		Args:  args.SingleArg(applicationIDArg, nil),
 		Example: examples.Build(
-			// TODO: fix examples
 			examples.NewExample(
-				`Update a SCA application with ID "xxx" from an environment with ID "yyy"`,
-				"$ stackit sca application describe xxx --environment-id yyy"),
+				`Update a SCA application using an API payload sourced from the file "./payload.json"`,
+				"$ stackit sca application update-from-payload my-application-id --payload @./payload.json"),
 			examples.NewExample(
-				`Get details of all SCA application with ID "xxx" from an environment with ID "yyy" in JSON format`,
-				"$ stackit sca application describe xxx --environment-id yyy --output-format json"),
+				`Update a SCA application using an API payload provided as a JSON string`,
+				`$ stackit sca application update-from-payload my-application-id --payload "{...}"`),
+			examples.NewExample(
+				`Generate a payload with the current values of an application, and adapt it with custom values for the different configuration options`,
+				`$ stackit sca application generate-payload --application-id application-id > ./payload.json`,
+				`<Modify payload in file>`,
+				`$ stackit sca application update-from-payload application-id --payload @./payload.json`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

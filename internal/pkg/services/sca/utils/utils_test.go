@@ -3,8 +3,9 @@ package utils_test
 import (
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sca/utils"
 	"github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sca/utils"
 )
 
 func TestApplicationStatusToStr(t *testing.T) {

@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	sca "github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -16,7 +18,6 @@ import (
 	scautils "github.com/stackitcloud/stackit-cli/internal/pkg/services/sca/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-	sca "github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi"
 )
 
 const (
@@ -45,7 +46,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				`List all SCA applications`,
 				"$ stackit sca application list"),
 			examples.NewExample(
-				`List all SCA applications from enviroment with ID "xxx"`,
+				`List all SCA applications from environment with ID "xxx"`,
 				"$ stackit sca application list --environment-id xxx"),
 			examples.NewExample(
 				`List all SCA applications in JSON format`,
@@ -54,7 +55,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				`List up to 10 SCA applications`,
 				"$ stackit sca application list --limit 10"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 
 			model, err := parseInput(params.Printer, cmd, nil)
@@ -138,7 +139,6 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, applicati
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "INSTANCES", "ENVIRONMENT", "ENVIRONMENT ID", "URL", "STATUS", "STATE")
 		for _, a := range applications {
-
 			table.AddRow(
 				a.GetId(),
 				a.GetDisplayName(),
@@ -148,7 +148,6 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, applicati
 				a.GetUrl(),
 				scautils.ApplicationStatusToStr(a.GetStatus()),
 				scautils.ApplicationStateToStr(a.GetStopped()),
-				// state,
 			)
 		}
 		err := table.Display(p)

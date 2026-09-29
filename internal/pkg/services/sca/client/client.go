@@ -2,10 +2,11 @@ package client
 
 import (
 	"github.com/spf13/viper"
+	sca "github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	genericclient "github.com/stackitcloud/stackit-cli/internal/pkg/generic-client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	sca "github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi"
 )
 
 func ConfigureClient(p *print.Printer, cliVersion string) (*sca.APIClient, error) {

@@ -7,9 +7,10 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
+	sca "github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	sca "github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi"
 )
 
 const (

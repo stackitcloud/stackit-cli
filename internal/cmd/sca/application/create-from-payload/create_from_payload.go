@@ -6,6 +6,9 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	sca "github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi"
+	"github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi/wait"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -15,8 +18,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sca/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-	sca "github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi"
-	"github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi/wait"
 )
 
 const (
@@ -46,10 +47,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				`Get details of all SCA application with ID "xxx" from an environment with ID "yyy" in JSON format`,
 				"$ stackit sca application describe xxx --environment-id yyy --output-format json"),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 
-			model, err := parseInput(params.Printer, cmd)
+			model, err := parseInput(params.Printer, cmd, nil)
 			if err != nil {
 				return err
 			}
@@ -114,7 +115,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(flags.MarkFlagsRequired(cmd, nameFlag))
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}

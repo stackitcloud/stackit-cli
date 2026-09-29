@@ -1,4 +1,4 @@
-package generatepayload
+package createfrompayload
 
 import (
 	"context"
@@ -23,8 +23,31 @@ var testCtx = context.Background()
 var (
 	testProjectID     = uuid.NewString()
 	testEnvironmentID = uuid.NewString()
-	testApplicationID = uuid.NewString()
-	testFilePath      = "example-file"
+
+	testPayload = &sca.CreateApplicationPayload{
+		DisplayName:          "test-application",
+		AdditionalProperties: map[string]any{},
+		Containers: []sca.Container{{
+			Name:                 "test-container",
+			Image:                "test-image",
+			Cpu:                  sca.PtrInt32(2000),
+			Memory:               sca.PtrInt32(2048),
+			AdditionalProperties: map[string]any{},
+		}},
+		Scaling: sca.Scaling{
+			Type: sca.SCALINGTYPE_SCALING_TYPE_MANUAL,
+			ManualScaling: &sca.ManualScaling{
+				Instances:            2,
+				AdditionalProperties: map[string]any{},
+			},
+			AdditionalProperties: map[string]any{},
+		},
+		Network: sca.Network{
+			PublicIngress:        true,
+			Port:                 sca.PtrInt32(8888),
+			AdditionalProperties: map[string]any{},
+		},
+	}
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -33,8 +56,26 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		globalflags.RegionFlag:    testRegion,
 
 		environmentIDFlag: testEnvironmentID,
-		applicationIDFlag: testApplicationID,
-		filePathFlag:      testFilePath,
+		nameFlag:          "test-application",
+		payloadFlag: `{
+			"displayName": "",
+			"containers": [{
+				"name": "test-container",
+				"image": "test-image",
+				"cpu": 2000,
+				"memory": 2048
+			}],
+			"scaling": {
+				"type": "SCALING_TYPE_MANUAL",
+				"manualScaling": {
+					"instances": 2
+				}
+			},
+			"network": {
+				"publicIngress": true,
+				"port": 8888
+			}
+		}`,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -49,9 +90,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		ApplicationID: &testApplicationID,
-		EnvironmentID: &testEnvironmentID,
-		FilePath:      &testFilePath,
+		EnvironmentID: testEnvironmentID,
+		Payload:       testPayload,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -59,8 +99,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *sca.ApiGetApplicationRequest)) sca.ApiGetApplicationRequest {
-	request := testClient.DefaultAPI.GetApplication(testCtx, testProjectID, testEnvironmentID, testApplicationID)
+func fixtureRequest(mods ...func(request *sca.ApiCreateApplicationRequest)) sca.ApiCreateApplicationRequest {
+	request := testClient.DefaultAPI.CreateApplication(testCtx, testProjectID, testEnvironmentID)
+	request = request.CreateApplicationPayload(*testPayload)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -70,7 +111,6 @@ func fixtureRequest(mods ...func(request *sca.ApiGetApplicationRequest)) sca.Api
 func TestParseInput(t *testing.T) {
 	tests := []struct {
 		desc          string
-		argValues     []string
 		flagValues    map[string]string
 		expectedModel *inputModel
 		isValid       bool
@@ -83,26 +123,8 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			desc:       "no values",
-			flagValues: map[string]string{},
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.ProjectId = ""
-				model.Region = ""
-				model.Verbosity = globalflags.VerbosityDefault
-				model.EnvironmentID = nil
-				model.ApplicationID = nil
-				model.FilePath = nil
-			}),
-			isValid: true,
-		},
-		{
-			desc: "application id missing",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, applicationIDFlag)
-			}),
-			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.ApplicationID = nil
-			}),
-			isValid: true,
+			flagValues: nil,
+			isValid:    false,
 		},
 		{
 			desc: "project id missing",
@@ -119,16 +141,9 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
-			desc: "environment id invalid",
+			desc: "invalid json",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[environmentIDFlag] = "invalid-uuid"
-			}),
-			isValid: false,
-		},
-		{
-			desc: "application id invalid",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[applicationIDFlag] = "invalid-uuid"
+				flagValues[payloadFlag] = "not json"
 			}),
 			isValid: false,
 		},
@@ -136,7 +151,7 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
+			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, nil, tt.flagValues, tt.isValid)
 		})
 	}
 }
@@ -145,7 +160,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest sca.ApiGetApplicationRequest
+		expectedRequest sca.ApiCreateApplicationRequest
 	}{
 		{
 			description:     "base",
@@ -161,6 +176,9 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx, sca.DefaultAPIService{}),
+				cmpopts.SortSlices(func(a, b sca.EnvVar) bool {
+					return a.Key < b.Key
+				}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

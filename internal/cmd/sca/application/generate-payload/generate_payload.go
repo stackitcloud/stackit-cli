@@ -6,6 +6,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	sca "github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -17,7 +19,6 @@ import (
 	scautils "github.com/stackitcloud/stackit-cli/internal/pkg/services/sca/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
-	sca "github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi"
 )
 
 const (
@@ -44,7 +45,20 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args: args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				``,
+				`Generate a payload with default values, and adapt it with custom values for the different configuration options`,
+				`$ stackit sca application generate-payload --file-path ./payload.json`,
+				`<Modify payload in file, if needed>`,
+				`$ stackit sca application create-from-payload --name application-name --payload @./payload.json`,
+			),
+			examples.NewExample(
+				`Generate a payload with values of an application, and adapt it with custom values for the different configuration options`,
+				`$ stackit sca application generate-payload --application-id xxx --file-path ./payload.json`,
+				`<Modify payload in file>`,
+				`$ stackit sca application update-from-payload --payload @./payload.json`,
+			),
+			examples.NewExample(
+				`Generate a payload with values of an application, and preview it in the terminal`,
+				`$ stackit sca application generate-payload --application-id xxx`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -76,7 +90,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 					Network:    resp.Network,
 					Containers: resp.Containers,
 				}
-
 			}
 
 			return outputResult(params.Printer, model.FilePath, payload)

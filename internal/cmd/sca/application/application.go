@@ -2,6 +2,7 @@ package application
 
 import (
 	"github.com/spf13/cobra"
+
 	"github.com/stackitcloud/stackit-cli/internal/cmd/sca/application/create"
 	createfrompayload "github.com/stackitcloud/stackit-cli/internal/cmd/sca/application/create-from-payload"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/sca/application/delete"

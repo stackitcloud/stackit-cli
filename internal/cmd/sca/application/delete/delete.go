@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	sca "github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -13,7 +15,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sca/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-	sca "github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi"
 )
 
 const (

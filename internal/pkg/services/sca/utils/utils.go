@@ -45,7 +45,7 @@ func ApplicationStatusToStr(status sca.CurrentStatus) string {
 }
 
 func ApplicationStateToStr(isStopped bool) string {
-	if isStopped == false {
+	if !isStopped {
 		return "Active"
 	}
 	return "Stopped"
