@@ -269,7 +269,7 @@ func getFlavorId(ctx context.Context, model *inputModel, apiClient mongodbflex.D
 	}
 
 	for _, flavor := range flavors.Flavors {
-		if *flavor.Cpu == *model.CPU && *flavor.Memory == *model.RAM {
+		if flavor.Cpu != nil && flavor.Memory != nil && *flavor.Cpu == *model.CPU && *flavor.Memory == *model.RAM {
 			return flavor.Id, nil
 		}
 	}
