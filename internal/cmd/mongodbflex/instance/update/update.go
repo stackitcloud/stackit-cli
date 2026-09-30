@@ -275,7 +275,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient mongodbflex.
 	if model.Type != nil {
 		replicasInt, err := mongodbflexUtils.GetInstanceReplicas(*model.Type)
 		if err != nil {
-			return req, fmt.Errorf("get PostgreSQL Flex instance type: %w", err)
+			return req, fmt.Errorf("get MongoDB Flex instance type: %w", err)
 		}
 
 		replicas = &replicasInt
