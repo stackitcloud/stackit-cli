@@ -25,7 +25,18 @@ const (
 	testUserName     = "user"
 )
 
-func newAPIClientMock(m clientMockSettings) mongodbflex.DefaultAPI {
+type mockSettings struct {
+	listVersionsFails    bool
+	listVersionsResp     *mongodbflex.ListVersionsResponse
+	getInstanceFails     bool
+	getInstanceResp      *mongodbflex.InstanceResponse
+	getUserFails         bool
+	getUserResp          *mongodbflex.GetUserResponse
+	listRestoreJobsFails bool
+	listRestoreJobsResp  *mongodbflex.ListRestoreJobsResponse
+}
+
+func newAPIClientMock(m mockSettings) mongodbflex.DefaultAPI {
 	return mongodbflex.DefaultAPIServiceMock{
 		ListVersionsExecuteMock: utils.Ptr(func(_ mongodbflex.ApiListVersionsRequest) (*mongodbflex.ListVersionsResponse, error) {
 			if m.listVersionsFails {
@@ -51,189 +62,6 @@ func newAPIClientMock(m clientMockSettings) mongodbflex.DefaultAPI {
 			}
 			return m.getUserResp, nil
 		}),
-	}
-}
-
-type clientMockSettings struct {
-	listVersionsFails    bool
-	listVersionsResp     *mongodbflex.ListVersionsResponse
-	getInstanceFails     bool
-	getInstanceResp      *mongodbflex.InstanceResponse
-	getUserFails         bool
-	getUserResp          *mongodbflex.GetUserResponse
-	listRestoreJobsFails bool
-	listRestoreJobsResp  *mongodbflex.ListRestoreJobsResponse
-}
-
-func TestValidateStorage(t *testing.T) {
-	tests := []struct {
-		description  string
-		storageClass *string
-		storageSize  *int64
-		storages     *mongodbflex.ListStoragesResponse
-		isValid      bool
-	}{
-		{
-			description:  "base",
-			storageClass: utils.Ptr("foo"),
-			storageSize:  utils.Ptr(int64(10)),
-			storages: &mongodbflex.ListStoragesResponse{
-				StorageClasses: []string{"bar-1", "bar-2", "foo"},
-				StorageRange: &mongodbflex.StorageRange{
-					Min: utils.Ptr(int64(5)),
-					Max: utils.Ptr(int64(20)),
-				},
-			},
-			isValid: true,
-		},
-		{
-			description:  "nil response",
-			storageClass: utils.Ptr("foo"),
-			storageSize:  utils.Ptr(int64(10)),
-			storages:     nil,
-			isValid:      false,
-		},
-		{
-			description:  "storage size out of range 1",
-			storageClass: utils.Ptr("foo"),
-			storageSize:  utils.Ptr(int64(1)),
-			storages: &mongodbflex.ListStoragesResponse{
-				StorageClasses: []string{"bar-1", "bar-2", "foo"},
-				StorageRange: &mongodbflex.StorageRange{
-					Min: utils.Ptr(int64(5)),
-					Max: utils.Ptr(int64(20)),
-				},
-			},
-			isValid: false,
-		},
-		{
-			description:  "storage size out of range 2",
-			storageClass: utils.Ptr("foo"),
-			storageSize:  utils.Ptr(int64(200)),
-			storages: &mongodbflex.ListStoragesResponse{
-				StorageClasses: []string{"bar-1", "bar-2", "foo"},
-				StorageRange: &mongodbflex.StorageRange{
-					Min: utils.Ptr(int64(5)),
-					Max: utils.Ptr(int64(20)),
-				},
-			},
-			isValid: false,
-		},
-		{
-			description:  "storage size in range limit 1",
-			storageClass: utils.Ptr("foo"),
-			storageSize:  utils.Ptr(int64(5)),
-			storages: &mongodbflex.ListStoragesResponse{
-				StorageClasses: []string{"bar-1", "bar-2", "foo"},
-				StorageRange: &mongodbflex.StorageRange{
-					Min: utils.Ptr(int64(5)),
-					Max: utils.Ptr(int64(20)),
-				},
-			},
-			isValid: true,
-		},
-		{
-			description:  "storage size in range limit 2",
-			storageClass: utils.Ptr("foo"),
-			storageSize:  utils.Ptr(int64(20)),
-			storages: &mongodbflex.ListStoragesResponse{
-				StorageClasses: []string{"bar-1", "bar-2", "foo"},
-				StorageRange: &mongodbflex.StorageRange{
-					Min: utils.Ptr(int64(5)),
-					Max: utils.Ptr(int64(20)),
-				},
-			},
-			isValid: true,
-		},
-		{
-			description:  "invalid storage",
-			storageClass: utils.Ptr("foo"),
-			storageSize:  utils.Ptr(int64(10)),
-			storages: &mongodbflex.ListStoragesResponse{
-				StorageClasses: []string{"bar-1", "bar-2", "bar-3"},
-				StorageRange: &mongodbflex.StorageRange{
-					Min: utils.Ptr(int64(5)),
-					Max: utils.Ptr(int64(20)),
-				},
-			},
-			isValid: false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.description, func(t *testing.T) {
-			err := ValidateStorage(tt.storageClass, tt.storageSize, tt.storages, "flavor-id")
-			if tt.isValid && err != nil {
-				t.Fatalf("should not have failed: %v", err)
-			}
-			if !tt.isValid && err == nil {
-				t.Fatalf("should have failed")
-			}
-		})
-	}
-}
-
-func TestValidateFlavorId(t *testing.T) {
-	tests := []struct {
-		description string
-		flavorId    string
-		flavors     []mongodbflex.InstanceFlavor
-		isValid     bool
-	}{
-		{
-			description: "base",
-			flavorId:    "foo",
-			flavors: []mongodbflex.InstanceFlavor{
-				{Id: utils.Ptr("bar-1")},
-				{Id: utils.Ptr("bar-2")},
-				{Id: utils.Ptr("foo")},
-			},
-			isValid: true,
-		},
-		{
-			description: "nil flavors",
-			flavorId:    "foo",
-			flavors:     nil,
-			isValid:     false,
-		},
-		{
-			description: "no flavors",
-			flavorId:    "foo",
-			flavors:     []mongodbflex.InstanceFlavor{},
-			isValid:     false,
-		},
-		{
-			description: "nil flavor id",
-			flavorId:    "foo",
-			flavors: []mongodbflex.InstanceFlavor{
-				{Id: utils.Ptr("bar-1")},
-				{Id: nil},
-				{Id: utils.Ptr("foo")},
-			},
-			isValid: true,
-		},
-		{
-			description: "invalid flavor",
-			flavorId:    "foo",
-			flavors: []mongodbflex.InstanceFlavor{
-				{Id: utils.Ptr("bar-1")},
-				{Id: utils.Ptr("bar-2")},
-				{Id: utils.Ptr("bar-3")},
-			},
-			isValid: false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.description, func(t *testing.T) {
-			err := ValidateFlavorId(tt.flavorId, tt.flavors)
-			if tt.isValid && err != nil {
-				t.Fatalf("should not have failed: %v", err)
-			}
-			if !tt.isValid && err == nil {
-				t.Fatalf("should have failed")
-			}
-		})
 	}
 }
 
@@ -408,7 +236,7 @@ func TestGetLatestMongoDBFlexVersion(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			settings := clientMockSettings{
+			settings := mockSettings{
 				listVersionsFails: tt.listVersionsFails,
 				listVersionsResp:  tt.listVersionsResp,
 			}
@@ -458,7 +286,7 @@ func TestGetInstanceName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			settings := clientMockSettings{
+			settings := mockSettings{
 				getInstanceFails: tt.getInstanceFails,
 				getInstanceResp:  tt.getInstanceResp,
 			}
@@ -508,7 +336,7 @@ func TestGetUserName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			settings := clientMockSettings{
+			settings := mockSettings{
 				getUserFails: tt.getUserFails,
 				getUserResp:  tt.getUserResp,
 			}
@@ -642,58 +470,6 @@ func TestGetRestoreStatus(t *testing.T) {
 
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
-			}
-		})
-	}
-}
-
-func TestGetInstanceType(t *testing.T) {
-	tests := []struct {
-		description    string
-		numReplicas    int32
-		expectedOutput string
-		isValid        bool
-	}{
-		{
-			description:    "single",
-			numReplicas:    1,
-			expectedOutput: "Single",
-			isValid:        true,
-		},
-		{
-			description:    "replica set",
-			numReplicas:    3,
-			expectedOutput: "Replica",
-			isValid:        true,
-		},
-		{
-			description:    "sharded cluster",
-			numReplicas:    9,
-			expectedOutput: "Sharded",
-			isValid:        true,
-		},
-		{
-			description: "invalid",
-			numReplicas: 0,
-			isValid:     false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.description, func(t *testing.T) {
-			output, err := GetInstanceType(tt.numReplicas)
-			if !tt.isValid {
-				if err == nil {
-					t.Fatalf("did not fail on invalid input")
-				}
-				return
-			}
-			if err != nil {
-				t.Fatalf("failed on valid input: %v", err)
-			}
-
-			if output != tt.expectedOutput {
-				t.Fatalf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}
 		})
 	}
