@@ -51,6 +51,8 @@ type UserAuthConfig struct {
 	IsReauthentication bool
 	// Port defines which port should be used for the UserAuthFlow callback
 	Port *int
+	// NoBrowserOpen stops the browser from opening automatically during the login flow
+	NoBrowserOpen bool
 }
 
 type apiClient interface {
@@ -250,19 +252,28 @@ func AuthorizeUser(p *print.Printer, authConfig UserAuthConfig) error {
 		}
 	})
 
-	p.Debug(print.DebugLevel, "opening browser for authentication: %s", authorizationURL)
 	p.Debug(print.DebugLevel, "using authentication server on %s", idpWellKnownConfig.Issuer)
 	p.Debug(print.DebugLevel, "using client ID %s for authentication ", idpClientID)
 
-	// Open a browser window to the authorizationURL
-	err = openBrowser(authorizationURL)
-	if err != nil {
-		return fmt.Errorf("open browser to URL %s: %w", authorizationURL, err)
-	}
+	if authConfig.NoBrowserOpen {
+		p.Debug(print.DebugLevel, "skipping browser opening since the commandline flag was passed")
 
-	// Print the link
-	p.Info("Your browser has been opened to visit:\n\n")
-	p.Info("%s\n\n", authorizationURL)
+		// Print the link in terminal
+		p.Info("Open the following URL in your browser:\n\n")
+		p.Info("%s\n\n", authorizationURL)
+	} else {
+		p.Debug(print.DebugLevel, "opening browser for authentication: %s", authorizationURL)
+
+		// Open a browser window to the authorizationURL
+		err = openBrowser(authorizationURL)
+		if err != nil {
+			return fmt.Errorf("open browser to URL %s: %w", authorizationURL, err)
+		}
+
+		// Print the link
+		p.Info("Your browser has been opened to visit:\n\n")
+		p.Info("%s\n\n", authorizationURL)
+	}
 
 	// Start the blocking web server loop
 	// It will exit when the handlers get fired and call server.Close()
