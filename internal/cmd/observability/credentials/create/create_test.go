@@ -50,7 +50,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *observability.ApiCreateCredentialsRequest)) observability.ApiCreateCredentialsRequest {
-	request := testClient.DefaultAPI.CreateCredentials(testCtx, testInstanceId, testProjectId)
+	request := testClient.DefaultAPI.CreateCredentials(testCtx, testInstanceId, testProjectId).CreateCredentialsPayload(observability.CreateCredentialsPayload{})
 	for _, mod := range mods {
 		mod(&request)
 	}

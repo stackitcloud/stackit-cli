@@ -60,6 +60,6 @@ stackit [flags]
 * [stackit ske](./stackit_ske.md)	 - Provides functionality for SKE
 * [stackit sqlserverflex](./stackit_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
 * [stackit ufw](./stackit_ufw.md)	 - Provides functionality for UFW
-* [stackit valkey](./stackit_valkey.md)	 - Provides functionality for Valkey
+* [stackit valkey](./stackit_valkey.md)	 - Provides functionality for Key Value Store (valkey)
 * [stackit volume](./stackit_volume.md)	 - Provides functionality for volumes
 
