@@ -33,8 +33,8 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Lists all credentials' IDs for a Valkey instance",
-		Long:  "Lists all credentials' IDs for a Valkey instance.",
+		Short: "Lists all credentials' IDs for a Key Value Store (valkey) instance",
+		Long:  "Lists all credentials' IDs for a Key Value Store (valkey) instance.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

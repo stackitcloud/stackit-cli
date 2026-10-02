@@ -5,16 +5,17 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	valkey "github.com/stackitcloud/stackit-sdk-go/services/valkey/v2api"
+	"github.com/stackitcloud/stackit-sdk-go/core/experimental/paginate"
+	automation "github.com/stackitcloud/stackit-sdk-go/services/automation/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/valkey/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/automation/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -22,6 +23,8 @@ import (
 
 const (
 	limitFlag = "limit"
+
+	maxPageSize = 100
 )
 
 type inputModel struct {
@@ -32,22 +35,20 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Lists all Key Value Store (valkey) instances",
-		Long:  "Lists all Key Value Store (valkey) instances.",
+		Short: "List all Volume Automations",
+		Long:  "List all Volume Automations.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`List all Valkey instances`,
-				"$ stackit valkey instance list"),
+				`List all Volume Automations`,
+				"$ stackit beta volume automation list"),
 			examples.NewExample(
-				`List all Valkey instances in JSON format`,
-				"$ stackit valkey instance list --output-format json"),
-			examples.NewExample(
-				`List up to 10 Valkey instances`,
-				"$ stackit valkey instance list --limit 10"),
+				`List up to 10 Volume Automations`,
+				"$ stackit beta volume automation list --limit 10"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -60,28 +61,23 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
-			resp, err := req.Execute()
+			resp, err := fetchAutomations(ctx, model, apiClient)
 			if err != nil {
-				return fmt.Errorf("get Valkey instances: %w", err)
-			}
-			instances := resp.Instances
-
-			// Truncate output
-			if model.Limit != nil && len(instances) > int(*model.Limit) {
-				instances = instances[:*model.Limit]
+				return fmt.Errorf("list volume automations: %w", err)
 			}
 
+			// Get projectLabel
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
+			} else if projectLabel == "" {
+				projectLabel = model.ProjectId
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, projectLabel, instances)
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, resp)
 		},
 	}
-
 	configureFlags(cmd)
 	return cmd
 }
@@ -93,12 +89,12 @@ func configureFlags(cmd *cobra.Command) {
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
-		return nil, &errors.ProjectIdError{}
+		return nil, &cliErr.ProjectIdError{}
 	}
 
 	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
 	if limit != nil && *limit < 1 {
-		return nil, &errors.FlagValidationError{
+		return nil, &cliErr.FlagValidationError{
 			Flag:    limitFlag,
 			Details: "must be greater than 0",
 		}
@@ -113,33 +109,56 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *valkey.APIClient) valkey.ApiListInstancesRequest {
-	return apiClient.DefaultAPI.ListInstances(ctx, model.ProjectId, model.Region)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *automation.APIClient) automation.ApiListVolumeAutomationsRequest {
+	req := apiClient.DefaultAPI.ListVolumeAutomations(ctx, model.ProjectId, model.Region)
+	return req
 }
 
-func outputResult(p *print.Printer, outputFormat, projectLabel string, instances []valkey.Instance) error {
-	return p.OutputResult(outputFormat, instances, func() error {
-		if len(instances) == 0 {
-			p.Outputf("No instances found for project %q\n", projectLabel)
+func fetchAutomations(ctx context.Context, model *inputModel, apiClient *automation.APIClient) ([]automation.ListAutomationsItem, error) {
+	req := buildRequest(ctx, model, apiClient)
+	opts := []paginate.Option{
+		paginate.WithPageSize(maxPageSize),
+	}
+	if model.Limit != nil {
+		opts = append(opts, paginate.WithLimit(int(*model.Limit)))
+	}
+
+	items, err := paginate.All[automation.ListAutomationsItem](req, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	if items == nil {
+		items = []automation.ListAutomationsItem{}
+	}
+
+	return items, nil
+}
+
+func outputResult(p *print.Printer, outputFormat, projectLabel string, items []automation.ListAutomationsItem) error {
+	return p.OutputResult(outputFormat, items, func() error {
+		if len(items) == 0 {
+			p.Outputf("No volume automations found in project %q\n", projectLabel)
 			return nil
 		}
 
 		table := tables.NewTable()
-		table.SetHeader("ID", "NAME", "LAST OPERATION TYPE", "LAST OPERATION STATE")
-		for i := range instances {
-			instance := instances[i]
+		table.SetHeader("ID", "NAME", "DESCRIPTION", "TEMPLATE ID")
+
+		for _, item := range items {
 			table.AddRow(
-				utils.PtrString(instance.InstanceId),
-				instance.Name,
-				string(instance.LastOperation.Type),
-				string(instance.LastOperation.State),
+				item.Id,
+				utils.PtrString(item.Name),
+				utils.PtrString(item.Description),
+				utils.PtrString(item.TemplateId),
 			)
+			table.AddSeparator()
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
-
 		return nil
 	})
 }

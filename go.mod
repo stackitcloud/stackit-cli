@@ -15,8 +15,8 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
-	github.com/stackitcloud/stackit-sdk-go/core v0.27.0
-	github.com/stackitcloud/stackit-sdk-go/services/alb v0.17.1
+	github.com/stackitcloud/stackit-sdk-go/core v0.27.1
+	github.com/stackitcloud/stackit-sdk-go/services/alb v0.18.0
 	github.com/stackitcloud/stackit-sdk-go/services/albwaf v0.13.4
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.15.4
 	github.com/stackitcloud/stackit-sdk-go/services/automation v0.2.0
@@ -27,18 +27,18 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.14.1
 	github.com/stackitcloud/stackit-sdk-go/services/intake v0.11.2
 	github.com/stackitcloud/stackit-sdk-go/services/logs v0.10.2
-	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.12.1
+	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.12.2
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.3.1
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.15.0
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.24.2
-	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.10.1
+	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.10.2
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.19.1
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.7.1
 	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.5.5
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.20.1
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.7.2
 	github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.2
-	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.18.0
+	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.18.1
 	github.com/stackitcloud/stackit-sdk-go/services/valkey v0.3.1
 	github.com/stackitcloud/stackit-sdk-go/services/vpn v0.15.2
 	github.com/zalando/go-keyring v0.2.8
@@ -272,10 +272,10 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/logme v1.3.1
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.3.1
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.9.2
-	github.com/stackitcloud/stackit-sdk-go/services/observability v0.25.0
+	github.com/stackitcloud/stackit-sdk-go/services/observability v0.25.2
 	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.3.1
 	github.com/stackitcloud/stackit-sdk-go/services/redis v1.4.1
-	github.com/stackitcloud/stackit-sdk-go/services/sfs v0.11.2
+	github.com/stackitcloud/stackit-sdk-go/services/sfs v0.11.3
 	github.com/subosito/gotenv v1.6.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

@@ -1,26 +1,30 @@
-## stackit valkey instance delete
+## stackit beta volume automation list
 
-Deletes a Key Value Store (valkey) instance
+List all Volume Automations
 
 ### Synopsis
 
-Deletes a Key Value Store (valkey) instance.
+List all Volume Automations.
 
 ```
-stackit valkey instance delete INSTANCE_ID [flags]
+stackit beta volume automation list [flags]
 ```
 
 ### Examples
 
 ```
-  Delete a Valkey instance with ID "xxx"
-  $ stackit valkey instance delete xxx
+  List all Volume Automations
+  $ stackit beta volume automation list
+
+  List up to 10 Volume Automations
+  $ stackit beta volume automation list --limit 10
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit valkey instance delete"
+  -h, --help        Help for "stackit beta volume automation list"
+      --limit int   Maximum number of entries to list
 ```
 
 ### Options inherited from parent commands
@@ -36,5 +40,5 @@ stackit valkey instance delete INSTANCE_ID [flags]
 
 ### SEE ALSO
 
-* [stackit valkey instance](./stackit_valkey_instance.md)	 - Provides functionality for Key Value Store (valkey) instances
+* [stackit beta volume automation](./stackit_beta_volume_automation.md)	 - Provides functionality for Volume Automation
 
