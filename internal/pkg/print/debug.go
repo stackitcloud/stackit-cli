@@ -89,23 +89,14 @@ func BuildDebugStrFromSlice(inputSlice []string) string {
 
 // buildHeaderMap converts a map to a user-friendly string representation.
 // This function also filters the headers based on the includeHeaders parameter.
-// If includeHeaders is empty, the default header filters are used.
+// If includeHeaders is empty, all headers will be printed.
 func buildHeaderMap(headers http.Header, includeHeaders []string) map[string]any {
 	headersMap := make(map[string]any)
 	for key, values := range headers {
-		headersMap[key] = strings.Join(values, ", ")
-	}
-
-	headersToInclude := defaultHTTPHeaders
-	if len(includeHeaders) != 0 {
-		headersToInclude = includeHeaders
-	}
-	for key := range headersMap {
-		if !slices.Contains(headersToInclude, key) {
-			delete(headersMap, key)
+		if len(includeHeaders) == 0 || slices.Contains(includeHeaders, key) {
+			headersMap[key] = strings.Join(values, ", ")
 		}
 	}
-
 	return headersMap
 }
 
@@ -132,9 +123,9 @@ func drainBody(b io.ReadCloser) (r1, r2 io.ReadCloser, err error) {
 }
 
 // BuildDebugStrFromHTTPRequest converts an HTTP request to a user-friendly string representation.
-// This function also receives a list of headers to include in the output, if empty, the default headers are used.
+// Only the headers specified in defaultHTTPHeaders will be printed.
 // The return value is a list of strings that should be printed separately.
-func BuildDebugStrFromHTTPRequest(req *http.Request, includeHeaders []string) ([]string, error) {
+func BuildDebugStrFromHTTPRequest(req *http.Request) ([]string, error) {
 	if req == nil {
 		return nil, fmt.Errorf("request is nil")
 	}
@@ -150,7 +141,7 @@ func BuildDebugStrFromHTTPRequest(req *http.Request, includeHeaders []string) ([
 
 	status := fmt.Sprintf("request to %s: %s %s", unescapedURL, req.Method, req.Proto)
 
-	headersMap := buildHeaderMap(req.Header, includeHeaders)
+	headersMap := buildHeaderMap(req.Header, defaultHTTPHeaders)
 	headers := fmt.Sprintf("request headers: %v", BuildDebugStrFromMap(headersMap))
 
 	var save io.ReadCloser
@@ -179,9 +170,9 @@ func BuildDebugStrFromHTTPRequest(req *http.Request, includeHeaders []string) ([
 }
 
 // BuildDebugStrFromHTTPResponse converts an HTTP response to a user-friendly string representation.
-// This function also receives a list of headers to include in the output, if empty, the default headers are used.
+// All headers will be printed.
 // The return value is a list of strings that should be printed separately.
-func BuildDebugStrFromHTTPResponse(resp *http.Response, includeHeaders []string) ([]string, error) {
+func BuildDebugStrFromHTTPResponse(resp *http.Response) ([]string, error) {
 	if resp == nil {
 		return nil, fmt.Errorf("response is nil")
 	}
@@ -199,7 +190,7 @@ func BuildDebugStrFromHTTPResponse(resp *http.Response, includeHeaders []string)
 
 	status := fmt.Sprintf("response from %s: %s %s", unescapedURL, resp.Proto, resp.Status)
 
-	headersMap := buildHeaderMap(resp.Header, includeHeaders)
+	headersMap := buildHeaderMap(resp.Header, nil)
 	headers := fmt.Sprintf("response headers: %v", BuildDebugStrFromMap(headersMap))
 
 	var save io.ReadCloser
@@ -228,23 +219,20 @@ func BuildDebugStrFromHTTPResponse(resp *http.Response, includeHeaders []string)
 }
 
 // RequestResponseCapturer is a middleware that captures the request and response of an HTTP request.
-// Receives a printer and a list of headers to include in the output
-// If the list of headers is empty, the default headers are used.
-// The printer is used to print the captured data.
-func RequestResponseCapturer(p *Printer, includeHeaders []string) config.Middleware {
+// Receives a printer used to print the captured data.
+func RequestResponseCapturer(p *Printer) config.Middleware {
 	return func(rt http.RoundTripper) http.RoundTripper {
-		return &roundTripperWithCapture{rt, p, includeHeaders}
+		return &roundTripperWithCapture{rt, p}
 	}
 }
 
 type roundTripperWithCapture struct {
-	transport        http.RoundTripper
-	p                *Printer
-	debugHttpHeaders []string
+	transport http.RoundTripper
+	p         *Printer
 }
 
 func (rt roundTripperWithCapture) RoundTrip(req *http.Request) (*http.Response, error) {
-	reqStr, err := BuildDebugStrFromHTTPRequest(req, rt.debugHttpHeaders)
+	reqStr, err := BuildDebugStrFromHTTPRequest(req)
 	if err != nil {
 		rt.p.Debug(ErrorLevel, "printing request to debug logs: %v", err)
 	}
@@ -254,7 +242,7 @@ func (rt roundTripperWithCapture) RoundTrip(req *http.Request) (*http.Response, 
 	resp, err := rt.transport.RoundTrip(req)
 	defer func() {
 		if err == nil {
-			respStrSlice, tempErr := BuildDebugStrFromHTTPResponse(resp, rt.debugHttpHeaders)
+			respStrSlice, tempErr := BuildDebugStrFromHTTPResponse(resp)
 			if tempErr != nil {
 				rt.p.Debug(ErrorLevel, "printing HTTP response to debug logs: %v", tempErr)
 			}
