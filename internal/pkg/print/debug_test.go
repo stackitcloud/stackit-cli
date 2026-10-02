@@ -498,7 +498,7 @@ func TestBuildDebugStrFromHTTPResponse(t *testing.T) {
 		},
 		{
 			description: "more headers",
-			inputResp: fixtureHTTPResponse(func(resp *http.Response) {
+			inputResp: fixtureHTTPResponse(func(resp *http.Response) { // nolint:bodyclose // false positive, body is closed in the test
 				resp.Header.Add("X-Trace-Id", "trace-id")
 			}),
 			expected: []string{
