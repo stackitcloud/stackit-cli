@@ -140,6 +140,15 @@ func TestParseInput(t *testing.T) {
 			}),
 		},
 		{
+			description: "hostname suffix without domain boundary",
+			argValues: []string{
+				"https://suspiciousstackit.cloud/",
+			},
+			flagValues:       fixtureFlagValues(),
+			allowedURLDomain: "stackit.cloud",
+			isValid:          false,
+		},
+		{
 			description: "invalid method 1",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
