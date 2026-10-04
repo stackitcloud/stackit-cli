@@ -68,7 +68,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			environmentLabel, err := utils.GetEnvironmentName(ctx, apiClient.DefaultAPI, model.ProjectId, model.EnvironmentID)
 			if err != nil {
-				params.Printer.Debug(print.ErrorLevel, "get environemnt name: %v", err)
+				params.Printer.Debug(print.ErrorLevel, "get environment name: %v", err)
 				environmentLabel = model.EnvironmentID
 			}
 

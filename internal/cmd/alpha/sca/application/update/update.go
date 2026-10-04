@@ -89,7 +89,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				`Update the container image of a SCA application with ID "xxx" from an environment with ID "yyy"`,
 				"$ stackit alpha sca application update xxx --image new-image --environment-id yyy"),
 		),
-		PreRunE: func(cmd *cobra.Command, args []string) error {
+		PreRunE: func(cmd *cobra.Command, _ []string) error {
 			updateFlags := []string{
 				imageFlag,
 				publicFlag,
@@ -153,9 +153,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				}
 			}
 
-			outputResult(params.Printer, model, resp)
-
-			return nil
+			return outputResult(params.Printer, model, resp)
 		},
 	}
 
@@ -213,7 +211,6 @@ func containersFromInput(containers []sca.Container, model *inputModel) []sca.Co
 				Value:  val,
 			})
 		}
-
 	}
 
 	if updateContainer {

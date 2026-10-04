@@ -98,7 +98,7 @@ func outputResult(p *print.Printer, outputFormat string, application *sca.Applic
 		table.AddRow("STATE", scautils.ApplicationStateToStr(application.GetStopped()))
 		table.AddSeparator()
 		if application.RuntimeStatus != nil {
-			table.AddRow("AVAILABE INSTANCES", len(application.GetRuntimeStatus().Instances))
+			table.AddRow("AVAILABLE INSTANCES", len(application.GetRuntimeStatus().Instances))
 			table.AddSeparator()
 		}
 		table.AddRow("PUBLIC INGRESS", application.GetNetwork().PublicIngress)
@@ -132,7 +132,7 @@ func outputResult(p *print.Printer, outputFormat string, application *sca.Applic
 
 		environmentVarTables := []tables.Table{}
 		for _, c := range application.Containers {
-			envVarTable := buildEnvVarsTable(c)
+			envVarTable := buildEnvVarsTable(&c)
 			if envVarTable != nil {
 				environmentVarTables = append(environmentVarTables, *envVarTable)
 			}
@@ -140,9 +140,9 @@ func outputResult(p *print.Printer, outputFormat string, application *sca.Applic
 			if len(c.Command) > 0 {
 				commands = strings.Join(c.Command, " ")
 			}
-			args := "-"
+			cArgs := "-"
 			if len(c.Command) > 0 {
-				args = strings.Join(c.Args, " ")
+				cArgs = strings.Join(c.Args, " ")
 			}
 
 			cpu := "-"
@@ -161,7 +161,7 @@ func outputResult(p *print.Printer, outputFormat string, application *sca.Applic
 				cpu,
 				memory,
 				commands,
-				args,
+				cArgs,
 			)
 		}
 		tablesToDisplay = append(tablesToDisplay, containersTable)
@@ -233,7 +233,6 @@ func buildScalingRulesTable(rules []sca.ScaleRule) tables.Table {
 			}
 			for _, p := range rule.GetCustomRule().Parameters {
 				params = append(params, fmt.Sprintf("%s: %s", p.Name, p.Value))
-
 			}
 			parameters = strings.Join(params, "\n")
 			sm := make([]string, 0, len(rule.GetCustomRule().SecretsMapping))
@@ -257,7 +256,7 @@ func buildScalingRulesTable(rules []sca.ScaleRule) tables.Table {
 	return table
 }
 
-func buildEnvVarsTable(container sca.Container) *tables.Table {
+func buildEnvVarsTable(container *sca.Container) *tables.Table {
 	if len(container.EnvironmentVariables) == 0 {
 		return nil
 	}

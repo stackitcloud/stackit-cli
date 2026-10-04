@@ -271,7 +271,6 @@ func TestParseInput(t *testing.T) {
 		{
 			desc: "invalid max instances",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				// scalingTypeFlag.Set()
 				flagValues[scalingTypeFlag.Name()] = scalingTypeAuto
 				delete(flagValues, instancesFlag)
 				flagValues[minInstancesFlag] = "2"
@@ -283,7 +282,6 @@ func TestParseInput(t *testing.T) {
 		{
 			desc: "missing rps and concurrency if autoscaling is enabled",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				// scalingTypeFlag.Set()
 				flagValues[scalingTypeFlag.Name()] = scalingTypeAuto
 				delete(flagValues, instancesFlag)
 				flagValues[minInstancesFlag] = "2"

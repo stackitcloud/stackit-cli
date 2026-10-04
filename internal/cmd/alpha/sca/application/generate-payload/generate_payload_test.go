@@ -1,13 +1,9 @@
 package generatepayload
 
 import (
-	"context"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	sca "github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
@@ -16,9 +12,6 @@ import (
 const (
 	testRegion = "eu01"
 )
-
-var testClient = &sca.APIClient{DefaultAPI: &sca.DefaultAPIService{}}
-var testCtx = context.Background()
 
 var (
 	testProjectID     = uuid.NewString()
@@ -57,14 +50,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		mod(model)
 	}
 	return model
-}
-
-func fixtureRequest(mods ...func(request *sca.ApiGetApplicationRequest)) sca.ApiGetApplicationRequest {
-	request := testClient.DefaultAPI.GetApplication(testCtx, testProjectID, testEnvironmentID, testApplicationID)
-	for _, mod := range mods {
-		mod(&request)
-	}
-	return request
 }
 
 func TestParseInput(t *testing.T) {
@@ -137,34 +122,6 @@ func TestParseInput(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
 			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
-		})
-	}
-}
-
-func TestBuildRequest(t *testing.T) {
-	tests := []struct {
-		description     string
-		model           *inputModel
-		expectedRequest sca.ApiGetApplicationRequest
-	}{
-		{
-			description:     "base",
-			model:           fixtureInputModel(),
-			expectedRequest: fixtureRequest(),
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
-
-			diff := cmp.Diff(request, tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx, sca.DefaultAPIService{}),
-			)
-			if diff != "" {
-				t.Fatalf("Data does not match: %s", diff)
-			}
 		})
 	}
 }
