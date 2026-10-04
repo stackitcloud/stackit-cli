@@ -46,19 +46,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Generate a payload with default values, and adapt it with custom values for the different configuration options`,
-				`$ stackit sca application generate-payload --file-path ./payload.json`,
+				`$ stackit alpha sca application generate-payload --file-path ./payload.json`,
 				`<Modify payload in file, if needed>`,
-				`$ stackit sca application create-from-payload --name application-name --payload @./payload.json`,
+				`$ stackit alpha sca application create-from-payload --name application-name --payload @./payload.json`,
 			),
 			examples.NewExample(
 				`Generate a payload with values of an application, and adapt it with custom values for the different configuration options`,
-				`$ stackit sca application generate-payload --application-id xxx --file-path ./payload.json`,
+				`$ stackit alpha sca application generate-payload --application-id xxx --file-path ./payload.json`,
 				`<Modify payload in file>`,
-				`$ stackit sca application update-from-payload --payload @./payload.json`,
+				`$ stackit alpha sca application update-from-payload --payload @./payload.json`,
 			),
 			examples.NewExample(
 				`Generate a payload with values of an application, and preview it in the terminal`,
-				`$ stackit sca application generate-payload --application-id xxx`,
+				`$ stackit alpha sca application generate-payload --application-id xxx`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

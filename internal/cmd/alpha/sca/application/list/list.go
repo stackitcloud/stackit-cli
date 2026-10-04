@@ -44,16 +44,16 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`List all SCA applications`,
-				"$ stackit sca application list"),
+				"$ stackit alpha sca application list"),
 			examples.NewExample(
 				`List all SCA applications from environment with ID "xxx"`,
-				"$ stackit sca application list --environment-id xxx"),
+				"$ stackit alpha sca application list --environment-id xxx"),
 			examples.NewExample(
 				`List all SCA applications in JSON format`,
-				"$ stackit sca application list --output-format json"),
+				"$ stackit alpha sca application list --output-format json"),
 			examples.NewExample(
 				`List up to 10 SCA applications`,
-				"$ stackit sca application list --limit 10"),
+				"$ stackit alpha sca application list --limit 10"),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()

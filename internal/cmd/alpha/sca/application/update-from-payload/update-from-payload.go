@@ -1,4 +1,4 @@
-package createfrompayload
+package updatefrompayload
 
 import (
 	"context"
@@ -21,36 +21,41 @@ import (
 )
 
 const (
+	applicationIDArg  = "APPLICATION_ID"
 	environmentIDFlag = "environment-id"
-	nameFlag          = "name"
 	payloadFlag       = "payload"
 )
 
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	EnvironmentID string
-	Payload       *sca.CreateApplicationPayload
+	ApplicationID string
+	Payload       *sca.UpdateApplicationPayload
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "create-from-payload",
-		Short: "Create a SCA application from payload",
-		Long:  "Create a STACKIT Kubernetes Engine (SCA) application from payload.",
-		Args:  args.NoArgs,
+		Use:   "update-from-payload",
+		Short: "Update a SCA application from payload",
+		Long:  "Update a STACKIT Kubernetes Engine (SCA) application from payload.",
+		Args:  args.SingleArg(applicationIDArg, nil),
 		Example: examples.Build(
-			// TODO: fix examples
 			examples.NewExample(
-				`Create a SCA application with ID "xxx" from an environment with ID "yyy"`,
-				"$ stackit sca application describe xxx --environment-id yyy"),
+				`Update a SCA application using an API payload sourced from the file "./payload.json"`,
+				"$ stackit alpha sca application update-from-payload my-application-id --payload @./payload.json"),
 			examples.NewExample(
-				`Get details of all SCA application with ID "xxx" from an environment with ID "yyy" in JSON format`,
-				"$ stackit sca application describe xxx --environment-id yyy --output-format json"),
+				`Update a SCA application using an API payload provided as a JSON string`,
+				`$ stackit alpha sca application update-from-payload my-application-id --payload "{...}"`),
+			examples.NewExample(
+				`Generate a payload with the current values of an application, and adapt it with custom values for the different configuration options`,
+				`$ stackit alpha sca application generate-payload --application-id application-id > ./payload.json`,
+				`<Modify payload in file>`,
+				`$ stackit alpha sca application update-from-payload application-id --payload @./payload.json`),
 		),
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 
-			model, err := parseInput(params.Printer, cmd, nil)
+			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
@@ -70,16 +75,16 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("create application: %w", err)
+				return fmt.Errorf("update application: %w", err)
 			}
 
 			if !model.Async {
-				err := spinner.Run(params.Printer, fmt.Sprintf("Creating application with id %q", resp.GetId()), func() error {
-					_, err := wait.CreateApplicationWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.EnvironmentID, resp.GetId()).WaitWithContext(ctx)
+				err := spinner.Run(params.Printer, fmt.Sprintf("Updating application with id %q", resp.GetId()), func() error {
+					_, err := wait.UpdateApplicationWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.EnvironmentID, resp.GetId()).WaitWithContext(ctx)
 					return err
 				})
 				if err != nil {
-					return fmt.Errorf("wait for application creation: %w", err)
+					return fmt.Errorf("wait for application update: %w", err)
 				}
 			}
 
@@ -93,15 +98,15 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	return cmd
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *sca.APIClient) sca.ApiCreateApplicationRequest {
-	return apiClient.DefaultAPI.CreateApplication(ctx, model.ProjectId, model.EnvironmentID).
-		CreateApplicationPayload(*model.Payload)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *sca.APIClient) sca.ApiUpdateApplicationRequest {
+	return apiClient.DefaultAPI.UpdateApplication(ctx, model.ProjectId, model.EnvironmentID, model.ApplicationID).
+		UpdateApplicationPayload(*model.Payload)
 }
 
 func outputResult(p *print.Printer, model *inputModel, application *sca.Application) {
-	operationState := "Created"
+	operationState := "Updated"
 	if model.Async {
-		operationState = "Triggered creation of"
+		operationState = "Triggered update of"
 	}
 
 	p.Outputf("%s application for environment %s. Application ID: %s\n", operationState, application.GetEnvironmentId(), application.GetId())
@@ -109,13 +114,12 @@ func outputResult(p *print.Printer, model *inputModel, application *sca.Applicat
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), environmentIDFlag, "Environment ID (uses default environment if not set)")
-	cmd.Flags().String(nameFlag, "", "Application display name")
 	cmd.Flags().Var(flags.ReadFromFileFlag(), payloadFlag, `Request payload (JSON). Can be a string or a file path, if prefixed with "@" (example: @./payload.json). If unset, will use a default payload (you can check it by running "stackit sca application generate-payload")`)
-
-	cobra.CheckErr(flags.MarkFlagsRequired(cmd, nameFlag))
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
+	applicationID := inputArgs[0]
+
 	globalFlags := globalflags.Parse(p, cmd)
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
@@ -127,20 +131,23 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	payloadValue := flags.FlagToStringPointer(p, cmd, payloadFlag)
-	var payload *sca.CreateApplicationPayload
+	var payload *sca.UpdateApplicationPayload
 	if payloadValue != nil {
-		payload = &sca.CreateApplicationPayload{}
+		payload = &sca.UpdateApplicationPayload{}
 		err := json.Unmarshal([]byte(*payloadValue), payload)
 		if err != nil {
 			return nil, fmt.Errorf("enconde payload: %w", err)
 		}
 	}
 
-	payload.DisplayName = flags.FlagToStringValue(p, cmd, nameFlag)
+	payload.AdditionalProperties = nil
+
+	fmt.Printf("%+v\n", payload)
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		EnvironmentID:   environmentID,
+		ApplicationID:   applicationID,
 		Payload:         payload,
 	}
 

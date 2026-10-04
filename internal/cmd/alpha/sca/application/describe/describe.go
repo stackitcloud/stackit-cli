@@ -41,10 +41,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Get details of a SCA application with ID "xxx" from an environment with ID "yyy"`,
-				"$ stackit sca application describe xxx --environment-id yyy"),
+				"$ stackit alpha sca application describe xxx --environment-id yyy"),
 			examples.NewExample(
 				`Get details of all SCA application with ID "xxx" from an environment with ID "yyy" in JSON format`,
-				"$ stackit sca application describe xxx --environment-id yyy --output-format json"),
+				"$ stackit alpha sca application describe xxx --environment-id yyy --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

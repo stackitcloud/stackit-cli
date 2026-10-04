@@ -91,19 +91,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create a SCA application with name "application-name" and image "my-image" for an environment with ID "yyy"`,
-				"$ stackit sca application create --name application-name --image my-image --environment-id yyy"),
+				"$ stackit alpha sca application create --name application-name --image my-image --environment-id yyy"),
 			examples.NewExample(
 				`Create a SCA application with name "application-name" and image "my-image" with 2 instances`,
-				"$ stackit sca application create --name application-name --image my-image --instances 2"),
+				"$ stackit alpha sca application create --name application-name --image my-image --instances 2"),
 			examples.NewExample(
 				`Create a SCA application with name "application-name" and image "my-image" exposing port 8888 of the container`,
-				"$ stackit sca application create --name application-name --image my-image --port 8888"),
+				"$ stackit alpha sca application create --name application-name --image my-image --port 8888"),
 			examples.NewExample(
 				`Create a SCA application with name "application-name" and image "my-image" disabling public networking`,
-				"$ stackit sca application create --name application-name --image my-image --public=false"),
+				"$ stackit alpha sca application create --name application-name --image my-image --public=false"),
 			examples.NewExample(
 				`Create a SCA application with name "application-name" and image "my-image" and environment variables ENV1=value1 and ENV2=value2`,
-				"$ stackit sca application create --name application-name --image my-image --environment-vars ENV1=value1,ENV2=value2"),
+				"$ stackit alpha sca application create --name application-name --image my-image --environment-vars ENV1=value1,ENV2=value2"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

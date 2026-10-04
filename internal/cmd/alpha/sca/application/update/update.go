@@ -82,10 +82,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Long:  "Update a STACKIT Kubernetes Engine (SCA) application.",
 		Args:  args.SingleArg(applicationIDArg, nil),
 		Example: examples.Build(
-			// TODO: fix examples
 			examples.NewExample(
 				`Update the number of instances of a SCA application with ID "xxx" from an environment with ID "yyy"`,
-				"$ stackit sca application update xxx --instances 2 --environment-id yyy"),
+				"$ stackit alpha sca application update xxx --instances 2 --environment-id yyy"),
+			examples.NewExample(
+				`Update the container image of a SCA application with ID "xxx" from an environment with ID "yyy"`,
+				"$ stackit alpha sca application update xxx --image new-image --environment-id yyy"),
 		),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			updateFlags := []string{

@@ -37,7 +37,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Delete a SCA application with ID "xxx" from an environment with ID "yyy"`,
-				"$ stackit sca application delete xxx --environment-id yyy"),
+				"$ stackit alpha sca application delete xxx --environment-id yyy"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
