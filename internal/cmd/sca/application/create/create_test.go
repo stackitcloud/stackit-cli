@@ -11,7 +11,6 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -96,7 +95,7 @@ func fixturePayload(mods ...func(payload *sca.CreateApplicationPayload)) sca.Cre
 		DisplayName: "test-application-name",
 		Network: sca.Network{
 			PublicIngress: true,
-			Port:          utils.Ptr(int32(8888)),
+			Port:          new(int32(8888)),
 		},
 		Scaling: sca.Scaling{
 			Type:          sca.SCALINGTYPE_SCALING_TYPE_MANUAL,
@@ -105,8 +104,8 @@ func fixturePayload(mods ...func(payload *sca.CreateApplicationPayload)) sca.Cre
 		Containers: []sca.Container{{
 			Name:    "container-1",
 			Image:   "test-image",
-			Cpu:     utils.Ptr(int32(2000)),
-			Memory:  utils.Ptr(int32(2048)),
+			Cpu:     new(int32(2000)),
+			Memory:  new(int32(2048)),
 			Command: []string{"/bin/sh", "-c"},
 			Args:    []string{"echo 'test'"},
 			EnvironmentVariables: []sca.EnvVar{

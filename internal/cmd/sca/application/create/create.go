@@ -15,6 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sca/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sca/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 )
@@ -22,18 +23,23 @@ import (
 const (
 	environmentIDFlag = "environment-id"
 	nameFlag          = "name"
-	imageFlag         = "image"
-	publicFlag        = "public"
-	externalPortFlag  = "external-port"
-	cpuFlag           = "cpu"
-	memoryFlag        = "memory"
-	instancesFlag     = "instances"
-	minInstancesFlag  = "min-instances"
-	maxInstancesFlag  = "max-instances"
-	scaleToZeroFlag   = "scale-to-zero"
-	envVarsFlag       = "environment-vars"
-	commandsFlag      = "commands"
-	argsFlag          = "args"
+	// Container config
+	imageFlag    = "image"
+	cpuFlag      = "cpu"
+	memoryFlag   = "memory"
+	envVarsFlag  = "environment-vars"
+	commandsFlag = "commands"
+	argsFlag     = "args"
+	// Scaling
+	instancesFlag    = "instances"
+	minInstancesFlag = "min-instances"
+	maxInstancesFlag = "max-instances"
+	scaleToZeroFlag  = "scale-to-zero"
+	rpsFlag          = "http-rule-rps"
+	concurrencyFlag  = "http-rule-concurrency"
+	// Networking
+	publicFlag       = "public"
+	externalPortFlag = "external-port"
 )
 
 const (
@@ -60,20 +66,20 @@ type inputModel struct {
 	EnvironmentID         string
 	Name                  string
 	Image                 string
-	ScalingType           string
-	Public                bool
-	ContainerExternalPort int32
 	CPU                   int32
 	Memory                int32
+	EnvironmentVars       map[string]string
+	Commands              []string
+	Args                  []string
+	ScalingType           string
 	Instances             int32
 	MinInstances          int32
 	MaxInstances          int32
 	ScaleToZero           bool
 	Concurrency           int32
 	RPS                   int32
-	EnvironmentVars       map[string]string
-	Commands              []string
-	Args                  []string
+	Public                bool
+	ContainerExternalPort int32
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -171,6 +177,7 @@ func buildScalingRules(model *inputModel) []sca.ScaleRule {
 	if model.Concurrency != 0 || model.RPS != 0 {
 		scaleRules = append(scaleRules, sca.ScaleRule{
 			Type: sca.RULETYPE_RULE_TYPE_HTTP,
+			Name: "http-scaling-rule",
 			HttpRule: &sca.HttpScaleRule{
 				Concurrency: &model.Concurrency,
 				Rps:         &model.RPS,
@@ -187,17 +194,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sca.APIClie
 		Port:          &model.ContainerExternalPort,
 	}
 
-	var envVars []sca.EnvVar
-	if model.EnvironmentVars != nil {
-		envVars = make([]sca.EnvVar, 0, len(model.EnvironmentVars))
-		for k, v := range model.EnvironmentVars {
-			envVars = append(envVars, sca.EnvVar{
-				Key:    k,
-				Value:  v,
-				Origin: sca.ENVVARTYPE_ENV_FROM_SOURCE_TYPE_MANUAL.Ptr(),
-			})
-		}
-	}
+	envVars := utils.EnvironmentVariablesFromMap(model.EnvironmentVars)
 
 	container := sca.Container{
 		Name:                 defaultContainerName,
@@ -232,19 +229,24 @@ func outputResult(p *print.Printer, model *inputModel, application *sca.Applicat
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), environmentIDFlag, "Environment ID (uses default environment if not set)")
 	cmd.Flags().String(nameFlag, "", "Application display name")
+	// container
 	cmd.Flags().String(imageFlag, "", "Container image")
-	cmd.Flags().Bool(publicFlag, defaultPublic, "Exposes your application securely to the public internet via HTTPS endpoint")
-	cmd.Flags().Int32(externalPortFlag, defaultPort, "Container external exposed port")
 	cmd.Flags().Int32(cpuFlag, defaultCPU, "The dedicated virtual CPU processing power allocated per container instance")
 	cmd.Flags().Int32(memoryFlag, defaultMemory, "The total amount of memory (RAM) allocated per container instance")
-	scalingTypeFlag.Register(cmd.Flags())
-	cmd.Flags().Int32(instancesFlag, defaultInstances, "The number of application instances (if manually scaled)")
-	cmd.Flags().Int32(minInstancesFlag, 0, "The minimum number of application instances (if autoscaling is enabled)")
-	cmd.Flags().Int32(maxInstancesFlag, 0, "The maximum number of application instances (if autoscaling is enabled)")
-	cmd.Flags().Bool(scaleToZeroFlag, false, "Enable scale to zero (if autoscaling is enabled)")
 	cmd.Flags().StringToString(envVarsFlag, nil, "Environment variables to inject into the application")
 	cmd.Flags().StringSlice(commandsFlag, nil, "Commands to execute in the application container")
 	cmd.Flags().StringSlice(argsFlag, nil, "Arguments to pass to the application container command")
+	// scaling
+	scalingTypeFlag.Register(cmd.Flags())
+	cmd.Flags().Int32(instancesFlag, defaultInstances, "The number of application instances (if manually scaled)")
+	cmd.Flags().Int32(minInstancesFlag, 1, "The minimum number of application instances (if autoscaling is enabled)")
+	cmd.Flags().Int32(maxInstancesFlag, 1, "The maximum number of application instances (if autoscaling is enabled)")
+	cmd.Flags().Int32(rpsFlag, 0, "Target number of requests per second to trigger autoscaling (if autoscaling is enabled)")
+	cmd.Flags().Int32(concurrencyFlag, 0, "Target number of in-flight requests to trigger autoscaling (if autoscaling is enabled)")
+	cmd.Flags().Bool(scaleToZeroFlag, false, "Enable scale to zero (if autoscaling is enabled)")
+	// networking
+	cmd.Flags().Bool(publicFlag, defaultPublic, "Exposes your application securely to the public internet via HTTPS endpoint")
+	cmd.Flags().Int32(externalPortFlag, defaultPort, "Container external exposed port")
 
 	cobra.CheckErr(flags.MarkFlagsRequired(cmd, nameFlag))
 	cobra.CheckErr(flags.MarkFlagsRequired(cmd, imageFlag))
@@ -261,12 +263,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		scalingType = *scalingTypeFlagValue
 	}
 
-	extertalPort := flags.FlagWithDefaultToInt32Value(p, cmd, externalPortFlag)
-	if extertalPort <= 1024 || extertalPort > 65535 {
-		return nil, &errors.FlagValidationError{
-			Flag:    externalPortFlag,
-			Details: "must be a valid non-privileged port (from 1025 to 65535)",
-		}
+	if err := validateScalingInput(cmd, scalingType); err != nil {
+		return nil, err
 	}
 
 	instances := flags.FlagWithDefaultToInt32Value(p, cmd, instancesFlag)
@@ -274,6 +272,33 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		return nil, &errors.FlagValidationError{
 			Flag:    instancesFlag,
 			Details: "must be an integer between 0 and 10",
+		}
+	}
+
+	minInstances := flags.FlagWithDefaultToInt32Value(p, cmd, minInstancesFlag)
+	if minInstances < 0 || minInstances > 10 {
+		return nil, &errors.FlagValidationError{
+			Flag:    minInstancesFlag,
+			Details: "must be an integer between 0 and 10",
+		}
+	}
+
+	maxInstances := flags.FlagWithDefaultToInt32Value(p, cmd, maxInstancesFlag)
+	if maxInstances == 0 {
+		maxInstances = minInstances
+	}
+	if maxInstances < minInstances || minInstances > 10 {
+		return nil, &errors.FlagValidationError{
+			Flag:    minInstancesFlag,
+			Details: fmt.Sprintf("must be an integer between minInstances (%d) and 10", minInstances),
+		}
+	}
+
+	extertalPort := flags.FlagWithDefaultToInt32Value(p, cmd, externalPortFlag)
+	if extertalPort <= 1024 || extertalPort > 65535 {
+		return nil, &errors.FlagValidationError{
+			Flag:    externalPortFlag,
+			Details: "must be a valid non-privileged port (from 1025 to 65535)",
 		}
 	}
 
@@ -300,20 +325,57 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		EnvironmentID:         environmentID,
 		Name:                  flags.FlagToStringValue(p, cmd, nameFlag),
 		Image:                 flags.FlagToStringValue(p, cmd, imageFlag),
-		Public:                flags.FlagToBoolValue(p, cmd, publicFlag),
-		ContainerExternalPort: extertalPort,
 		CPU:                   cpu,
 		Memory:                flags.FlagWithDefaultToInt32Value(p, cmd, memoryFlag),
-		Instances:             instances,
-		ScalingType:           scalingType,
-		MinInstances:          flags.FlagWithDefaultToInt32Value(p, cmd, minInstancesFlag),
-		MaxInstances:          flags.FlagWithDefaultToInt32Value(p, cmd, maxInstancesFlag),
-		ScaleToZero:           flags.FlagToBoolValue(p, cmd, scaleToZeroFlag),
 		EnvironmentVars:       envVars,
 		Commands:              flags.FlagToStringSliceValue(p, cmd, commandsFlag),
 		Args:                  flags.FlagToStringSliceValue(p, cmd, argsFlag),
+		ScalingType:           scalingType,
+		Instances:             instances,
+		MinInstances:          minInstances,
+		MaxInstances:          maxInstances,
+		ScaleToZero:           flags.FlagToBoolValue(p, cmd, scaleToZeroFlag),
+		RPS:                   flags.FlagWithDefaultToInt32Value(p, cmd, rpsFlag),
+		Concurrency:           flags.FlagWithDefaultToInt32Value(p, cmd, concurrencyFlag),
+		Public:                flags.FlagToBoolValue(p, cmd, publicFlag),
+		ContainerExternalPort: extertalPort,
 	}
 
 	p.DebugInputModel(model)
 	return &model, nil
+}
+
+func validateScalingInput(cmd *cobra.Command, scalingType string) error {
+	switch scalingType {
+	case scalingTypeManual:
+		autoFlags := []string{minInstancesFlag, maxInstancesFlag, scaleToZeroFlag, concurrencyFlag, rpsFlag}
+		for _, flagName := range autoFlags {
+			if cmd.Flags().Changed(flagName) {
+				return &errors.FlagValidationError{
+					Flag:    flagName,
+					Details: fmt.Sprintf("is only valid when --scaling-type is %q", scalingTypeAuto),
+				}
+			}
+		}
+	case scalingTypeAuto:
+		if cmd.Flags().Changed(instancesFlag) {
+			return &errors.FlagValidationError{
+				Flag:    instancesFlag,
+				Details: fmt.Sprintf("is only valid when --scaling-type is %q", scalingTypeManual),
+			}
+		}
+		if !cmd.Flags().Changed(rpsFlag) && !cmd.Flags().Changed(concurrencyFlag) {
+			return &errors.OneOfFlagsIsMissing{
+				MissingFlags: []string{rpsFlag, concurrencyFlag},
+				SetFlag:      fmt.Sprintf("--%s=%s", scalingTypeFlag.Name(), scalingTypeAuto),
+			}
+		}
+	default:
+		return &errors.FlagValidationError{
+			Flag:    scalingType,
+			Details: "invalid scaling type",
+		}
+	}
+
+	return nil
 }

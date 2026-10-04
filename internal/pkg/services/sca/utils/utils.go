@@ -50,3 +50,29 @@ func ApplicationStateToStr(isStopped bool) string {
 	}
 	return "Stopped"
 }
+
+func HumanReadableScalingType(st sca.ScalingType) string {
+	switch st {
+	case sca.SCALINGTYPE_SCALING_TYPE_MANUAL:
+		return "manual"
+	case sca.SCALINGTYPE_SCALING_TYPE_AUTO:
+		return "auto"
+	default:
+		return "-"
+	}
+}
+
+func EnvironmentVariablesFromMap(m map[string]string) []sca.EnvVar {
+	var envVars []sca.EnvVar
+	if m != nil {
+		envVars = make([]sca.EnvVar, 0, len(m))
+		for k, v := range m {
+			envVars = append(envVars, sca.EnvVar{
+				Key:    k,
+				Value:  v,
+				Origin: sca.ENVVARTYPE_ENV_FROM_SOURCE_TYPE_MANUAL.Ptr(),
+			})
+		}
+	}
+	return envVars
+}
