@@ -37,7 +37,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Use:   "create-from-payload",
 		Short: "Create a SCA application from payload",
 		Long: fmt.Sprintf("%s\n%s\n%s",
-			"Create a STACKIT Kubernetes Engine (SCA) application from payload.",
+			"Create a STACKIT Container Applications (SCA) application from payload.",
 			`The payload can be provided as a JSON string or a file path prefixed with "@".`,
 			"See https://docs.api.stackit.cloud/documentation/sca/version/v1alpha#tag/Applications/operation/Applications_CreateApplication for information regarding the payload structure.",
 		),
@@ -91,9 +91,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				}
 			}
 
-			outputResult(params.Printer, model, resp)
-
-			return nil
+			return outputResult(params.Printer, model, resp)
 		},
 	}
 
@@ -106,13 +104,19 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sca.APIClie
 		CreateApplicationPayload(*model.Payload)
 }
 
-func outputResult(p *print.Printer, model *inputModel, application *sca.Application) {
-	operationState := "Created"
-	if model.Async {
-		operationState = "Triggered creation of"
+func outputResult(p *print.Printer, model *inputModel, application *sca.Application) error {
+	if application == nil {
+		return fmt.Errorf("create application response is empty")
 	}
 
-	p.Outputf("%s application for environment %s. Application ID: %s\n", operationState, application.GetEnvironmentId(), application.GetId())
+	return p.OutputResult(model.OutputFormat, application, func() error {
+		operationState := "Created"
+		if model.Async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s application for environment %s. Application ID: %s\n", operationState, application.GetEnvironmentId(), application.GetId())
+		return nil
+	})
 }
 
 func configureFlags(cmd *cobra.Command) {
@@ -140,7 +144,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		payload = &sca.CreateApplicationPayload{}
 		err := json.Unmarshal([]byte(*payloadValue), payload)
 		if err != nil {
-			return nil, fmt.Errorf("enconde payload: %w", err)
+			return nil, fmt.Errorf("encode payload: %w", err)
+		}
+	}
+
+	if payload == nil {
+		return nil, &errors.FlagValidationError{
+			Flag:    payloadFlag,
+			Details: "Received empty payload",
 		}
 	}
 

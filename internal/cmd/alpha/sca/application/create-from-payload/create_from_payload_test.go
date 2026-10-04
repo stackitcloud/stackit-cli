@@ -147,6 +147,13 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: false,
 		},
+		{
+			desc: "empty json",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[payloadFlag] = "{}"
+			}),
+			isValid: false,
+		},
 	}
 
 	for _, tt := range tests {

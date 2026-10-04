@@ -11,14 +11,14 @@ import (
 func TestApplicationStatusToStr(t *testing.T) {
 	tests := []struct {
 		desc     string
-		status   v1alphaapi.CurrentStatus
+		status   *v1alphaapi.CurrentStatus
 		expected string
 	}{
-		{desc: "Running", status: v1alphaapi.CURRENTSTATUS_CURRENT_STATUS_RUNNING, expected: "Running"},
-		{desc: "Progressing", status: v1alphaapi.CURRENTSTATUS_CURRENT_STATUS_PROGRESSING, expected: "Progressing"},
-		{desc: "Idle", status: v1alphaapi.CURRENTSTATUS_CURRENT_STATUS_IDLE, expected: "Idle"},
-		{desc: "Failed", status: v1alphaapi.CURRENTSTATUS_CURRENT_STATUS_FAILED, expected: "Failed"},
-		{desc: "None", status: v1alphaapi.CURRENTSTATUS_CURRENT_STATUS_NONE, expected: "None"},
+		{desc: "Running", status: new(v1alphaapi.CURRENTSTATUS_CURRENT_STATUS_RUNNING), expected: "Running"},
+		{desc: "Progressing", status: new(v1alphaapi.CURRENTSTATUS_CURRENT_STATUS_PROGRESSING), expected: "Progressing"},
+		{desc: "Idle", status: new(v1alphaapi.CURRENTSTATUS_CURRENT_STATUS_IDLE), expected: "Idle"},
+		{desc: "Failed", status: new(v1alphaapi.CURRENTSTATUS_CURRENT_STATUS_FAILED), expected: "Failed"},
+		{desc: "None", status: new(v1alphaapi.CURRENTSTATUS_CURRENT_STATUS_NONE), expected: "None"},
 	}
 
 	for _, tt := range tests {

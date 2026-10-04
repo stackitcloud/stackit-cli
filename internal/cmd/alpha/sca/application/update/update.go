@@ -79,7 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update a SCA application",
-		Long:  "Update a STACKIT Kubernetes Engine (SCA) application.",
+		Long:  "Update a STACKIT Container Applications (SCA) application.",
 		Args:  args.SingleArg(applicationIDArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
@@ -396,15 +396,6 @@ func buildScalingRules(model *inputModel, current []sca.ScaleRule) []sca.ScaleRu
 	})
 }
 
-func outputResult(p *print.Printer, model *inputModel, application *sca.Application) {
-	operationState := "Updated"
-	if model.Async {
-		operationState = "Triggered update of"
-	}
-
-	p.Outputf("%s application for environment %s. Application ID: %s\n", operationState, application.GetEnvironmentId(), application.GetId())
-}
-
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), environmentIDFlag, "Environment ID (uses default environment if not set)")
 	cmd.Flags().Bool(stoppedFlag, false, "Stopped")
@@ -473,4 +464,20 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	p.DebugInputModel(model)
 	return &model, nil
+}
+
+func outputResult(p *print.Printer, model *inputModel, application *sca.Application) error {
+	if application == nil {
+		return fmt.Errorf("update application response is empty")
+	}
+
+	return p.OutputResult(model.OutputFormat, application, func() error {
+		operationState := "Updated"
+		if model.Async {
+			operationState = "Triggered update of"
+		}
+
+		p.Outputf("%s application for environment %s. Application ID: %s\n", operationState, application.GetEnvironmentId(), application.GetId())
+		return nil
+	})
 }

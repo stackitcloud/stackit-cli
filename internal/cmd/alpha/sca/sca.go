@@ -1,7 +1,7 @@
 package sca
 
 import (
-	"github.com/stackitcloud/stackit-cli/internal/cmd/sca/application"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/alpha/sca/application"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"

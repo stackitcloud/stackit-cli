@@ -24,12 +24,13 @@ const (
 	environmentIDFlag = "environment-id"
 	nameFlag          = "name"
 	// Container config
-	imageFlag    = "image"
-	cpuFlag      = "cpu"
-	memoryFlag   = "memory"
-	envVarsFlag  = "environment-vars"
-	commandsFlag = "commands"
-	argsFlag     = "args"
+	containerNameFlag = "container-name"
+	imageFlag         = "image"
+	cpuFlag           = "cpu"
+	memoryFlag        = "memory"
+	envVarsFlag       = "environment-vars"
+	commandsFlag      = "commands"
+	argsFlag          = "args"
 	// Scaling
 	instancesFlag    = "instances"
 	minInstancesFlag = "min-instances"
@@ -40,9 +41,7 @@ const (
 	// Networking
 	publicFlag       = "public"
 	externalPortFlag = "external-port"
-)
 
-const (
 	scalingTypeManual = "manual"
 	scalingTypeAuto   = "auto"
 
@@ -65,6 +64,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	EnvironmentID         string
 	Name                  string
+	ContainerName         string
 	Image                 string
 	CPU                   int32
 	Memory                int32
@@ -86,7 +86,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a SCA application",
-		Long:  "Create a STACKIT Kubernetes Engine (SCA) application.",
+		Long:  "Create a STACKIT Container Applications (SCA) application.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
@@ -97,7 +97,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				"$ stackit alpha sca application create --name application-name --image my-image --instances 2"),
 			examples.NewExample(
 				`Create a SCA application with name "application-name" and image "my-image" exposing port 8888 of the container`,
-				"$ stackit alpha sca application create --name application-name --image my-image --port 8888"),
+				"$ stackit alpha sca application create --name application-name --image my-image --external-port 8888"),
 			examples.NewExample(
 				`Create a SCA application with name "application-name" and image "my-image" disabling public networking`,
 				"$ stackit alpha sca application create --name application-name --image my-image --public=false"),
@@ -141,9 +141,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				}
 			}
 
-			outputResult(params.Printer, model, resp)
-
-			return nil
+			return outputResult(params.Printer, model, resp)
 		},
 	}
 
@@ -217,19 +215,26 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sca.APIClie
 		CreateApplicationPayload(payload)
 }
 
-func outputResult(p *print.Printer, model *inputModel, application *sca.Application) {
-	operationState := "Created"
-	if model.Async {
-		operationState = "Triggered creation of"
+func outputResult(p *print.Printer, model *inputModel, application *sca.Application) error {
+	if application == nil {
+		return fmt.Errorf("create application response is empty")
 	}
 
-	p.Outputf("%s application for environment %s. Application ID: %s\n", operationState, application.GetEnvironmentId(), application.GetId())
+	return p.OutputResult(model.OutputFormat, application, func() error {
+		operationState := "Created"
+		if model.Async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s application for environment %s. Application ID: %s\n", operationState, application.GetEnvironmentId(), application.GetId())
+		return nil
+	})
 }
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), environmentIDFlag, "Environment ID (uses default environment if not set)")
 	cmd.Flags().String(nameFlag, "", "Application display name")
 	// container
+	cmd.Flags().String(containerNameFlag, defaultContainerName, "Container name")
 	cmd.Flags().String(imageFlag, "", "Container image")
 	cmd.Flags().Int32(cpuFlag, defaultCPU, "The dedicated virtual CPU processing power allocated per container instance")
 	cmd.Flags().Int32(memoryFlag, defaultMemory, "The total amount of memory (RAM) allocated per container instance")
@@ -240,7 +245,7 @@ func configureFlags(cmd *cobra.Command) {
 	scalingTypeFlag.Register(cmd.Flags())
 	cmd.Flags().Int32(instancesFlag, defaultInstances, "The number of application instances (if manually scaled)")
 	cmd.Flags().Int32(minInstancesFlag, 1, "The minimum number of application instances (if autoscaling is enabled)")
-	cmd.Flags().Int32(maxInstancesFlag, 1, "The maximum number of application instances (if autoscaling is enabled)")
+	cmd.Flags().Int32(maxInstancesFlag, 0, "The maximum number of application instances (if autoscaling is enabled)")
 	cmd.Flags().Int32(rpsFlag, 0, "Target number of requests per second to trigger autoscaling (if autoscaling is enabled)")
 	cmd.Flags().Int32(concurrencyFlag, 0, "Target number of in-flight requests to trigger autoscaling (if autoscaling is enabled)")
 	cmd.Flags().Bool(scaleToZeroFlag, false, "Enable scale to zero (if autoscaling is enabled)")
@@ -283,11 +288,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		}
 	}
 
-	maxInstances := flags.FlagWithDefaultToInt32Value(p, cmd, maxInstancesFlag)
-	if maxInstances == 0 {
-		maxInstances = minInstances
+	maxInstances := minInstances
+	if i := flags.FlagToInt32Pointer(p, cmd, maxInstancesFlag); i != nil {
+		maxInstances = *i
 	}
-	if maxInstances < minInstances || minInstances > 10 {
+	if maxInstances < minInstances || maxInstances > 10 {
 		return nil, &errors.FlagValidationError{
 			Flag:    minInstancesFlag,
 			Details: fmt.Sprintf("must be an integer between minInstances (%d) and 10", minInstances),
@@ -303,10 +308,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	cpu := flags.FlagWithDefaultToInt32Value(p, cmd, cpuFlag)
-	if cpu%1000 != 0 {
+	if cpu <= 0 || cpu%1000 != 0 {
 		return nil, &errors.FlagValidationError{
-			Flag:    instancesFlag,
-			Details: "must be divisible by 1000",
+			Flag:    cpuFlag,
+			Details: "must be a valid value divisible by 1000",
 		}
 	}
 
@@ -324,6 +329,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		GlobalFlagModel:       globalFlags,
 		EnvironmentID:         environmentID,
 		Name:                  flags.FlagToStringValue(p, cmd, nameFlag),
+		ContainerName:         flags.FlagWithDefaultToStringValue(p, cmd, containerNameFlag),
 		Image:                 flags.FlagToStringValue(p, cmd, imageFlag),
 		CPU:                   cpu,
 		Memory:                flags.FlagWithDefaultToInt32Value(p, cmd, memoryFlag),

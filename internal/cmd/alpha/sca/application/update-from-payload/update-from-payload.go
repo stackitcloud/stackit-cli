@@ -37,7 +37,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update-from-payload",
 		Short: "Update a SCA application from payload",
-		Long:  "Update a STACKIT Kubernetes Engine (SCA) application from payload.",
+		Long:  "Update a STACKIT Container Applications (SCA) application from payload.",
 		Args:  args.SingleArg(applicationIDArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
@@ -140,9 +140,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		}
 	}
 
-	payload.AdditionalProperties = nil
+	if payload == nil {
+		return nil, &errors.FlagValidationError{
+			Flag:    payloadFlag,
+			Details: "Received empty payload",
+		}
+	}
 
-	fmt.Printf("%+v\n", payload)
+	payload.AdditionalProperties = nil
 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,

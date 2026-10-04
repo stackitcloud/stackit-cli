@@ -37,7 +37,7 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "generate-payload",
-		Short: "Generates a payload to create/updaet SCA applications",
+		Short: "Generates a payload to create/update SCA applications",
 		Long: fmt.Sprintf("%s\n%s",
 			"Generates a JSON payload with values to be used as --payload input for application creation or update.",
 			"See https://docs.api.stackit.cloud/documentation/sca/version/v1alpha#tag/Applications/operation/Applications_CreateApplication for information regarding the payload structure.",
@@ -125,10 +125,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	return &model, nil
-}
-
-func buildRequest(ctx context.Context, model *inputModel, apiClient *sca.APIClient) sca.ApiGetApplicationRequest {
-	return apiClient.DefaultAPI.GetApplication(ctx, model.ProjectId, *model.EnvironmentID, *model.ApplicationID)
 }
 
 func outputResult(p *print.Printer, filePath *string, payload *sca.CreateApplicationPayload) error {

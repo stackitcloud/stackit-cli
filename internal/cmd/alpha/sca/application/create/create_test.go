@@ -32,6 +32,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 
 		environmentIDFlag:      testEnvironmentID,
 		nameFlag:               "test-application-name",
+		containerNameFlag:      "my-container",
 		imageFlag:              "test-image",
 		externalPortFlag:       "8888",
 		cpuFlag:                "2000",
@@ -39,12 +40,9 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		instancesFlag:          "2",
 		publicFlag:             "true",
 		scalingTypeFlag.Name(): scalingTypeManual,
-		// minInstancesFlag:  "",
-		// maxInstancesFlag:  "",
-		// scaleToZeroFlag:   "",
-		envVarsFlag:  "ENV1=val1,ENV2=val2",
-		commandsFlag: "/bin/sh,-c",
-		argsFlag:     "echo 'test'",
+		envVarsFlag:            "ENV1=val1,ENV2=val2",
+		commandsFlag:           "/bin/sh,-c",
+		argsFlag:               "echo 'test'",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -61,6 +59,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		EnvironmentID:         testEnvironmentID,
 		Name:                  "test-application-name",
+		ContainerName:         "my-container",
 		Image:                 "test-image",
 		ContainerExternalPort: 8888,
 		ScalingType:           scalingTypeManual,
@@ -68,6 +67,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		CPU:                   2000,
 		Memory:                2048,
 		Instances:             2,
+		MinInstances:          1,
+		MaxInstances:          1,
 		EnvironmentVars: map[string]string{
 			"ENV1": "val1",
 			"ENV2": "val2",
@@ -98,8 +99,10 @@ func fixturePayload(mods ...func(payload *sca.CreateApplicationPayload)) sca.Cre
 			Port:          new(int32(8888)),
 		},
 		Scaling: sca.Scaling{
-			Type:          sca.SCALINGTYPE_SCALING_TYPE_MANUAL,
-			ManualScaling: &sca.ManualScaling{},
+			Type: sca.SCALINGTYPE_SCALING_TYPE_MANUAL,
+			ManualScaling: &sca.ManualScaling{
+				Instances: 2,
+			},
 		},
 		Containers: []sca.Container{{
 			Name:    "container-1",
@@ -219,6 +222,72 @@ func TestParseInput(t *testing.T) {
 			desc: "invalid cpu",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[cpuFlag] = "1500"
+			}),
+			isValid: false,
+		},
+		{
+			desc: "invalid min instances",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[minInstancesFlag] = "-2"
+			}),
+			isValid: false,
+		},
+		{
+			desc: "valid autoscaling config",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[scalingTypeFlag.Name()] = scalingTypeAuto
+				delete(flagValues, instancesFlag)
+				flagValues[minInstancesFlag] = "2"
+				flagValues[maxInstancesFlag] = "3"
+				flagValues[rpsFlag] = "5"
+			}),
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.ScalingType = scalingTypeAuto
+				model.Instances = defaultInstances
+				model.MinInstances = 2
+				model.MaxInstances = 3
+				model.RPS = 5
+			}),
+			isValid: true,
+		},
+		{
+			desc: "set min instances as max instances if not defined",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[scalingTypeFlag.Name()] = scalingTypeAuto
+				delete(flagValues, instancesFlag)
+				delete(flagValues, maxInstancesFlag)
+				flagValues[minInstancesFlag] = "2"
+				flagValues[rpsFlag] = "5"
+			}),
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.ScalingType = scalingTypeAuto
+				model.Instances = defaultInstances
+				model.MinInstances = 2
+				model.MaxInstances = 2
+				model.RPS = 5
+			}),
+			isValid: true,
+		},
+		{
+			desc: "invalid max instances",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				// scalingTypeFlag.Set()
+				flagValues[scalingTypeFlag.Name()] = scalingTypeAuto
+				delete(flagValues, instancesFlag)
+				flagValues[minInstancesFlag] = "2"
+				flagValues[maxInstancesFlag] = "1"
+				flagValues[rpsFlag] = "5"
+			}),
+			isValid: false,
+		},
+		{
+			desc: "missing rps and concurrency if autoscaling is enabled",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				// scalingTypeFlag.Set()
+				flagValues[scalingTypeFlag.Name()] = scalingTypeAuto
+				delete(flagValues, instancesFlag)
+				flagValues[minInstancesFlag] = "2"
+				flagValues[maxInstancesFlag] = "5"
 			}),
 			isValid: false,
 		},

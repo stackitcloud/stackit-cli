@@ -1,6 +1,9 @@
 package utils
 
 import (
+	"context"
+	"fmt"
+
 	sca "github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi"
 )
 
@@ -27,8 +30,11 @@ func GetDefaultPayload() *sca.CreateApplicationPayload {
 	}
 }
 
-func ApplicationStatusToStr(status sca.CurrentStatus) string {
-	switch status {
+func ApplicationStatusToStr(status *sca.CurrentStatus) string {
+	if status == nil {
+		return "None"
+	}
+	switch *status {
 	case sca.CURRENTSTATUS_CURRENT_STATUS_RUNNING:
 		return "Running"
 	case sca.CURRENTSTATUS_CURRENT_STATUS_IDLE:
@@ -75,4 +81,20 @@ func EnvironmentVariablesFromMap(m map[string]string) []sca.EnvVar {
 		}
 	}
 	return envVars
+}
+
+func GetApplicationName(ctx context.Context, apiClient sca.DefaultAPI, projectId, environmentID, applicaitonID string) (string, error) {
+	resp, err := apiClient.GetApplication(ctx, projectId, environmentID, applicaitonID).Execute()
+	if err != nil {
+		return "", fmt.Errorf("get application: %w", err)
+	}
+	return resp.DisplayName, nil
+}
+
+func GetEnvironmentName(ctx context.Context, apiClient sca.DefaultAPI, projectId, environmentID string) (string, error) {
+	resp, err := apiClient.GetEnvironment(ctx, projectId, environmentID).Execute()
+	if err != nil {
+		return "", fmt.Errorf("get environment: %w", err)
+	}
+	return resp.DisplayName, nil
 }

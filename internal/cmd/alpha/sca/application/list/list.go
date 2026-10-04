@@ -39,7 +39,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all SCA applications",
-		Long:  "Lists all STACKIT Kubernetes Engine (SCA) applications.",
+		Long:  "Lists all STACKIT Container Applications (SCA) applications.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
@@ -110,10 +110,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		return nil, &errors.ProjectIdError{}
 	}
 
+	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
+	if limit != nil && *limit < 1 {
+		return nil, &errors.FlagValidationError{
+			Flag:    limitFlag,
+			Details: "must be greater than 0",
+		}
+	}
+
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		EnvironmentID:   flags.FlagToStringValue(p, cmd, environmentIDFlag),
-		Limit:           flags.FlagToInt64Pointer(p, cmd, limitFlag),
+		Limit:           limit,
 	}
 
 	p.DebugInputModel(model)
@@ -146,7 +154,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, applicati
 				a.GetEnvironmentName(),
 				a.GetEnvironmentId(),
 				a.GetUrl(),
-				scautils.ApplicationStatusToStr(a.GetStatus()),
+				scautils.ApplicationStatusToStr(a.Status),
 				scautils.ApplicationStateToStr(a.GetStopped()),
 			)
 		}

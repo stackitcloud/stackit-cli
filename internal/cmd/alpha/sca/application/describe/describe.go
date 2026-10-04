@@ -36,7 +36,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "describe",
 		Short: "Show details of a SCA application",
-		Long:  "Show details of a STACKIT Kubernetes Engine (SCA) application.",
+		Long:  "Show details of a STACKIT Container Applications (SCA) application.",
 		Args:  args.SingleArg(applicationIDArg, nil),
 		Example: examples.Build(
 			examples.NewExample(
@@ -93,17 +93,19 @@ func outputResult(p *print.Printer, outputFormat string, application *sca.Applic
 		table.AddSeparator()
 		table.AddRow("NAME", application.DisplayName)
 		table.AddSeparator()
-		table.AddRow("STATUS", scautils.ApplicationStatusToStr(application.RuntimeStatus.GetCurrentStatus()))
+		table.AddRow("STATUS", scautils.ApplicationStatusToStr(application.GetRuntimeStatus().CurrentStatus))
 		table.AddSeparator()
 		table.AddRow("STATE", scautils.ApplicationStateToStr(application.GetStopped()))
 		table.AddSeparator()
-		table.AddRow("AVAILABE INSTANCES", len(application.RuntimeStatus.Instances))
-		table.AddSeparator()
-		table.AddRow("PUBLIC INGRESS", application.Network.PublicIngress)
-		if application.Network.Port != nil {
-			table.AddRow("PUBLIC PORT", *application.Network.Port)
+		if application.RuntimeStatus != nil {
+			table.AddRow("AVAILABE INSTANCES", len(application.GetRuntimeStatus().Instances))
+			table.AddSeparator()
 		}
-		if len(application.RuntimeStatus.Urls) > 0 {
+		table.AddRow("PUBLIC INGRESS", application.GetNetwork().PublicIngress)
+		if application.Network.Port != nil {
+			table.AddRow("PUBLIC PORT", *application.GetNetwork().Port)
+		}
+		if len(application.GetRuntimeStatus().Urls) > 0 {
 			table.AddRow("PUBLIC URL", application.RuntimeStatus.Urls[0])
 		}
 		table.AddSeparator()
@@ -143,11 +145,21 @@ func outputResult(p *print.Printer, outputFormat string, application *sca.Applic
 				args = strings.Join(c.Args, " ")
 			}
 
+			cpu := "-"
+			if c.Cpu != nil {
+				cpu = string(*c.Cpu)
+			}
+
+			memory := "-"
+			if c.Memory != nil {
+				memory = string(*c.Memory)
+			}
+
 			containersTable.AddRow(
 				c.Name,
 				c.Image,
-				*c.Cpu,
-				*c.Memory,
+				cpu,
+				memory,
 				commands,
 				args,
 			)
