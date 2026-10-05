@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	sca "github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi"
 )
 
@@ -97,4 +98,34 @@ func GetEnvironmentName(ctx context.Context, apiClient sca.DefaultAPI, projectId
 		return "", fmt.Errorf("get environment: %w", err)
 	}
 	return resp.DisplayName, nil
+}
+
+func ValidatePort(port int32, flag string) error {
+	if port <= 1024 || port > 65535 {
+		return &errors.FlagValidationError{
+			Flag:    flag,
+			Details: "must be a valid non-privileged port (from 1025 to 65535)",
+		}
+	}
+	return nil
+}
+
+func ValidateInstances(instances int32, flag string) error {
+	if instances < 0 || instances > 10 {
+		return &errors.FlagValidationError{
+			Flag:    flag,
+			Details: "must be an integer between 0 and 10",
+		}
+	}
+	return nil
+}
+
+func ValidateCPU(cpu int32, flag string) error {
+	if cpu <= 0 || cpu%1000 != 0 {
+		return &errors.FlagValidationError{
+			Flag:    flag,
+			Details: "must be a valid value divisible by 1000",
+		}
+	}
+	return nil
 }

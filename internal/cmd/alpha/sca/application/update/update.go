@@ -133,8 +133,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return &errors.ProjectIdError{}
 			}
 
+			current, err := apiClient.DefaultAPI.GetApplication(ctx, model.ProjectId, model.EnvironmentID, model.ApplicationID).Execute()
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get current application: %v", err)
+				return err
+			}
+
 			// Call API
-			req, err := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient, current)
 			if err != nil {
 				return err
 			}
@@ -238,12 +244,7 @@ func networkFromInput(model *inputModel) *sca.Network {
 	return network
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *sca.APIClient) (*sca.ApiUpdateApplicationRequest, error) {
-	current, err := apiClient.DefaultAPI.GetApplication(ctx, model.ProjectId, model.EnvironmentID, model.ApplicationID).Execute()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get current application instance: %w", err)
-	}
-
+func buildRequest(ctx context.Context, model *inputModel, apiClient *sca.APIClient, current *sca.Application) (*sca.ApiUpdateApplicationRequest, error) {
 	// scaling
 	updatedScaling, err := buildScalingConfig(model, current)
 	if err != nil {
@@ -263,6 +264,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sca.APIClie
 }
 
 func buildScalingConfig(model *inputModel, current *sca.Application) (*sca.Scaling, error) {
+	if model.ScalingType == nil &&
+		model.Instances == nil &&
+		model.MinInstances == nil &&
+		model.MaxInstances == nil &&
+		model.RPS == nil &&
+		model.Concurrency == nil {
+		return nil, nil
+	}
 	// input's scaling type is different from current
 	if model.ScalingType != nil && *model.ScalingType != scautils.HumanReadableScalingType(current.GetScaling().Type) {
 		switch *model.ScalingType {
@@ -280,6 +289,21 @@ func buildScalingConfig(model *inputModel, current *sca.Application) (*sca.Scali
 				},
 			}, nil
 		case scalingTypeAuto:
+			if model.MinInstances == nil {
+				return nil, &errors.FlagValidationError{
+					Flag:    instancesFlag,
+					Details: "required flag if replacing scaling type to auto",
+				}
+			}
+			if model.MaxInstances == nil {
+				model.MaxInstances = model.MinInstances
+			}
+			if model.RPS == nil && model.Concurrency == nil {
+				return nil, &errors.OneOfFlagsIsMissing{
+					MissingFlags: []string{rpsFlag, concurrencyFlag},
+					SetFlag:      fmt.Sprintf("--%s=%s", scalingTypeFlag.Name(), scalingTypeAuto),
+				}
+			}
 			autoScaling, err := buildAutoscalingConfig(model, nil)
 			if err != nil {
 				return nil, err
@@ -438,25 +462,61 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		envVars = *env
 	}
 
+	instances := flags.FlagToInt32Pointer(p, cmd, instancesFlag)
+	if instances != nil {
+		if err := scautils.ValidateInstances(*instances, instancesFlag); err != nil {
+			return nil, err
+		}
+	}
+
+	minInstances := flags.FlagToInt32Pointer(p, cmd, minInstancesFlag)
+	if minInstances != nil {
+		if err := scautils.ValidateInstances(*minInstances, minInstancesFlag); err != nil {
+			return nil, err
+		}
+	}
+
+	maxInstances := flags.FlagToInt32Pointer(p, cmd, maxInstancesFlag)
+	if maxInstances != nil {
+		if err := scautils.ValidateInstances(*maxInstances, maxInstancesFlag); err != nil {
+			return nil, err
+		}
+	}
+
+	extertalPort := flags.FlagToInt32Pointer(p, cmd, externalPortFlag)
+	if extertalPort != nil {
+		if err := scautils.ValidatePort(*extertalPort, externalPortFlag); err != nil {
+			return nil, err
+		}
+	}
+
+	cpu := flags.FlagToInt32Pointer(p, cmd, cpuFlag)
+	if cpu != nil {
+		if err := scautils.ValidateCPU(*cpu, cpuFlag); err != nil {
+			return nil, err
+		}
+	}
+
 	model := inputModel{
 		GlobalFlagModel:       globalFlags,
 		EnvironmentID:         environmentID,
 		ApplicationID:         applicationID,
 		Stopped:               flags.FlagToBoolPointer(p, cmd, stoppedFlag),
 		Memory:                flags.FlagToInt32Pointer(p, cmd, memoryFlag),
-		CPU:                   flags.FlagToInt32Pointer(p, cmd, cpuFlag),
+		CPU:                   cpu,
+		Image:                 flags.FlagWithDefaultToStringValue(p, cmd, imageFlag),
 		EnvironmentVariables:  envVars,
 		Commands:              flags.FlagToStringSliceValue(p, cmd, commandsFlag),
 		Args:                  flags.FlagToStringSliceValue(p, cmd, argsFlag),
 		ScalingType:           scalingTypeFlag.Ptr(),
-		Instances:             flags.FlagToInt32Pointer(p, cmd, instancesFlag),
-		MinInstances:          flags.FlagToInt32Pointer(p, cmd, minInstancesFlag),
-		MaxInstances:          flags.FlagToInt32Pointer(p, cmd, maxInstancesFlag),
+		Instances:             instances,
+		MinInstances:          minInstances,
+		MaxInstances:          maxInstances,
 		ScaleToZero:           flags.FlagToBoolPointer(p, cmd, scaleToZeroFlag),
 		Concurrency:           flags.FlagToInt32Pointer(p, cmd, concurrencyFlag),
 		RPS:                   flags.FlagToInt32Pointer(p, cmd, rpsFlag),
 		Public:                flags.FlagToBoolPointer(p, cmd, publicFlag),
-		ContainerExternalPort: flags.FlagToInt32Pointer(p, cmd, externalPortFlag),
+		ContainerExternalPort: extertalPort,
 	}
 
 	p.DebugInputModel(model)

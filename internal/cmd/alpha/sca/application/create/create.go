@@ -273,6 +273,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	instances := flags.FlagWithDefaultToInt32Value(p, cmd, instancesFlag)
+	if err := utils.ValidateInstances(instances, instancesFlag); err != nil {
+		return nil, err
+	}
 	if instances < 0 || instances > 10 {
 		return nil, &errors.FlagValidationError{
 			Flag:    instancesFlag,
@@ -281,18 +284,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	minInstances := flags.FlagWithDefaultToInt32Value(p, cmd, minInstancesFlag)
-	if minInstances < 0 || minInstances > 10 {
-		return nil, &errors.FlagValidationError{
-			Flag:    minInstancesFlag,
-			Details: "must be an integer between 0 and 10",
-		}
+	if err := utils.ValidateInstances(minInstances, minInstancesFlag); err != nil {
+		return nil, err
 	}
 
 	maxInstances := minInstances
 	if i := flags.FlagToInt32Pointer(p, cmd, maxInstancesFlag); i != nil {
 		maxInstances = *i
 	}
-	if maxInstances < minInstances || maxInstances > 10 {
+	if err := utils.ValidateInstances(maxInstances, maxInstancesFlag); err != nil {
+		return nil, err
+	}
+	if maxInstances < minInstances {
 		return nil, &errors.FlagValidationError{
 			Flag:    minInstancesFlag,
 			Details: fmt.Sprintf("must be an integer between minInstances (%d) and 10", minInstances),
@@ -300,19 +303,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	extertalPort := flags.FlagWithDefaultToInt32Value(p, cmd, externalPortFlag)
-	if extertalPort <= 1024 || extertalPort > 65535 {
-		return nil, &errors.FlagValidationError{
-			Flag:    externalPortFlag,
-			Details: "must be a valid non-privileged port (from 1025 to 65535)",
-		}
+	if err := utils.ValidatePort(extertalPort, externalPortFlag); err != nil {
+		return nil, err
 	}
 
 	cpu := flags.FlagWithDefaultToInt32Value(p, cmd, cpuFlag)
-	if cpu <= 0 || cpu%1000 != 0 {
-		return nil, &errors.FlagValidationError{
-			Flag:    cpuFlag,
-			Details: "must be a valid value divisible by 1000",
-		}
+	if err := utils.ValidateCPU(cpu, cpuFlag); err != nil {
+		return nil, err
 	}
 
 	var envVars map[string]string
