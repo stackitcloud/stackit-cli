@@ -289,7 +289,6 @@ func TestBuildRequest(t *testing.T) {
 					payload.Network = nil
 					payload.Scaling = nil
 				}))
-
 			}),
 		},
 		{

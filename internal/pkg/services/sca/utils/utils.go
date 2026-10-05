@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
+
 	sca "github.com/stackitcloud/stackit-sdk-go/services/sca/v1alphaapi"
 )
 
