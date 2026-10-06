@@ -225,7 +225,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient mongodbflex.
 
 			currentInstance, instErr := apiClient.GetInstance(ctx, model.ProjectId, model.InstanceId, model.Region).Execute()
 			if instErr != nil {
-				return req, fmt.Errorf("get MongoDB Flex instance: %w", err)
+				return req, fmt.Errorf("get MongoDB Flex instance: %w", instErr)
 			}
 
 			for _, f := range flavors.Flavors {
