@@ -59,6 +59,7 @@ const (
 	LogsCustomEndpointKey              = "logs_custom_endpoint"
 	ValkeyCustomEndpointKey            = "valkey_custom_endpoint"
 	VPNCustomEndpointKey               = "vpn_custom_endpoint"
+	TelemetryLinkCustomEndpointKey     = "telemetrylink_custom_endpoint"
 
 	ProjectNameKey     = "project_name"
 	DefaultProfileName = "default"
@@ -130,6 +131,7 @@ var ConfigKeys = []string{
 	TokenCustomEndpointKey,
 	ValkeyCustomEndpointKey,
 	VPNCustomEndpointKey,
+	TelemetryLinkCustomEndpointKey,
 }
 
 var defaultConfigFolderPath string
@@ -225,6 +227,7 @@ func setConfigDefaults() {
 	viper.SetDefault(CDNCustomEndpointKey, "")
 	viper.SetDefault(ValkeyCustomEndpointKey, "")
 	viper.SetDefault(VPNCustomEndpointKey, "")
+	viper.SetDefault(TelemetryLinkCustomEndpointKey, "")
 }
 
 func getConfigFilePath(configFolder string) string {
