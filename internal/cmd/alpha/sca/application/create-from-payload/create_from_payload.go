@@ -105,11 +105,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sca.APIClie
 }
 
 func outputResult(p *print.Printer, model *inputModel, application *sca.Application) error {
-	if application == nil {
-		return fmt.Errorf("create application response is empty")
-	}
-
 	return p.OutputResult(model.OutputFormat, application, func() error {
+		if application == nil {
+			return fmt.Errorf("create application response is empty")
+		}
 		operationState := "Created"
 		if model.Async {
 			operationState = "Triggered creation of"
@@ -122,9 +121,9 @@ func outputResult(p *print.Printer, model *inputModel, application *sca.Applicat
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), environmentIDFlag, "Environment ID (uses default environment if not set)")
 	cmd.Flags().String(nameFlag, "", "Application display name")
-	cmd.Flags().Var(flags.ReadFromFileFlag(), payloadFlag, `Request payload (JSON). Can be a string or a file path, if prefixed with "@" (example: @./payload.json). If unset, will use a default payload (you can check it by running "stackit sca application generate-payload")`)
+	cmd.Flags().Var(flags.ReadFromFileFlag(), payloadFlag, `Request payload (JSON). Can be a string or a file path, if prefixed with "@" (example: @./payload.json).`)
 
-	cobra.CheckErr(flags.MarkFlagsRequired(cmd, nameFlag))
+	cobra.CheckErr(flags.MarkFlagsRequired(cmd, nameFlag, payloadFlag))
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {

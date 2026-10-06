@@ -3,6 +3,7 @@ package describe
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -147,12 +148,12 @@ func outputResult(p *print.Printer, outputFormat string, application *sca.Applic
 
 			cpu := "-"
 			if c.Cpu != nil {
-				cpu = string(*c.Cpu)
+				cpu = strconv.Itoa(int(*c.Cpu))
 			}
 
 			memory := "-"
 			if c.Memory != nil {
-				memory = string(*c.Memory)
+				memory = strconv.Itoa(int(*c.Memory))
 			}
 
 			containersTable.AddRow(

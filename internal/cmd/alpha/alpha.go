@@ -18,13 +18,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Use:   "alpha",
 		Short: "Contains alpha STACKIT CLI commands",
 		Long: fmt.Sprintf("%s\n%s",
-			"Contains beta STACKIT CLI commands.",
+			"Contains alpha STACKIT CLI commands.",
 			"The commands under this group are still in an alpha state, and functionality may be incomplete or have breaking changes."),
 		Args: args.NoArgs,
 		Run:  utils.CmdHelp,
 		Example: examples.Build(
 			examples.NewExample(
-				"See the currently available beta commands",
+				"See the currently available alpha commands",
 				"$ stackit alpha --help"),
 			examples.NewExample(
 				"Execute a alpha command",

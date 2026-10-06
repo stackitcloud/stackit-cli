@@ -50,7 +50,6 @@ var scalingTypeFlag = flags.StringEnumFlag(
 	"scaling-type",
 	[]string{scalingTypeManual, scalingTypeAuto},
 	"Scaling type",
-	flags.StringEnumDefaultValue(scalingTypeManual),
 )
 
 type inputModel struct {
@@ -291,7 +290,7 @@ func buildScalingConfig(model *inputModel, current *sca.Application) (*sca.Scali
 		case scalingTypeAuto:
 			if model.MinInstances == nil {
 				return nil, &errors.FlagValidationError{
-					Flag:    instancesFlag,
+					Flag:    minInstancesFlag,
 					Details: "required flag if replacing scaling type to auto",
 				}
 			}
@@ -315,7 +314,7 @@ func buildScalingConfig(model *inputModel, current *sca.Application) (*sca.Scali
 		}
 	}
 
-	// input's scaling type is ni or equal to current
+	// input's scaling type is nil or equal to current
 
 	switch current.Scaling.Type {
 	case sca.SCALINGTYPE_SCALING_TYPE_MANUAL:
@@ -351,13 +350,36 @@ func buildAutoscalingConfig(model *inputModel, current *sca.AutoScaling) (*sca.A
 		}
 	}
 
-	autoScaling := &sca.AutoScaling{}
-	if current != nil {
-		autoScaling = current
+	if current == nil {
+		if model.MinInstances == nil {
+			return nil, &errors.FlagValidationError{
+				Flag:    instancesFlag,
+				Details: "Required flag if auto scaling is being configured",
+			}
+		}
+
+		maxInstances := *model.MinInstances
+		if model.MaxInstances != nil {
+			maxInstances = *model.MaxInstances
+		}
+
+		return &sca.AutoScaling{
+			MinInstances:     *model.MinInstances,
+			MaxInstances:     maxInstances,
+			AllowScaleToZero: model.ScaleToZero,
+			Rules:            buildScalingRules(model, nil),
+		}, nil
+	}
+
+	autoScaling := &sca.AutoScaling{
+		MinInstances: current.MinInstances,
+		MaxInstances: current.MaxInstances,
 	}
 
 	if model.ScaleToZero != nil {
 		autoScaling.AllowScaleToZero = model.ScaleToZero
+	} else if current.AllowScaleToZero != nil {
+		autoScaling.AllowScaleToZero = new(*current.AllowScaleToZero)
 	}
 
 	if model.MinInstances != nil {
@@ -372,9 +394,7 @@ func buildAutoscalingConfig(model *inputModel, current *sca.AutoScaling) (*sca.A
 		autoScaling.MaxInstances = autoScaling.MinInstances
 	}
 
-	if model.RPS != nil || model.Concurrency != nil {
-		autoScaling.Rules = buildScalingRules(model, autoScaling.Rules)
-	}
+	autoScaling.Rules = buildScalingRules(model, current.Rules)
 
 	if len(autoScaling.Rules) == 0 {
 		return nil, &errors.OneOfFlagsIsMissing{
@@ -390,31 +410,46 @@ func buildScalingRules(model *inputModel, current []sca.ScaleRule) []sca.ScaleRu
 	if model.Concurrency == nil && model.RPS == nil {
 		return current
 	}
+
 	found := false
+	updatedRules := make([]sca.ScaleRule, 0, len(current))
+
+	var httpRule *sca.HttpScaleRule
 	for _, rule := range current {
 		if rule.Type == sca.RULETYPE_RULE_TYPE_HTTP {
+			httpRule = &sca.HttpScaleRule{}
 			found = true
 			if model.Concurrency != nil {
-				rule.HttpRule.Concurrency = model.Concurrency
+				httpRule.Concurrency = model.Concurrency
 			}
 			if model.RPS != nil {
-				rule.HttpRule.Rps = model.RPS
+				httpRule.Rps = model.RPS
 			}
 		}
+		updatedRules = append(updatedRules, sca.ScaleRule{
+			Type:       rule.Type,
+			Name:       rule.Name,
+			HttpRule:   httpRule,
+			CustomRule: rule.CustomRule,
+		})
 	}
 
 	if found {
-		return current
+		return updatedRules
 	}
 
-	return append(current, sca.ScaleRule{
+	return append(updatedRules, buildHttpScaleRule(model))
+}
+
+func buildHttpScaleRule(model *inputModel) sca.ScaleRule {
+	return sca.ScaleRule{
 		Type: sca.RULETYPE_RULE_TYPE_HTTP,
 		Name: "http-scaling-rule",
 		HttpRule: &sca.HttpScaleRule{
 			Concurrency: model.Concurrency,
 			Rps:         model.RPS,
 		},
-	})
+	}
 }
 
 func configureFlags(cmd *cobra.Command) {
@@ -483,9 +518,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		}
 	}
 
-	extertalPort := flags.FlagToInt32Pointer(p, cmd, externalPortFlag)
-	if extertalPort != nil {
-		if err := scautils.ValidatePort(*extertalPort, externalPortFlag); err != nil {
+	externalPort := flags.FlagToInt32Pointer(p, cmd, externalPortFlag)
+	if externalPort != nil {
+		if err := scautils.ValidatePort(*externalPort, externalPortFlag); err != nil {
 			return nil, err
 		}
 	}
@@ -516,7 +551,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		Concurrency:           flags.FlagToInt32Pointer(p, cmd, concurrencyFlag),
 		RPS:                   flags.FlagToInt32Pointer(p, cmd, rpsFlag),
 		Public:                flags.FlagToBoolPointer(p, cmd, publicFlag),
-		ContainerExternalPort: extertalPort,
+		ContainerExternalPort: externalPort,
 	}
 
 	p.DebugInputModel(model)
@@ -524,11 +559,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 func outputResult(p *print.Printer, model *inputModel, application *sca.Application) error {
-	if application == nil {
-		return fmt.Errorf("update application response is empty")
-	}
-
 	return p.OutputResult(model.OutputFormat, application, func() error {
+		if application == nil {
+			return fmt.Errorf("update application response is empty")
+		}
 		operationState := "Updated"
 		if model.Async {
 			operationState = "Triggered update of"

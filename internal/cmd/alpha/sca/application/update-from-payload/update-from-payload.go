@@ -88,9 +88,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				}
 			}
 
-			outputResult(params.Printer, model, resp)
-
-			return nil
+			return outputResult(params.Printer, model, resp)
 		},
 	}
 
@@ -103,18 +101,26 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sca.APIClie
 		UpdateApplicationPayload(*model.Payload)
 }
 
-func outputResult(p *print.Printer, model *inputModel, application *sca.Application) {
-	operationState := "Updated"
-	if model.Async {
-		operationState = "Triggered update of"
-	}
+func outputResult(p *print.Printer, model *inputModel, application *sca.Application) error {
+	return p.OutputResult(model.OutputFormat, application, func() error {
+		if application == nil {
+			return fmt.Errorf("update application response is empty")
+		}
+		operationState := "Updated"
+		if model.Async {
+			operationState = "Triggered update of"
+		}
 
-	p.Outputf("%s application for environment %s. Application ID: %s\n", operationState, application.GetEnvironmentId(), application.GetId())
+		p.Outputf("%s application for environment %s. Application ID: %s\n", operationState, application.GetEnvironmentId(), application.GetId())
+		return nil
+	})
 }
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), environmentIDFlag, "Environment ID (uses default environment if not set)")
-	cmd.Flags().Var(flags.ReadFromFileFlag(), payloadFlag, `Request payload (JSON). Can be a string or a file path, if prefixed with "@" (example: @./payload.json). If unset, will use a default payload (you can check it by running "stackit sca application generate-payload")`)
+	cmd.Flags().Var(flags.ReadFromFileFlag(), payloadFlag, `Request payload (JSON). Can be a string or a file path, if prefixed with "@" (example: @./payload.json).`)
+
+	flags.MarkFlagsRequired(cmd, payloadFlag)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -136,7 +142,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		payload = &sca.UpdateApplicationPayload{}
 		err := json.Unmarshal([]byte(*payloadValue), payload)
 		if err != nil {
-			return nil, fmt.Errorf("enconde payload: %w", err)
+			return nil, fmt.Errorf("encode payload: %w", err)
 		}
 	}
 

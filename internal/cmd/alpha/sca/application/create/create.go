@@ -216,11 +216,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sca.APIClie
 }
 
 func outputResult(p *print.Printer, model *inputModel, application *sca.Application) error {
-	if application == nil {
-		return fmt.Errorf("create application response is empty")
-	}
-
 	return p.OutputResult(model.OutputFormat, application, func() error {
+		if application == nil {
+			return fmt.Errorf("create application response is empty")
+		}
 		operationState := "Created"
 		if model.Async {
 			operationState = "Triggered creation of"
@@ -276,12 +275,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	if err := utils.ValidateInstances(instances, instancesFlag); err != nil {
 		return nil, err
 	}
-	if instances < 0 || instances > 10 {
-		return nil, &errors.FlagValidationError{
-			Flag:    instancesFlag,
-			Details: "must be an integer between 0 and 10",
-		}
-	}
 
 	minInstances := flags.FlagWithDefaultToInt32Value(p, cmd, minInstancesFlag)
 	if err := utils.ValidateInstances(minInstances, minInstancesFlag); err != nil {
@@ -302,8 +295,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		}
 	}
 
-	extertalPort := flags.FlagWithDefaultToInt32Value(p, cmd, externalPortFlag)
-	if err := utils.ValidatePort(extertalPort, externalPortFlag); err != nil {
+	externalPort := flags.FlagWithDefaultToInt32Value(p, cmd, externalPortFlag)
+	if err := utils.ValidatePort(externalPort, externalPortFlag); err != nil {
 		return nil, err
 	}
 
@@ -341,7 +334,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		RPS:                   flags.FlagWithDefaultToInt32Value(p, cmd, rpsFlag),
 		Concurrency:           flags.FlagWithDefaultToInt32Value(p, cmd, concurrencyFlag),
 		Public:                flags.FlagToBoolValue(p, cmd, publicFlag),
-		ContainerExternalPort: extertalPort,
+		ContainerExternalPort: externalPort,
 	}
 
 	p.DebugInputModel(model)

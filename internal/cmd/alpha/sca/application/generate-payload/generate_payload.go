@@ -68,15 +68,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
-			if err != nil {
-				return err
-			}
-
 			var payload *sca.CreateApplicationPayload
 			if model.ApplicationID == nil {
 				payload = scautils.GetDefaultPayload()
 			} else {
+				apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
+				if err != nil {
+					return err
+				}
 				req := apiClient.DefaultAPI.GetApplication(ctx, model.ProjectId, *model.EnvironmentID, *model.ApplicationID)
 				resp, err := req.Execute()
 				if err != nil {

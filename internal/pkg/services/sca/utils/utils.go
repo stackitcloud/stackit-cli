@@ -85,8 +85,8 @@ func EnvironmentVariablesFromMap(m map[string]string) []sca.EnvVar {
 	return envVars
 }
 
-func GetApplicationName(ctx context.Context, apiClient sca.DefaultAPI, projectId, environmentID, applicaitonID string) (string, error) {
-	resp, err := apiClient.GetApplication(ctx, projectId, environmentID, applicaitonID).Execute()
+func GetApplicationName(ctx context.Context, apiClient sca.DefaultAPI, projectId, environmentID, applicationID string) (string, error) {
+	resp, err := apiClient.GetApplication(ctx, projectId, environmentID, applicationID).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get application: %w", err)
 	}
