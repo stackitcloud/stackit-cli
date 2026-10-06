@@ -209,10 +209,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient mongodbflex.
 
 	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.InstanceId, model.Region)
 
-	currentInstance, err := apiClient.GetInstance(ctx, model.ProjectId, model.InstanceId, model.Region).Execute()
-	if err != nil {
-		return req, fmt.Errorf("get MongoDB Flex instance: %w", err)
-	}
 	flavors, err := apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Execute()
 	if err != nil {
 		return req, fmt.Errorf("get MongoDB Flex flavors: %w", err)
@@ -226,6 +222,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient mongodbflex.
 		// if only one of the cpu/ram flags is set
 		if model.RAM == nil || model.CPU == nil {
 			var currentFlavor *mongodbflex.InstanceFlavor
+
+			currentInstance, instErr := apiClient.GetInstance(ctx, model.ProjectId, model.InstanceId, model.Region).Execute()
+			if instErr != nil {
+				return req, fmt.Errorf("get MongoDB Flex instance: %w", err)
+			}
 
 			for _, f := range flavors.Flavors {
 				if f.Id != nil && currentInstance.Item.Flavor.Id != nil && *f.Id == *currentInstance.Item.Flavor.Id {

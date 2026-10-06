@@ -490,7 +490,9 @@ func TestBuildRequest(t *testing.T) {
 			mockClientSettings: mockClientSettings{
 				getInstanceFails: true,
 			},
-			isValid: false,
+			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testInstanceId, testRegion).
+				PartialUpdateInstancePayload(mongodbflex.PartialUpdateInstancePayload{}),
+			isValid: true,
 		},
 		{
 			description: "get storages fails",
