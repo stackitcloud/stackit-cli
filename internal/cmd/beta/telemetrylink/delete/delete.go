@@ -6,6 +6,8 @@ import (
 
 	"github.com/stackitcloud/stackit-sdk-go/services/telemetrylink/v1api/wait"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/telemetrylink/utils"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	cliErr "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -13,7 +15,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	rmClient "github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/client"
-	rmUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/resourcemanager/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/telemetrylink/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
@@ -71,22 +72,17 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			var resourceLabel string
 			rmApiClient, err := rmClient.ConfigureClient(params.Printer, params.CliVersion)
 			if err == nil {
-				switch model.ResourceType {
-				case "project":
-					resourceLabel, err = rmUtils.GetProjectName(ctx, rmApiClient.DefaultAPI, model.ResourceId)
-				case "organization":
-					resourceLabel, err = rmUtils.GetOrganizationName(ctx, rmApiClient.DefaultAPI, model.ResourceId)
-				case "folder":
-					resourceLabel, err = rmUtils.GetFolderName(ctx, rmApiClient.DefaultAPI, model.ResourceId)
-				default:
-					params.Printer.Debug(print.ErrorLevel, "unknown resource type: %v", model.ResourceType)
-				}
+				resourceLabel, err = utils.GetResourceLabel(ctx, rmApiClient.DefaultAPI, model.ResourceId, model.ResourceType)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get %v name: %v", model.ResourceType, err)
 					resourceLabel = model.ResourceId
 				}
 			} else {
 				params.Printer.Debug(print.ErrorLevel, "configure resource manager client: %v", err)
+			}
+
+			if resourceLabel == "" {
+				resourceLabel = model.ResourceId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete the Telemetry Link for %q %q?", model.ResourceType, resourceLabel)
