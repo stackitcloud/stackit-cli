@@ -120,7 +120,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), environmentIDFlag, "Environment ID (uses default environment if not set)")
 	cmd.Flags().Var(flags.ReadFromFileFlag(), payloadFlag, `Request payload (JSON). Can be a string or a file path, if prefixed with "@" (example: @./payload.json).`)
 
-	flags.MarkFlagsRequired(cmd, payloadFlag)
+	cobra.CheckErr(flags.MarkFlagsRequired(cmd, payloadFlag))
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
