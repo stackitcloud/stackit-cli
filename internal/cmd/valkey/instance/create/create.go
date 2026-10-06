@@ -62,8 +62,8 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Creates a Valkey instance",
-		Long:  "Creates a Valkey instance.",
+		Short: "Creates a Key Value Store (valkey) instance",
+		Long:  "Creates a Key Value Store (valkey) instance.",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
