@@ -17,7 +17,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sca/client"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sca/utils"
 	scautils "github.com/stackitcloud/stackit-cli/internal/pkg/services/sca/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
@@ -129,13 +128,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			applicationLabel, err := utils.GetApplicationName(ctx, apiClient.DefaultAPI, model.ProjectId, model.EnvironmentID, model.ApplicationID)
+			applicationLabel, err := scautils.GetApplicationName(ctx, apiClient.DefaultAPI, model.ProjectId, model.EnvironmentID, model.ApplicationID)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get application name: %v", err)
 				applicationLabel = model.ApplicationID
 			}
 
-			environmentLabel, err := utils.GetEnvironmentName(ctx, apiClient.DefaultAPI, model.ProjectId, model.EnvironmentID)
+			environmentLabel, err := scautils.GetEnvironmentName(ctx, apiClient.DefaultAPI, model.ProjectId, model.EnvironmentID)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get environment name: %v", err)
 				environmentLabel = model.EnvironmentID
