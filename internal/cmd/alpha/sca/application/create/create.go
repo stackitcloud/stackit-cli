@@ -119,9 +119,16 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			globalFlags := globalflags.Parse(params.Printer, cmd)
-			if globalFlags.ProjectId == "" {
-				return &errors.ProjectIdError{}
+			environmentLabel, err := utils.GetEnvironmentName(ctx, apiClient.DefaultAPI, model.ProjectId, model.EnvironmentID)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get environment name: %v", err)
+				environmentLabel = model.EnvironmentID
+			}
+
+			prompt := fmt.Sprintf("Are you sure you want to create application %q on environment %q?", model.Name, environmentLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			// Call API

@@ -15,7 +15,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sca/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/sca/utils"
 	scautils "github.com/stackitcloud/stackit-cli/internal/pkg/services/sca/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
@@ -127,9 +129,28 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			globalFlags := globalflags.Parse(params.Printer, cmd)
-			if globalFlags.ProjectId == "" {
-				return &errors.ProjectIdError{}
+			applicationLabel, err := utils.GetApplicationName(ctx, apiClient.DefaultAPI, model.ProjectId, model.EnvironmentID, model.ApplicationID)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get application name: %v", err)
+				applicationLabel = model.ApplicationID
+			}
+
+			environmentLabel, err := utils.GetEnvironmentName(ctx, apiClient.DefaultAPI, model.ProjectId, model.EnvironmentID)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get environment name: %v", err)
+				environmentLabel = model.EnvironmentID
+			}
+
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
+			}
+
+			prompt := fmt.Sprintf("Are you sure you want to update the application %q from environment %q and product %q?", applicationLabel, environmentLabel, projectLabel)
+			err = params.Printer.PromptForConfirmation(prompt)
+			if err != nil {
+				return err
 			}
 
 			current, err := apiClient.DefaultAPI.GetApplication(ctx, model.ProjectId, model.EnvironmentID, model.ApplicationID).Execute()
