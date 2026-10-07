@@ -106,6 +106,9 @@ func outputResult(p *print.Printer, outputFormat string, application *sca.Applic
 		if application.Network.Port != nil {
 			table.AddRow("PUBLIC PORT", *application.GetNetwork().Port)
 		}
+		if len(application.Network.IngressAcl) > 0 {
+			table.AddRow("ACLs", strings.Join(application.Network.IngressAcl, "\n"))
+		}
 		if len(application.GetRuntimeStatus().Urls) > 0 {
 			table.AddRow("PUBLIC URL", application.RuntimeStatus.Urls[0])
 		}
@@ -119,6 +122,7 @@ func outputResult(p *print.Printer, outputFormat string, application *sca.Applic
 			table.AddRow("INSTANCES", application.GetScaling().ManualScaling.Instances)
 		case sca.SCALINGTYPE_SCALING_TYPE_AUTO:
 			table.AddRow("SCALING TYPE", "AUTO")
+			table.AddRow("SCALE TO ZERO", application.GetScaling().AutoScaling.GetAllowScaleToZero())
 			table.AddRow("MIN INSTANCES", application.GetScaling().AutoScaling.MinInstances)
 			table.AddRow("MAX INSTANCES", application.GetScaling().AutoScaling.MaxInstances)
 			rules := application.GetScaling().AutoScaling.Rules
@@ -142,7 +146,7 @@ func outputResult(p *print.Printer, outputFormat string, application *sca.Applic
 				commands = strings.Join(c.Command, " ")
 			}
 			cArgs := "-"
-			if len(c.Command) > 0 {
+			if len(c.Args) > 0 {
 				cArgs = strings.Join(c.Args, " ")
 			}
 

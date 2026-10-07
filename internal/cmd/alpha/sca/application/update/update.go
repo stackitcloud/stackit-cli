@@ -187,7 +187,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	return cmd
 }
 
-func containersFromInput(containers []sca.Container, model *inputModel) []sca.Container {
+func containersFromInput(model *inputModel, containers []sca.Container) []sca.Container {
 	if len(containers) == 0 {
 		return []sca.Container{{
 			Name:                 "container-1",
@@ -213,10 +213,12 @@ func containersFromInput(containers []sca.Container, model *inputModel) []sca.Co
 	}
 
 	if model.Commands != nil {
+		updateContainer = true
 		containers[0].Command = model.Commands
 	}
 
 	if model.Args != nil {
+		updateContainer = true
 		containers[0].Args = model.Args
 	}
 
@@ -246,12 +248,16 @@ func containersFromInput(containers []sca.Container, model *inputModel) []sca.Co
 	return nil
 }
 
-func networkFromInput(model *inputModel) *sca.Network {
+func networkFromInput(model *inputModel, current sca.Network) *sca.Network {
 	if model.Public == nil && model.ContainerExternalPort == nil {
 		return nil
 	}
 
-	network := &sca.Network{}
+	network := &sca.Network{
+		PublicIngress: current.PublicIngress,
+		Port:          current.Port,
+		IngressAcl:    current.IngressAcl,
+	}
 
 	if model.Public != nil {
 		network.PublicIngress = *model.Public
@@ -276,8 +282,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sca.APIClie
 		Stopped: model.Stopped,
 	}
 
-	payload.Containers = containersFromInput(current.Containers, model)
-	payload.Network = networkFromInput(model)
+	payload.Containers = containersFromInput(model, current.Containers)
+	payload.Network = networkFromInput(model, current.Network)
 
 	return new(apiClient.DefaultAPI.UpdateApplication(ctx, model.ProjectId, model.EnvironmentID, model.ApplicationID).
 		UpdateApplicationPayload(payload)), nil
@@ -288,6 +294,7 @@ func buildScalingConfig(model *inputModel, current *sca.Application) (*sca.Scali
 		model.Instances == nil &&
 		model.MinInstances == nil &&
 		model.MaxInstances == nil &&
+		model.ScaleToZero == nil &&
 		model.RPS == nil &&
 		model.Concurrency == nil {
 		return nil, nil
@@ -435,16 +442,13 @@ func buildScalingRules(model *inputModel, current []sca.ScaleRule) []sca.ScaleRu
 	found := false
 	updatedRules := make([]sca.ScaleRule, 0, len(current))
 
-	var httpRule *sca.HttpScaleRule
 	for _, rule := range current {
+		var httpRule *sca.HttpScaleRule
 		if rule.Type == sca.RULETYPE_RULE_TYPE_HTTP {
-			httpRule = &sca.HttpScaleRule{}
 			found = true
-			if model.Concurrency != nil {
-				httpRule.Concurrency = model.Concurrency
-			}
-			if model.RPS != nil {
-				httpRule.Rps = model.RPS
+			httpRule = &sca.HttpScaleRule{
+				Concurrency: model.Concurrency,
+				Rps:         model.RPS,
 			}
 		}
 		updatedRules = append(updatedRules, sca.ScaleRule{
