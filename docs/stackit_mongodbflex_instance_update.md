@@ -17,7 +17,7 @@ stackit mongodbflex instance update INSTANCE_ID [flags]
   $ stackit mongodbflex instance update xxx --name my-new-name
 
   Update the version of a MongoDB Flex instance
-  $ stackit mongodbflex instance update xxx --version 6.0
+  $ stackit mongodbflex instance update xxx --version 8.0
 ```
 
 ### Options
@@ -25,11 +25,9 @@ stackit mongodbflex instance update INSTANCE_ID [flags]
 ```
       --acl strings              Lists of IP networks in CIDR notation which are allowed to access this instance (default [])
       --backup-schedule string   Backup schedule
-      --cpu int32                Number of CPUs
       --flavor-id string         ID of the flavor
   -h, --help                     Help for "stackit mongodbflex instance update"
   -n, --name string              Instance name
-      --ram int32                Amount of RAM (in GB)
       --storage-class string     Storage class
       --storage-size int         Storage size (in GB)
       --type string              Instance type, (one of: [Replica, Sharded, Single])
