@@ -28,6 +28,7 @@ const (
 	allowedUrlDomainFlag                             = "allowed-url-domain"
 
 	authorizationCustomEndpointFlag     = "authorization-custom-endpoint"
+	automationCustomEndpointFlag        = "automation-custom-endpoint"
 	albWafCustomEndpointFlag            = "alb-waf-custom-endpoint"
 	dnsCustomEndpointFlag               = "dns-custom-endpoint"
 	edgeCustomEndpointFlag              = "edge-custom-endpoint"
@@ -79,6 +80,7 @@ type inputModel struct {
 	AllowedUrlDomain               bool
 
 	AuthorizationCustomEndpoint     bool
+	AutomationCustomEndpoint        bool
 	AlbWafCustomEndpoint            bool
 	DNSCustomEndpoint               bool
 	EdgeCustomEndpoint              bool
@@ -168,6 +170,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 			if model.AuthorizationCustomEndpoint {
 				viper.Set(config.AuthorizationCustomEndpointKey, "")
+			}
+			if model.AutomationCustomEndpoint {
+				viper.Set(config.AutomationCustomEndpointKey, "")
 			}
 			if model.AlbWafCustomEndpoint {
 				viper.Set(config.AlbWafCustomEndpointKey, "")
@@ -283,6 +288,7 @@ func configureFlags(cmd *cobra.Command) {
 
 	cmd.Flags().Bool(observabilityCustomEndpointFlag, false, "Observability API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(authorizationCustomEndpointFlag, false, "Authorization API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(automationCustomEndpointFlag, false, "Automation API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(albWafCustomEndpointFlag, false, "ALB WAF API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(dnsCustomEndpointFlag, false, "DNS API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(edgeCustomEndpointFlag, false, "Edge API base URL. If unset, uses the default base URL")
@@ -329,6 +335,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		AllowedUrlDomain:               flags.FlagToBoolValue(p, cmd, allowedUrlDomainFlag),
 
 		AuthorizationCustomEndpoint:     flags.FlagToBoolValue(p, cmd, authorizationCustomEndpointFlag),
+		AutomationCustomEndpoint:        flags.FlagToBoolValue(p, cmd, automationCustomEndpointFlag),
 		AlbWafCustomEndpoint:            flags.FlagToBoolValue(p, cmd, albWafCustomEndpointFlag),
 		DNSCustomEndpoint:               flags.FlagToBoolValue(p, cmd, dnsCustomEndpointFlag),
 		EdgeCustomEndpoint:              flags.FlagToBoolValue(p, cmd, edgeCustomEndpointFlag),

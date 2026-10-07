@@ -31,6 +31,7 @@ stackit config unset [flags]
       --assume-yes                                          If set, skips all confirmation prompts
       --async                                               Configuration option to run commands asynchronously
       --authorization-custom-endpoint                       Authorization API base URL. If unset, uses the default base URL
+      --automation-custom-endpoint                          Automation API base URL. If unset, uses the default base URL
       --cdn-custom-endpoint                                 Custom CDN endpoint URL. If unset, uses the default base URL
       --dns-custom-endpoint                                 DNS API base URL. If unset, uses the default base URL
       --edge-custom-endpoint                                Edge API base URL. If unset, uses the default base URL

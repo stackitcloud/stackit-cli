@@ -1,10 +1,10 @@
 ## stackit valkey instance create
 
-Creates a Valkey instance
+Creates a Key Value Store (valkey) instance
 
 ### Synopsis
 
-Creates a Valkey instance.
+Creates a Key Value Store (valkey) instance.
 
 ```
 stackit valkey instance create [flags]
@@ -55,5 +55,5 @@ stackit valkey instance create [flags]
 
 ### SEE ALSO
 
-* [stackit valkey instance](./stackit_valkey_instance.md)	 - Provides functionality for Valkey instances
+* [stackit valkey instance](./stackit_valkey_instance.md)	 - Provides functionality for Key Value Store (valkey) instances
 

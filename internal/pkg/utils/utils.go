@@ -108,8 +108,13 @@ func ValidateURLDomain(value string) error {
 	}
 
 	allowedUrlDomain := viper.GetString(config.AllowedUrlDomainKey)
+	if allowedUrlDomain == "" {
+		return nil
+	}
 
-	if !strings.HasSuffix(urlHost, allowedUrlDomain) {
+	urlHost = strings.ToLower(urlHost)
+	allowedUrlDomain = strings.ToLower(allowedUrlDomain)
+	if urlHost != allowedUrlDomain && !strings.HasSuffix(urlHost, "."+allowedUrlDomain) {
 		return fmt.Errorf(`only urls belonging to domain %s are allowed`, allowedUrlDomain)
 	}
 	return nil
@@ -205,4 +210,48 @@ func Map[T, U any](input []T, mapFn func(T) U) []U {
 		values[i] = mapFn(input[i])
 	}
 	return values
+}
+
+// FlattenMap flats a map. Nested maps will be added to the root map.
+// The keys in the output map will be dot-separated for nested maps.
+//
+// Example:
+// input:
+//
+//	{
+//	  "a": 1,
+//	  "b": {
+//	    "c": 2,
+//	    "d": {
+//	      "e": 3
+//	    }
+//	  }
+//	}
+//
+// output:
+//
+//	{
+//	  "a": 1,
+//	  "b.c": 2,
+//	  "b.d.e": 3
+//	}
+func FlattenMap(inputMap map[string]interface{}) map[string]interface{} {
+	if inputMap == nil {
+		return nil
+	}
+	outputMap := make(map[string]interface{})
+	for key, value := range inputMap {
+		if valueMap, ok := value.(map[string]interface{}); ok {
+			if len(valueMap) == 0 {
+				outputMap[key] = ""
+				continue
+			}
+			for nestedKey, nestedValue := range FlattenMap(valueMap) {
+				outputMap[key+"."+nestedKey] = nestedValue
+			}
+		} else {
+			outputMap[key] = value
+		}
+	}
+	return outputMap
 }

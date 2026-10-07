@@ -25,6 +25,7 @@ const (
 	allowedUrlDomainFlag                             = "allowed-url-domain"
 
 	authorizationCustomEndpointFlag     = "authorization-custom-endpoint"
+	automationCustomEndpointFlag        = "automation-custom-endpoint"
 	albWafCustomEndpointFlag            = "alb-waf-custom-endpoint"
 	dnsCustomEndpointFlag               = "dns-custom-endpoint"
 	edgeCustomEndpointFlag              = "edge-custom-endpoint"
@@ -147,6 +148,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(allowedUrlDomainFlag, "", `Domain name, used for the verification of the URLs that are given in the custom identity provider endpoint and "STACKIT curl" command`)
 	cmd.Flags().String(observabilityCustomEndpointFlag, "", "Observability API base URL, used in calls to this API")
 	cmd.Flags().String(authorizationCustomEndpointFlag, "", "Authorization API base URL, used in calls to this API")
+	cmd.Flags().String(automationCustomEndpointFlag, "", "Automation API base URL, used in calls to this API")
 	cmd.Flags().String(albWafCustomEndpointFlag, "", "ALB WAF API base URL, used in calls to this API")
 	cmd.Flags().String(dnsCustomEndpointFlag, "", "DNS API base URL, used in calls to this API")
 	cmd.Flags().String(edgeCustomEndpointFlag, "", "Edge API base URL, used in calls to this API")
@@ -189,6 +191,8 @@ func configureFlags(cmd *cobra.Command) {
 	err = viper.BindPFlag(config.ObservabilityCustomEndpointKey, cmd.Flags().Lookup(observabilityCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.AuthorizationCustomEndpointKey, cmd.Flags().Lookup(authorizationCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.AutomationCustomEndpointKey, cmd.Flags().Lookup(automationCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.AlbWafCustomEndpointKey, cmd.Flags().Lookup(albWafCustomEndpointFlag))
 	cobra.CheckErr(err)
