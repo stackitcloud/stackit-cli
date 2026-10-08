@@ -4,18 +4,16 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
+
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	mongodbflex "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api"
-)
 
-const (
-	testRegion = "eu02"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 )
 
 type testCtxKey struct{}
@@ -24,11 +22,14 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &mongodbflex.APIClient{DefaultAPI: &mongodbflex.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 
+const (
+	testRegion = "eu01"
+)
+
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
 		globalflags.RegionFlag:    testRegion,
-		limitFlag:                 "10",
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -43,7 +44,6 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		Limit: new(int64(10)),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -51,8 +51,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	return model
 }
 
-func fixtureRequest(mods ...func(request *mongodbflex.ApiListInstancesRequest)) mongodbflex.ApiListInstancesRequest {
-	request := testClient.DefaultAPI.ListInstances(testCtx, testProjectId, testRegion).Tag("")
+func fixtureRequest(mods ...func(request *mongodbflex.ApiListFlavorsRequest)) mongodbflex.ApiListFlavorsRequest {
+	request := testClient.DefaultAPI.ListFlavors(testCtx, testProjectId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -74,7 +74,7 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModel(),
 		},
 		{
-			description: "no values",
+			description: "no flag values",
 			flagValues:  map[string]string{},
 			isValid:     false,
 		},
@@ -82,34 +82,6 @@ func TestParseInput(t *testing.T) {
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, globalflags.ProjectIdFlag)
-			}),
-			isValid: false,
-		},
-		{
-			description: "project id invalid 1",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[globalflags.ProjectIdFlag] = ""
-			}),
-			isValid: false,
-		},
-		{
-			description: "project id invalid 2",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
-			}),
-			isValid: false,
-		},
-		{
-			description: "limit invalid",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[limitFlag] = "invalid"
-			}),
-			isValid: false,
-		},
-		{
-			description: "limit invalid 2",
-			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[limitFlag] = "0"
 			}),
 			isValid: false,
 		},
@@ -126,7 +98,7 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		expectedRequest mongodbflex.ApiListInstancesRequest
+		expectedRequest mongodbflex.ApiListFlavorsRequest
 	}{
 		{
 			description:     "base",
@@ -137,7 +109,7 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			request := buildRequest(testCtx, tt.model, testClient.DefaultAPI)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
@@ -150,11 +122,10 @@ func TestBuildRequest(t *testing.T) {
 	}
 }
 
-func TestOutputResult(t *testing.T) {
+func Test_outputResult(t *testing.T) {
 	type args struct {
 		outputFormat string
-		projectLabel string
-		instanceList []mongodbflex.InstanceListInstance
+		flavors      []mongodbflex.InstanceFlavor
 	}
 	tests := []struct {
 		name    string
@@ -162,21 +133,23 @@ func TestOutputResult(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "empty",
-			args:    args{},
-			wantErr: false,
-		},
-		{
-			name: "empty instance list slice",
+			name: "flavors slice is nil",
 			args: args{
-				instanceList: []mongodbflex.InstanceListInstance{},
+				flavors: nil,
 			},
 			wantErr: false,
 		},
 		{
-			name: "empty instance in instance list slice",
+			name: "flavors slice is empty",
 			args: args{
-				instanceList: []mongodbflex.InstanceListInstance{{}},
+				flavors: []mongodbflex.InstanceFlavor{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty flavor in flavors slice",
+			args: args{
+				flavors: []mongodbflex.InstanceFlavor{{}},
 			},
 			wantErr: false,
 		},
@@ -184,7 +157,7 @@ func TestOutputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.projectLabel, tt.args.instanceList); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.flavors); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
