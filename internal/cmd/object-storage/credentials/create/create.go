@@ -132,7 +132,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 	req := apiClient.DefaultAPI.CreateAccessKey(ctx, model.ProjectId, model.Region)
 	req = req.CredentialsGroup(model.CredentialsGroupId)
 	req = req.CreateAccessKeyPayload(objectstorage.CreateAccessKeyPayload{
-		Expires: model.ExpireDate,
+		Expires: *objectstorage.NewNullableTime(model.ExpireDate),
 	})
 	return req
 }
