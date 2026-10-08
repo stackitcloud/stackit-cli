@@ -616,8 +616,8 @@ github.com/stackitcloud/stackit-sdk-go/services/albwaf v0.13.4 h1:KNEcAPj66Asb00
 github.com/stackitcloud/stackit-sdk-go/services/albwaf v0.13.4/go.mod h1:riXgEDfIjNdFjYk81zNnWt0npkv1+/P1iFRfFIt28Jo=
 github.com/stackitcloud/stackit-sdk-go/services/authorization v0.15.4 h1:YRfEQJxMn9B/yCf5ZGTsBzPLv69LM/jvvLuC8vb0Uf4=
 github.com/stackitcloud/stackit-sdk-go/services/authorization v0.15.4/go.mod h1:AVLUwOPKsoz6HvKzClu0a5OTjMOYS696gRjHUQvQH70=
-github.com/stackitcloud/stackit-sdk-go/services/automation v0.2.0 h1:X3tnz8Aij3fRk0vx7Ekvt5ONnP+ACMqwrBuKftHJJdY=
-github.com/stackitcloud/stackit-sdk-go/services/automation v0.2.0/go.mod h1:1vv2SZorcHJKxEPV15CnTDhavV+NcYSNjAX7cZGX31k=
+github.com/stackitcloud/stackit-sdk-go/services/automation v0.2.1 h1:VxYQ4fCkuZAnzsqKXTSMxG8KX/OlfOgKJ0heB0Rf9gw=
+github.com/stackitcloud/stackit-sdk-go/services/automation v0.2.1/go.mod h1:pDhpbmeDlthML6h4jyI7ZRGrG2C4Tx3aIGru5Ts6ISo=
 github.com/stackitcloud/stackit-sdk-go/services/cdn v1.21.0 h1:lCs1eq/OOTdwGrrkxkJ8qCnS6yLM4XZhznpML3nd1NI=
 github.com/stackitcloud/stackit-sdk-go/services/cdn v1.21.0/go.mod h1:NBgvZH5ekJ2hFCNI480C9MdJsa4989YGC1YgX5ELA48=
 github.com/stackitcloud/stackit-sdk-go/services/dns v0.23.1 h1:6hm7oYJeR5Bu8d+PeCvVLWjUXh78pSfdsCTZ7lu5qdc=
@@ -626,8 +626,8 @@ github.com/stackitcloud/stackit-sdk-go/services/edge v0.13.2 h1:UDkXmgOAlP3y/u7F
 github.com/stackitcloud/stackit-sdk-go/services/edge v0.13.2/go.mod h1:hlUcPvOgH/CzZqH7u4SwV81qiismCVAtvw5pTAf6si4=
 github.com/stackitcloud/stackit-sdk-go/services/git v0.14.1 h1:7R5peSRer3Y83mfB6wcdCP0vhEjsq4myUdVhl24q6to=
 github.com/stackitcloud/stackit-sdk-go/services/git v0.14.1/go.mod h1:kz2pl17t9MNQx0+fNXg10ZAVfjmvOtsHB7VlAzu/Io8=
-github.com/stackitcloud/stackit-sdk-go/services/iaas v1.14.1 h1:P8XhOi8TLA7NbLHhxU8dCJjgQpha/65agos3pI59+vw=
-github.com/stackitcloud/stackit-sdk-go/services/iaas v1.14.1/go.mod h1:/QpOsaCOQjwGgQqG8y9xXqryp25AfkorPjInX9xIeOU=
+github.com/stackitcloud/stackit-sdk-go/services/iaas v1.14.5 h1:CVRo4/hCy6vLlh6LQjQikTDnh/0KF43nRhKsiicxyXc=
+github.com/stackitcloud/stackit-sdk-go/services/iaas v1.14.5/go.mod h1:oJmNZY04vvjrQI+y91ZZWOQiCAREcCldkh6cib+YtP0=
 github.com/stackitcloud/stackit-sdk-go/services/intake v0.11.2 h1:wC0J5fHffmbPLzsqjQ08P9Jb10/BbJUm45TSNfAm8jc=
 github.com/stackitcloud/stackit-sdk-go/services/intake v0.11.2/go.mod h1:WIgF8d0xz2dIf95k1lMIGCBoyDhr2/AFJFEdnWB8tTo=
 github.com/stackitcloud/stackit-sdk-go/services/kms v1.13.1 h1:iEPerniBpji6dGiB31p1WAUxgBf9VBIL9gKocfbBqW8=
@@ -642,8 +642,8 @@ github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.3.1 h1:FZJLUhHVrlrfFn
 github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.3.1/go.mod h1:P1HFWSmuy2i1WA0PhcDfGsa0CRcbGTE+wDb1iEAL8/E=
 github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.12.2 h1:oXuBETy/UZ3T8XxnZM2rfKVPxOxiZhNdz5ojn8dqMFo=
 github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.12.2/go.mod h1:/a74NLBtvdS0Z2jrC4AvZCa+rcJDIhOOBkjM5y37eO4=
-github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.9.2 h1:FvT1SDs4Q8MTNwKERqMUgvXAyYwv/MQTAGfZAxcDfQo=
-github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.9.2/go.mod h1:HNLjAqJrfBYfK/DT7Nrwh6LkArq6bn/ri+kgps3skjc=
+github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.10.1 h1:7zNpG0O+2gJC22ZfV1lX+EPwT8DGnnlTEMjMN22y80w=
+github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.10.1/go.mod h1:HAQToFb4LrI6jdOdOowApI3KLF3D0KzE9ne0Lty4wkw=
 github.com/stackitcloud/stackit-sdk-go/services/observability v0.25.2 h1:fFb8inhRUgcmdVGHrOG59HKUnmENwwwq678895XgL1Q=
 github.com/stackitcloud/stackit-sdk-go/services/observability v0.25.2/go.mod h1:OAR5GjprwOgXmCIbZTP8ISJ4CmPrCW0zY0phg06pIps=
 github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.3.1 h1:xVv2Z/ddBJaY65dfGMOn5pC8OAENOpO2fnKp7nuH5Lo=
