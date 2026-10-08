@@ -57,6 +57,7 @@ stackit [flags]
 * [stackit security-group](./stackit_security-group.md)	 - Manage security groups
 * [stackit server](./stackit_server.md)	 - Provides functionality for servers
 * [stackit service-account](./stackit_service-account.md)	 - Provides functionality for service accounts
+* [stackit sfs](./stackit_sfs.md)	 - Provides functionality for SFS (STACKIT File Storage)
 * [stackit ske](./stackit_ske.md)	 - Provides functionality for SKE
 * [stackit sqlserverflex](./stackit_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
 * [stackit valkey](./stackit_valkey.md)	 - Provides functionality for Key Value Store (valkey)

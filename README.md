@@ -95,7 +95,7 @@ Below you can find a list of the STACKIT services already available in the CLI (
 | Server Command (Run Command)       | `server command`                                                                                                                                                                                    | :white_check_mark:        |
 | Service Account                    | `service-account`                                                                                                                                                                                   | :white_check_mark:        |
 | SQLServer Flex                     | `sqlserverflex`                                                                                                                                                                                     | :white_check_mark:        |
-| File Storage (SFS)                 | `beta sfs`                                                                                                                                                                                          | :white_check_mark: (beta) |
+| File Storage (SFS)                 | `sfs`                                                                                                                                                                                               | :white_check_mark:        |
 
 ## Authentication
 

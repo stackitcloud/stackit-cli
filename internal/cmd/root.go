@@ -40,6 +40,7 @@ import (
 	securitygroup "github.com/stackitcloud/stackit-cli/internal/cmd/security-group"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/server"
 	serviceaccount "github.com/stackitcloud/stackit-cli/internal/cmd/service-account"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/sfs"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/valkey"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/volume"
@@ -191,6 +192,7 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(redis.NewCmd(params)) //nolint:staticcheck // deprecated but still supported until 2027-08-31
 	cmd.AddCommand(secretsmanager.NewCmd(params))
 	cmd.AddCommand(serviceaccount.NewCmd(params))
+	cmd.AddCommand(sfs.NewCmd(params))
 	cmd.AddCommand(ske.NewCmd(params))
 	cmd.AddCommand(server.NewCmd(params))
 	cmd.AddCommand(networkArea.NewCmd(params))
