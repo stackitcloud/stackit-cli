@@ -6,7 +6,6 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -41,8 +40,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			ProjectId: testProjectId,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		ParentId: utils.Ptr(testParentId),
-		Name:     utils.Ptr(nameFlag),
+		ParentId: new(testParentId),
+		Name:     new(nameFlag),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -53,8 +52,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 func fixtureRequest(mods ...func(request *resourcemanager.ApiPartialUpdateProjectRequest)) resourcemanager.ApiPartialUpdateProjectRequest {
 	request := testClient.DefaultAPI.PartialUpdateProject(testCtx, testProjectId)
 	request = request.PartialUpdateProjectPayload(resourcemanager.PartialUpdateProjectPayload{
-		ContainerParentId: utils.Ptr(testParentId),
-		Name:              utils.Ptr(nameFlag),
+		ContainerParentId: new(testParentId),
+		Name:              new(nameFlag),
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -102,8 +101,8 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModel(
 				func(model *inputModel) {
 					model.Labels = &map[string]*string{
-						"key": utils.Ptr("value"),
-						"foo": utils.Ptr("bar"),
+						"key": new("value"),
+						"foo": new("bar"),
 					}
 				}),
 			isValid: true,
@@ -115,8 +114,8 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModel(
 				func(model *inputModel) {
 					model.Labels = &map[string]*string{
-						"key": utils.Ptr("value"),
-						"foo": utils.Ptr("bar"),
+						"key": new("value"),
+						"foo": new("bar"),
 					}
 				}),
 			isValid: true,
