@@ -101,9 +101,9 @@ func TestParseInput(t *testing.T) {
 			labelValues: []string{"key=value", "foo=bar"},
 			expectedModel: fixtureInputModel(
 				func(model *inputModel) {
-					model.Labels = &map[string]string{
-						"key": "value",
-						"foo": "bar",
+					model.Labels = &map[string]*string{
+						"key": utils.Ptr("value"),
+						"foo": utils.Ptr("bar"),
 					}
 				}),
 			isValid: true,
@@ -114,9 +114,9 @@ func TestParseInput(t *testing.T) {
 			labelValues: []string{"key=value,foo=bar"},
 			expectedModel: fixtureInputModel(
 				func(model *inputModel) {
-					model.Labels = &map[string]string{
-						"key": "value",
-						"foo": "bar",
+					model.Labels = &map[string]*string{
+						"key": utils.Ptr("value"),
+						"foo": utils.Ptr("bar"),
 					}
 				}),
 			isValid: true,
