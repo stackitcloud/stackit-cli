@@ -53,7 +53,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			vpcLabel, err := iaasUtils.GetVPCName(ctx, apiClient.DefaultAPI, model.ProjectId, model.VpcId)
 			if err != nil {
-				params.Printer.Debug(print.ErrorLevel, "get VPC name: %w", err)
+				params.Printer.Debug(print.ErrorLevel, "get VPC name: %v", err)
 				vpcLabel = model.VpcId
 			} else if vpcLabel == "" {
 				vpcLabel = model.VpcId

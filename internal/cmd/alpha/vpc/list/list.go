@@ -39,16 +39,16 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Lists all VPCs`,
-				"$ stackit alpha vpc list xxx"),
+				"$ stackit alpha vpc list"),
 			examples.NewExample(
-				`Lists all VPCsin JSON format`,
+				`Lists all VPCs in JSON format`,
 				"$ stackit alpha vpc list --output-format json"),
 			examples.NewExample(
 				`Lists up to 10 VPCs`,
-				"$ stackit alpha vpc list xxx --limit 10"),
+				"$ stackit alpha vpc list --limit 10"),
 			examples.NewExample(
 				`Lists all VPCs which has the name "my-vpc"`,
-				`$ stackit alpha vpc list xxx --filter "name == 'my-vpc'"`),
+				`$ stackit alpha vpc list --filter "name == 'my-vpc'"`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

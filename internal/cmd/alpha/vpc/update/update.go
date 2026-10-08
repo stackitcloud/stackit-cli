@@ -43,8 +43,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(vpcIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Delete a vpc with ID "xxx"`,
-				"$ stackit alpha vpc delete xxx",
+				`Update a vpc with ID "xxx" to new name "vpc-new"`,
+				"$ stackit alpha vpc update xxx --name vpc-new",
+			),
+			examples.NewExample(
+				`Update a vpc with ID "xxx" to new description "updated vpc"`,
+				`$ stackit alpha vpc update xxx --description "updated vpc"`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

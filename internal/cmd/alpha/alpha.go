@@ -9,6 +9,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -17,8 +18,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Short: "Contains alpha STACKIT CLI commands",
 		Long: fmt.Sprintf("%s\n%s",
 			"Contains alpha STACKIT CLI commands.",
-			"The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes."),
+			"The commands under this group are still in an alpha state, and functionality may be incomplete or have breaking changes."),
 		Args: args.NoArgs,
+		Run:  utils.CmdHelp,
 		Example: examples.Build(
 			examples.NewExample(
 				"See the currently available alpha commands",

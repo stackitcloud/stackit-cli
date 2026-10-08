@@ -210,7 +210,7 @@ func TestOutputResult(t *testing.T) {
 		{
 			name: "empty vpc response",
 			args: args{
-				vpcLabel: testLabels,
+				vpcLabel: testVpcId,
 				resp:     &iaas.VPC{},
 			},
 		},

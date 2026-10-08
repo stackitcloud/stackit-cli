@@ -13,8 +13,11 @@ stackit alpha vpc update VPC_ID [flags]
 ### Examples
 
 ```
-  Delete a vpc with ID "xxx"
-  $ stackit alpha vpc delete xxx
+  Update a vpc with ID "xxx" to new name "vpc-new"
+  $ stackit alpha vpc update xxx --name vpc-new
+
+  Update a vpc with ID "xxx" to new description "updated vpc"
+  $ stackit alpha vpc update xxx --description "updated vpc"
 ```
 
 ### Options

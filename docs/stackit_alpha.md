@@ -5,7 +5,11 @@ Contains alpha STACKIT CLI commands
 ### Synopsis
 
 Contains alpha STACKIT CLI commands.
-The commands under this group are still in a beta state, and functionality may be incomplete or have breaking changes.
+The commands under this group are still in an alpha state, and functionality may be incomplete or have breaking changes.
+
+```
+stackit alpha [flags]
+```
 
 ### Examples
 
