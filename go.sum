@@ -642,8 +642,8 @@ github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.3.1 h1:FZJLUhHVrlrfFn
 github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.3.1/go.mod h1:P1HFWSmuy2i1WA0PhcDfGsa0CRcbGTE+wDb1iEAL8/E=
 github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.12.2 h1:oXuBETy/UZ3T8XxnZM2rfKVPxOxiZhNdz5ojn8dqMFo=
 github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.12.2/go.mod h1:/a74NLBtvdS0Z2jrC4AvZCa+rcJDIhOOBkjM5y37eO4=
-github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.9.2 h1:FvT1SDs4Q8MTNwKERqMUgvXAyYwv/MQTAGfZAxcDfQo=
-github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.9.2/go.mod h1:HNLjAqJrfBYfK/DT7Nrwh6LkArq6bn/ri+kgps3skjc=
+github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.10.1 h1:7zNpG0O+2gJC22ZfV1lX+EPwT8DGnnlTEMjMN22y80w=
+github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.10.1/go.mod h1:HAQToFb4LrI6jdOdOowApI3KLF3D0KzE9ne0Lty4wkw=
 github.com/stackitcloud/stackit-sdk-go/services/observability v0.25.2 h1:fFb8inhRUgcmdVGHrOG59HKUnmENwwwq678895XgL1Q=
 github.com/stackitcloud/stackit-sdk-go/services/observability v0.25.2/go.mod h1:OAR5GjprwOgXmCIbZTP8ISJ4CmPrCW0zY0phg06pIps=
 github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.3.1 h1:xVv2Z/ddBJaY65dfGMOn5pC8OAENOpO2fnKp7nuH5Lo=
