@@ -12,11 +12,13 @@ import (
 )
 
 var (
-	testOrgId = uuid.NewString()
+	testOrgId    = uuid.NewString()
+	testFolderId = uuid.NewString()
 )
 
 const (
-	testOrgName = "organization"
+	testOrgName    = "organization"
+	testFolderName = "folder"
 )
 
 type resourceManagerClientMocked struct {
@@ -24,6 +26,8 @@ type resourceManagerClientMocked struct {
 	getOrganizationResp  *resourcemanager.OrganizationResponse
 	getProjectFails      bool
 	getProjectResp       *resourcemanager.GetProjectResponse
+	getFolderFails       bool
+	getFolderResp        *resourcemanager.GetFolderDetailsResponse
 }
 
 func (s *resourceManagerClientMocked) newMock() resourcemanager.DefaultAPI {
@@ -39,6 +43,12 @@ func (s *resourceManagerClientMocked) newMock() resourcemanager.DefaultAPI {
 				return nil, fmt.Errorf("could not get project")
 			}
 			return s.getProjectResp, nil
+		}),
+		GetFolderDetailsExecuteMock: utils.Ptr(func(_ resourcemanager.ApiGetFolderDetailsRequest) (*resourcemanager.GetFolderDetailsResponse, error) {
+			if s.getFolderFails {
+				return nil, fmt.Errorf("could not get folder")
+			}
+			return s.getFolderResp, nil
 		}),
 	}
 }
@@ -122,6 +132,54 @@ func TestGetProjectName(t *testing.T) {
 			}
 
 			output, err := GetProjectName(context.Background(), client.newMock(), testOrgId)
+
+			if tt.isValid && err != nil {
+				t.Errorf("failed on valid input")
+			}
+			if !tt.isValid && err == nil {
+				t.Errorf("did not fail on invalid input")
+			}
+			if !tt.isValid {
+				return
+			}
+			if output != tt.expectedOutput {
+				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
+			}
+		})
+	}
+}
+
+func TestGetFolderName(t *testing.T) {
+	tests := []struct {
+		description    string
+		getFolderFails bool
+		getFolderResp  *resourcemanager.GetFolderDetailsResponse
+		isValid        bool
+		expectedOutput string
+	}{
+		{
+			description: "base",
+			getFolderResp: &resourcemanager.GetFolderDetailsResponse{
+				Name: testFolderName,
+			},
+			isValid:        true,
+			expectedOutput: testFolderName,
+		},
+		{
+			description:    "get organization fails",
+			getFolderFails: true,
+			isValid:        false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			client := &resourceManagerClientMocked{
+				getFolderFails: tt.getFolderFails,
+				getFolderResp:  tt.getFolderResp,
+			}
+
+			output, err := GetFolderName(context.Background(), client.newMock(), testFolderId)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
