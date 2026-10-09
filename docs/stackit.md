@@ -28,6 +28,7 @@ stackit [flags]
 
 * [stackit affinity-group](./stackit_affinity-group.md)	 - Manage server affinity groups
 * [stackit ai-model-experiments](./stackit_ai-model-experiments.md)	 - Provides functionality for AI Model Experiments
+* [stackit alpha](./stackit_alpha.md)	 - Contains alpha STACKIT CLI commands
 * [stackit auth](./stackit_auth.md)	 - Authenticates the STACKIT CLI
 * [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
 * [stackit config](./stackit_config.md)	 - Provides functionality for CLI configuration options
@@ -58,6 +59,7 @@ stackit [flags]
 * [stackit security-group](./stackit_security-group.md)	 - Manage security groups
 * [stackit server](./stackit_server.md)	 - Provides functionality for servers
 * [stackit service-account](./stackit_service-account.md)	 - Provides functionality for service accounts
+* [stackit sfs](./stackit_sfs.md)	 - Provides functionality for SFS (STACKIT File Storage)
 * [stackit ske](./stackit_ske.md)	 - Provides functionality for SKE
 * [stackit sqlserverflex](./stackit_sqlserverflex.md)	 - Provides functionality for SQLServer Flex
 * [stackit valkey](./stackit_valkey.md)	 - Provides functionality for Key Value Store (valkey)
