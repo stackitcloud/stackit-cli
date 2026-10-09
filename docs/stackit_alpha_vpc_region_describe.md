@@ -1,19 +1,30 @@
-## stackit alpha vpc
+## stackit alpha vpc region describe
 
-Manages vpcs
+Describes a regional configuration for a VPC
 
 ### Synopsis
 
-Manages the lifecycle of vpcs.
+Describes a regional configuration for a VPC.
 
 ```
-stackit alpha vpc [flags]
+stackit alpha vpc region describe [flags]
+```
+
+### Examples
+
+```
+  Describe the regional configuration "eu02" for a VPC with ID "xxx"
+  $ stackit alpha vpc region describe --vpc-id xxx --region eu02
+
+  Describe a regional configuration in JSON format, using the configured project and region
+  $ stackit alpha vpc region describe --vpc-id xxx --output-format json
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit alpha vpc"
+  -h, --help            Help for "stackit alpha vpc region describe"
+      --vpc-id string   VPC ID
 ```
 
 ### Options inherited from parent commands
@@ -29,11 +40,5 @@ stackit alpha vpc [flags]
 
 ### SEE ALSO
 
-* [stackit alpha](./stackit_alpha.md)	 - Contains alpha STACKIT CLI commands
-* [stackit alpha vpc create](./stackit_alpha_vpc_create.md)	 - Creates a VPC
-* [stackit alpha vpc delete](./stackit_alpha_vpc_delete.md)	 - Deletes a VPC
-* [stackit alpha vpc describe](./stackit_alpha_vpc_describe.md)	 - Shows details of a VPC
-* [stackit alpha vpc list](./stackit_alpha_vpc_list.md)	 - Lists all VPC of a project
 * [stackit alpha vpc region](./stackit_alpha_vpc_region.md)	 - Manages regional configurations of a VPC
-* [stackit alpha vpc update](./stackit_alpha_vpc_update.md)	 - Updates a VPC
 
