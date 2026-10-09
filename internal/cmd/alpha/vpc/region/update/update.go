@@ -111,7 +111,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateVPCRegionRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient iaas.DefaultAPI) iaas.ApiUpdateVPCRegionRequest {
 	payload := iaas.UpdateVPCRegionPayload{
 		Ipv4: &iaas.RegionalVPCIPv4{
 			DefaultNameservers: model.IPv4DefaultNameservers,

@@ -123,6 +123,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiDeleteVPCRegionRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient iaas.DefaultAPI) iaas.ApiDeleteVPCRegionRequest {
 	return apiClient.DefaultAPI.DeleteVPCRegion(ctx, model.ProjectId, model.VpcId, model.Region)
 }

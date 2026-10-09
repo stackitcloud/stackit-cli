@@ -101,7 +101,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetVPCRegionRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient iaas.DefaultAPI) iaas.ApiGetVPCRegionRequest {
 	return apiClient.DefaultAPI.GetVPCRegion(ctx, model.ProjectId, model.VpcId, model.Region)
 }
 

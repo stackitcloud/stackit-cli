@@ -101,7 +101,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListVPCRegionsRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient iaas.DefaultAPI) iaas.ApiListVPCRegionsRequest {
 	return apiClient.DefaultAPI.ListVPCRegions(ctx, model.ProjectId, model.VpcId)
 }
 
@@ -116,7 +116,7 @@ func outputResult(p *print.Printer, outputFormat, vpcLabel string, resp *iaas.Re
 			return nil
 		}
 
-		regions := make([]string, 0, len(resp.Regions))
+		regionIds := slices.Sorted(maps.Keys(resp.Regions))
 		for region := range resp.Regions {
 			regions = append(regions, region)
 		}

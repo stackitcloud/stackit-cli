@@ -169,7 +169,7 @@ func TestOutputResult(t *testing.T) {
 		},
 		{
 			name:   "json",
-			format: "json",
+			format: print.JSONOutputFormat,
 			resp: &iaas.RegionalVPC{
 				Status: new("CREATED"),
 			},
@@ -177,7 +177,7 @@ func TestOutputResult(t *testing.T) {
 		},
 		{
 			name:   "yaml",
-			format: "yaml",
+			format: print.YAMLOutputFormat,
 			resp: &iaas.RegionalVPC{
 				Status: new("CREATED"),
 			},
