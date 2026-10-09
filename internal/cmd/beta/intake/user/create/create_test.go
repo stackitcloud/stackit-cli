@@ -152,7 +152,10 @@ func TestParseInput(t *testing.T) {
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, passwordFlag)
 			}),
-			isValid: false,
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Password = nil
+			}),
 		},
 		{
 			description: "required fields only",

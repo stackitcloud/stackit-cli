@@ -16,8 +16,11 @@ stackit beta intake user update USER_ID [flags]
   Update the display name of an Intake User
   $ stackit beta intake user update xxx --intake-id yyy --display-name "new-user-name"
 
-  Update the password and description for an Intake User
-  $ stackit beta intake user update xxx --intake-id yyy --password "NewSecret123\!" --description "Updated description"
+  Update the password interactively for an Intake User
+  $ stackit beta intake user update xxx --intake-id yyy --password
+
+  Update the password and description for an Intake User from a file
+  $ stackit beta intake user update xxx --intake-id yyy --password @./secret.txt --description "Updated description"
 ```
 
 ### Options
@@ -28,7 +31,7 @@ stackit beta intake user update USER_ID [flags]
   -h, --help                    Help for "stackit beta intake user update"
       --intake-id string        Intake ID
       --labels stringToString   Labels in key=value format, separated by commas. Example: --labels "key1=value1,key2=value2". (default [])
-      --password string         Password. Can be a string (deprecated) or a file path, if prefixed with '@' (example: @./secret.txt). Will be read from stdin when empty. Must contain lower, upper, number, and special characters (min 12 chars)
+      --password string         Password. Can be a string (deprecated) or a file path, if prefixed with '@' (example: @./secret.txt). Will be read from stdin when empty.
       --type string             Type of user. One of 'intake' or 'dead-letter'
 ```
 
