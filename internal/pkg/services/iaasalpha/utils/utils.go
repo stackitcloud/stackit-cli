@@ -22,3 +22,21 @@ func GetVPCName(ctx context.Context, apiClient iaas.DefaultAPI, projectId, vpcId
 	}
 	return resp.Name, nil
 }
+
+func GetVPCNetworkRangePrefix(ctx context.Context, apiClient iaas.DefaultAPI, projectId, vpcId, region, networkRangeId string) (string, error) {
+	resp, err := apiClient.GetVPCNetworkRange(ctx, projectId, vpcId, region, networkRangeId).Execute()
+	if err != nil {
+		return "", fmt.Errorf("get vpc network range: %w", err)
+	}
+
+	if resp != nil {
+		if resp.VPCNetworkRangeIPv4 != nil {
+			return resp.VPCNetworkRangeIPv4.Prefix, nil
+		}
+		if resp.VPCNetworkRangeIPv6 != nil {
+			return resp.VPCNetworkRangeIPv6.Prefix, nil
+		}
+	}
+
+	return "", ErrResponseNil
+}

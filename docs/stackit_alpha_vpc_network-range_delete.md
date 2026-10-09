@@ -1,19 +1,27 @@
-## stackit alpha vpc
+## stackit alpha vpc network-range delete
 
-Manages vpcs
+Deletes a regional network range in a VPC
 
 ### Synopsis
 
-Manages the lifecycle of vpcs.
+Deletes a regional network range in a VPC.
 
 ```
-stackit alpha vpc [flags]
+stackit alpha vpc network-range delete NETWORK_RANGE_ID [flags]
+```
+
+### Examples
+
+```
+  Delete network range with id "xxx" in a VPC with ID "yyy"
+  $ stackit alpha vpc network-range delete xxx --vpc-id yyy
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit alpha vpc"
+  -h, --help            Help for "stackit alpha vpc network-range delete"
+      --vpc-id string   VPC ID
 ```
 
 ### Options inherited from parent commands
@@ -29,11 +37,5 @@ stackit alpha vpc [flags]
 
 ### SEE ALSO
 
-* [stackit alpha](./stackit_alpha.md)	 - Contains alpha STACKIT CLI commands
-* [stackit alpha vpc create](./stackit_alpha_vpc_create.md)	 - Creates a VPC
-* [stackit alpha vpc delete](./stackit_alpha_vpc_delete.md)	 - Deletes a VPC
-* [stackit alpha vpc describe](./stackit_alpha_vpc_describe.md)	 - Shows details of a VPC
-* [stackit alpha vpc list](./stackit_alpha_vpc_list.md)	 - Lists all VPC of a project
 * [stackit alpha vpc network-range](./stackit_alpha_vpc_network-range.md)	 - Provides functionality for network ranges in VPC
-* [stackit alpha vpc update](./stackit_alpha_vpc_update.md)	 - Updates a VPC
 

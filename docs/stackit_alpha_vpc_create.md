@@ -23,7 +23,7 @@ stackit alpha vpc create [flags]
 ```
       --description string      Description of the VPC
   -h, --help                    Help for "stackit alpha vpc create"
-      --labels stringToString   Comma separated list of labels of the VPC (default [])
+      --labels stringToString   Labels are key-value string pairs which can be attached to a vpc. E.g. '--labels key1=value1,key2=value2,...' (default [])
       --name string             Name of the VPC
 ```
 
