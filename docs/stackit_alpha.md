@@ -17,7 +17,7 @@ stackit alpha [flags]
   See the currently available alpha commands
   $ stackit alpha --help
 
-  Execute a alpha command
+  Execute an alpha command
   $ stackit alpha MY_COMMAND
 ```
 
@@ -42,4 +42,5 @@ stackit alpha [flags]
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
 * [stackit alpha sca](./stackit_alpha_sca.md)	 - Provides functionality for SCA
+* [stackit alpha vpc](./stackit_alpha_vpc.md)	 - Manages vpcs
 

@@ -49,6 +49,7 @@ const (
 	serviceEnablementCustomEndpointFlag = "service-enablement-custom-endpoint"
 	skeCustomEndpointFlag               = "ske-custom-endpoint"
 	sqlServerFlexCustomEndpointFlag     = "sqlserverflex-custom-endpoint"
+	iaasAlphaCustomEndpointFlag         = "iaas-alpha-custom-endpoint"
 	iaasCustomEndpointFlag              = "iaas-custom-endpoint"
 	tokenCustomEndpointFlag             = "token-custom-endpoint"
 	intakeCustomEndpointFlag            = "intake-custom-endpoint"
@@ -172,6 +173,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(runCommandCustomEndpointFlag, "", "Run Command API base URL, used in calls to this API")
 	cmd.Flags().String(skeCustomEndpointFlag, "", "SKE API base URL, used in calls to this API")
 	cmd.Flags().String(sqlServerFlexCustomEndpointFlag, "", "SQLServer Flex API base URL, used in calls to this API")
+	cmd.Flags().String(iaasAlphaCustomEndpointFlag, "", "IaaS Alpha API base URL, used in calls to this API")
 	cmd.Flags().String(iaasCustomEndpointFlag, "", "IaaS API base URL, used in calls to this API")
 	cmd.Flags().String(tokenCustomEndpointFlag, "", "Custom token endpoint of the Service Account API, which is used to request access tokens when the service account authentication is activated. Not relevant for user authentication.")
 	cmd.Flags().String(intakeCustomEndpointFlag, "", "Intake API base URL, used in calls to this API")
@@ -239,6 +241,8 @@ func configureFlags(cmd *cobra.Command) {
 	err = viper.BindPFlag(config.SKECustomEndpointKey, cmd.Flags().Lookup(skeCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.SQLServerFlexCustomEndpointKey, cmd.Flags().Lookup(sqlServerFlexCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.IaaSAlphaCustomEndpointKey, cmd.Flags().Lookup(iaasAlphaCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.IaaSCustomEndpointKey, cmd.Flags().Lookup(iaasCustomEndpointFlag))
 	cobra.CheckErr(err)

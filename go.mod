@@ -24,13 +24,13 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.23.1
 	github.com/stackitcloud/stackit-sdk-go/services/edge v0.13.2
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.14.1
-	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.14.1
+	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.14.5
 	github.com/stackitcloud/stackit-sdk-go/services/intake v0.11.2
 	github.com/stackitcloud/stackit-sdk-go/services/logs v0.10.2
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.12.2
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.3.1
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.15.0
-	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.24.2
+	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.26.0
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.10.2
 	github.com/stackitcloud/stackit-sdk-go/services/sca v0.1.0
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.19.1
@@ -272,7 +272,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.15.2
 	github.com/stackitcloud/stackit-sdk-go/services/logme v1.3.1
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.3.1
-	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.9.2
+	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.10.1
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.25.2
 	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.3.1
 	github.com/stackitcloud/stackit-sdk-go/services/redis v1.4.1
