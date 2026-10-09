@@ -7,6 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/alpha/vpc/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/alpha/vpc/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/alpha/vpc/list"
+	networkRange "github.com/stackitcloud/stackit-cli/internal/cmd/alpha/vpc/network-range"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/alpha/vpc/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
@@ -30,5 +31,6 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(delete.NewCmd(params))
 	cmd.AddCommand(describe.NewCmd(params))
 	cmd.AddCommand(list.NewCmd(params))
+	cmd.AddCommand(networkRange.NewCmd(params))
 	cmd.AddCommand(update.NewCmd(params))
 }
