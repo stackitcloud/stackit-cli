@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+
 	"github.com/stackitcloud/stackit-cli/internal/cmd/alpha/sca"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/alpha/vpc"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
