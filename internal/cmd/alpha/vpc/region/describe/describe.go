@@ -62,7 +62,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				vpcName = ""
 			}
 
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 
 			resp, err := req.Execute()
 			if err != nil {
@@ -102,7 +102,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient iaas.DefaultAPI) iaas.ApiGetVPCRegionRequest {
-	return apiClient.DefaultAPI.GetVPCRegion(ctx, model.ProjectId, model.VpcId, model.Region)
+	return apiClient.GetVPCRegion(ctx, model.ProjectId, model.VpcId, model.Region)
 }
 
 func outputResult(p *print.Printer, outputFormat, region, vpcId, vpcName string, resp *iaas.RegionalVPC) error {

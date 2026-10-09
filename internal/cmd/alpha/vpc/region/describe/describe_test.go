@@ -11,6 +11,7 @@ import (
 	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2alpha1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 )
@@ -99,21 +100,33 @@ func TestParseInput(t *testing.T) {
 
 func TestBuildRequest(t *testing.T) {
 	ctx := context.Background()
-	client := &iaas.APIClient{
-		DefaultAPI: &iaas.DefaultAPIService{},
-	}
-	model := &inputModel{
-		GlobalFlagModel: &globalflags.GlobalFlagModel{
-			ProjectId: testProjectId,
-			Region:    "eu02",
+	client := &iaas.DefaultAPIServiceMock{}
+
+	tests := []struct {
+		description string
+		inputModel  *inputModel
+		want        iaas.ApiGetVPCRegionRequest
+	}{
+		{
+			description: "default",
+			inputModel: &inputModel{
+				GlobalFlagModel: &globalflags.GlobalFlagModel{
+					ProjectId: testProjectId,
+					Region:    "eu02",
+				},
+				VpcId: testVpcId,
+			},
+			want: client.GetVPCRegion(ctx, testProjectId, testVpcId, "eu02"),
 		},
-		VpcId: testVpcId,
 	}
 
-	want := client.DefaultAPI.GetVPCRegion(ctx, testProjectId, testVpcId, "eu02")
-	got := buildRequest(ctx, model, client)
-	if diff := cmp.Diff(want, got, cmp.AllowUnexported(want), cmpopts.EquateComparable(ctx, iaas.DefaultAPIService{})); diff != "" {
-		t.Fatalf("request mismatch (-want +got): %s", diff)
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			got := buildRequest(ctx, tt.inputModel, client)
+			if diff := cmp.Diff(tt.want, got, cmp.AllowUnexported(tt.want), cmpopts.EquateComparable(ctx, iaas.DefaultAPIService{})); diff != "" {
+				t.Fatalf("request mismatch (-want +got): %s", diff)
+			}
+		})
 	}
 }
 
@@ -150,13 +163,13 @@ func TestOutputResult(t *testing.T) {
 		},
 		{
 			name:   "json",
-			format: "json",
+			format: print.JSONOutputFormat,
 			resp:   resp,
 			want:   []string{`"status": "CREATED"`, `"defaultNameservers"`},
 		},
 		{
 			name:   "yaml",
-			format: "yaml",
+			format: print.YAMLOutputFormat,
 			resp:   resp,
 			want:   []string{"status: CREATED", "defaultNameservers:"},
 		},

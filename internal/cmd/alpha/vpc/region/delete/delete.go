@@ -68,7 +68,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 
 			if err := req.Execute(); err != nil {
 				return fmt.Errorf("delete vpc region: %w", err)
@@ -124,5 +124,5 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient iaas.DefaultAPI) iaas.ApiDeleteVPCRegionRequest {
-	return apiClient.DefaultAPI.DeleteVPCRegion(ctx, model.ProjectId, model.VpcId, model.Region)
+	return apiClient.DeleteVPCRegion(ctx, model.ProjectId, model.VpcId, model.Region)
 }

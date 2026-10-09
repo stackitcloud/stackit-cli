@@ -109,7 +109,7 @@ func TestBuildRequest(t *testing.T) {
 	}
 
 	want := client.DefaultAPI.DeleteVPCRegion(ctx, testProjectId, testVpcId, "eu02")
-	got := buildRequest(ctx, model, client)
+	got := buildRequest(ctx, model, client.DefaultAPI)
 	if diff := cmp.Diff(want, got, cmp.AllowUnexported(want), cmpopts.EquateComparable(ctx, iaas.DefaultAPIService{})); diff != "" {
 		t.Fatalf("request mismatch (-want +got): %s", diff)
 	}

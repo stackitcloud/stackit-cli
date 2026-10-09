@@ -70,7 +70,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 
 			resp, err := req.Execute()
 			if err != nil {
@@ -118,7 +118,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient iaas.Default
 		},
 	}
 
-	return apiClient.DefaultAPI.UpdateVPCRegion(ctx, model.ProjectId, model.VpcId, model.Region).UpdateVPCRegionPayload(payload)
+	return apiClient.UpdateVPCRegion(ctx, model.ProjectId, model.VpcId, model.Region).UpdateVPCRegionPayload(payload)
 }
 
 func outputResult(p *print.Printer, outputFormat, region, vpcLabel string, resp *iaas.RegionalVPC) error {

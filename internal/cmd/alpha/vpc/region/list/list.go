@@ -3,6 +3,7 @@ package list
 import (
 	"context"
 	"fmt"
+	"maps"
 	"slices"
 	"strings"
 
@@ -65,7 +66,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				vpcLabel = model.VpcId
 			}
 
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 
 			resp, err := req.Execute()
 			if err != nil {
@@ -102,7 +103,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient iaas.DefaultAPI) iaas.ApiListVPCRegionsRequest {
-	return apiClient.DefaultAPI.ListVPCRegions(ctx, model.ProjectId, model.VpcId)
+	return apiClient.ListVPCRegions(ctx, model.ProjectId, model.VpcId)
 }
 
 func outputResult(p *print.Printer, outputFormat, vpcLabel string, resp *iaas.RegionalVPCList) error {
@@ -117,15 +118,10 @@ func outputResult(p *print.Printer, outputFormat, vpcLabel string, resp *iaas.Re
 		}
 
 		regionIds := slices.Sorted(maps.Keys(resp.Regions))
-		for region := range resp.Regions {
-			regions = append(regions, region)
-		}
-
-		slices.Sort(regions)
 
 		table := tables.NewTable()
 		table.SetHeader("REGION", "STATUS", "DNS NAME SERVERS")
-		for _, region := range regions {
+		for _, region := range regionIds {
 			regionConfig := resp.Regions[region]
 			var dnsNames string
 			if ipv4 := regionConfig.Ipv4; ipv4 != nil {

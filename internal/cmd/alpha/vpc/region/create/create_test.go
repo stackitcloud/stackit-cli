@@ -11,6 +11,7 @@ import (
 	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2alpha1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 )
@@ -113,33 +114,78 @@ func TestParseInput(t *testing.T) {
 }
 
 func TestBuildRequest(t *testing.T) {
-	ctx := context.Background()
-	client := &iaas.APIClient{
-		DefaultAPI: &iaas.DefaultAPIService{},
-	}
-
-	for _, nameservers := range [][]string{nil, {}, {"8.8.8.8", "8.8.4.4"}} {
+	buildRequestInputModelDefault := func(opts ...func(m *inputModel)) *inputModel {
 		model := &inputModel{
 			GlobalFlagModel: &globalflags.GlobalFlagModel{
 				ProjectId: testProjectId,
 				Region:    "eu02",
 			},
 			VpcId:                  testVpcId,
-			IPv4DefaultNameservers: nameservers,
+			IPv4DefaultNameservers: []string{"8.8.8.8", "8.8.4.4"},
 		}
 
-		payload := iaas.CreateVPCRegionPayload{}
-		if nameservers != nil {
-			payload.Ipv4 = &iaas.RegionalVPCIPv4{
-				DefaultNameservers: nameservers,
+		for _, opt := range opts {
+			opt(model)
+		}
+
+		return model
+	}
+
+	buildRequestPayloadDefault := func(opts ...func(p *iaas.CreateVPCRegionPayload)) iaas.CreateVPCRegionPayload {
+		payload := iaas.CreateVPCRegionPayload{
+			Ipv4: &iaas.RegionalVPCIPv4{
+				DefaultNameservers: []string{"8.8.8.8", "8.8.4.4"},
+			},
+		}
+
+		for _, opt := range opts {
+			opt(&payload)
+		}
+
+		return payload
+	}
+
+	tests := []struct {
+		description string
+		inputModel  *inputModel
+		wantPayload iaas.CreateVPCRegionPayload
+	}{
+		{
+			description: "default",
+			inputModel:  buildRequestInputModelDefault(),
+			wantPayload: buildRequestPayloadDefault(),
+		},
+		{
+			description: "nameservers is empty",
+			inputModel: buildRequestInputModelDefault(func(m *inputModel) {
+				m.IPv4DefaultNameservers = []string{}
+			}),
+			wantPayload: buildRequestPayloadDefault(func(p *iaas.CreateVPCRegionPayload) {
+				p.Ipv4.DefaultNameservers = []string{}
+			}),
+		},
+		{
+			description: "nameservers is nil",
+			inputModel: buildRequestInputModelDefault(func(m *inputModel) {
+				m.IPv4DefaultNameservers = nil
+			}),
+			wantPayload: buildRequestPayloadDefault(func(p *iaas.CreateVPCRegionPayload) {
+				p.Ipv4 = nil
+			}),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			ctx := context.Background()
+			client := &iaas.DefaultAPIServiceMock{}
+
+			want := client.CreateVPCRegion(ctx, testProjectId, testVpcId, "eu02").CreateVPCRegionPayload(tt.wantPayload)
+			got := buildRequest(ctx, tt.inputModel, client)
+			if diff := cmp.Diff(want, got, cmp.AllowUnexported(want), cmpopts.EquateComparable(ctx, iaas.DefaultAPIService{})); diff != "" {
+				t.Fatalf("request mismatch (-want +got): %s", diff)
 			}
-		}
-
-		want := client.DefaultAPI.CreateVPCRegion(ctx, testProjectId, testVpcId, "eu02").CreateVPCRegionPayload(payload)
-		got := buildRequest(ctx, model, client)
-		if diff := cmp.Diff(want, got, cmp.AllowUnexported(want), cmpopts.EquateComparable(ctx, iaas.DefaultAPIService{})); diff != "" {
-			t.Fatalf("request mismatch (-want +got): %s", diff)
-		}
+		})
 	}
 }
 

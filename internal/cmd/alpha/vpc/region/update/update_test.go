@@ -11,6 +11,7 @@ import (
 	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2alpha1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 )
@@ -115,32 +116,69 @@ func TestParseInput(t *testing.T) {
 }
 
 func TestBuildRequest(t *testing.T) {
-	ctx := context.Background()
-	client := &iaas.APIClient{
-		DefaultAPI: &iaas.DefaultAPIService{},
-	}
-
-	for _, nameservers := range [][]string{{}, {"8.8.8.8", "8.8.4.4"}} {
+	buildRequestInputModelDefault := func(opts ...func(m *inputModel)) *inputModel {
 		model := &inputModel{
 			GlobalFlagModel: &globalflags.GlobalFlagModel{
 				ProjectId: testProjectId,
 				Region:    "eu02",
 			},
 			VpcId:                  testVpcId,
-			IPv4DefaultNameservers: nameservers,
+			IPv4DefaultNameservers: []string{"8.8.8.8", "8.8.4.4"},
 		}
 
+		for _, opt := range opts {
+			opt(model)
+		}
+
+		return model
+	}
+
+	buildRequestPayloadDefault := func(opts ...func(p *iaas.UpdateVPCRegionPayload)) iaas.UpdateVPCRegionPayload {
 		payload := iaas.UpdateVPCRegionPayload{
 			Ipv4: &iaas.RegionalVPCIPv4{
-				DefaultNameservers: nameservers,
+				DefaultNameservers: []string{"8.8.8.8", "8.8.4.4"},
 			},
 		}
 
-		want := client.DefaultAPI.UpdateVPCRegion(ctx, testProjectId, testVpcId, "eu02").UpdateVPCRegionPayload(payload)
-		got := buildRequest(ctx, model, client)
-		if diff := cmp.Diff(want, got, cmp.AllowUnexported(want), cmpopts.EquateComparable(ctx, iaas.DefaultAPIService{})); diff != "" {
-			t.Fatalf("request mismatch (-want +got): %s", diff)
+		for _, opt := range opts {
+			opt(&payload)
 		}
+
+		return payload
+	}
+
+	tests := []struct {
+		description string
+		inputModel  *inputModel
+		wantPayload iaas.UpdateVPCRegionPayload
+	}{
+		{
+			description: "default",
+			inputModel:  buildRequestInputModelDefault(),
+			wantPayload: buildRequestPayloadDefault(),
+		},
+		{
+			description: "nameservers is empty",
+			inputModel: buildRequestInputModelDefault(func(m *inputModel) {
+				m.IPv4DefaultNameservers = []string{}
+			}),
+			wantPayload: buildRequestPayloadDefault(func(p *iaas.UpdateVPCRegionPayload) {
+				p.Ipv4.DefaultNameservers = []string{}
+			}),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			ctx := context.Background()
+			client := &iaas.DefaultAPIServiceMock{}
+
+			want := client.UpdateVPCRegion(ctx, testProjectId, testVpcId, "eu02").UpdateVPCRegionPayload(tt.wantPayload)
+			got := buildRequest(ctx, tt.inputModel, client)
+			if diff := cmp.Diff(want, got, cmp.AllowUnexported(want), cmpopts.EquateComparable(ctx, iaas.DefaultAPIService{})); diff != "" {
+				t.Fatalf("request mismatch (-want +got): %s", diff)
+			}
+		})
 	}
 }
 
@@ -163,7 +201,7 @@ func TestOutputResult(t *testing.T) {
 		},
 		{
 			name:   "json",
-			format: "json",
+			format: print.JSONOutputFormat,
 			resp: &iaas.RegionalVPC{
 				Status: new("UPDATED"),
 			},
@@ -171,7 +209,7 @@ func TestOutputResult(t *testing.T) {
 		},
 		{
 			name:   "yaml",
-			format: "yaml",
+			format: print.YAMLOutputFormat,
 			resp: &iaas.RegionalVPC{
 				Status: new("UPDATED"),
 			},
