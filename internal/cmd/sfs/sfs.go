@@ -1,0 +1,38 @@
+package sfs
+
+import (
+	exportpolicy "github.com/stackitcloud/stackit-cli/internal/cmd/sfs/export-policy"
+	performanceclass "github.com/stackitcloud/stackit-cli/internal/cmd/sfs/performance-class"
+	projectlock "github.com/stackitcloud/stackit-cli/internal/cmd/sfs/project-lock"
+	resourcepool "github.com/stackitcloud/stackit-cli/internal/cmd/sfs/resource-pool"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/sfs/share"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/sfs/snapshot"
+	snapshotpolicy "github.com/stackitcloud/stackit-cli/internal/cmd/sfs/snapshot-policy"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+
+	"github.com/spf13/cobra"
+)
+
+func NewCmd(params *types.CmdParams) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "sfs",
+		Short: "Provides functionality for SFS (STACKIT File Storage)",
+		Long:  "Provides functionality for SFS (STACKIT File Storage).",
+		Args:  args.NoArgs,
+		Run:   utils.CmdHelp,
+	}
+	addSubcommands(cmd, params)
+	return cmd
+}
+
+func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
+	cmd.AddCommand(resourcepool.NewCmd(params))
+	cmd.AddCommand(share.NewCmd(params))
+	cmd.AddCommand(exportpolicy.NewCmd(params))
+	cmd.AddCommand(snapshot.NewCmd(params))
+	cmd.AddCommand(snapshotpolicy.NewCmd(params))
+	cmd.AddCommand(performanceclass.NewCmd(params))
+	cmd.AddCommand(projectlock.NewCmd(params))
+}

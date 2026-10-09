@@ -74,6 +74,7 @@ Below you can find a list of the STACKIT services already available in the CLI (
 | Authorization                      | `project`, `organization`                                                                                                                                                                           | :white_check_mark:        |
 | DNS                                | `dns`                                                                                                                                                                                               | :white_check_mark:        |
 | Edge Cloud                         | `beta edge-cloud`                                                                                                                                                                                   | :white_check_mark: (beta) |
+| File Storage (SFS)                 | `sfs`                                                                                                                                                                                               | :white_check_mark:        |
 | Git                                | `git`                                                                                                                                                                                               | :white_check_mark:        |
 | Infrastructure as a Service (IaaS) | `affinity-group` <br/> `image` <br/> `key-pair` <br/> `network` <br/> `network-area` <br/> `network-interface` <br/> `public-ip` <br/> `quota` <br/> `security-group` <br/> `server` <br/> `volume` | :white_check_mark:        |
 | Intake                             | `beta intake`                                                                                                                                                                                       | :white_check_mark: (beta) |
@@ -95,7 +96,6 @@ Below you can find a list of the STACKIT services already available in the CLI (
 | Server Command (Run Command)       | `server command`                                                                                                                                                                                    | :white_check_mark:        |
 | Service Account                    | `service-account`                                                                                                                                                                                   | :white_check_mark:        |
 | SQLServer Flex                     | `sqlserverflex`                                                                                                                                                                                     | :white_check_mark:        |
-| File Storage (SFS)                 | `beta sfs`                                                                                                                                                                                          | :white_check_mark: (beta) |
 
 ## Authentication
 
