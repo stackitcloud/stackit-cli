@@ -58,6 +58,7 @@ stackit config unset [flags]
       --region                                              Region
       --resource-manager-custom-endpoint                    Resource Manager API base URL. If unset, uses the default base URL
       --runcommand-custom-endpoint                          Server Command base URL. If unset, uses the default base URL
+      --sca-custom-endpoint                                 SCA API base URL. If unset, uses the default base URL
       --secrets-manager-custom-endpoint                     Secrets Manager API base URL. If unset, uses the default base URL
       --server-osupdate-custom-endpoint                     Server Update Management base URL. If unset, uses the default base URL
       --serverbackup-custom-endpoint                        Server Backup base URL. If unset, uses the default base URL
