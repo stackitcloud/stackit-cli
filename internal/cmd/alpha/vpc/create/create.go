@@ -87,7 +87,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(nameFlag, "", "Name of the VPC")
 	cmd.Flags().String(descriptionFlag, "", "Description of the VPC")
-	cmd.Flags().StringToString(labelsFlag, nil, "Comma separated list of labels of the VPC")
+	cmd.Flags().StringToString(labelsFlag, nil, "Labels are key-value string pairs which can be attached to a vpc. E.g. '--labels key1=value1,key2=value2,...'")
 
 	err := cmd.MarkFlagRequired(nameFlag)
 	cobra.CheckErr(err)
