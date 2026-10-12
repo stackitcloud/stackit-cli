@@ -34,5 +34,6 @@ stackit alpha vpc routing-table [flags]
 * [stackit alpha vpc routing-table delete](./stackit_alpha_vpc_routing-table_delete.md)	 - Deletes a VPC routing-table
 * [stackit alpha vpc routing-table describe](./stackit_alpha_vpc_routing-table_describe.md)	 - Describes a VPC routing-table
 * [stackit alpha vpc routing-table list](./stackit_alpha_vpc_routing-table_list.md)	 - Lists VPC routing-tables
+* [stackit alpha vpc routing-table static-route](./stackit_alpha_vpc_routing-table_static-route.md)	 - Manages static routes of a VPC routing-table
 * [stackit alpha vpc routing-table update](./stackit_alpha_vpc_routing-table_update.md)	 - Updates a VPC routing-table
 
