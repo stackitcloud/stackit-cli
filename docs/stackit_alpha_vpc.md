@@ -35,5 +35,6 @@ stackit alpha vpc [flags]
 * [stackit alpha vpc describe](./stackit_alpha_vpc_describe.md)	 - Shows details of a VPC
 * [stackit alpha vpc list](./stackit_alpha_vpc_list.md)	 - Lists all VPC of a project
 * [stackit alpha vpc region](./stackit_alpha_vpc_region.md)	 - Manages regional configurations of a VPC
+* [stackit alpha vpc routing-table](./stackit_alpha_vpc_routing-table.md)	 - Manages VPC routing-tables
 * [stackit alpha vpc update](./stackit_alpha_vpc_update.md)	 - Updates a VPC
 
