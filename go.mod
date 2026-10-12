@@ -33,7 +33,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.26.1
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.10.2
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.19.1
-	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.7.1
+	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.7.3
 	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.5.6
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.20.1
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.7.2
