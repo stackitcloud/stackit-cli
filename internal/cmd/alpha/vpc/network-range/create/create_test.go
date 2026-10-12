@@ -2,6 +2,8 @@ package create
 
 import (
 	"context"
+	"maps"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -77,8 +79,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		DefaultPrefixLength: new(testDefaultPrefixLength),
 		MaxPrefixLength:     new(testMaxPrefixLength),
 		MinPrefixLength:     new(testMinPrefixLength),
-		Nameservers:         testNameservers,
-		Labels:              testLabel,
+		Nameservers:         slices.Clone(testNameservers),
+		Labels:              maps.Clone(testLabel),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -101,10 +103,10 @@ func fixturePayload(mods ...func(payload *iaas.CreateVPCNetworkRangePayload)) ia
 			DefaultPrefixLen: new(testDefaultPrefixLength),
 			Description:      new(testDescription),
 			IpVersion:        testIpVersion,
-			Labels:           testLabel,
+			Labels:           maps.Clone(testLabel),
 			MaxPrefixLen:     new(testMaxPrefixLength),
 			MinPrefixLen:     new(testMinPrefixLength),
-			Nameservers:      testNameservers,
+			Nameservers:      slices.Clone(testNameservers),
 			Prefix:           testPrefix,
 		},
 	}
@@ -207,7 +209,7 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request, err := buildRequest(testCtx, tt.model, testClient)
+			request, err := buildRequest(testCtx, tt.model, testClient.DefaultAPI)
 			if err != nil {
 				t.Fatalf("test failed: %v", err)
 			}
@@ -228,6 +230,7 @@ func TestOutputResult(t *testing.T) {
 
 	type args struct {
 		outputFormat string
+		async        bool
 		vpcLabel     string
 		networkRange *iaas.VPCNetworkRange
 	}
@@ -292,7 +295,7 @@ func TestOutputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.vpcLabel, tt.args.networkRange); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.async, tt.args.vpcLabel, tt.args.networkRange); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

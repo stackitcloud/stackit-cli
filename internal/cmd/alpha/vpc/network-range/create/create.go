@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2alpha1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/iaas/v2alpha1api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -15,6 +16,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaasalpha/client"
 	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaasalpha/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 )
 
@@ -92,7 +94,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req, err := buildRequest(ctx, model, apiClient)
+			req, err := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				return err
 			}
@@ -101,7 +103,28 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("create network range: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, vpcLabel, resp)
+			if !model.Async {
+				var networkRangeId string
+				if ipv4 := resp.VPCNetworkRangeIPv4; ipv4 != nil && ipv4.Id != nil {
+					networkRangeId = *ipv4.Id
+				} else if ipv6 := resp.VPCNetworkRangeIPv6; ipv6 != nil && ipv6.Id != nil {
+					networkRangeId = *ipv6.Id
+				} else {
+					return fmt.Errorf("network range ID is missing in API response")
+				}
+
+				err = spinner.Run(params.Printer, "Creating VPC Network range", func() error {
+					resp, err = wait.CreateVPCNetworkRangeWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.VpcId, model.Region, networkRangeId).WaitWithContext(ctx)
+					return err
+				})
+				if err != nil {
+					if err != nil {
+						return fmt.Errorf("wait for network range %q creation: %w", networkRangeId, err)
+					}
+				}
+			}
+
+			return outputResult(params.Printer, model.OutputFormat, model.Async, vpcLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -146,7 +169,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) (iaas.ApiCreateVPCNetworkRangeRequest, error) {
+func buildRequest(ctx context.Context, model *inputModel, apiClient iaas.DefaultAPI) (iaas.ApiCreateVPCNetworkRangeRequest, error) {
 	if model.IpVersion != "ipv4" {
 		return iaas.ApiCreateVPCNetworkRangeRequest{}, fmt.Errorf("unsupported IP version: %q", model.IpVersion)
 	}
@@ -163,10 +186,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 			Labels:           model.Labels,
 		},
 	}
-	return apiClient.DefaultAPI.CreateVPCNetworkRange(ctx, model.ProjectId, model.VpcId, model.Region).CreateVPCNetworkRangePayload(payload), nil
+	return apiClient.CreateVPCNetworkRange(ctx, model.ProjectId, model.VpcId, model.Region).CreateVPCNetworkRangePayload(payload), nil
 }
 
-func outputResult(p *print.Printer, outputFormat, vpcLabel string, networkRange *iaas.VPCNetworkRange) error {
+func outputResult(p *print.Printer, outputFormat string, async bool, vpcLabel string, networkRange *iaas.VPCNetworkRange) error {
 	if networkRange == nil {
 		return fmt.Errorf("create vpc network range response is nil")
 	}
@@ -180,7 +203,12 @@ func outputResult(p *print.Printer, outputFormat, vpcLabel string, networkRange 
 			return fmt.Errorf("network range ID is missing in API response")
 		}
 
-		p.Outputf("Created network range for VPC %q.\nNetwork range ID: %s\n", vpcLabel, networkRangeId)
+		operationState := "Created"
+		if async {
+			operationState = "Triggered creation of"
+		}
+
+		p.Outputf("%s network range for VPC %q.\nNetwork range ID: %s\n", operationState, vpcLabel, networkRangeId)
 		return nil
 	})
 }

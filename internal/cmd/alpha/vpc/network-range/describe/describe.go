@@ -60,7 +60,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("describe network range: %w", err)
@@ -97,8 +97,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetVPCNetworkRangeRequest {
-	return apiClient.DefaultAPI.GetVPCNetworkRange(ctx, model.ProjectId, model.VpcId, model.Region, model.NetworkRangeId)
+func buildRequest(ctx context.Context, model *inputModel, apiClient iaas.DefaultAPI) iaas.ApiGetVPCNetworkRangeRequest {
+	return apiClient.GetVPCNetworkRange(ctx, model.ProjectId, model.VpcId, model.Region, model.NetworkRangeId)
 }
 
 func outputResult(p *print.Printer, outputFormat string, networkRange *iaas.VPCNetworkRange) error {

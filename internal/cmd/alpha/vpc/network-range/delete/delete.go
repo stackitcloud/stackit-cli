@@ -4,18 +4,19 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-
 	iaas "github.com/stackitcloud/stackit-sdk-go/services/iaas/v2alpha1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/iaas/v2alpha1api/wait"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaasalpha/client"
 	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaasalpha/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/spf13/cobra"
@@ -79,14 +80,29 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("delete vpc network range: %w", err)
 			}
 
-			params.Printer.Outputf("Deleted network range %q on VPC %q\n", networkRangeLabel, vpcLabel)
+			// Wait for async operation, if async mode not enabled
+			if !model.Async {
+				err := spinner.Run(params.Printer, "Deleting VPC network range", func() error {
+					_, err = wait.DeleteVPCNetworkRangeWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.VpcId, model.Region, model.NetworkRangeId).WaitWithContext(ctx)
+					return err
+				})
+				if err != nil {
+					return fmt.Errorf("wait for VPC network range deletion: %w", err)
+				}
+			}
 
+			operationState := "Deleted"
+			if model.Async {
+				operationState = "Triggered deletion of"
+			}
+
+			params.Printer.Outputf("%s network range %q on VPC %q\n", operationState, networkRangeLabel, vpcLabel)
 			return nil
 		},
 	}
@@ -117,6 +133,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiDeleteVPCNetworkRangeRequest {
-	return apiClient.DefaultAPI.DeleteVPCNetworkRange(ctx, model.ProjectId, model.VpcId, model.Region, model.NetworkRangeId)
+func buildRequest(ctx context.Context, model *inputModel, apiClient iaas.DefaultAPI) iaas.ApiDeleteVPCNetworkRangeRequest {
+	return apiClient.DeleteVPCNetworkRange(ctx, model.ProjectId, model.VpcId, model.Region, model.NetworkRangeId)
 }
