@@ -70,7 +70,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a route in a routing-table",
-		Long:  "Creates a route in a routing-table.",
+		Long:  "Creates a route in a routing-table within a STACKIT Network Area (SNA).",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample("Create a route with CIDRv4 destination and IPv4 nexthop",
