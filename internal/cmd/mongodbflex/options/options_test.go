@@ -34,31 +34,31 @@ func newAPIClientMock(c *mockSettings) mongodbflex.DefaultAPI {
 			if c.listFlavorsFails {
 				return nil, fmt.Errorf("list flavors failed")
 			}
-			return utils.Ptr(mongodbflex.ListFlavorsResponse{
+			return &mongodbflex.ListFlavorsResponse{
 				Flavors: []mongodbflex.InstanceFlavor{},
-			}), nil
+			}, nil
 		}),
 		ListVersionsExecuteMock: utils.Ptr(func(_ mongodbflex.ApiListVersionsRequest) (*mongodbflex.ListVersionsResponse, error) {
 			c.listVersionsCalled = true
 			if c.listVersionsFails {
 				return nil, fmt.Errorf("list versions failed")
 			}
-			return utils.Ptr(mongodbflex.ListVersionsResponse{
+			return &mongodbflex.ListVersionsResponse{
 				Versions: []string{},
-			}), nil
+			}, nil
 		}),
 		ListStoragesExecuteMock: utils.Ptr(func(_ mongodbflex.ApiListStoragesRequest) (*mongodbflex.ListStoragesResponse, error) {
 			c.listStoragesCalled = true
 			if c.listStoragesFails {
 				return nil, fmt.Errorf("list storages failed")
 			}
-			return utils.Ptr(mongodbflex.ListStoragesResponse{
+			return &mongodbflex.ListStoragesResponse{
 				StorageClasses: []string{},
 				StorageRange: &mongodbflex.StorageRange{
-					Min: utils.Ptr(int64(10)),
-					Max: utils.Ptr(int64(100)),
+					Min: new(int64(10)),
+					Max: new(int64(100)),
 				},
-			}), nil
+			}, nil
 		}),
 	}
 }
@@ -95,7 +95,7 @@ func fixtureInputModelAllTrue(mods ...func(model *inputModel)) *inputModel {
 		Flavors:         true,
 		Versions:        true,
 		Storages:        true,
-		FlavorId:        utils.Ptr("2.4"),
+		FlavorId:        new("2.4"),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -145,7 +145,7 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModelAllFalse(func(model *inputModel) {
 				model.Storages = true
-				model.FlavorId = utils.Ptr("2.4")
+				model.FlavorId = new("2.4")
 			}),
 		},
 		{
@@ -216,7 +216,7 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 			description: "only storages",
 			model: fixtureInputModelAllFalse(func(model *inputModel) {
 				model.Storages = true
-				model.FlavorId = utils.Ptr("2.4")
+				model.FlavorId = new("2.4")
 			}),
 			isValid:                  true,
 			expectListStoragesCalled: true,

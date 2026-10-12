@@ -6,7 +6,6 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -58,7 +57,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		InstanceId: testInstanceId,
 		UserId:     testUserId,
-		Database:   utils.Ptr("default"),
+		Database:   new("default"),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -69,7 +68,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 func fixtureRequest(mods ...func(request *mongodbflex.ApiPartialUpdateUserRequest)) mongodbflex.ApiPartialUpdateUserRequest {
 	request := testClient.DefaultAPI.PartialUpdateUser(testCtx, testProjectId, testInstanceId, testUserId, testRegion)
 	request = request.PartialUpdateUserPayload(mongodbflex.PartialUpdateUserPayload{
-		Database: utils.Ptr("default"),
+		Database: new("default"),
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -124,7 +123,7 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Database = utils.Ptr("default")
+				model.Database = new("default")
 			}),
 		},
 		{

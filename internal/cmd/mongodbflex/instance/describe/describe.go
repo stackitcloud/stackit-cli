@@ -13,7 +13,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/client"
-	mongodbflexUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/mongodbflex/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -96,15 +95,6 @@ func outputResult(p *print.Printer, outputFormat string, instance *mongodbflex.I
 		if instance == nil {
 			return fmt.Errorf("instance is nil")
 		}
-		var instanceType string
-		if instance.HasReplicas() {
-			var err error
-			instanceType, err = mongodbflexUtils.GetInstanceType(*instance.Replicas)
-			if err != nil {
-				// Should never happen
-				instanceType = ""
-			}
-		}
 
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(instance.Id))
@@ -113,6 +103,10 @@ func outputResult(p *print.Printer, outputFormat string, instance *mongodbflex.I
 		table.AddSeparator()
 		table.AddRow("STATUS", utils.PtrString(instance.Status))
 		table.AddSeparator()
+		if instance.HasFlavor() {
+			table.AddRow("FLAVOR ID", utils.PtrString(instance.Flavor.Id))
+			table.AddSeparator()
+		}
 		if instance.HasStorage() {
 			table.AddRow("STORAGE SIZE (GB)", utils.PtrString(instance.Storage.Size))
 			table.AddSeparator()
@@ -122,22 +116,6 @@ func outputResult(p *print.Printer, outputFormat string, instance *mongodbflex.I
 		if instance.HasAcl() {
 			acls := strings.Join(instance.Acl.Items, ",")
 			table.AddRow("ACL", acls)
-			table.AddSeparator()
-		}
-		if instance.HasFlavor() && instance.Flavor.HasDescription() {
-			table.AddRow("FLAVOR DESCRIPTION", *instance.Flavor.Description)
-			table.AddSeparator()
-		}
-		table.AddRow("TYPE", instanceType)
-		table.AddSeparator()
-		if instance.HasReplicas() {
-			table.AddRow("REPLICAS", *instance.Replicas)
-			table.AddSeparator()
-		}
-		if instance.HasFlavor() {
-			table.AddRow("CPU", utils.PtrString(instance.Flavor.Cpu))
-			table.AddSeparator()
-			table.AddRow("RAM (GB)", utils.PtrString(instance.Flavor.Memory))
 			table.AddSeparator()
 		}
 		table.AddRow("BACKUP SCHEDULE (UTC)", utils.PtrString(instance.BackupSchedule))

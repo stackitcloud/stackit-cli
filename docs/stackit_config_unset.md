@@ -36,6 +36,7 @@ stackit config unset [flags]
       --dns-custom-endpoint                                 DNS API base URL. If unset, uses the default base URL
       --edge-custom-endpoint                                Edge API base URL. If unset, uses the default base URL
   -h, --help                                                Help for "stackit config unset"
+      --iaas-alpha-custom-endpoint                          IaaS Alpha API base URL. If unset, uses the default base URL
       --iaas-custom-endpoint                                IaaS API base URL. If unset, uses the default base URL
       --identity-provider-custom-client-id                  Identity Provider client ID, used for user authentication
       --identity-provider-custom-well-known-configuration   Identity Provider well-known OpenID configuration URL. If unset, uses the default identity provider

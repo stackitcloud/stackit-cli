@@ -108,8 +108,13 @@ func ValidateURLDomain(value string) error {
 	}
 
 	allowedUrlDomain := viper.GetString(config.AllowedUrlDomainKey)
+	if allowedUrlDomain == "" {
+		return nil
+	}
 
-	if !strings.HasSuffix(urlHost, allowedUrlDomain) {
+	urlHost = strings.ToLower(urlHost)
+	allowedUrlDomain = strings.ToLower(allowedUrlDomain)
+	if urlHost != allowedUrlDomain && !strings.HasSuffix(urlHost, "."+allowedUrlDomain) {
 		return fmt.Errorf(`only urls belonging to domain %s are allowed`, allowedUrlDomain)
 	}
 	return nil

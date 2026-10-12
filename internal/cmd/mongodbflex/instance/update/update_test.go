@@ -21,16 +21,20 @@ const (
 
 type testCtxKey struct{}
 
-var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &mongodbflex.APIClient{DefaultAPI: &mongodbflex.DefaultAPIService{}}
+var (
+	testCtx    = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient = &mongodbflex.APIClient{DefaultAPI: &mongodbflex.DefaultAPIService{}}
+
+	testProjectId  = uuid.NewString()
+	testInstanceId = uuid.NewString()
+	testFlavorId   = uuid.NewString()
+)
 
 type mockClientSettings struct {
-	listFlavorsFails  bool
-	listFlavorsResp   *mongodbflex.ListFlavorsResponse
-	listStoragesFails bool
-	listStoragesResp  *mongodbflex.ListStoragesResponse
-	getInstanceFails  bool
-	getInstanceResp   *mongodbflex.InstanceResponse
+	listFlavorsFails bool
+	listFlavorsResp  *mongodbflex.ListFlavorsResponse
+	getInstanceFails bool
+	getInstanceResp  *mongodbflex.InstanceResponse
 }
 
 func newAPIClientMock(c mockClientSettings) mongodbflex.DefaultAPI {
@@ -41,12 +45,6 @@ func newAPIClientMock(c mockClientSettings) mongodbflex.DefaultAPI {
 			}
 			return c.getInstanceResp, nil
 		}),
-		ListStoragesExecuteMock: utils.Ptr(func(_ mongodbflex.ApiListStoragesRequest) (*mongodbflex.ListStoragesResponse, error) {
-			if c.listFlavorsFails {
-				return nil, fmt.Errorf("list storages failed")
-			}
-			return c.listStoragesResp, nil
-		}),
 		ListFlavorsExecuteMock: utils.Ptr(func(_ mongodbflex.ApiListFlavorsRequest) (*mongodbflex.ListFlavorsResponse, error) {
 			if c.listFlavorsFails {
 				return nil, fmt.Errorf("list flavors failed")
@@ -55,10 +53,6 @@ func newAPIClientMock(c mockClientSettings) mongodbflex.DefaultAPI {
 		}),
 	}
 }
-
-var testProjectId = uuid.NewString()
-var testInstanceId = uuid.NewString()
-var testFlavorId = uuid.NewString()
 
 func fixtureArgValues(mods ...func(argValues []string)) []string {
 	argValues := []string{
@@ -123,14 +117,14 @@ func fixtureStandardInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId:     testInstanceId,
-		FlavorId:       utils.Ptr(testFlavorId),
-		InstanceName:   utils.Ptr("example-name"),
-		ACL:            utils.Ptr([]string{"0.0.0.0/0"}),
-		BackupSchedule: utils.Ptr("0 0 * * *"),
-		StorageClass:   utils.Ptr("class"),
-		StorageSize:    utils.Ptr(int64(10)),
-		Version:        utils.Ptr("5.0"),
-		Type:           utils.Ptr("Single"),
+		FlavorId:       new(testFlavorId),
+		InstanceName:   new("example-name"),
+		ACL:            new([]string{"0.0.0.0/0"}),
+		BackupSchedule: new("0 0 * * *"),
+		StorageClass:   new("class"),
+		StorageSize:    new(int64(10)),
+		Version:        new("5.0"),
+		Type:           new("Single"),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -199,8 +193,8 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureStandardInputModel(func(model *inputModel) {
 				model.FlavorId = nil
-				model.CPU = utils.Ptr(int32(2))
-				model.RAM = utils.Ptr(int32(4))
+				model.CPU = new(int32(2))
+				model.RAM = new(int32(4))
 			}),
 		},
 		{
@@ -276,7 +270,7 @@ func TestParseInput(t *testing.T) {
 			aclValues:   []string{"198.51.100.14/24", "198.51.100.14/32"},
 			isValid:     true,
 			expectedModel: fixtureRequiredInputModel(func(model *inputModel) {
-				model.ACL = utils.Ptr([]string{"198.51.100.14/24", "198.51.100.14/32"})
+				model.ACL = new([]string{"198.51.100.14/24", "198.51.100.14/32"})
 			}),
 		},
 	}
@@ -348,16 +342,11 @@ func TestParseInput(t *testing.T) {
 
 func TestBuildRequest(t *testing.T) {
 	tests := []struct {
-		description       string
-		model             *inputModel
-		expectedRequest   mongodbflex.ApiPartialUpdateInstanceRequest
-		getInstanceFails  bool
-		getInstanceResp   *mongodbflex.InstanceResponse
-		listFlavorsFails  bool
-		listFlavorsResp   *mongodbflex.ListFlavorsResponse
-		listStoragesFails bool
-		listStoragesResp  *mongodbflex.ListStoragesResponse
-		isValid           bool
+		description        string
+		model              *inputModel
+		expectedRequest    mongodbflex.ApiPartialUpdateInstanceRequest
+		mockClientSettings mockClientSettings
+		isValid            bool
 	}{
 		{
 			description:     "no values",
@@ -368,97 +357,91 @@ func TestBuildRequest(t *testing.T) {
 		{
 			description: "update flavor from id",
 			model: fixtureRequiredInputModel(func(model *inputModel) {
-				model.FlavorId = utils.Ptr(testFlavorId)
+				model.FlavorId = new(testFlavorId)
 			}),
 			isValid: true,
-			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: []mongodbflex.InstanceFlavor{
-					{
-						Id:     utils.Ptr(testFlavorId),
-						Cpu:    utils.Ptr(int32(2)),
-						Memory: utils.Ptr(int32(4)),
+			mockClientSettings: mockClientSettings{
+				listFlavorsResp: &mongodbflex.ListFlavorsResponse{
+					Flavors: []mongodbflex.InstanceFlavor{
+						{
+							Id:     new(testFlavorId),
+							Cpu:    new(int32(2)),
+							Memory: new(int32(4)),
+						},
 					},
 				},
 			},
 			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testInstanceId, testRegion).
 				PartialUpdateInstancePayload(mongodbflex.PartialUpdateInstancePayload{
-					FlavorId: utils.Ptr(testFlavorId),
+					FlavorId: new(testFlavorId),
 				}),
 		},
 		{
 			description: "update flavor from cpu and ram",
 			model: fixtureRequiredInputModel(func(model *inputModel) {
-				model.CPU = utils.Ptr(int32(2))
-				model.RAM = utils.Ptr(int32(4))
+				model.CPU = new(int32(2))
+				model.RAM = new(int32(4))
 			}),
 			isValid: true,
-			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: []mongodbflex.InstanceFlavor{
-					{
-						Id:     utils.Ptr(testFlavorId),
-						Cpu:    utils.Ptr(int32(2)),
-						Memory: utils.Ptr(int32(4)),
+			mockClientSettings: mockClientSettings{
+				listFlavorsResp: &mongodbflex.ListFlavorsResponse{
+					Flavors: []mongodbflex.InstanceFlavor{
+						{
+							Id:     new(testFlavorId),
+							Cpu:    new(int32(2)),
+							Memory: new(int32(4)),
+						},
 					},
 				},
 			},
 			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testInstanceId, testRegion).
 				PartialUpdateInstancePayload(mongodbflex.PartialUpdateInstancePayload{
-					FlavorId: utils.Ptr(testFlavorId),
+					FlavorId: new(testFlavorId),
 				}),
 		},
 		{
 			description: "update storage class only",
 			model: fixtureRequiredInputModel(func(model *inputModel) {
-				model.StorageClass = utils.Ptr("class")
+				model.StorageClass = new("class")
 			}),
 			isValid: true,
-			getInstanceResp: &mongodbflex.InstanceResponse{
-				Item: &mongodbflex.Instance{
-					Flavor: &mongodbflex.Flavor{
-						Id: utils.Ptr(testFlavorId),
+			mockClientSettings: mockClientSettings{
+				getInstanceResp: &mongodbflex.InstanceResponse{
+					Item: &mongodbflex.Instance{
+						Flavor: &mongodbflex.Flavor{
+							Id: new(testFlavorId),
+						},
 					},
-				},
-			},
-			listStoragesResp: &mongodbflex.ListStoragesResponse{
-				StorageClasses: []string{"class"},
-				StorageRange: &mongodbflex.StorageRange{
-					Min: utils.Ptr(int64(10)),
-					Max: utils.Ptr(int64(100)),
 				},
 			},
 			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testInstanceId, testRegion).
 				PartialUpdateInstancePayload(mongodbflex.PartialUpdateInstancePayload{
 					Storage: &mongodbflex.Storage{
-						Class: utils.Ptr("class"),
+						Class: new("class"),
 					},
 				}),
 		},
 		{
 			description: "update storage class and size",
 			model: fixtureRequiredInputModel(func(model *inputModel) {
-				model.StorageClass = utils.Ptr("class")
-				model.StorageSize = utils.Ptr(int64(10))
+				model.StorageClass = new("class")
+				model.StorageSize = new(int64(10))
 			}),
 			isValid: true,
-			getInstanceResp: &mongodbflex.InstanceResponse{
-				Item: &mongodbflex.Instance{
-					Flavor: &mongodbflex.Flavor{
-						Id: utils.Ptr(testFlavorId),
+			mockClientSettings: mockClientSettings{
+				getInstanceResp: &mongodbflex.InstanceResponse{
+					Item: &mongodbflex.Instance{
+						Flavor: &mongodbflex.Flavor{
+							Id: new(testFlavorId),
+						},
 					},
-				},
-			},
-			listStoragesResp: &mongodbflex.ListStoragesResponse{
-				StorageClasses: []string{"class"},
-				StorageRange: &mongodbflex.StorageRange{
-					Min: utils.Ptr(int64(10)),
-					Max: utils.Ptr(int64(100)),
 				},
 			},
 			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testInstanceId, testRegion).
 				PartialUpdateInstancePayload(mongodbflex.PartialUpdateInstancePayload{
 					Storage: &mongodbflex.Storage{
-						Class: utils.Ptr("class"),
-						Size:  utils.Ptr(int64(10)),
+						Class: new("class"),
+						Size:  new(int64(10)),
 					},
 				}),
 		},
@@ -466,32 +449,36 @@ func TestBuildRequest(t *testing.T) {
 			description: "get flavors fails",
 			model: fixtureRequiredInputModel(
 				func(model *inputModel) {
-					model.CPU = utils.Ptr(int32(2))
-					model.RAM = utils.Ptr(int32(4))
+					model.CPU = new(int32(2))
+					model.RAM = new(int32(4))
 				},
 			),
-			listFlavorsFails: true,
-			isValid:          false,
+			mockClientSettings: mockClientSettings{
+				listFlavorsFails: true,
+			},
+			isValid: false,
 		},
 		{
 			description: "flavor id not found",
 			model: fixtureRequiredInputModel(
 				func(model *inputModel) {
-					model.CPU = utils.Ptr(int32(5))
-					model.RAM = utils.Ptr(int32(9))
+					model.CPU = new(int32(5))
+					model.RAM = new(int32(9))
 				},
 			),
-			listFlavorsResp: &mongodbflex.ListFlavorsResponse{
-				Flavors: []mongodbflex.InstanceFlavor{
-					{
-						Id:     utils.Ptr(testFlavorId),
-						Cpu:    utils.Ptr(int32(2)),
-						Memory: utils.Ptr(int32(4)),
-					},
-					{
-						Id:     utils.Ptr("other-flavor"),
-						Cpu:    utils.Ptr(int32(1)),
-						Memory: utils.Ptr(int32(8)),
+			mockClientSettings: mockClientSettings{
+				listFlavorsResp: &mongodbflex.ListFlavorsResponse{
+					Flavors: []mongodbflex.InstanceFlavor{
+						{
+							Id:     new(testFlavorId),
+							Cpu:    new(int32(2)),
+							Memory: new(int32(4)),
+						},
+						{
+							Id:     new("other-flavor"),
+							Cpu:    new(int32(1)),
+							Memory: new(int32(8)),
+						},
 					},
 				},
 			},
@@ -499,69 +486,25 @@ func TestBuildRequest(t *testing.T) {
 		},
 		{
 			description: "get instance fails",
-			model: fixtureRequiredInputModel(
-				func(model *inputModel) {
-					model.StorageClass = utils.Ptr("class")
-				},
-			),
-			getInstanceFails: true,
-			isValid:          false,
+			model:       fixtureRequiredInputModel(),
+			mockClientSettings: mockClientSettings{
+				getInstanceFails: true,
+			},
+			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testInstanceId, testRegion).
+				PartialUpdateInstancePayload(mongodbflex.PartialUpdateInstancePayload{}),
+			isValid: true,
 		},
 		{
 			description: "get storages fails",
 			model: fixtureRequiredInputModel(
 				func(model *inputModel) {
 					model.FlavorId = nil
-					model.CPU = utils.Ptr(int32(2))
-					model.RAM = utils.Ptr(int32(4))
+					model.CPU = new(int32(2))
+					model.RAM = new(int32(4))
 				},
 			),
-			listFlavorsFails: true,
-			isValid:          false,
-		},
-		{
-			description: "invalid storage class",
-			model: fixtureRequiredInputModel(
-				func(model *inputModel) {
-					model.StorageClass = utils.Ptr("non-existing-class")
-				},
-			),
-			getInstanceResp: &mongodbflex.InstanceResponse{
-				Item: &mongodbflex.Instance{
-					Flavor: &mongodbflex.Flavor{
-						Id: utils.Ptr(testFlavorId),
-					},
-				},
-			},
-			listStoragesResp: &mongodbflex.ListStoragesResponse{
-				StorageClasses: []string{"class"},
-				StorageRange: &mongodbflex.StorageRange{
-					Min: utils.Ptr(int64(10)),
-					Max: utils.Ptr(int64(100)),
-				},
-			},
-			isValid: false,
-		},
-		{
-			description: "invalid storage size",
-			model: fixtureRequiredInputModel(
-				func(model *inputModel) {
-					model.StorageSize = utils.Ptr(int64(9))
-				},
-			),
-			getInstanceResp: &mongodbflex.InstanceResponse{
-				Item: &mongodbflex.Instance{
-					Flavor: &mongodbflex.Flavor{
-						Id: utils.Ptr(testFlavorId),
-					},
-				},
-			},
-			listStoragesResp: &mongodbflex.ListStoragesResponse{
-				StorageClasses: []string{"class"},
-				StorageRange: &mongodbflex.StorageRange{
-					Min: utils.Ptr(int64(10)),
-					Max: utils.Ptr(int64(100)),
-				},
+			mockClientSettings: mockClientSettings{
+				listFlavorsFails: true,
 			},
 			isValid: false,
 		},
@@ -569,15 +512,7 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			settings := mockClientSettings{
-				getInstanceFails:  tt.getInstanceFails,
-				getInstanceResp:   tt.getInstanceResp,
-				listFlavorsFails:  tt.listFlavorsFails,
-				listFlavorsResp:   tt.listFlavorsResp,
-				listStoragesFails: tt.listStoragesFails,
-				listStoragesResp:  tt.listStoragesResp,
-			}
-			request, err := buildRequest(testCtx, tt.model, newAPIClientMock(settings))
+			request, err := buildRequest(testCtx, tt.model, newAPIClientMock(tt.mockClientSettings))
 			if err != nil {
 				if !tt.isValid {
 					return

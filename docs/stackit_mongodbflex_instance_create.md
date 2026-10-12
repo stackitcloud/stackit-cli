@@ -13,30 +13,25 @@ stackit mongodbflex instance create [flags]
 ### Examples
 
 ```
-  Create a MongoDB Flex instance with name "my-instance", ACL 0.0.0.0/0 (open access) and specify flavor by CPU and RAM. Other parameters are set to default values
-  $ stackit mongodbflex instance create --name my-instance --cpu 1 --ram 4 --acl 0.0.0.0/0
+  Create a MongoDB Flex instance with name "my-instance", ACL 0.0.0.0/0 (open access).
+  $ stackit mongodbflex instance create --name my-instance --flavor-id xxx --acl 0.0.0.0/0 --type Replica --storage-size 20 --version 8.0 --backup-schedule "6 6 * * *" --storage-size 10 --storage-class premium-perf2-mongodb
 
-  Create a MongoDB Flex instance with name "my-instance", ACL 0.0.0.0/0 (open access) and specify flavor by ID. Other parameters are set to default values
-  $ stackit mongodbflex instance create --name my-instance --flavor-id xxx --acl 0.0.0.0/0
-
-  Create a MongoDB Flex instance with name "my-instance", allow access to a specific range of IP addresses, specify flavor by CPU and RAM and set storage size to 20 GB. Other parameters are set to default values
-  $ stackit mongodbflex instance create --name my-instance --cpu 1 --ram 4 --acl 1.2.3.0/24 --storage-size 20
+  Create a MongoDB Flex instance with name "my-instance", allow access to a specific range of IP addresses.
+  $ stackit mongodbflex instance create --name my-instance --flavor-id xxx --acl 1.2.3.0/24 --type Replica --storage-size 20 --version 8.0 --backup-schedule "6 6 * * *" --storage-size 10 --storage-class premium-perf2-mongodb
 ```
 
 ### Options
 
 ```
       --acl strings              The access control list (ACL). Must contain at least one valid subnet, for instance '0.0.0.0/0' for open access (discouraged), '1.2.3.0/24 for a public IP range of an organization, '1.2.3.4/32' for a single IP range, etc. (default [])
-      --backup-schedule string   Backup schedule (default "0 0/6 * * *")
-      --cpu int32                Number of CPUs
-      --flavor-id string         ID of the flavor
+      --backup-schedule string   Backup schedule. This flag will be required after 2027-03-07. (default "0 0/6 * * *")
+      --flavor-id string         ID of the flavor. This flag will be required after 2027-03-07.
   -h, --help                     Help for "stackit mongodbflex instance create"
   -n, --name string              Instance name
-      --ram int32                Amount of RAM (in GB)
-      --storage-class string     Storage class (default "premium-perf2-mongodb")
-      --storage-size int         Storage size (in GB) (default 10)
+      --storage-class string     Storage class. This flag will be required after 2027-03-07. (default "premium-perf2-mongodb")
+      --storage-size int         Storage size (in GB). This flag will be required after 2027-03-07. (default 10)
       --type string              Instance type, (one of: [Replica, Sharded, Single]) (default "Replica")
-      --version string           MongoDB version. Defaults to the latest version available
+      --version string           MongoDB version. Defaults to the latest version available. This flag will be required after 2027-03-07.
 ```
 
 ### Options inherited from parent commands

@@ -120,6 +120,60 @@ func TestValidateURLDomain(t *testing.T) {
 			isValid:          true,
 		},
 		{
+			name:             "apex domain",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "https://stackit.cloud/path",
+			isValid:          true,
+		},
+		{
+			name:             "multiple subdomains",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "https://dns.api.stackit.cloud/v1",
+			isValid:          true,
+		},
+		{
+			name:             "hostname suffix without label boundary",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "https://suspiciousstackit.cloud",
+			isValid:          false,
+		},
+		{
+			name:             "lookalike subdomain",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "https://api.suspiciousstackit.cloud",
+			isValid:          false,
+		},
+		{
+			name:             "domain followed by extra labels",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "https://api.stackit.cloud.evil.example",
+			isValid:          false,
+		},
+		{
+			name:             "port is not hostname",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "https://stackit.cloud:443/v1",
+			isValid:          true,
+		},
+		{
+			name:             "userinfo does not affect hostname",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "https://stackit.cloud@evil.example/path",
+			isValid:          false,
+		},
+		{
+			name:             "path does not affect hostname",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "https://evil.example/path/stackit.cloud",
+			isValid:          false,
+		},
+		{
+			name:             "hostname is case insensitive",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "https://API.STACKIT.CLOUD/path",
+			isValid:          true,
+		},
+		{
 			name:             "STACKIT URL invalid",
 			allowedUrlDomain: "example.com",
 			input:            "https://example.stackit.cloud",
@@ -138,6 +192,12 @@ func TestValidateURLDomain(t *testing.T) {
 			isValid:          true,
 		},
 		{
+			name:             "custom domain boundary rejected",
+			allowedUrlDomain: "example.com",
+			input:            "https://badexample.com",
+			isValid:          false,
+		},
+		{
 			name:             "every URL valid",
 			allowedUrlDomain: "",
 			input:            "https://www.test.example.com/",
@@ -152,6 +212,24 @@ func TestValidateURLDomain(t *testing.T) {
 			name:    "invalid protocol",
 			input:   "http://example.stackit.cloud",
 			isValid: false,
+		},
+		{
+			name:             "invalid protocol with allowed domain",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "http://api.stackit.cloud",
+			isValid:          false,
+		},
+		{
+			name:             "missing host",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "https:///path",
+			isValid:          false,
+		},
+		{
+			name:             "malformed URL",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "https://%zz",
+			isValid:          false,
 		},
 		{
 			name:    "no protocol",

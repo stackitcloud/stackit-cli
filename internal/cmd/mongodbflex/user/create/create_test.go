@@ -7,7 +7,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -48,9 +47,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId: testInstanceId,
-		Username:   utils.Ptr("johndoe"),
-		Database:   utils.Ptr("default"),
-		Roles:      utils.Ptr([]string{"read"}),
+		Username:   new("johndoe"),
+		Database:   new("default"),
+		Roles:      new([]string{"read"}),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -61,7 +60,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 func fixtureRequest(mods ...func(request *mongodbflex.ApiCreateUserRequest)) mongodbflex.ApiCreateUserRequest {
 	request := testClient.DefaultAPI.CreateUser(testCtx, testProjectId, testInstanceId, testRegion)
 	request = request.CreateUserPayload(mongodbflex.CreateUserPayload{
-		Username: utils.Ptr("johndoe"),
+		Username: new("johndoe"),
 		Database: "default",
 		Roles:    []string{"read"},
 	})
