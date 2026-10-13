@@ -9,12 +9,14 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/alpha/vpc/list"
 	networkRange "github.com/stackitcloud/stackit-cli/internal/cmd/alpha/vpc/network-range"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/alpha/vpc/region"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/alpha/vpc/routingtable"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/alpha/vpc/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
+// The vpc command group is in alpha because the API is only on alpha available.
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "vpc",
@@ -35,4 +37,5 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(networkRange.NewCmd(params))
 	cmd.AddCommand(update.NewCmd(params))
 	cmd.AddCommand(region.NewCmd(params))
+	cmd.AddCommand(routingtable.NewCmd(params))
 }
