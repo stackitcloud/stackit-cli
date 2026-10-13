@@ -80,7 +80,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("delete vpc routing-table: %w", err)
 			}
 
-			params.Printer.Outputf("Deleted routing-table %q.\n", routingTableLabel)
+			params.Printer.Info("Deleted routing-table %q.\n", routingTableLabel)
 			return nil
 		},
 	}
