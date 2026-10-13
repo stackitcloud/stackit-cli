@@ -4,7 +4,7 @@ Lists all routes within a routing-table
 
 ### Synopsis
 
-Lists all routes within a routing-table
+Lists all routes within a routing-table within a STACKIT Network Area (SNA).
 
 ```
 stackit network-area routing-table route list [flags]

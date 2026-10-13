@@ -36,7 +36,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("delete %s", routingTableIdFlag),
 		Short: "Deletes a route within a routing-table",
-		Long:  "Deletes a route within a routing-table",
+		Long:  "Deletes a route within a routing-table within a STACKIT Network Area (SNA).",
 		Args:  args.SingleArg(routeIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(

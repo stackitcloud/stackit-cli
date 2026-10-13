@@ -4,7 +4,7 @@ Deletes a routing-table
 
 ### Synopsis
 
-Deletes a routing-table
+Deletes a routing-table within a STACKIT Network Area (SNA).
 
 ```
 stackit network-area routing-table delete ROUTING_TABLE_ID [flags]
