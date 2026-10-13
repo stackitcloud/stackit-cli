@@ -23,96 +23,115 @@ var (
 	testRoutingTableId = uuid.NewString()
 )
 
+func fixtureFlagValues(mods ...func(map[string]string)) map[string]string {
+	flagValues := map[string]string{
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    "eu02",
+		vpcIdFlag:                 testVpcId,
+	}
+	for _, mod := range mods {
+		mod(flagValues)
+	}
+	return flagValues
+}
+
+func fixtureInputModel(mods ...func(*inputModel)) *inputModel {
+	model := &inputModel{
+		GlobalFlagModel: &globalflags.GlobalFlagModel{
+			ProjectId: testProjectId,
+			Region:    "eu02",
+			Verbosity: globalflags.VerbosityDefault,
+		},
+		VpcId:          testVpcId,
+		RoutingTableId: testRoutingTableId,
+	}
+	for _, mod := range mods {
+		mod(model)
+	}
+	return model
+}
+
 func TestParseInput(t *testing.T) {
-	for _, tt := range []struct {
-		name   string
-		flag   string
-		value  string
-		remove bool
-		args   []string
-		valid  bool
+	tests := []struct {
+		name       string
+		args       []string
+		flagValues map[string]string
+		valid      bool
+		expected   *inputModel
 	}{
 		{
-			name:  "base",
-			valid: true,
+			name:       "base",
+			args:       []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(),
+			valid:      true,
+			expected:   fixtureInputModel(),
 		},
 		{
-			name:   "missing project",
-			flag:   globalflags.ProjectIdFlag,
-			remove: true,
+			name: "missing project",
+			args: []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				delete(f, globalflags.ProjectIdFlag)
+			}),
 		},
 		{
-			name:  "invalid project",
-			flag:  globalflags.ProjectIdFlag,
-			value: "invalid",
+			name: "invalid project",
+			args: []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				f[globalflags.ProjectIdFlag] = "invalid"
+			}),
 		},
 		{
-			name:   "missing region",
-			flag:   globalflags.RegionFlag,
-			remove: true,
+			name: "missing region",
+			args: []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				delete(f, globalflags.RegionFlag)
+			}),
 		},
 		{
-			name:   "missing vpc",
-			flag:   vpcIdFlag,
-			remove: true,
+			name: "missing vpc",
+			args: []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				delete(f, vpcIdFlag)
+			}),
 		},
 		{
-			name:  "invalid vpc",
-			flag:  vpcIdFlag,
-			value: "invalid",
+			name: "invalid vpc",
+			args: []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				f[vpcIdFlag] = "invalid"
+			}),
 		},
 		{
 			name: "empty vpc",
-			flag: vpcIdFlag,
+			args: []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				f[vpcIdFlag] = ""
+			}),
 		},
 		{
-			name: "missing routing-table id",
-			args: []string{},
+			name:       "missing routing-table id",
+			args:       []string{},
+			flagValues: fixtureFlagValues(),
 		},
 		{
-			name: "invalid routing-table id",
-			args: []string{"invalid"},
+			name:       "invalid routing-table id",
+			args:       []string{"invalid"},
+			flagValues: fixtureFlagValues(),
 		},
 		{
-			name: "empty routing-table id",
-			args: []string{""},
+			name:       "empty routing-table id",
+			args:       []string{""},
+			flagValues: fixtureFlagValues(),
 		},
 		{
-			name: "too many arguments",
-			args: []string{testRoutingTableId, testRoutingTableId},
+			name:       "too many arguments",
+			args:       []string{testRoutingTableId, testRoutingTableId},
+			flagValues: fixtureFlagValues(),
 		},
-	} {
+	}
+	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			flagValues := map[string]string{
-				globalflags.ProjectIdFlag: testProjectId,
-				globalflags.RegionFlag:    "eu02",
-				vpcIdFlag:                 testVpcId,
-			}
-			if tt.flag != "" {
-				flagValues[tt.flag] = tt.value
-				if tt.remove {
-					delete(flagValues, tt.flag)
-				}
-			}
-			inputArgs := tt.args
-			if inputArgs == nil {
-				inputArgs = []string{testRoutingTableId}
-			}
-
-			var expected *inputModel
-			if tt.valid {
-				expected = &inputModel{
-					GlobalFlagModel: &globalflags.GlobalFlagModel{
-						ProjectId: testProjectId,
-						Region:    "eu02",
-						Verbosity: globalflags.VerbosityDefault,
-					},
-					VpcId:          testVpcId,
-					RoutingTableId: testRoutingTableId,
-				}
-			}
-
-			testutils.TestParseInput(t, NewCmd, parseInput, expected, inputArgs, flagValues, tt.valid)
+			testutils.TestParseInput(t, NewCmd, parseInput, tt.expected, tt.args, tt.flagValues, tt.valid)
 		})
 	}
 }
@@ -127,16 +146,9 @@ func TestBuildRequest(t *testing.T) {
 		want  iaas.ApiGetVPCRoutingTableRequest
 	}{
 		{
-			name: "default",
-			model: &inputModel{
-				GlobalFlagModel: &globalflags.GlobalFlagModel{
-					ProjectId: testProjectId,
-					Region:    "eu02",
-				},
-				VpcId:          testVpcId,
-				RoutingTableId: testRoutingTableId,
-			},
-			want: client.GetVPCRoutingTable(ctx, testProjectId, testVpcId, "eu02", testRoutingTableId),
+			name:  "default",
+			model: fixtureInputModel(),
+			want:  client.GetVPCRoutingTable(ctx, testProjectId, testVpcId, "eu02", testRoutingTableId),
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {

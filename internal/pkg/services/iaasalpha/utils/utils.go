@@ -23,6 +23,17 @@ func GetVPCName(ctx context.Context, apiClient iaas.DefaultAPI, projectId, vpcId
 	return resp.Name, nil
 }
 
+func GetVPCRoutingTableName(ctx context.Context, apiClient iaas.DefaultAPI, projectId, vpcId, region, routingTableId string) (string, error) {
+	resp, err := apiClient.GetVPCRoutingTable(ctx, projectId, vpcId, region, routingTableId).Execute()
+	if err != nil {
+		return "", fmt.Errorf("get vpc routing-table: %w", err)
+	}
+	if resp == nil {
+		return "", ErrResponseNil
+	}
+	return resp.Name, nil
+}
+
 func GetVPCNetworkRangePrefix(ctx context.Context, apiClient iaas.DefaultAPI, projectId, vpcId, region, networkRangeId string) (string, error) {
 	resp, err := apiClient.GetVPCNetworkRange(ctx, projectId, vpcId, region, networkRangeId).Execute()
 	if err != nil {

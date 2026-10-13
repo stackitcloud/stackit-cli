@@ -14,8 +14,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaasalpha/client"
+	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaasalpha/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -65,7 +65,15 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			prompt := fmt.Sprintf("Are you sure you want to create the routing-table %q for VPC %q in region %q?", model.Name, model.VpcId, model.Region)
+			vpcLabel, err := iaasUtils.GetVPCName(ctx, apiClient.DefaultAPI, model.ProjectId, model.VpcId)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get VPC name: %v", err)
+				vpcLabel = model.VpcId
+			} else if vpcLabel == "" {
+				vpcLabel = model.VpcId
+			}
+
+			prompt := fmt.Sprintf("Are you sure you want to create the routing-table %q for VPC %q in region %q?", model.Name, vpcLabel, model.Region)
 			if err := params.Printer.PromptForConfirmation(prompt); err != nil {
 				return err
 			}
@@ -123,8 +131,8 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient iaas.Default
 		Name:          model.Name,
 		Description:   model.Description,
 		Labels:        model.Labels,
-		DynamicRoutes: utils.Ptr(model.DynamicRoutes),
-		SystemRoutes:  utils.Ptr(model.SystemRoutes),
+		DynamicRoutes: new(model.DynamicRoutes),
+		SystemRoutes:  new(model.SystemRoutes),
 	}
 
 	return apiClient.AddVPCRoutingTable(ctx, model.ProjectId, model.VpcId, model.Region).AddVPCRoutingTablePayload(payload)

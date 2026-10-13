@@ -22,115 +22,148 @@ var (
 	testRoutingTableId = uuid.NewString()
 )
 
-func TestParseInput(t *testing.T) {
-	defaultModel := func(opts ...func(*inputModel)) *inputModel {
-		model := &inputModel{
-			GlobalFlagModel: &globalflags.GlobalFlagModel{
-				ProjectId: testProjectId,
-				Region:    "eu02",
-				Verbosity: globalflags.VerbosityDefault,
-			},
-			VpcId: testVpcId,
-		}
-		for _, opt := range opts {
-			opt(model)
-		}
-		return model
+func fixtureFlagValues(mods ...func(map[string]string)) map[string]string {
+	flagValues := map[string]string{
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    "eu02",
+		vpcIdFlag:                 testVpcId,
 	}
+	for _, mod := range mods {
+		mod(flagValues)
+	}
+	return flagValues
+}
 
-	for _, tt := range []struct {
-		name   string
-		flag   string
-		value  string
-		remove bool
-		args   []string
-		want   *inputModel
+func fixtureInputModel(mods ...func(*inputModel)) *inputModel {
+	model := &inputModel{
+		GlobalFlagModel: &globalflags.GlobalFlagModel{
+			ProjectId: testProjectId,
+			Region:    "eu02",
+			Verbosity: globalflags.VerbosityDefault,
+		},
+		VpcId: testVpcId,
+	}
+	for _, mod := range mods {
+		mod(model)
+	}
+	return model
+}
+
+func TestParseInput(t *testing.T) {
+	tests := []struct {
+		name       string
+		args       []string
+		flagValues map[string]string
+		want       *inputModel
 	}{
 		{
-			name: "defaults",
-			want: defaultModel(),
+			name:       "defaults",
+			flagValues: fixtureFlagValues(),
+			want:       fixtureInputModel(),
 		},
 		{
-			name:  "label selector",
-			flag:  labelSelectorFlag,
-			value: "env=dev",
-			want:  defaultModel(func(m *inputModel) { m.LabelSelector = new("env=dev") }),
+			name: "label selector",
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				f[labelSelectorFlag] = "env=dev"
+			}),
+			want: fixtureInputModel(func(m *inputModel) {
+				m.LabelSelector = new("env=dev")
+			}),
 		},
 		{
-			name:  "filter",
-			flag:  filterFlag,
-			value: `name == "rt"`,
-			want:  defaultModel(func(m *inputModel) { m.Filter = new(`name == "rt"`) }),
+			name: "filter",
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				f[filterFlag] = `name == "rt"`
+			}),
+			want: fixtureInputModel(func(m *inputModel) {
+				m.Filter = new(`name == "rt"`)
+			}),
 		},
 		{
-			name:  "limit",
-			flag:  limitFlag,
-			value: "10",
-			want:  defaultModel(func(m *inputModel) { m.Limit = new(int64(10)) }),
+			name: "limit",
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				f[limitFlag] = "10"
+			}),
+			want: fixtureInputModel(func(m *inputModel) {
+				m.Limit = new(int64(10))
+			}),
 		},
 		{
-			name:  "zero limit",
-			flag:  limitFlag,
-			value: "0",
+			name: "combined options",
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				f[labelSelectorFlag] = "env=dev"
+				f[filterFlag] = `name == "rt"`
+				f[limitFlag] = "10"
+			}),
+			want: fixtureInputModel(func(m *inputModel) {
+				m.LabelSelector = new("env=dev")
+				m.Filter = new(`name == "rt"`)
+				m.Limit = new(int64(10))
+			}),
 		},
 		{
-			name:  "negative limit",
-			flag:  limitFlag,
-			value: "-1",
+			name: "zero limit",
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				f[limitFlag] = "0"
+			}),
 		},
 		{
-			name:  "invalid limit",
-			flag:  limitFlag,
-			value: "invalid",
+			name: "negative limit",
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				f[limitFlag] = "-1"
+			}),
 		},
 		{
-			name:   "missing project",
-			flag:   globalflags.ProjectIdFlag,
-			remove: true,
+			name: "invalid limit",
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				f[limitFlag] = "invalid"
+			}),
 		},
 		{
-			name:  "invalid project",
-			flag:  globalflags.ProjectIdFlag,
-			value: "invalid",
+			name: "missing project",
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				delete(f, globalflags.ProjectIdFlag)
+			}),
 		},
 		{
-			name:   "missing region",
-			flag:   globalflags.RegionFlag,
-			remove: true,
+			name: "invalid project",
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				f[globalflags.ProjectIdFlag] = "invalid"
+			}),
 		},
 		{
-			name:   "missing vpc",
-			flag:   vpcIdFlag,
-			remove: true,
+			name: "missing region",
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				delete(f, globalflags.RegionFlag)
+			}),
 		},
 		{
-			name:  "invalid vpc",
-			flag:  vpcIdFlag,
-			value: "invalid",
+			name: "missing vpc",
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				delete(f, vpcIdFlag)
+			}),
+		},
+		{
+			name: "invalid vpc",
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				f[vpcIdFlag] = "invalid"
+			}),
 		},
 		{
 			name: "empty vpc",
-			flag: vpcIdFlag,
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				f[vpcIdFlag] = ""
+			}),
 		},
 		{
-			name: "unexpected argument",
-			args: []string{"unexpected"},
+			name:       "unexpected argument",
+			args:       []string{"unexpected"},
+			flagValues: fixtureFlagValues(),
 		},
-	} {
+	}
+	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			flagValues := map[string]string{
-				globalflags.ProjectIdFlag: testProjectId,
-				globalflags.RegionFlag:    "eu02",
-				vpcIdFlag:                 testVpcId,
-			}
-			if tt.flag != "" {
-				flagValues[tt.flag] = tt.value
-				if tt.remove {
-					delete(flagValues, tt.flag)
-				}
-			}
-
-			testutils.TestParseInput(t, NewCmd, parseInput, tt.want, tt.args, flagValues, tt.want != nil)
+			testutils.TestParseInput(t, NewCmd, parseInput, tt.want, tt.args, tt.flagValues, tt.want != nil)
 		})
 	}
 }
@@ -138,19 +171,6 @@ func TestParseInput(t *testing.T) {
 func TestBuildRequest(t *testing.T) {
 	ctx := context.Background()
 	client := &iaas.DefaultAPIServiceMock{}
-	defaultModel := func(opts ...func(*inputModel)) *inputModel {
-		model := &inputModel{
-			GlobalFlagModel: &globalflags.GlobalFlagModel{
-				ProjectId: testProjectId,
-				Region:    "eu02",
-			},
-			VpcId: testVpcId,
-		}
-		for _, opt := range opts {
-			opt(model)
-		}
-		return model
-	}
 
 	for _, tt := range []struct {
 		name  string
@@ -159,22 +179,26 @@ func TestBuildRequest(t *testing.T) {
 	}{
 		{
 			name:  "default",
-			model: defaultModel(),
+			model: fixtureInputModel(),
 			want:  client.ListVPCRoutingTables(ctx, testProjectId, testVpcId, "eu02"),
 		},
 		{
-			name:  "label selector",
-			model: defaultModel(func(m *inputModel) { m.LabelSelector = new("env=dev") }),
-			want:  client.ListVPCRoutingTables(ctx, testProjectId, testVpcId, "eu02").LabelSelector("env=dev"),
+			name: "label selector",
+			model: fixtureInputModel(func(m *inputModel) {
+				m.LabelSelector = new("env=dev")
+			}),
+			want: client.ListVPCRoutingTables(ctx, testProjectId, testVpcId, "eu02").LabelSelector("env=dev"),
 		},
 		{
-			name:  "filter",
-			model: defaultModel(func(m *inputModel) { m.Filter = new(`name == "rt"`) }),
-			want:  client.ListVPCRoutingTables(ctx, testProjectId, testVpcId, "eu02").Filter(`name == "rt"`),
+			name: "filter",
+			model: fixtureInputModel(func(m *inputModel) {
+				m.Filter = new(`name == "rt"`)
+			}),
+			want: client.ListVPCRoutingTables(ctx, testProjectId, testVpcId, "eu02").Filter(`name == "rt"`),
 		},
 		{
 			name: "combined filters",
-			model: defaultModel(func(m *inputModel) {
+			model: fixtureInputModel(func(m *inputModel) {
 				m.LabelSelector = new("env=dev")
 				m.Filter = new(`name == "rt"`)
 			}),
@@ -182,16 +206,18 @@ func TestBuildRequest(t *testing.T) {
 		},
 		{
 			name: "empty filters",
-			model: defaultModel(func(m *inputModel) {
+			model: fixtureInputModel(func(m *inputModel) {
 				m.LabelSelector = new("")
 				m.Filter = new("")
 			}),
 			want: client.ListVPCRoutingTables(ctx, testProjectId, testVpcId, "eu02").LabelSelector("").Filter(""),
 		},
 		{
-			name:  "limit is client side",
-			model: defaultModel(func(m *inputModel) { m.Limit = new(int64(10)) }),
-			want:  client.ListVPCRoutingTables(ctx, testProjectId, testVpcId, "eu02"),
+			name: "limit is client side",
+			model: fixtureInputModel(func(m *inputModel) {
+				m.Limit = new(int64(10))
+			}),
+			want: client.ListVPCRoutingTables(ctx, testProjectId, testVpcId, "eu02"),
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {

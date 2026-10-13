@@ -14,6 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/iaasalpha/client"
+	iaasUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/iaasalpha/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
@@ -67,7 +68,23 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			prompt := fmt.Sprintf("Are you sure you want to update the routing-table %q for VPC %q in region %q?", model.RoutingTableId, model.VpcId, model.Region)
+			vpcLabel, err := iaasUtils.GetVPCName(ctx, apiClient.DefaultAPI, model.ProjectId, model.VpcId)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get VPC name: %v", err)
+				vpcLabel = model.VpcId
+			} else if vpcLabel == "" {
+				vpcLabel = model.VpcId
+			}
+
+			routingTableLabel, err := iaasUtils.GetVPCRoutingTableName(ctx, apiClient.DefaultAPI, model.ProjectId, model.VpcId, model.Region, model.RoutingTableId)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get VPC routing-table name: %v", err)
+				routingTableLabel = model.RoutingTableId
+			} else if routingTableLabel == "" {
+				routingTableLabel = model.RoutingTableId
+			}
+
+			prompt := fmt.Sprintf("Are you sure you want to update the routing-table %q for VPC %q in region %q?", routingTableLabel, vpcLabel, model.Region)
 			if err := params.Printer.PromptForConfirmation(prompt); err != nil {
 				return err
 			}

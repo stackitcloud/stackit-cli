@@ -22,53 +22,92 @@ var (
 	testRoutingTableId = uuid.NewString()
 )
 
-func TestParseInput(t *testing.T) {
-	defaultModel := func(opts ...func(*inputModel)) *inputModel {
-		model := &inputModel{
-			GlobalFlagModel: &globalflags.GlobalFlagModel{
-				ProjectId: testProjectId,
-				Region:    "eu02",
-				Verbosity: globalflags.VerbosityDefault,
-			},
-			VpcId:          testVpcId,
-			RoutingTableId: testRoutingTableId,
-		}
-		for _, opt := range opts {
-			opt(model)
-		}
-		return model
+func fixtureFlagValues(mods ...func(map[string]string)) map[string]string {
+	flagValues := map[string]string{
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    "eu02",
+		vpcIdFlag:                 testVpcId,
+		nameFlag:                  "rt",
 	}
+	for _, mod := range mods {
+		mod(flagValues)
+	}
+	return flagValues
+}
 
-	for _, tt := range []struct {
-		name   string
-		flag   string
-		value  string
-		remove bool
-		args   []string
-		want   *inputModel
+func fixtureInputModel(mods ...func(*inputModel)) *inputModel {
+	model := &inputModel{
+		GlobalFlagModel: &globalflags.GlobalFlagModel{
+			ProjectId: testProjectId,
+			Region:    "eu02",
+			Verbosity: globalflags.VerbosityDefault,
+		},
+		VpcId:          testVpcId,
+		RoutingTableId: testRoutingTableId,
+		Name:           new("rt"),
+	}
+	for _, mod := range mods {
+		mod(model)
+	}
+	return model
+}
+
+func fixturePayload(mods ...func(*iaas.UpdateVPCRoutingTablePayload)) iaas.UpdateVPCRoutingTablePayload {
+	payload := iaas.UpdateVPCRoutingTablePayload{
+		Name: new("rt"),
+	}
+	for _, mod := range mods {
+		mod(&payload)
+	}
+	return payload
+}
+
+func TestParseInput(t *testing.T) {
+	tests := []struct {
+		name       string
+		args       []string
+		flagValues map[string]string
+		want       *inputModel
 	}{
 		{
-			name:  "name only",
-			flag:  nameFlag,
-			value: "rt",
-			want:  defaultModel(func(m *inputModel) { m.Name = new("rt") }),
+			name:       "name only",
+			args:       []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(),
+			want:       fixtureInputModel(),
 		},
 		{
-			name:  "description only",
-			flag:  descriptionFlag,
-			value: "my routing table",
-			want:  defaultModel(func(m *inputModel) { m.Description = new("my routing table") }),
+			name: "description only",
+			args: []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				delete(f, nameFlag)
+				f[descriptionFlag] = "my routing table"
+			}),
+			want: fixtureInputModel(func(m *inputModel) {
+				m.Name = nil
+				m.Description = new("my routing table")
+			}),
 		},
 		{
 			name: "clear description",
-			flag: descriptionFlag,
-			want: defaultModel(func(m *inputModel) { m.Description = new("") }),
+			args: []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				delete(f, nameFlag)
+				f[descriptionFlag] = ""
+			}),
+			want: fixtureInputModel(func(m *inputModel) {
+				m.Name = nil
+				m.Description = new("")
+			}),
 		},
 		{
-			name:  "labels only",
-			flag:  labelFlag,
-			value: "env=dev,team=network",
-			want: defaultModel(func(m *inputModel) {
+			name: "labels only",
+			args: []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				delete(f, nameFlag)
+				f[labelFlag] = "env=dev,team=network"
+			}),
+			want: fixtureInputModel(func(m *inputModel) {
+				m.Name = nil
 				m.Labels = map[string]any{
 					"env":  "dev",
 					"team": "network",
@@ -77,206 +116,245 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			name: "empty labels",
-			flag: labelFlag,
+			args: []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				f[labelFlag] = ""
+			}),
 		},
 		{
-			name:  "disable dynamic routes",
-			flag:  dynamicRoutesFlag,
-			value: "false",
-			want:  defaultModel(func(m *inputModel) { m.DynamicRoutes = new(false) }),
+			name: "disable dynamic routes",
+			args: []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				delete(f, nameFlag)
+				f[dynamicRoutesFlag] = "false"
+			}),
+			want: fixtureInputModel(func(m *inputModel) {
+				m.Name = nil
+				m.DynamicRoutes = new(false)
+			}),
 		},
 		{
-			name:  "enable dynamic routes",
-			flag:  dynamicRoutesFlag,
-			value: "true",
-			want:  defaultModel(func(m *inputModel) { m.DynamicRoutes = new(true) }),
+			name: "enable dynamic routes",
+			args: []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				delete(f, nameFlag)
+				f[dynamicRoutesFlag] = "true"
+			}),
+			want: fixtureInputModel(func(m *inputModel) {
+				m.Name = nil
+				m.DynamicRoutes = new(true)
+			}),
 		},
 		{
-			name:  "disable system routes",
-			flag:  systemRoutesFlag,
-			value: "false",
-			want:  defaultModel(func(m *inputModel) { m.SystemRoutes = new(false) }),
+			name: "disable system routes",
+			args: []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				delete(f, nameFlag)
+				f[systemRoutesFlag] = "false"
+			}),
+			want: fixtureInputModel(func(m *inputModel) {
+				m.Name = nil
+				m.SystemRoutes = new(false)
+			}),
 		},
 		{
-			name:  "enable system routes",
-			flag:  systemRoutesFlag,
-			value: "true",
-			want:  defaultModel(func(m *inputModel) { m.SystemRoutes = new(true) }),
+			name: "enable system routes",
+			args: []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				delete(f, nameFlag)
+				f[systemRoutesFlag] = "true"
+			}),
+			want: fixtureInputModel(func(m *inputModel) {
+				m.Name = nil
+				m.SystemRoutes = new(true)
+			}),
 		},
 		{
-			name:   "no update flags",
-			flag:   nameFlag,
-			remove: true,
+			name: "combined updates",
+			args: []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				f[descriptionFlag] = "my routing table"
+				f[dynamicRoutesFlag] = "false"
+				f[systemRoutesFlag] = "false"
+			}),
+			want: fixtureInputModel(func(m *inputModel) {
+				m.Description = new("my routing table")
+				m.DynamicRoutes = new(false)
+				m.SystemRoutes = new(false)
+			}),
 		},
 		{
-			name:   "missing project",
-			flag:   globalflags.ProjectIdFlag,
-			remove: true,
+			name: "no update flags",
+			args: []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				delete(f, nameFlag)
+			}),
 		},
 		{
-			name:  "invalid project",
-			flag:  globalflags.ProjectIdFlag,
-			value: "invalid",
+			name: "missing project",
+			args: []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				delete(f, globalflags.ProjectIdFlag)
+			}),
 		},
 		{
-			name:   "missing region",
-			flag:   globalflags.RegionFlag,
-			remove: true,
+			name: "invalid project",
+			args: []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				f[globalflags.ProjectIdFlag] = "invalid"
+			}),
 		},
 		{
-			name:   "missing vpc",
-			flag:   vpcIdFlag,
-			remove: true,
+			name: "missing region",
+			args: []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				delete(f, globalflags.RegionFlag)
+			}),
 		},
 		{
-			name:  "invalid vpc",
-			flag:  vpcIdFlag,
-			value: "invalid",
+			name: "missing vpc",
+			args: []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				delete(f, vpcIdFlag)
+			}),
+		},
+		{
+			name: "invalid vpc",
+			args: []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				f[vpcIdFlag] = "invalid"
+			}),
 		},
 		{
 			name: "empty vpc",
-			flag: vpcIdFlag,
+			args: []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				f[vpcIdFlag] = ""
+			}),
 		},
 		{
-			name:  "invalid labels",
-			flag:  labelFlag,
-			value: "invalid",
+			name: "invalid labels",
+			args: []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				f[labelFlag] = "invalid"
+			}),
 		},
 		{
-			name:  "invalid boolean",
-			flag:  dynamicRoutesFlag,
-			value: "invalid",
+			name: "invalid boolean",
+			args: []string{testRoutingTableId},
+			flagValues: fixtureFlagValues(func(f map[string]string) {
+				f[dynamicRoutesFlag] = "invalid"
+			}),
 		},
 		{
-			name: "missing routing-table id",
-			args: []string{},
+			name:       "missing routing-table id",
+			args:       []string{},
+			flagValues: fixtureFlagValues(),
 		},
 		{
-			name: "invalid routing-table id",
-			args: []string{"invalid"},
+			name:       "invalid routing-table id",
+			args:       []string{"invalid"},
+			flagValues: fixtureFlagValues(),
 		},
 		{
-			name: "empty routing-table id",
-			args: []string{""},
+			name:       "empty routing-table id",
+			args:       []string{""},
+			flagValues: fixtureFlagValues(),
 		},
 		{
-			name: "too many arguments",
-			args: []string{testRoutingTableId, testRoutingTableId},
+			name:       "too many arguments",
+			args:       []string{testRoutingTableId, testRoutingTableId},
+			flagValues: fixtureFlagValues(),
 		},
-	} {
+	}
+	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			flagValues := map[string]string{
-				globalflags.ProjectIdFlag: testProjectId,
-				globalflags.RegionFlag:    "eu02",
-				vpcIdFlag:                 testVpcId,
-			}
-			if tt.want == nil {
-				flagValues[nameFlag] = "rt"
-			}
-			if tt.flag != "" {
-				flagValues[tt.flag] = tt.value
-				if tt.remove {
-					delete(flagValues, tt.flag)
-				}
-			}
-			inputArgs := tt.args
-			if inputArgs == nil {
-				inputArgs = []string{testRoutingTableId}
-			}
-
-			testutils.TestParseInput(t, NewCmd, parseInput, tt.want, inputArgs, flagValues, tt.want != nil)
+			testutils.TestParseInput(t, NewCmd, parseInput, tt.want, tt.args, tt.flagValues, tt.want != nil)
 		})
 	}
 }
 
 func TestBuildRequest(t *testing.T) {
-	defaultModel := func(opts ...func(*inputModel)) *inputModel {
-		model := &inputModel{
-			GlobalFlagModel: &globalflags.GlobalFlagModel{
-				ProjectId: testProjectId,
-				Region:    "eu02",
-			},
-			VpcId:          testVpcId,
-			RoutingTableId: testRoutingTableId,
-			Name:           new("rt"),
-			Description:    new("description"),
-			Labels:         map[string]any{"env": "dev"},
-			DynamicRoutes:  new(true),
-			SystemRoutes:   new(true),
-		}
-		for _, opt := range opts {
-			opt(model)
-		}
-		return model
-	}
-	defaultPayload := func(opts ...func(*iaas.UpdateVPCRoutingTablePayload)) iaas.UpdateVPCRoutingTablePayload {
-		payload := iaas.UpdateVPCRoutingTablePayload{
-			Name:          new("rt"),
-			Description:   new("description"),
-			Labels:        map[string]any{"env": "dev"},
-			DynamicRoutes: new(true),
-			SystemRoutes:  new(true),
-		}
-		for _, opt := range opts {
-			opt(&payload)
-		}
-		return payload
-	}
-
-	for _, tt := range []struct {
+	tests := []struct {
 		name        string
 		model       *inputModel
 		wantPayload iaas.UpdateVPCRoutingTablePayload
 	}{
 		{
-			name:        "all fields",
-			model:       defaultModel(),
-			wantPayload: defaultPayload(),
-		},
-		{
-			name:        "empty labels",
-			model:       defaultModel(func(m *inputModel) { m.Labels = map[string]any{} }),
-			wantPayload: defaultPayload(func(p *iaas.UpdateVPCRoutingTablePayload) { p.Labels = map[string]any{} }),
-		},
-		{
-			name:        "omitted labels",
-			model:       defaultModel(func(m *inputModel) { m.Labels = nil }),
-			wantPayload: defaultPayload(func(p *iaas.UpdateVPCRoutingTablePayload) { p.Labels = nil }),
-		},
-		{
-			name: "name only leaves other fields unchanged",
-			model: defaultModel(func(m *inputModel) {
-				m.Labels = nil
-				m.Description = nil
-				m.DynamicRoutes = nil
-				m.SystemRoutes = nil
+			name: "all fields",
+			model: fixtureInputModel(func(m *inputModel) {
+				m.Description = new("description")
+				m.Labels = map[string]any{"env": "dev"}
+				m.DynamicRoutes = new(true)
+				m.SystemRoutes = new(true)
 			}),
-			wantPayload: iaas.UpdateVPCRoutingTablePayload{
-				Name: new("rt"),
-			},
+			wantPayload: fixturePayload(func(p *iaas.UpdateVPCRoutingTablePayload) {
+				p.Description = new("description")
+				p.Labels = map[string]any{"env": "dev"}
+				p.DynamicRoutes = new(true)
+				p.SystemRoutes = new(true)
+			}),
+		},
+		{
+			name: "empty labels",
+			model: fixtureInputModel(func(m *inputModel) {
+				m.Labels = map[string]any{}
+			}),
+			wantPayload: fixturePayload(func(p *iaas.UpdateVPCRoutingTablePayload) {
+				p.Labels = map[string]any{}
+			}),
+		},
+		{
+			name: "omitted labels",
+			model: fixtureInputModel(func(m *inputModel) {
+				m.Description = new("description")
+				m.DynamicRoutes = new(true)
+				m.SystemRoutes = new(true)
+			}),
+			wantPayload: fixturePayload(func(p *iaas.UpdateVPCRoutingTablePayload) {
+				p.Description = new("description")
+				p.DynamicRoutes = new(true)
+				p.SystemRoutes = new(true)
+			}),
+		},
+		{
+			name:        "name only leaves other fields unchanged",
+			model:       fixtureInputModel(),
+			wantPayload: fixturePayload(),
 		},
 		{
 			name: "disabled routes",
-			model: defaultModel(func(m *inputModel) {
+			model: fixtureInputModel(func(m *inputModel) {
 				m.DynamicRoutes = new(false)
 				m.SystemRoutes = new(false)
 			}),
-			wantPayload: defaultPayload(func(p *iaas.UpdateVPCRoutingTablePayload) {
+			wantPayload: fixturePayload(func(p *iaas.UpdateVPCRoutingTablePayload) {
 				p.DynamicRoutes = new(false)
 				p.SystemRoutes = new(false)
 			}),
 		},
 		{
-			name:        "clear description",
-			model:       defaultModel(func(m *inputModel) { m.Description = new("") }),
-			wantPayload: defaultPayload(func(p *iaas.UpdateVPCRoutingTablePayload) { p.Description = new("") }),
+			name: "clear description",
+			model: fixtureInputModel(func(m *inputModel) {
+				m.Description = new("")
+			}),
+			wantPayload: fixturePayload(func(p *iaas.UpdateVPCRoutingTablePayload) {
+				p.Description = new("")
+			}),
 		},
 		{
-			name:        "omitted name",
-			model:       defaultModel(func(m *inputModel) { m.Name = nil }),
-			wantPayload: defaultPayload(func(p *iaas.UpdateVPCRoutingTablePayload) { p.Name = nil }),
+			name: "omitted name",
+			model: fixtureInputModel(func(m *inputModel) {
+				m.Name = nil
+				m.Description = new("description")
+			}),
+			wantPayload: fixturePayload(func(p *iaas.UpdateVPCRoutingTablePayload) {
+				p.Name = nil
+				p.Description = new("description")
+			}),
 		},
-	} {
+	}
+	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
 			client := &iaas.DefaultAPIServiceMock{}
