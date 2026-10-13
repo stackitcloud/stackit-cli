@@ -25,6 +25,7 @@ const (
 	allowedUrlDomainFlag                             = "allowed-url-domain"
 
 	authorizationCustomEndpointFlag     = "authorization-custom-endpoint"
+	automationCustomEndpointFlag        = "automation-custom-endpoint"
 	albWafCustomEndpointFlag            = "alb-waf-custom-endpoint"
 	dnsCustomEndpointFlag               = "dns-custom-endpoint"
 	edgeCustomEndpointFlag              = "edge-custom-endpoint"
@@ -48,6 +49,7 @@ const (
 	serviceEnablementCustomEndpointFlag = "service-enablement-custom-endpoint"
 	skeCustomEndpointFlag               = "ske-custom-endpoint"
 	sqlServerFlexCustomEndpointFlag     = "sqlserverflex-custom-endpoint"
+	iaasAlphaCustomEndpointFlag         = "iaas-alpha-custom-endpoint"
 	iaasCustomEndpointFlag              = "iaas-custom-endpoint"
 	tokenCustomEndpointFlag             = "token-custom-endpoint"
 	intakeCustomEndpointFlag            = "intake-custom-endpoint"
@@ -147,6 +149,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(allowedUrlDomainFlag, "", `Domain name, used for the verification of the URLs that are given in the custom identity provider endpoint and "STACKIT curl" command`)
 	cmd.Flags().String(observabilityCustomEndpointFlag, "", "Observability API base URL, used in calls to this API")
 	cmd.Flags().String(authorizationCustomEndpointFlag, "", "Authorization API base URL, used in calls to this API")
+	cmd.Flags().String(automationCustomEndpointFlag, "", "Automation API base URL, used in calls to this API")
 	cmd.Flags().String(albWafCustomEndpointFlag, "", "ALB WAF API base URL, used in calls to this API")
 	cmd.Flags().String(dnsCustomEndpointFlag, "", "DNS API base URL, used in calls to this API")
 	cmd.Flags().String(edgeCustomEndpointFlag, "", "Edge API base URL, used in calls to this API")
@@ -169,6 +172,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(runCommandCustomEndpointFlag, "", "Run Command API base URL, used in calls to this API")
 	cmd.Flags().String(skeCustomEndpointFlag, "", "SKE API base URL, used in calls to this API")
 	cmd.Flags().String(sqlServerFlexCustomEndpointFlag, "", "SQLServer Flex API base URL, used in calls to this API")
+	cmd.Flags().String(iaasAlphaCustomEndpointFlag, "", "IaaS Alpha API base URL, used in calls to this API")
 	cmd.Flags().String(iaasCustomEndpointFlag, "", "IaaS API base URL, used in calls to this API")
 	cmd.Flags().String(tokenCustomEndpointFlag, "", "Custom token endpoint of the Service Account API, which is used to request access tokens when the service account authentication is activated. Not relevant for user authentication.")
 	cmd.Flags().String(intakeCustomEndpointFlag, "", "Intake API base URL, used in calls to this API")
@@ -189,6 +193,8 @@ func configureFlags(cmd *cobra.Command) {
 	err = viper.BindPFlag(config.ObservabilityCustomEndpointKey, cmd.Flags().Lookup(observabilityCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.AuthorizationCustomEndpointKey, cmd.Flags().Lookup(authorizationCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.AutomationCustomEndpointKey, cmd.Flags().Lookup(automationCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.AlbWafCustomEndpointKey, cmd.Flags().Lookup(albWafCustomEndpointFlag))
 	cobra.CheckErr(err)
@@ -212,7 +218,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.RabbitMQCustomEndpointKey, cmd.Flags().Lookup(rabbitMQCustomEndpointFlag))
 	cobra.CheckErr(err)
-	err = viper.BindPFlag(config.RedisCustomEndpointKey, cmd.Flags().Lookup(redisCustomEndpointFlag))
+	err = viper.BindPFlag(config.RedisCustomEndpointKey, cmd.Flags().Lookup(redisCustomEndpointFlag)) //nolint:staticcheck // deprecated but still supported until 2027-08-31
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.ResourceManagerEndpointKey, cmd.Flags().Lookup(resourceManagerCustomEndpointFlag))
 	cobra.CheckErr(err)
@@ -233,6 +239,8 @@ func configureFlags(cmd *cobra.Command) {
 	err = viper.BindPFlag(config.SKECustomEndpointKey, cmd.Flags().Lookup(skeCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.SQLServerFlexCustomEndpointKey, cmd.Flags().Lookup(sqlServerFlexCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.IaaSAlphaCustomEndpointKey, cmd.Flags().Lookup(iaasAlphaCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.IaaSCustomEndpointKey, cmd.Flags().Lookup(iaasCustomEndpointFlag))
 	cobra.CheckErr(err)

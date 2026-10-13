@@ -1,6 +1,7 @@
 package albwaf
 
 import (
+	config "github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb-waf/config"
 	customrulegroup "github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb-waf/custom-rule-group"
 	managedruleset "github.com/stackitcloud/stackit-cli/internal/cmd/beta/alb-waf/managed-rule-set"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -27,5 +28,6 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(
 		managedruleset.NewCmd(params),
 		customrulegroup.NewCmd(params),
+		config.NewCmd(params),
 	)
 }

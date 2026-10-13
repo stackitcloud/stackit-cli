@@ -322,7 +322,7 @@ func TestBuildHeaderMap(t *testing.T) {
 			},
 		},
 		{
-			description: "no include headers",
+			description: "non default HTTP headers",
 			inputHeader: http.Header{
 				"Accept": []string{"value1"},
 				"key2":   []string{"value2"},
@@ -332,6 +332,7 @@ func TestBuildHeaderMap(t *testing.T) {
 			expected: map[string]any{
 				"Accept": "value1",
 				"Date":   "value3",
+				"key2":   "value2",
 			},
 		},
 		{
@@ -364,11 +365,10 @@ func TestBuildHeaderMap(t *testing.T) {
 
 func TestBuildDebugStrFromHTTPRequest(t *testing.T) {
 	tests := []struct {
-		description         string
-		inputReq            *http.Request
-		inputIncludeHeaders []string
-		expected            []string
-		isValid             bool
+		description string
+		inputReq    *http.Request
+		expected    []string
+		isValid     bool
 	}{
 		{
 			description: "base",
@@ -381,12 +381,13 @@ func TestBuildDebugStrFromHTTPRequest(t *testing.T) {
 			isValid: true,
 		},
 		{
-			description:         "include headers",
-			inputReq:            fixtureHTTPRequest(),
-			inputIncludeHeaders: []string{"Content-Type", "Accept"},
+			description: "includes only default headers",
+			inputReq: fixtureHTTPRequest(func(req *http.Request) {
+				req.Header["Authorization"] = []string{"Bearer: ey"}
+			}),
 			expected: []string{
 				"request to http://example.com: GET HTTP/1.1",
-				"request headers: [Accept: application/json, Content-Type: application/json]",
+				"request headers: [Accept: application/json, Content-Length: 15, Content-Type: application/json]",
 				"request body: [key: value]",
 			},
 			isValid: true,
@@ -438,7 +439,7 @@ func TestBuildDebugStrFromHTTPRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			actual, err := BuildDebugStrFromHTTPRequest(tt.inputReq, tt.inputIncludeHeaders)
+			actual, err := BuildDebugStrFromHTTPRequest(tt.inputReq)
 			if err != nil {
 				if !tt.isValid {
 					return
@@ -458,11 +459,10 @@ func TestBuildDebugStrFromHTTPRequest(t *testing.T) {
 
 func TestBuildDebugStrFromHTTPResponse(t *testing.T) {
 	tests := []struct {
-		description         string
-		inputResp           *http.Response
-		inputIncludeHeaders []string
-		expected            []string
-		isValid             bool
+		description string
+		inputResp   *http.Response
+		expected    []string
+		isValid     bool
 	}{
 		{
 			description: "base",
@@ -497,6 +497,18 @@ func TestBuildDebugStrFromHTTPResponse(t *testing.T) {
 			isValid: true,
 		},
 		{
+			description: "more headers",
+			inputResp: fixtureHTTPResponse(func(resp *http.Response) { // nolint:bodyclose // false positive, body is closed in the test
+				resp.Header.Add("X-Trace-Id", "trace-id")
+			}),
+			expected: []string{
+				"response from http://example.com: HTTP/1.1 200 OK",
+				"response headers: [Accept: application/json, Content-Length: 15, Content-Type: application/json, X-Trace-Id: trace-id]",
+				"response body: [key: value]",
+			},
+			isValid: true,
+		},
+		{
 			description: "empty body",
 			inputResp: fixtureHTTPResponse(func(resp *http.Response) { // nolint:bodyclose // false positive, body is closed in the test
 				resp.Body = nil
@@ -517,7 +529,7 @@ func TestBuildDebugStrFromHTTPResponse(t *testing.T) {
 					err = tt.inputResp.Body.Close()
 				}()
 			}
-			actual, err := BuildDebugStrFromHTTPResponse(tt.inputResp, tt.inputIncludeHeaders)
+			actual, err := BuildDebugStrFromHTTPResponse(tt.inputResp)
 			if err != nil {
 				if !tt.isValid {
 					return

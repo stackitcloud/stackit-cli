@@ -28,6 +28,7 @@ const (
 	allowedUrlDomainFlag                             = "allowed-url-domain"
 
 	authorizationCustomEndpointFlag     = "authorization-custom-endpoint"
+	automationCustomEndpointFlag        = "automation-custom-endpoint"
 	albWafCustomEndpointFlag            = "alb-waf-custom-endpoint"
 	dnsCustomEndpointFlag               = "dns-custom-endpoint"
 	edgeCustomEndpointFlag              = "edge-custom-endpoint"
@@ -52,6 +53,7 @@ const (
 	sfsCustomEndpointFlag               = "sfs-custom-endpoint"
 	skeCustomEndpointFlag               = "ske-custom-endpoint"
 	sqlServerFlexCustomEndpointFlag     = "sqlserverflex-custom-endpoint"
+	iaasAlphaCustomEndpointFlag         = "iaas-alpha-custom-endpoint"
 	iaasCustomEndpointFlag              = "iaas-custom-endpoint"
 	tokenCustomEndpointFlag             = "token-custom-endpoint"
 	intakeCustomEndpointFlag            = "intake-custom-endpoint"
@@ -79,6 +81,7 @@ type inputModel struct {
 	AllowedUrlDomain               bool
 
 	AuthorizationCustomEndpoint     bool
+	AutomationCustomEndpoint        bool
 	AlbWafCustomEndpoint            bool
 	DNSCustomEndpoint               bool
 	EdgeCustomEndpoint              bool
@@ -103,6 +106,7 @@ type inputModel struct {
 	SfsCustomEndpoint               bool
 	SKECustomEndpoint               bool
 	SQLServerFlexCustomEndpoint     bool
+	IaaSAlphaCustomEndpoint         bool
 	IaaSCustomEndpoint              bool
 	TokenCustomEndpoint             bool
 	IntakeCustomEndpoint            bool
@@ -169,6 +173,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.AuthorizationCustomEndpoint {
 				viper.Set(config.AuthorizationCustomEndpointKey, "")
 			}
+			if model.AutomationCustomEndpoint {
+				viper.Set(config.AutomationCustomEndpointKey, "")
+			}
 			if model.AlbWafCustomEndpoint {
 				viper.Set(config.AlbWafCustomEndpointKey, "")
 			}
@@ -203,7 +210,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				viper.Set(config.RabbitMQCustomEndpointKey, "")
 			}
 			if model.RedisCustomEndpoint {
-				viper.Set(config.RedisCustomEndpointKey, "")
+				viper.Set(config.RedisCustomEndpointKey, "") //nolint:staticcheck // deprecated but still supported until 2027-08-31
 			}
 			if model.ResourceManagerCustomEndpoint {
 				viper.Set(config.ResourceManagerEndpointKey, "")
@@ -234,6 +241,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 			if model.SQLServerFlexCustomEndpoint {
 				viper.Set(config.SQLServerFlexCustomEndpointKey, "")
+			}
+			if model.IaaSAlphaCustomEndpoint {
+				viper.Set(config.IaaSAlphaCustomEndpointKey, "")
 			}
 			if model.IaaSCustomEndpoint {
 				viper.Set(config.IaaSCustomEndpointKey, "")
@@ -283,6 +293,7 @@ func configureFlags(cmd *cobra.Command) {
 
 	cmd.Flags().Bool(observabilityCustomEndpointFlag, false, "Observability API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(authorizationCustomEndpointFlag, false, "Authorization API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(automationCustomEndpointFlag, false, "Automation API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(albWafCustomEndpointFlag, false, "ALB WAF API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(dnsCustomEndpointFlag, false, "DNS API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(edgeCustomEndpointFlag, false, "Edge API base URL. If unset, uses the default base URL")
@@ -305,6 +316,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(runCommandCustomEndpointFlag, false, "Server Command base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(skeCustomEndpointFlag, false, "SKE API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(sqlServerFlexCustomEndpointFlag, false, "SQLServer Flex API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(iaasAlphaCustomEndpointFlag, false, "IaaS Alpha API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(iaasCustomEndpointFlag, false, "IaaS API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(tokenCustomEndpointFlag, false, "Custom token endpoint of the Service Account API, which is used to request access tokens when the service account authentication is activated. Not relevant for user authentication.")
 	cmd.Flags().Bool(intakeCustomEndpointFlag, false, "Intake API base URL. If unset, uses the default base URL")
@@ -329,6 +341,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		AllowedUrlDomain:               flags.FlagToBoolValue(p, cmd, allowedUrlDomainFlag),
 
 		AuthorizationCustomEndpoint:     flags.FlagToBoolValue(p, cmd, authorizationCustomEndpointFlag),
+		AutomationCustomEndpoint:        flags.FlagToBoolValue(p, cmd, automationCustomEndpointFlag),
 		AlbWafCustomEndpoint:            flags.FlagToBoolValue(p, cmd, albWafCustomEndpointFlag),
 		DNSCustomEndpoint:               flags.FlagToBoolValue(p, cmd, dnsCustomEndpointFlag),
 		EdgeCustomEndpoint:              flags.FlagToBoolValue(p, cmd, edgeCustomEndpointFlag),
@@ -353,6 +366,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		SKECustomEndpoint:               flags.FlagToBoolValue(p, cmd, skeCustomEndpointFlag),
 		SfsCustomEndpoint:               flags.FlagToBoolValue(p, cmd, sfsCustomEndpointFlag),
 		SQLServerFlexCustomEndpoint:     flags.FlagToBoolValue(p, cmd, sqlServerFlexCustomEndpointFlag),
+		IaaSAlphaCustomEndpoint:         flags.FlagToBoolValue(p, cmd, iaasAlphaCustomEndpointFlag),
 		IaaSCustomEndpoint:              flags.FlagToBoolValue(p, cmd, iaasCustomEndpointFlag),
 		TokenCustomEndpoint:             flags.FlagToBoolValue(p, cmd, tokenCustomEndpointFlag),
 		IntakeCustomEndpoint:            flags.FlagToBoolValue(p, cmd, intakeCustomEndpointFlag),

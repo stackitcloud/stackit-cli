@@ -23,20 +23,22 @@ const (
 	IdentityProviderCustomClientIdKey               = "identity_provider_custom_client_id"
 	AllowedUrlDomainKey                             = "allowed_url_domain"
 
-	AuthorizationCustomEndpointKey     = "authorization_custom_endpoint"
-	AlbCustomEndpoint                  = "alb_custom _endpoint"
-	AlbWafCustomEndpointKey            = "alb_waf_custom_endpoint"
-	DNSCustomEndpointKey               = "dns_custom_endpoint"
-	EdgeCustomEndpointKey              = "edge_custom_endpoint"
-	LoadBalancerCustomEndpointKey      = "load_balancer_custom_endpoint"
-	LogMeCustomEndpointKey             = "logme_custom_endpoint"
-	MariaDBCustomEndpointKey           = "mariadb_custom_endpoint"
-	MongoDBFlexCustomEndpointKey       = "mongodbflex_custom_endpoint"
-	ObjectStorageCustomEndpointKey     = "object_storage_custom_endpoint"
-	ObservabilityCustomEndpointKey     = "observability_custom_endpoint"
-	OpenSearchCustomEndpointKey        = "opensearch_custom_endpoint"
-	PostgresFlexCustomEndpointKey      = "postgresflex_custom_endpoint"
-	RabbitMQCustomEndpointKey          = "rabbitmq_custom_endpoint"
+	AuthorizationCustomEndpointKey = "authorization_custom_endpoint"
+	AutomationCustomEndpointKey    = "automation_custom_endpoint"
+	AlbCustomEndpoint              = "alb_custom _endpoint"
+	AlbWafCustomEndpointKey        = "alb_waf_custom_endpoint"
+	DNSCustomEndpointKey           = "dns_custom_endpoint"
+	EdgeCustomEndpointKey          = "edge_custom_endpoint"
+	LoadBalancerCustomEndpointKey  = "load_balancer_custom_endpoint"
+	LogMeCustomEndpointKey         = "logme_custom_endpoint"
+	MariaDBCustomEndpointKey       = "mariadb_custom_endpoint"
+	MongoDBFlexCustomEndpointKey   = "mongodbflex_custom_endpoint"
+	ObjectStorageCustomEndpointKey = "object_storage_custom_endpoint"
+	ObservabilityCustomEndpointKey = "observability_custom_endpoint"
+	OpenSearchCustomEndpointKey    = "opensearch_custom_endpoint"
+	PostgresFlexCustomEndpointKey  = "postgresflex_custom_endpoint"
+	RabbitMQCustomEndpointKey      = "rabbitmq_custom_endpoint"
+	// Deprecated: Will be removed after 2027-08-31.
 	RedisCustomEndpointKey             = "redis_custom_endpoint"
 	ResourceManagerEndpointKey         = "resource_manager_custom_endpoint"
 	SecretsManagerCustomEndpointKey    = "secrets_manager_custom_endpoint"
@@ -49,12 +51,14 @@ const (
 	SfsCustomEndpointKey               = "sfs_custom_endpoint"
 	SKECustomEndpointKey               = "ske_custom_endpoint"
 	SQLServerFlexCustomEndpointKey     = "sqlserverflex_custom_endpoint"
+	IaaSAlphaCustomEndpointKey         = "iaas_alpha_custom_endpoint"
 	IaaSCustomEndpointKey              = "iaas_custom_endpoint"
 	TokenCustomEndpointKey             = "token_custom_endpoint"
 	GitCustomEndpointKey               = "git_custom_endpoint"
 	CDNCustomEndpointKey               = "cdn_custom_endpoint"
 	IntakeCustomEndpointKey            = "intake_custom_endpoint"
 	LogsCustomEndpointKey              = "logs_custom_endpoint"
+	ValkeyCustomEndpointKey            = "valkey_custom_endpoint"
 	VPNCustomEndpointKey               = "vpn_custom_endpoint"
 
 	ProjectNameKey     = "project_name"
@@ -95,10 +99,12 @@ var ConfigKeys = []string{
 	AlbCustomEndpoint,
 	AlbWafCustomEndpointKey,
 	AuthorizationCustomEndpointKey,
+	AutomationCustomEndpointKey,
 	CDNCustomEndpointKey,
 	DNSCustomEndpointKey,
 	EdgeCustomEndpointKey,
 	GitCustomEndpointKey,
+	IaaSAlphaCustomEndpointKey,
 	IaaSCustomEndpointKey,
 	IntakeCustomEndpointKey,
 	KMSCustomEndpointKey,
@@ -124,6 +130,7 @@ var ConfigKeys = []string{
 	ServiceEnablementCustomEndpointKey,
 	SfsCustomEndpointKey,
 	TokenCustomEndpointKey,
+	ValkeyCustomEndpointKey,
 	VPNCustomEndpointKey,
 }
 
@@ -195,6 +202,7 @@ func setConfigDefaults() {
 	viper.SetDefault(EdgeCustomEndpointKey, "")
 	viper.SetDefault(ObservabilityCustomEndpointKey, "")
 	viper.SetDefault(AuthorizationCustomEndpointKey, "")
+	viper.SetDefault(AutomationCustomEndpointKey, "")
 	viper.SetDefault(MongoDBFlexCustomEndpointKey, "")
 	viper.SetDefault(ObjectStorageCustomEndpointKey, "")
 	viper.SetDefault(OpenSearchCustomEndpointKey, "")
@@ -209,6 +217,7 @@ func setConfigDefaults() {
 	viper.SetDefault(RunCommandCustomEndpointKey, "")
 	viper.SetDefault(SKECustomEndpointKey, "")
 	viper.SetDefault(SQLServerFlexCustomEndpointKey, "")
+	viper.SetDefault(IaaSAlphaCustomEndpointKey, "")
 	viper.SetDefault(IaaSCustomEndpointKey, "")
 	viper.SetDefault(TokenCustomEndpointKey, "")
 	viper.SetDefault(GitCustomEndpointKey, "")
@@ -217,6 +226,7 @@ func setConfigDefaults() {
 	viper.SetDefault(AlbWafCustomEndpointKey, "")
 	viper.SetDefault(LogsCustomEndpointKey, "")
 	viper.SetDefault(CDNCustomEndpointKey, "")
+	viper.SetDefault(ValkeyCustomEndpointKey, "")
 	viper.SetDefault(VPNCustomEndpointKey, "")
 }
 

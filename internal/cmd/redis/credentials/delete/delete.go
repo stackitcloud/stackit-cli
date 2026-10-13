@@ -21,23 +21,28 @@ import (
 )
 
 const (
+	// Deprecated: Will be removed after 2027-08-31.
 	credentialsIdArg = "CREDENTIALS_ID" //nolint:gosec // linter false positive
 
+	// Deprecated: Will be removed after 2027-08-31.
 	instanceIdFlag = "instance-id"
 )
 
+// Deprecated: Will be removed after 2027-08-31.
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	InstanceId    string
 	CredentialsId string
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("delete %s", credentialsIdArg),
-		Short: "Deletes credentials of a Redis instance",
-		Long:  "Deletes credentials of a Redis instance.",
-		Args:  args.SingleArg(credentialsIdArg, utils.ValidateUUID),
+		Use:        fmt.Sprintf("delete %s", credentialsIdArg),
+		Short:      "Deletes credentials of a Redis instance",
+		Long:       "Deletes credentials of a Redis instance.",
+		Deprecated: "\nCommand `stackit redis credentials delete` is deprecated and will be removed after 2027-08-31. Please use `stackit valkey credentials delete` instead.",
+		Args:       args.SingleArg(credentialsIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
 				`Delete credentials with ID "xxx" of Redis instance with ID "yyy"`,
@@ -89,6 +94,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	return cmd
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance ID")
 
@@ -96,6 +102,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	credentialsId := inputArgs[0]
 
@@ -114,6 +121,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func buildRequest(ctx context.Context, model *inputModel, apiClient *redis.APIClient) redis.ApiDeleteCredentialsRequest {
 	req := apiClient.DefaultAPI.DeleteCredentials(ctx, model.ProjectId, model.Region, model.InstanceId, model.CredentialsId)
 	return req

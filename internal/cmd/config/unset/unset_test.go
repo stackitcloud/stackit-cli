@@ -23,6 +23,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 		allowedUrlDomainFlag:                             true,
 
 		authorizationCustomEndpointFlag:   true,
+		automationCustomEndpointFlag:      true,
 		albWafCustomEndpointFlag:          true,
 		dnsCustomEndpointFlag:             true,
 		edgeCustomEndpointFlag:            true,
@@ -44,6 +45,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 		sfsCustomEndpointFlag:             true,
 		skeCustomEndpointFlag:             true,
 		sqlServerFlexCustomEndpointFlag:   true,
+		iaasAlphaCustomEndpointFlag:       true,
 		iaasCustomEndpointFlag:            true,
 		tokenCustomEndpointFlag:           true,
 		intakeCustomEndpointFlag:          true,
@@ -71,6 +73,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		AllowedUrlDomain:               true,
 
 		AuthorizationCustomEndpoint:   true,
+		AutomationCustomEndpoint:      true,
 		AlbWafCustomEndpoint:          true,
 		DNSCustomEndpoint:             true,
 		EdgeCustomEndpoint:            true,
@@ -92,6 +95,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		SfsCustomEndpoint:             true,
 		SKECustomEndpoint:             true,
 		SQLServerFlexCustomEndpoint:   true,
+		IaaSAlphaCustomEndpoint:       true,
 		IaaSCustomEndpoint:            true,
 		TokenCustomEndpoint:           true,
 		IntakeCustomEndpoint:          true,
@@ -135,6 +139,7 @@ func TestParseInput(t *testing.T) {
 				model.AllowedUrlDomain = false
 
 				model.AuthorizationCustomEndpoint = false
+				model.AutomationCustomEndpoint = false
 				model.AlbWafCustomEndpoint = false
 				model.DNSCustomEndpoint = false
 				model.EdgeCustomEndpoint = false
@@ -156,6 +161,7 @@ func TestParseInput(t *testing.T) {
 				model.SfsCustomEndpoint = false
 				model.SKECustomEndpoint = false
 				model.SQLServerFlexCustomEndpoint = false
+				model.IaaSAlphaCustomEndpoint = false
 				model.IaaSCustomEndpoint = false
 				model.TokenCustomEndpoint = false
 				model.IntakeCustomEndpoint = false
@@ -222,6 +228,16 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.ObservabilityCustomEndpoint = false
+			}),
+		},
+		{
+			description: "automation custom endpoint empty",
+			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
+				flagValues[automationCustomEndpointFlag] = false
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.AutomationCustomEndpoint = false
 			}),
 		},
 		{

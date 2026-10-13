@@ -73,6 +73,43 @@ func TestFlagToStringToStringPointer(t *testing.T) {
 	}
 }
 
+func TestFlagToStringToStringPointerPointer(t *testing.T) {
+	const flagName = "labels"
+
+	tests := []struct {
+		name      string
+		flagValue *string
+		want      *map[string]*string
+	}{
+		{name: "flag unset"},
+		{
+			name:      "flag set",
+			flagValue: utils.Ptr("foo=bar,label1=value1"),
+			want: &map[string]*string{
+				"foo":    utils.Ptr("bar"),
+				"label1": utils.Ptr("value1"),
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			params := testparams.NewTestParams()
+			cmd := &cobra.Command{Use: "test"}
+			cmd.Flags().StringToString(flagName, nil, "Labels")
+			if tt.flagValue != nil {
+				if err := cmd.Flags().Set(flagName, *tt.flagValue); err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			if got := FlagToStringToStringPointerPointer(params.Printer, cmd, flagName); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("FlagToStringToStringPointerPointer() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestFlagToStringArrayValue(t *testing.T) {
 	const flagName = "geofencing"
 	tests := []struct {

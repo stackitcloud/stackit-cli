@@ -83,7 +83,7 @@ func fixturePayload(mods ...func(payload *postgresflex.CreateInstancePayload)) p
 			Acl: []string{"0.0.0.0/0"},
 		},
 		Storage: postgresflex.StorageCreate{
-			Class: utils.Ptr("premium-perf4-stackit"),
+			Class: "premium-perf4-stackit",
 			Size:  int64(10),
 		},
 		Version:       "6.0",
@@ -270,6 +270,34 @@ func TestBuildRequest(t *testing.T) {
 
 				*request = request.CreateInstancePayload(payload)
 			}),
+		},
+		{
+			description: "storage class missing",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.StorageClass = nil
+			}),
+			isValid: false,
+		},
+		{
+			description: "storage size missing",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.StorageSize = nil
+			}),
+			isValid: false,
+		},
+		{
+			description: "backup schedule missing",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.BackupSchedule = nil
+			}),
+			isValid: false,
+		},
+		{
+			description: "version missing",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Version = nil
+			}),
+			isValid: false,
 		},
 	}
 

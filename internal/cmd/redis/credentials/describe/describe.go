@@ -21,23 +21,28 @@ import (
 )
 
 const (
+	// Deprecated: Will be removed after 2027-08-31.
 	credentialsIdArg = "CREDENTIALS_ID" //nolint:gosec // linter false positive
 
+	// Deprecated: Will be removed after 2027-08-31.
 	instanceIdFlag = "instance-id"
 )
 
+// Deprecated: Will be removed after 2027-08-31.
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	InstanceId    string
 	CredentialsId string
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("describe %s", credentialsIdArg),
-		Short: "Shows details of credentials of a Redis instance",
-		Long:  "Shows details of credentials of a Redis instance. The password will be shown in plain text in the output.",
-		Args:  args.SingleArg(credentialsIdArg, utils.ValidateUUID),
+		Use:        fmt.Sprintf("describe %s", credentialsIdArg),
+		Short:      "Shows details of credentials of a Redis instance",
+		Long:       "Shows details of credentials of a Redis instance. The password will be shown in plain text in the output.",
+		Deprecated: "\nCommand `stackit redis credentials describe` is deprecated and will be removed after 2027-08-31. Please use `stackit valkey credentials describe` instead.",
+		Args:       args.SingleArg(credentialsIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
 				`Get details of credentials with ID "xxx" from instance with ID "yyy"`,
@@ -73,6 +78,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	return cmd
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance ID")
 
@@ -80,6 +86,7 @@ func configureFlags(cmd *cobra.Command) {
 	cobra.CheckErr(err)
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	credentialsId := inputArgs[0]
 
@@ -98,11 +105,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func buildRequest(ctx context.Context, model *inputModel, apiClient *redis.APIClient) redis.ApiGetCredentialsRequest {
 	req := apiClient.DefaultAPI.GetCredentials(ctx, model.ProjectId, model.Region, model.InstanceId, model.CredentialsId)
 	return req
 }
 
+// Deprecated: Will be removed after 2027-08-31.
 func outputResult(p *print.Printer, outputFormat string, credentials *redis.CredentialsResponse) error {
 	if credentials == nil {
 		return fmt.Errorf("no credentials passed")

@@ -5,10 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/sqlserverflex"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
-
 	affinityGroups "github.com/stackitcloud/stackit-cli/internal/cmd/affinity-groups"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/alpha"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/auth"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta"
 	configCmd "github.com/stackitcloud/stackit-cli/internal/cmd/config"
@@ -40,7 +38,10 @@ import (
 	securitygroup "github.com/stackitcloud/stackit-cli/internal/cmd/security-group"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/server"
 	serviceaccount "github.com/stackitcloud/stackit-cli/internal/cmd/service-account"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/sfs"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/ske"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/sqlserverflex"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/valkey"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/volume"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
@@ -48,6 +49,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -170,6 +172,7 @@ func configureFlags(cmd *cobra.Command) error {
 }
 
 func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
+	cmd.AddCommand(alpha.NewCmd(params))
 	cmd.AddCommand(auth.NewCmd(params))
 	cmd.AddCommand(configCmd.NewCmd(params))
 	cmd.AddCommand(beta.NewCmd(params))
@@ -187,9 +190,10 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(postgresflex.NewCmd(params))
 	cmd.AddCommand(project.NewCmd(params))
 	cmd.AddCommand(rabbitmq.NewCmd(params))
-	cmd.AddCommand(redis.NewCmd(params))
+	cmd.AddCommand(redis.NewCmd(params)) //nolint:staticcheck // deprecated but still supported until 2027-08-31
 	cmd.AddCommand(secretsmanager.NewCmd(params))
 	cmd.AddCommand(serviceaccount.NewCmd(params))
+	cmd.AddCommand(sfs.NewCmd(params))
 	cmd.AddCommand(ske.NewCmd(params))
 	cmd.AddCommand(server.NewCmd(params))
 	cmd.AddCommand(networkArea.NewCmd(params))
@@ -205,6 +209,7 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(git.NewCmd(params))
 	cmd.AddCommand(kms.NewCmd(params))
 	cmd.AddCommand(sqlserverflex.NewCmd(params))
+	cmd.AddCommand(valkey.NewCmd(params))
 }
 
 // traverseCommands calls f for c and all of its children.

@@ -9,6 +9,7 @@ import (
 	redis "github.com/stackitcloud/stackit-sdk-go/services/redis/v2api"
 )
 
+// Deprecated: Will be removed after 2027-08-31.
 func ConfigureClient(p *print.Printer, cliVersion string) (*redis.APIClient, error) {
 	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.RedisCustomEndpointKey), false, genericclient.CreateApiClient[*redis.APIClient](redis.NewAPIClient))
 }

@@ -5,27 +5,18 @@ import (
 	"context"
 	"fmt"
 	"slices"
-	"strings"
 
 	"golang.org/x/mod/semver"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
-
 	mongodbflex "github.com/stackitcloud/stackit-sdk-go/services/mongodbflex/v2api"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 )
 
-// The number of replicas is enforced by the API according to the instance type
 var instanceTypeToReplicas = map[string]int32{
 	"Single":  1,
 	"Replica": 3,
 	"Sharded": 9,
-}
-
-type MongoDBFlexClient interface {
-	ListVersions(ctx context.Context, projectId, region string) mongodbflex.ApiListVersionsRequest
-	GetInstance(ctx context.Context, projectId, instanceId, region string) mongodbflex.ApiGetInstanceRequest
-	GetUser(ctx context.Context, projectId, instanceId, userId, region string) mongodbflex.ApiGetUserRequest
-	ListRestoreJobs(ctx context.Context, projectId string, instanceId, region string) mongodbflex.ApiListRestoreJobsRequest
 }
 
 func AvailableInstanceTypes() []string {
@@ -49,59 +40,7 @@ func GetInstanceReplicas(instanceType string) (int32, error) {
 	return numReplicas, nil
 }
 
-func GetInstanceType(numReplicas int32) (string, error) {
-	for k, v := range instanceTypeToReplicas {
-		if v == numReplicas {
-			return k, nil
-		}
-	}
-	return "", fmt.Errorf("invalid number of replicas: %v", numReplicas)
-}
-
-func ValidateFlavorId(flavorId string, flavors []mongodbflex.InstanceFlavor) error {
-	if flavors == nil {
-		return fmt.Errorf("nil flavors")
-	}
-
-	for _, f := range flavors {
-		if f.Id != nil && strings.EqualFold(*f.Id, flavorId) {
-			return nil
-		}
-	}
-
-	return &errors.DatabaseInvalidFlavorError{
-		Service: "mongodbflex",
-		Details: fmt.Sprintf("You provided flavor ID '%s', which is invalid.", flavorId),
-	}
-}
-
-func ValidateStorage(storageClass *string, storageSize *int64, storages *mongodbflex.ListStoragesResponse, flavorId string) error {
-	if storages == nil {
-		return fmt.Errorf("nil storages")
-	}
-
-	if storageSize != nil {
-		if *storageSize < *storages.StorageRange.Min || *storageSize > *storages.StorageRange.Max {
-			return fmt.Errorf("%s", fmt.Sprintf("You provided storage size '%d', which is invalid. The valid range is %d-%d.", *storageSize, *storages.StorageRange.Min, *storages.StorageRange.Max))
-		}
-	}
-
-	if storageClass == nil {
-		return nil
-	}
-
-	for _, sc := range storages.StorageClasses {
-		if strings.EqualFold(*storageClass, sc) {
-			return nil
-		}
-	}
-	return &errors.DatabaseInvalidStorageError{
-		Service:  "mongodbflex",
-		Details:  fmt.Sprintf("You provided storage class '%s', which is invalid.", *storageClass),
-		FlavorId: flavorId,
-	}
-}
-
+// Deprecated: Will be removed after 2027-03-07
 func LoadFlavorId(cpu, ram int32, flavors *[]mongodbflex.InstanceFlavor) (*string, error) {
 	if flavors == nil {
 		return nil, fmt.Errorf("nil flavors")
@@ -123,7 +62,8 @@ func LoadFlavorId(cpu, ram int32, flavors *[]mongodbflex.InstanceFlavor) (*strin
 	}
 }
 
-func GetLatestMongoDBVersion(ctx context.Context, apiClient MongoDBFlexClient, projectId, region string) (string, error) {
+// Deprecated: Will be removed after 2027-03-07.
+func GetLatestMongoDBVersion(ctx context.Context, apiClient mongodbflex.DefaultAPI, projectId, region string) (string, error) {
 	resp, err := apiClient.ListVersions(ctx, projectId, region).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get MongoDB versions: %w", err)
@@ -144,7 +84,7 @@ func GetLatestMongoDBVersion(ctx context.Context, apiClient MongoDBFlexClient, p
 	return latestVersion, nil
 }
 
-func GetInstanceName(ctx context.Context, apiClient MongoDBFlexClient, projectId, instanceId, region string) (string, error) {
+func GetInstanceName(ctx context.Context, apiClient mongodbflex.DefaultAPI, projectId, instanceId, region string) (string, error) {
 	resp, err := apiClient.GetInstance(ctx, projectId, instanceId, region).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get MongoDB Flex instance: %w", err)
@@ -152,7 +92,7 @@ func GetInstanceName(ctx context.Context, apiClient MongoDBFlexClient, projectId
 	return *resp.Item.Name, nil
 }
 
-func GetUserName(ctx context.Context, apiClient MongoDBFlexClient, projectId, instanceId, userId, region string) (string, error) {
+func GetUserName(ctx context.Context, apiClient mongodbflex.DefaultAPI, projectId, instanceId, userId, region string) (string, error) {
 	resp, err := apiClient.GetUser(ctx, projectId, instanceId, userId, region).Execute()
 	if err != nil {
 		return "", fmt.Errorf("get MongoDB Flex user: %w", err)
