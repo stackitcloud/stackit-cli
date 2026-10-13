@@ -36,7 +36,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", routingTableIdArg),
 		Short: "Describes a routing-table",
-		Long:  "Describes a routing-table",
+		Long:  "Describes a routing-table within a STACKIT Network Area (SNA).",
 		Args:  args.SingleArg(routingTableIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(

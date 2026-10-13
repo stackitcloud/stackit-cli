@@ -18,7 +18,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "routing-table",
 		Short: "Manage routing-tables and its according routes",
-		Long: `Manage routing-tables and their associated routes.
+		Long: `Manage routing-tables and their associated routes within STACKIT Network Areas (SNAs).
 
 This API is currently available only to selected customers.  
 To request access, please contact your account manager or submit a support ticket.`,
