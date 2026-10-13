@@ -7,6 +7,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/alpha/vpc/routingtable/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/alpha/vpc/routingtable/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/alpha/vpc/routingtable/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/alpha/vpc/routingtable/staticroute"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/alpha/vpc/routingtable/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
@@ -32,4 +33,5 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(update.NewCmd(params))
 	cmd.AddCommand(list.NewCmd(params))
 	cmd.AddCommand(delete.NewCmd(params))
+	cmd.AddCommand(staticroute.NewCmd(params))
 }
