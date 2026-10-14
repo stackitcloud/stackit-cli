@@ -137,6 +137,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelsFlag),
 	}
 
+	if model.Password == nil || *model.Password == "" {
+		return nil, &cliErr.FlagValidationError{
+			Flag:    passwordFlag,
+			Details: "password is required and cannot be empty",
+		}
+	}
+
 	p.DebugInputModel(model)
 	return &model, nil
 }

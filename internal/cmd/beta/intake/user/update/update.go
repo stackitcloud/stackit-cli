@@ -3,8 +3,10 @@ package update
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
 	"github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi/wait"
 
@@ -97,12 +99,24 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 	return cmd
 }
 
+type updateSecretFlag struct {
+	pflag.Value
+}
+
+func (f *updateSecretFlag) Set(val string) error {
+	if strings.TrimSpace(val) == "" {
+		return nil
+	}
+	return f.Value.Set(val)
+}
+
 func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.Flags().Var(flags.UUIDFlag(), intakeIdFlag, "Intake ID")
 	cmd.Flags().String(displayNameFlag, "", "Display name")
 	cmd.Flags().String(descriptionFlag, "", "Description")
 	password := flags.SecretFlag(passwordFlag, params)
-	cmd.Flags().Var(password, passwordFlag, password.Usage())
+	cmd.Flags().Var(&updateSecretFlag{Value: password}, passwordFlag, password.Usage())
+	cmd.Flag(passwordFlag).NoOptDefVal = " "
 	cmd.Flags().String(userTypeFlag, "", "Type of user. One of 'intake' or 'dead-letter'")
 	cmd.Flags().StringToString(labelsFlag, nil, `Labels in key=value format, separated by commas. Example: --labels "key1=value1,key2=value2".`)
 
@@ -118,13 +132,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		return nil, &cliErr.ProjectIdError{}
 	}
 
+	var password *string
+	if cmd.Flag(passwordFlag).Changed {
+		password = flags.SecretFlagToStringPointer(p, cmd, passwordFlag)
+	}
+
 	model := &inputModel{
 		GlobalFlagModel: globalFlags,
 		IntakeId:        flags.FlagToStringValue(p, cmd, intakeIdFlag),
 		UserId:          userId,
 		DisplayName:     flags.FlagToStringPointer(p, cmd, displayNameFlag),
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
-		Password:        flags.SecretFlagToStringPointer(p, cmd, passwordFlag),
+		Password:        password,
 		UserType:        flags.FlagToStringPointer(p, cmd, userTypeFlag),
 		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelsFlag),
 	}
@@ -158,11 +177,16 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIC
 
 func outputResult(p *print.Printer, model *inputModel, resp *intake.IntakeUserResponse) error {
 	return p.OutputResult(model.OutputFormat, resp, func() error {
+		if resp == nil {
+			p.Outputf("Triggered update of Intake User for intake %q, but no user ID was returned.\n", model.IntakeId)
+			return nil
+		}
+
 		operationState := "Updated"
 		if model.Async {
 			operationState = "Triggered update of"
 		}
-		p.Outputf("%s Intake User %s\n", operationState, model.UserId)
+		p.Outputf("%s Intake User for intake %q. User ID: %s\n", operationState, model.IntakeId, resp.Id)
 		return nil
 	})
 }
