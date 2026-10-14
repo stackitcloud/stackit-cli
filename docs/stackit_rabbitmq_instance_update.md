@@ -31,7 +31,7 @@ stackit rabbitmq instance update INSTANCE_ID [flags]
       --metrics-prefix string           Metrics prefix
       --monitoring-instance-id string   Monitoring instance ID
       --plan-id string                  Plan ID
-      --plugin strings                  Plugins (multiple of: [rabbitmq_consistent_hash_exchange, rabbitmq_federation, rabbitmq_federation_management, rabbitmq_mqtt, rabbitmq_sharding, rabbitmq_shovel, rabbitmq_shovel_management, rabbitmq_stomp, rabbitmq_tracing, rabbitmq_event_exchange]) (default [])
+      --plugin strings                  Plugins (multiple of: [rabbitmq_consistent_hash_exchange, rabbitmq_federation, rabbitmq_federation_management, rabbitmq_mqtt, rabbitmq_sharding, rabbitmq_shovel, rabbitmq_shovel_management, rabbitmq_stomp, rabbitmq_event_exchange]) (default [])
       --syslog strings                  Syslog
 ```
 
