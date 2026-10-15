@@ -143,7 +143,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, networks 
 		}
 
 		table := tables.NewTable()
-		table.SetHeader("ID", "NAME", "STATUS", "PUBLIC IP", "PREFIXES", "ROUTED", "ROUTING TABLE ID")
+		table.SetHeader("ID", "NAME", "DESCRIPTION", "STATUS", "PUBLIC IP", "PREFIXES", "ROUTED", "ROUTING TABLE ID")
 
 		for _, network := range networks {
 			var publicIp, prefixes string
@@ -160,6 +160,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, networks 
 			table.AddRow(
 				network.Id,
 				network.Name,
+				utils.PtrString(network.Description),
 				network.Status,
 				publicIp,
 				prefixes,

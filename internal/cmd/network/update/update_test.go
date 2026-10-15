@@ -126,6 +126,28 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModel(),
 		},
 		{
+			description: "description set",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[descriptionFlag] = "My network"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Description = new("My network")
+			}),
+		},
+		{
+			description: "description empty",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[descriptionFlag] = ""
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Description = new("")
+			}),
+		},
+		{
 			description: "required only",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
@@ -318,6 +340,39 @@ func TestBuildRequest(t *testing.T) {
 			expectedRequest: fixtureRequest(),
 		},
 		{
+			description: "description set",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Description = new("My network")
+			}),
+			expectedRequest: fixtureRequest(func(payload *iaas.PartialUpdateNetworkPayload) {
+				payload.Description = new("My network")
+			}),
+		},
+		{
+			description: "description empty",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Description = new("")
+			}),
+			expectedRequest: fixtureRequest(func(payload *iaas.PartialUpdateNetworkPayload) {
+				payload.Description = new("")
+			}),
+		},
+		{
+			description: "description only",
+			model: &inputModel{
+				GlobalFlagModel: &globalflags.GlobalFlagModel{
+					ProjectId: testProjectId,
+					Region:    testRegion,
+				},
+				NetworkId:   testNetworkId,
+				Description: new("My network"),
+			},
+			expectedRequest: testClient.DefaultAPI.PartialUpdateNetwork(testCtx, testProjectId, testRegion, testNetworkId).
+				PartialUpdateNetworkPayload(iaas.PartialUpdateNetworkPayload{
+					Description: new("My network"),
+				}),
+		},
+		{
 			description: "not setting IPv4DnsNameServers does not result in nil pointer dereference",
 			model: fixtureInputModel(func(model *inputModel) {
 				model.IPv4DnsNameServers = nil
@@ -343,7 +398,7 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			request := buildRequest(testCtx, tt.model, testClient.DefaultAPI)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),

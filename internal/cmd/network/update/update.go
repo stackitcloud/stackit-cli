@@ -27,6 +27,7 @@ const (
 	networkIdArg = "NETWORK_ID"
 
 	nameFlag               = "name"
+	descriptionFlag        = "description"
 	ipv4DnsNameServersFlag = "ipv4-dns-name-servers"
 	ipv4GatewayFlag        = "ipv4-gateway"
 	ipv6DnsNameServersFlag = "ipv6-dns-name-servers"
@@ -41,6 +42,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	NetworkId          string
 	Name               *string
+	Description        *string
 	IPv4DnsNameServers *[]string
 	IPv4Gateway        *string
 	IPv6DnsNameServers *[]string
@@ -61,6 +63,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			examples.NewExample(
 				`Update network with ID "xxx" with new name "network-1-new"`,
 				`$ stackit network update xxx --name network-1-new`,
+			),
+			examples.NewExample(
+				`Update the description of network with ID "xxx"`,
+				`$ stackit network update xxx --description "My network"`,
+			),
+			examples.NewExample(
+				`Clear the description of network with ID "xxx"`,
+				`$ stackit network update xxx --description ""`,
 			),
 			examples.NewExample(
 				`Update network with ID "xxx" with no gateway`,
@@ -107,7 +117,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("update network area: %w", err)
@@ -138,6 +148,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(nameFlag, "n", "", "Network name")
+	cmd.Flags().String(descriptionFlag, "", "Description of the network (up to 255 characters). Use an empty string to clear it")
 	cmd.Flags().StringSlice(ipv4DnsNameServersFlag, nil, "List of DNS name servers IPv4. Nameservers cannot be defined for routed networks")
 	cmd.Flags().String(ipv4GatewayFlag, "", "The IPv4 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway")
 	cmd.Flags().StringSlice(ipv6DnsNameServersFlag, nil, "List of DNS name servers for IPv6. Nameservers cannot be defined for routed networks")
@@ -159,6 +170,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	model := inputModel{
 		GlobalFlagModel:    globalFlags,
 		Name:               flags.FlagToStringPointer(p, cmd, nameFlag),
+		Description:        flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		NetworkId:          networkId,
 		IPv4DnsNameServers: flags.FlagToStringSlicePointer(p, cmd, ipv4DnsNameServersFlag),
 		IPv4Gateway:        flags.FlagToStringPointer(p, cmd, ipv4GatewayFlag),
@@ -174,8 +186,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiPartialUpdateNetworkRequest {
-	req := apiClient.DefaultAPI.PartialUpdateNetwork(ctx, model.ProjectId, model.Region, model.NetworkId)
+func buildRequest(ctx context.Context, model *inputModel, apiClient iaas.DefaultAPI) iaas.ApiPartialUpdateNetworkRequest {
+	req := apiClient.PartialUpdateNetwork(ctx, model.ProjectId, model.Region, model.NetworkId)
 	var payloadIPv4 *iaas.UpdateNetworkIPv4Body
 	var payloadIPv6 *iaas.UpdateNetworkIPv6Body
 
@@ -209,6 +221,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	payload := iaas.PartialUpdateNetworkPayload{
 		Name:           model.Name,
+		Description:    model.Description,
 		Ipv4:           payloadIPv4,
 		Ipv6:           payloadIPv6,
 		Labels:         model.Labels,
