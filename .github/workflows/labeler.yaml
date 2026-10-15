@@ -32,7 +32,6 @@ jobs:
       contents: read
       pull-requests: write
       issues: write
-    # don't run on PRs from forks (token has no write permissions)
     if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
     name: "Label all open PRs"
     runs-on: ubuntu-latest
