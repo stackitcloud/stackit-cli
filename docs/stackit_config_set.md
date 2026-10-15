@@ -37,6 +37,7 @@ stackit config set [flags]
       --dns-custom-endpoint string                                 DNS API base URL, used in calls to this API
       --edge-custom-endpoint string                                Edge API base URL, used in calls to this API
   -h, --help                                                       Help for "stackit config set"
+      --iaas-alpha-custom-endpoint string                          IaaS Alpha API base URL, used in calls to this API
       --iaas-custom-endpoint string                                IaaS API base URL, used in calls to this API
       --identity-provider-custom-client-id string                  Identity Provider client ID, used for user authentication
       --identity-provider-custom-well-known-configuration string   Identity Provider well-known OpenID configuration URL, used for user authentication

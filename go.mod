@@ -10,31 +10,31 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/inhies/go-bytesize v0.0.0-20220417184213-4913239db9cf
 	github.com/jedib0t/go-pretty/v6 v6.8.3
-	github.com/lmittmann/tint v1.2.0
-	github.com/mattn/go-colorable v0.1.15
+	github.com/lmittmann/tint v1.2.1
+	github.com/mattn/go-colorable v0.1.16
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
 	github.com/stackitcloud/stackit-sdk-go/core v0.27.1
 	github.com/stackitcloud/stackit-sdk-go/services/alb v0.18.0
 	github.com/stackitcloud/stackit-sdk-go/services/albwaf v0.13.4
-	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.15.4
+	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.15.5
 	github.com/stackitcloud/stackit-sdk-go/services/automation v0.2.1
 	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.21.0
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.23.1
 	github.com/stackitcloud/stackit-sdk-go/services/edge v0.13.2
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.14.1
-	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.14.1
+	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.14.5
 	github.com/stackitcloud/stackit-sdk-go/services/intake v0.11.2
 	github.com/stackitcloud/stackit-sdk-go/services/logs v0.10.2
-	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.12.2
-	github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.3.1
+	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.13.0
+	github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.5.0
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.15.0
-	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.24.2
+	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.26.1
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.10.2
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.19.1
-	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.7.1
-	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.5.5
+	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.7.3
+	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.5.6
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.20.1
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.7.2
 	github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.2
@@ -46,8 +46,8 @@ require (
 	golang.org/x/oauth2 v0.37.0
 	golang.org/x/term v0.46.0
 	golang.org/x/text v0.42.0
-	k8s.io/apimachinery v0.37.0
-	k8s.io/client-go v0.37.0
+	k8s.io/apimachinery v0.37.1
+	k8s.io/client-go v0.37.1
 )
 
 require (
@@ -267,19 +267,19 @@ require (
 	github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
-	github.com/stackitcloud/stackit-sdk-go/services/kms v1.13.1
+	github.com/stackitcloud/stackit-sdk-go/services/kms v1.14.0
 	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.15.2
-	github.com/stackitcloud/stackit-sdk-go/services/logme v1.3.1
+	github.com/stackitcloud/stackit-sdk-go/services/logme v1.4.0
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.3.1
-	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.9.2
+	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.11.0
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.25.2
-	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.3.1
-	github.com/stackitcloud/stackit-sdk-go/services/redis v1.4.1
+	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.5.0
+	github.com/stackitcloud/stackit-sdk-go/services/redis v1.5.0
 	github.com/stackitcloud/stackit-sdk-go/services/sfs v0.11.3
 	github.com/subosito/gotenv v1.6.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.37.0 // indirect
+	k8s.io/api v0.37.1 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/utils v0.0.0-20260626114624-be93311217bd
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect

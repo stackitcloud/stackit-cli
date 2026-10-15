@@ -51,6 +51,7 @@ const (
 	SfsCustomEndpointKey               = "sfs_custom_endpoint"
 	SKECustomEndpointKey               = "ske_custom_endpoint"
 	SQLServerFlexCustomEndpointKey     = "sqlserverflex_custom_endpoint"
+	IaaSAlphaCustomEndpointKey         = "iaas_alpha_custom_endpoint"
 	IaaSCustomEndpointKey              = "iaas_custom_endpoint"
 	TokenCustomEndpointKey             = "token_custom_endpoint"
 	GitCustomEndpointKey               = "git_custom_endpoint"
@@ -103,6 +104,7 @@ var ConfigKeys = []string{
 	DNSCustomEndpointKey,
 	EdgeCustomEndpointKey,
 	GitCustomEndpointKey,
+	IaaSAlphaCustomEndpointKey,
 	IaaSCustomEndpointKey,
 	IntakeCustomEndpointKey,
 	KMSCustomEndpointKey,
@@ -215,6 +217,7 @@ func setConfigDefaults() {
 	viper.SetDefault(RunCommandCustomEndpointKey, "")
 	viper.SetDefault(SKECustomEndpointKey, "")
 	viper.SetDefault(SQLServerFlexCustomEndpointKey, "")
+	viper.SetDefault(IaaSAlphaCustomEndpointKey, "")
 	viper.SetDefault(IaaSCustomEndpointKey, "")
 	viper.SetDefault(TokenCustomEndpointKey, "")
 	viper.SetDefault(GitCustomEndpointKey, "")
