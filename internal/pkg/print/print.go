@@ -97,6 +97,16 @@ func (p *Printer) Outputln(msg string) {
 	mustPrint(fmt.Fprintln(p.StdOut, msg))
 }
 
+// Noticef prints a formatted notice to StdErr, regardless of verbosity or output format.
+func (p *Printer) Noticef(msg string, args ...any) {
+	mustPrint(fmt.Fprintf(p.StdErr, msg, args...))
+}
+
+// Noticeln prints a notice followed by a newline to StdErr, regardless of verbosity or output format.
+func (p *Printer) Noticeln(msg string) {
+	mustPrint(fmt.Fprintln(p.StdErr, msg))
+}
+
 // Print a Debug level log through the "slog" package.
 // If the verbosity level is not Debug, it does nothing
 func (p *Printer) Debug(level Level, msg string, args ...any) {
