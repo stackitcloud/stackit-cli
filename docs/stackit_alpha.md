@@ -41,5 +41,6 @@ stackit alpha [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
+* [stackit alpha sca](./stackit_alpha_sca.md)	 - Provides functionality for SCA
 * [stackit alpha vpc](./stackit_alpha_vpc.md)	 - Manages vpcs
 
