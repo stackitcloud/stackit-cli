@@ -24,6 +24,7 @@ const (
 	AllowedUrlDomainKey                             = "allowed_url_domain"
 
 	AuthorizationCustomEndpointKey = "authorization_custom_endpoint"
+	AutomationCustomEndpointKey    = "automation_custom_endpoint"
 	AlbCustomEndpoint              = "alb_custom _endpoint"
 	AlbWafCustomEndpointKey        = "alb_waf_custom_endpoint"
 	DNSCustomEndpointKey           = "dns_custom_endpoint"
@@ -50,6 +51,7 @@ const (
 	SfsCustomEndpointKey               = "sfs_custom_endpoint"
 	SKECustomEndpointKey               = "ske_custom_endpoint"
 	SQLServerFlexCustomEndpointKey     = "sqlserverflex_custom_endpoint"
+	IaaSAlphaCustomEndpointKey         = "iaas_alpha_custom_endpoint"
 	IaaSCustomEndpointKey              = "iaas_custom_endpoint"
 	TokenCustomEndpointKey             = "token_custom_endpoint"
 	GitCustomEndpointKey               = "git_custom_endpoint"
@@ -97,10 +99,12 @@ var ConfigKeys = []string{
 	AlbCustomEndpoint,
 	AlbWafCustomEndpointKey,
 	AuthorizationCustomEndpointKey,
+	AutomationCustomEndpointKey,
 	CDNCustomEndpointKey,
 	DNSCustomEndpointKey,
 	EdgeCustomEndpointKey,
 	GitCustomEndpointKey,
+	IaaSAlphaCustomEndpointKey,
 	IaaSCustomEndpointKey,
 	IntakeCustomEndpointKey,
 	KMSCustomEndpointKey,
@@ -198,6 +202,7 @@ func setConfigDefaults() {
 	viper.SetDefault(EdgeCustomEndpointKey, "")
 	viper.SetDefault(ObservabilityCustomEndpointKey, "")
 	viper.SetDefault(AuthorizationCustomEndpointKey, "")
+	viper.SetDefault(AutomationCustomEndpointKey, "")
 	viper.SetDefault(MongoDBFlexCustomEndpointKey, "")
 	viper.SetDefault(ObjectStorageCustomEndpointKey, "")
 	viper.SetDefault(OpenSearchCustomEndpointKey, "")
@@ -212,6 +217,7 @@ func setConfigDefaults() {
 	viper.SetDefault(RunCommandCustomEndpointKey, "")
 	viper.SetDefault(SKECustomEndpointKey, "")
 	viper.SetDefault(SQLServerFlexCustomEndpointKey, "")
+	viper.SetDefault(IaaSAlphaCustomEndpointKey, "")
 	viper.SetDefault(IaaSCustomEndpointKey, "")
 	viper.SetDefault(TokenCustomEndpointKey, "")
 	viper.SetDefault(GitCustomEndpointKey, "")

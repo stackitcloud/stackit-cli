@@ -15,8 +15,8 @@ import (
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "credentials",
-		Short: "Provides functionality for Valkey credentials",
-		Long:  "Provides functionality for Valkey credentials.",
+		Short: "Provides functionality for Key Value Store (valkey) credentials",
+		Long:  "Provides functionality for Key Value Store (valkey) credentials.",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

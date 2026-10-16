@@ -63,8 +63,8 @@ type inputModel struct {
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", instanceIdArg),
-		Short: "Updates a Valkey instance",
-		Long:  "Updates a Valkey instance.",
+		Short: "Updates a Key Value Store (valkey) instance",
+		Long:  "Updates a Key Value Store (valkey) instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(

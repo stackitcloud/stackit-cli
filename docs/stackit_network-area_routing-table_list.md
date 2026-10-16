@@ -4,7 +4,7 @@ Lists all routing-tables
 
 ### Synopsis
 
-Lists all routing-tables
+Lists all routing-tables within a STACKIT Network Area (SNA).
 
 ```
 stackit network-area routing-table list [flags]

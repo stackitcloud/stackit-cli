@@ -1,10 +1,10 @@
 ## stackit valkey
 
-Provides functionality for Valkey
+Provides functionality for Key Value Store (valkey)
 
 ### Synopsis
 
-Provides functionality for Valkey.
+Provides functionality for Key Value Store (valkey).
 
 ```
 stackit valkey [flags]
@@ -30,7 +30,7 @@ stackit valkey [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit valkey credentials](./stackit_valkey_credentials.md)	 - Provides functionality for Valkey credentials
-* [stackit valkey instance](./stackit_valkey_instance.md)	 - Provides functionality for Valkey instances
-* [stackit valkey plans](./stackit_valkey_plans.md)	 - Lists all Valkey service plans
+* [stackit valkey credentials](./stackit_valkey_credentials.md)	 - Provides functionality for Key Value Store (valkey) credentials
+* [stackit valkey instance](./stackit_valkey_instance.md)	 - Provides functionality for Key Value Store (valkey) instances
+* [stackit valkey plans](./stackit_valkey_plans.md)	 - Lists all Key Value Store (valkey) service plans
 

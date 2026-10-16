@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/spf13/viper"
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 	"github.com/stackitcloud/stackit-sdk-go/core/utils"
@@ -119,6 +120,60 @@ func TestValidateURLDomain(t *testing.T) {
 			isValid:          true,
 		},
 		{
+			name:             "apex domain",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "https://stackit.cloud/path",
+			isValid:          true,
+		},
+		{
+			name:             "multiple subdomains",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "https://dns.api.stackit.cloud/v1",
+			isValid:          true,
+		},
+		{
+			name:             "hostname suffix without label boundary",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "https://suspiciousstackit.cloud",
+			isValid:          false,
+		},
+		{
+			name:             "lookalike subdomain",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "https://api.suspiciousstackit.cloud",
+			isValid:          false,
+		},
+		{
+			name:             "domain followed by extra labels",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "https://api.stackit.cloud.evil.example",
+			isValid:          false,
+		},
+		{
+			name:             "port is not hostname",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "https://stackit.cloud:443/v1",
+			isValid:          true,
+		},
+		{
+			name:             "userinfo does not affect hostname",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "https://stackit.cloud@evil.example/path",
+			isValid:          false,
+		},
+		{
+			name:             "path does not affect hostname",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "https://evil.example/path/stackit.cloud",
+			isValid:          false,
+		},
+		{
+			name:             "hostname is case insensitive",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "https://API.STACKIT.CLOUD/path",
+			isValid:          true,
+		},
+		{
 			name:             "STACKIT URL invalid",
 			allowedUrlDomain: "example.com",
 			input:            "https://example.stackit.cloud",
@@ -137,6 +192,12 @@ func TestValidateURLDomain(t *testing.T) {
 			isValid:          true,
 		},
 		{
+			name:             "custom domain boundary rejected",
+			allowedUrlDomain: "example.com",
+			input:            "https://badexample.com",
+			isValid:          false,
+		},
+		{
 			name:             "every URL valid",
 			allowedUrlDomain: "",
 			input:            "https://www.test.example.com/",
@@ -151,6 +212,24 @@ func TestValidateURLDomain(t *testing.T) {
 			name:    "invalid protocol",
 			input:   "http://example.stackit.cloud",
 			isValid: false,
+		},
+		{
+			name:             "invalid protocol with allowed domain",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "http://api.stackit.cloud",
+			isValid:          false,
+		},
+		{
+			name:             "missing host",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "https:///path",
+			isValid:          false,
+		},
+		{
+			name:             "malformed URL",
+			allowedUrlDomain: "stackit.cloud",
+			input:            "https://%zz",
+			isValid:          false,
 		},
 		{
 			name:    "no protocol",
@@ -396,6 +475,89 @@ func TestMap(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := Map(tt.args.input, tt.args.mapFn); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Map() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFlattenMap(t *testing.T) {
+	tests := []struct {
+		name     string
+		inputMap map[string]interface{}
+		want     map[string]interface{}
+	}{
+		{
+			name: "single level map",
+			inputMap: map[string]interface{}{
+				"string": "value",
+				"slice":  []string{"string", "slice"},
+				"number": 2,
+				"bool":   true,
+				"nil":    nil,
+			},
+			want: map[string]interface{}{
+				"string": "value",
+				"slice":  []string{"string", "slice"},
+				"number": 2,
+				"bool":   true,
+				"nil":    nil,
+			},
+		},
+		{
+			name:     "nil input",
+			inputMap: nil,
+			want:     nil,
+		},
+		{
+			name: "multiple nested map (1 level)",
+			inputMap: map[string]interface{}{
+				"key1": map[string]interface{}{
+					"subkey1": "subvalue1",
+					"subkey2": "subvalue2",
+				},
+				"key2": "value2",
+			},
+			want: map[string]interface{}{
+				"key1.subkey1": "subvalue1",
+				"key1.subkey2": "subvalue2",
+				"key2":         "value2",
+			},
+		},
+		{
+			name: "multiple nested map (2 level)",
+			inputMap: map[string]interface{}{
+				"key1": map[string]interface{}{
+					"subkey1": "subvalue1",
+					"subkey2": map[string]interface{}{
+						"string":    "value",
+						"slice":     []string{"string", "slice"},
+						"number":    2,
+						"bool":      true,
+						"nil":       nil,
+						"empty_map": map[string]interface{}{},
+					},
+					"empty_map": map[string]interface{}{},
+				},
+				"key2": "value2",
+			},
+			want: map[string]interface{}{
+				"key1.subkey1":           "subvalue1",
+				"key1.subkey2.string":    "value",
+				"key1.subkey2.slice":     []string{"string", "slice"},
+				"key1.subkey2.number":    2,
+				"key1.subkey2.bool":      true,
+				"key1.subkey2.nil":       nil,
+				"key1.subkey2.empty_map": "",
+				"key1.empty_map":         "",
+				"key2":                   "value2",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := FlattenMap(tt.inputMap)
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("FlattenMap() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
