@@ -14,11 +14,13 @@ import (
 )
 
 const (
-	portFlag = "port"
+	portFlag          = "port"
+	noBrowserOpenFlag = "no-browser-open"
 )
 
 type inputModel struct {
-	Port *int
+	Port          *int
+	NoBrowserOpen bool
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -43,6 +45,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			err = auth.AuthorizeUser(params.Printer, auth.UserAuthConfig{
 				IsReauthentication: false,
 				Port:               model.Port,
+				NoBrowserOpen:      model.NoBrowserOpen,
 			})
 			if err != nil {
 				return fmt.Errorf("authorization failed: %w", err)
@@ -62,6 +65,9 @@ func configureFlags(cmd *cobra.Command) {
 		"The port on which the callback server will listen to. By default, it tries to bind a port between 8000 and 8020.\n"+
 			"When a value is specified, it will only try to use the specified port. Valid values are within the range of 8000 to 8020.",
 	)
+	cmd.Flags().Bool(noBrowserOpenFlag, false,
+		"If set, does not open the browser automatically but only prints the URL to the terminal",
+	)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
@@ -71,8 +77,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		return nil, fmt.Errorf("port must be between 8000 and 8020")
 	}
 
+	noBrowserOpen := flags.FlagToBoolValue(p, cmd, noBrowserOpenFlag)
+
 	model := inputModel{
-		Port: port,
+		Port:          port,
+		NoBrowserOpen: noBrowserOpen,
 	}
 
 	p.DebugInputModel(model)
