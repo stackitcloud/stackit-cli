@@ -160,7 +160,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, networks 
 			table.AddRow(
 				network.Id,
 				network.Name,
-				utils.PtrString(network.Description),
+				utils.Truncate(network.Description, 70),
 				network.Status,
 				publicIp,
 				prefixes,

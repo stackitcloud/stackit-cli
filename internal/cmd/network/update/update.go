@@ -157,6 +157,19 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(noIpv6GatewayFlag, false, "If set to true, the network doesn't have an IPv6 gateway")
 	cmd.Flags().Var(flags.UUIDFlag(), routingTableIdFlag, "The ID of the routing-table for the network")
 	cmd.Flags().StringToString(labelFlag, nil, "Labels are key-value string pairs which can be attached to a network. E.g. '--labels key1=value1,key2=value2,...'")
+
+	cmd.MarkFlagsOneRequired(
+		nameFlag,
+		descriptionFlag,
+		ipv4DnsNameServersFlag,
+		ipv4GatewayFlag,
+		ipv6DnsNameServersFlag,
+		ipv6GatewayFlag,
+		noIpv4GatewayFlag,
+		noIpv6GatewayFlag,
+		routingTableIdFlag,
+		labelFlag,
+	)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
