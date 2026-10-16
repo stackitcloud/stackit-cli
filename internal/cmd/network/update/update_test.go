@@ -165,6 +165,15 @@ func TestParseInput(t *testing.T) {
 			isValid:     false,
 		},
 		{
+			description: "no cmd specific flag values",
+			argValues:   fixtureArgValues(),
+			flagValues: map[string]string{
+				globalflags.ProjectIdFlag: testProjectId,
+				globalflags.RegionFlag:    testRegion,
+			},
+			isValid: false,
+		},
+		{
 			description: "project id missing",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
