@@ -134,9 +134,9 @@ func GetRouteFromAPIResponse(destination, nexthop string, routes []iaas.Route) (
 		nextHopV6 := route.Nexthop.NexthopIPv6
 		nextHopV6Matches := nextHopV6 != nil && nextHopV6.Value == nexthop
 		nextHopInet := route.Nexthop.NexthopInternet
-		nextHopInetMatches := nextHopInet != nil && nextHopInet.Type == nexthop
+		nextHopInetMatches := nextHopInet != nil && nextHopInet.Type == iaas.NexthopInternetType(nexthop)
 		nextHopBlackhole := route.Nexthop.NexthopBlackhole
-		nextHopBlackholeMatches := nextHopBlackhole != nil && nextHopBlackhole.Type == nexthop
+		nextHopBlackholeMatches := nextHopBlackhole != nil && nextHopBlackhole.Type == iaas.NexthopBlackholeType(nexthop)
 		nextHopMatches := nextHopV4Matches || nextHopV6Matches || nextHopInetMatches || nextHopBlackholeMatches
 		if nextHopMatches {
 			return route, nil
