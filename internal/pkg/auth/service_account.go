@@ -68,15 +68,17 @@ func AuthenticateServiceAccount(p *print.Printer, rt http.RoundTripper, disableW
 		authFields[ACCESS_TOKEN] = flow.GetConfig().ServiceAccountToken
 	case wifFlowInterface:
 		p.Debug(print.DebugLevel, "authenticating using workload identity federation")
-		authFlowType = AUTH_FLOW_SERVICE_ACCOUNT_KEY
+		authFlowType = AUTH_FLOW_WORKLOAD_IDENTITY
 
 		accessToken, err := flow.GetAccessToken()
 		if err != nil {
 			p.Debug(print.ErrorLevel, "get workload identity access token: %v", err)
 			return "", "", &errors.ActivateServiceAccountError{}
 		}
+		// only the service account email is stored; the federated token is read from the environment on every refresh
 		authFields[ACCESS_TOKEN] = accessToken
-		disableWriting = true
+		authFields[SERVICE_ACCOUNT_KEY] = ""
+		authFields[PRIVATE_KEY] = ""
 	default:
 		return "", "", fmt.Errorf("could not authenticate using any of the supported authentication flows (key and token): please report this issue")
 	}
@@ -147,6 +149,37 @@ func initKeyFlowWithStorage() (*keyFlowWithStorage, error) {
 		keyFlow: keyFlow,
 	}
 	return keyFlowWithStorage, nil
+}
+
+// initWIFFlowWithStorage initializes the workload identity federation flow for the service account stored in the auth storage.
+// The federated token is not stored, it is read from the environment every time the access token is refreshed.
+func initWIFFlowWithStorage() (*clients.WorkloadIdentityFederationFlow, error) {
+	authFields := map[authFieldKey]string{
+		SERVICE_ACCOUNT_EMAIL: "",
+		TOKEN_CUSTOM_ENDPOINT: "",
+	}
+	err := GetAuthFieldMap(authFields)
+	if err != nil {
+		return nil, fmt.Errorf("get from auth storage: %w", err)
+	}
+
+	tokenFunc, err := OIDCTokenFunc()
+	if err != nil {
+		return nil, err
+	}
+
+	cfg := &clients.WorkloadIdentityFederationFlowConfig{
+		TokenUrl:               authFields[TOKEN_CUSTOM_ENDPOINT],
+		ClientID:               authFields[SERVICE_ACCOUNT_EMAIL],
+		FederatedTokenFunction: tokenFunc,
+	}
+
+	wifFlow := &clients.WorkloadIdentityFederationFlow{}
+	err = wifFlow.Init(cfg)
+	if err != nil {
+		return nil, fmt.Errorf("initialize workload identity federation flow: %w", err)
+	}
+	return wifFlow, nil
 }
 
 // The keyFlowWithStorage Roundtrip executes the keyFlow roundtrip and then stores the access token

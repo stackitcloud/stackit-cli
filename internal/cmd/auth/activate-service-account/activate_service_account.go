@@ -165,6 +165,11 @@ func runOIDCMode(params *types.CmdParams, model *inputModel) error {
 	}
 
 	tokenCustomEndpoint := viper.GetString(config.TokenCustomEndpointKey)
+	if !model.OnlyPrintAccessToken {
+		if err := storeCustomEndpoint(tokenCustomEndpoint); err != nil {
+			return err
+		}
+	}
 
 	wifCfg := &sdkConfig.Configuration{
 		WorkloadIdentityFederation:       true,
@@ -179,8 +184,8 @@ func runOIDCMode(params *types.CmdParams, model *inputModel) error {
 		return &cliErr.ActivateServiceAccountError{}
 	}
 
-	// credentials are never written to disk in OIDC mode
-	saEmail, accessToken, err := auth.AuthenticateServiceAccount(params.Printer, rt, true)
+	// only the service account email is stored, the federated token is read from the environment on every command
+	saEmail, accessToken, err := auth.AuthenticateServiceAccount(params.Printer, rt, model.OnlyPrintAccessToken)
 	if err != nil {
 		var activateErr *cliErr.ActivateServiceAccountError
 		if !errors.As(err, &activateErr) {

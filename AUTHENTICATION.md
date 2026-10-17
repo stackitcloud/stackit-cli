@@ -131,3 +131,14 @@ Using this flow is less secure since the token is long-lived. You can provide th
    # Optional: provide a file path containing the OIDC token
    STACKIT_FEDERATED_TOKEN_FILE=/path/to/oidc-token.jwt
    ```
+
+   When running in Azure DevOps with the [STACKIT Service Connection](https://marketplace.visualstudio.com/items?itemName=SchwarzDigits.stackit-service-connection), the CLI reads `STACKIT_SERVICE_CONNECTION_ID` and requests the OIDC token for that service connection.
+
+3. Activate the service account and run commands as usual:
+
+   ```bash
+   stackit auth activate-service-account --use-oidc
+   stackit project list
+   ```
+
+   As with a service account key, the following commands use the activated service account. Only the service account email is stored: the OIDC token is read from the environment every time a new access token is needed, so the token source must still be available when running those commands (e.g. in the same CI job).

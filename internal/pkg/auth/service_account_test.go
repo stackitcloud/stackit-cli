@@ -207,9 +207,15 @@ func TestAuthenticateServiceAccount_WIF(t *testing.T) {
 		isValid            bool
 	}{
 		{
-			description:    "wif_success_no_credentials_written",
+			description:    "wif_success_credentials_written",
 			accessToken:    raw,
-			disableWriting: false, // even when false, WIF forces no-write internally
+			disableWriting: false,
+			isValid:        true,
+		},
+		{
+			description:    "wif_success_writing_disabled",
+			accessToken:    raw,
+			disableWriting: true,
 			isValid:        true,
 		},
 		{
@@ -223,6 +229,17 @@ func TestAuthenticateServiceAccount_WIF(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			keyring.MockInit()
 			config.InitConfig()
+
+			// leftovers from a previous key flow must not survive a WIF activation
+			if err := SetAuthFieldMap(map[authFieldKey]string{
+				SERVICE_ACCOUNT_KEY: "old_key",
+				PRIVATE_KEY:         "old_private_key",
+			}); err != nil {
+				t.Fatalf("set previous credentials: %v", err)
+			}
+			if err := SetAuthFlow(AUTH_FLOW_SERVICE_ACCOUNT_KEY); err != nil {
+				t.Fatalf("set previous auth flow: %v", err)
+			}
 
 			flow := &wifFlowMocked{
 				accessToken:        tt.accessToken,
@@ -245,16 +262,31 @@ func TestAuthenticateServiceAccount_WIF(t *testing.T) {
 				t.Fatalf("email = %q, want %q", email, testEmail)
 			}
 
-			// Verify no credentials were written to the keyring / file.
-			// After a WIF authentication, the auth storage should not contain a
-			// service account key or private key.
+			storedFlow, _ := GetAuthFlow()
+			storedEmail, _ := GetAuthField(SERVICE_ACCOUNT_EMAIL)
 			storedKey, _ := GetAuthField(SERVICE_ACCOUNT_KEY)
-			if storedKey != "" {
-				t.Errorf("SERVICE_ACCOUNT_KEY was written to storage in WIF mode, want empty")
-			}
 			storedPrivKey, _ := GetAuthField(PRIVATE_KEY)
+
+			if tt.disableWriting {
+				if storedFlow != AUTH_FLOW_SERVICE_ACCOUNT_KEY {
+					t.Errorf("auth flow = %q, want previous flow %q untouched when writing is disabled", storedFlow, AUTH_FLOW_SERVICE_ACCOUNT_KEY)
+				}
+				return
+			}
+
+			// Only the flow and the service account email are needed to rebuild the WIF flow,
+			// the federated token is read from the environment on every command.
+			if storedFlow != AUTH_FLOW_WORKLOAD_IDENTITY {
+				t.Errorf("auth flow = %q, want %q", storedFlow, AUTH_FLOW_WORKLOAD_IDENTITY)
+			}
+			if storedEmail != testEmail {
+				t.Errorf("SERVICE_ACCOUNT_EMAIL = %q, want %q", storedEmail, testEmail)
+			}
+			if storedKey != "" {
+				t.Errorf("SERVICE_ACCOUNT_KEY = %q, want empty in WIF mode", storedKey)
+			}
 			if storedPrivKey != "" {
-				t.Errorf("PRIVATE_KEY was written to storage in WIF mode, want empty")
+				t.Errorf("PRIVATE_KEY = %q, want empty in WIF mode", storedPrivKey)
 			}
 		})
 	}
