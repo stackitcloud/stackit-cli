@@ -74,6 +74,8 @@ func TestAuthenticationConfig(t *testing.T) {
 		saKey                         string
 		privateKeySet                 bool
 		tokenEndpoint                 string
+		saEmail                       string
+		federatedToken                string
 		isValid                       bool
 		expectedCustomAuthSet         bool
 		expectedTokenSet              bool
@@ -120,6 +122,41 @@ func TestAuthenticationConfig(t *testing.T) {
 			isValid:          false,
 		},
 		{
+			description:           "base_workload_identity",
+			flow:                  AUTH_FLOW_WORKLOAD_IDENTITY,
+			sessionExpiresAt:      time.Now().Add(time.Hour),
+			accessTokenSet:        true,
+			saEmail:               "ci@sa.stackit.cloud",
+			federatedToken:        "federated_token",
+			isValid:               true,
+			expectedCustomAuthSet: true,
+		},
+		{
+			description:      "workload_identity_session_expired",
+			flow:             AUTH_FLOW_WORKLOAD_IDENTITY,
+			sessionExpiresAt: time.Now().Add(-time.Hour),
+			accessTokenSet:   true,
+			saEmail:          "ci@sa.stackit.cloud",
+			federatedToken:   "federated_token",
+			isValid:          false,
+		},
+		{
+			description:      "workload_identity_no_federated_token_source",
+			flow:             AUTH_FLOW_WORKLOAD_IDENTITY,
+			sessionExpiresAt: time.Now().Add(time.Hour),
+			accessTokenSet:   true,
+			saEmail:          "ci@sa.stackit.cloud",
+			isValid:          false,
+		},
+		{
+			description:      "workload_identity_no_email",
+			flow:             AUTH_FLOW_WORKLOAD_IDENTITY,
+			sessionExpiresAt: time.Now().Add(time.Hour),
+			accessTokenSet:   true,
+			federatedToken:   "federated_token",
+			isValid:          false,
+		},
+		{
 			description:      "base_user_token",
 			flow:             AUTH_FLOW_USER_TOKEN,
 			sessionExpiresAt: time.Now().Add(time.Hour),
@@ -156,6 +193,13 @@ func TestAuthenticationConfig(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			t.Setenv(EnvUseOIDC, "") // ensure OIDC mode is off for these tests
+			// only the static federated token is used as OIDC token source in these tests
+			t.Setenv(EnvServiceAccountFederatedToken, tt.federatedToken)
+			t.Setenv(EnvFederatedTokenFile, "")
+			t.Setenv(EnvGitHubRequestURL, "")
+			t.Setenv(EnvGitHubRequestToken, "")
+			t.Setenv(EnvAzureOIDCRequestURI, "")
+			t.Setenv(EnvAzureAccessToken, "")
 			keyring.MockInit()
 			timestamp := time.Now().Add(24 * time.Hour)
 			authFields := make(map[authFieldKey]string)
@@ -182,6 +226,7 @@ func TestAuthenticationConfig(t *testing.T) {
 			authFields[REFRESH_TOKEN] = tt.refreshToken
 			authFields[SERVICE_ACCOUNT_KEY] = tt.saKey
 			authFields[TOKEN_CUSTOM_ENDPOINT] = tt.tokenEndpoint
+			authFields[SERVICE_ACCOUNT_EMAIL] = tt.saEmail
 
 			err = SetAuthFlow(tt.flow)
 			if err != nil {

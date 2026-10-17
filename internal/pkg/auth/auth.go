@@ -100,6 +100,16 @@ func AuthenticationConfig(p *print.Printer, reauthorizeUserRoutine func(p *print
 			return nil, fmt.Errorf("initialize service account key flow: %w", err)
 		}
 		authCfgOption = sdkConfig.WithCustomAuth(keyFlow)
+	case AUTH_FLOW_WORKLOAD_IDENTITY:
+		p.Debug(print.DebugLevel, "authenticating using workload identity federation")
+		if userSessionExpired {
+			return nil, fmt.Errorf("session expired")
+		}
+		wifFlow, err := initWIFFlowWithStorage()
+		if err != nil {
+			return nil, fmt.Errorf("initialize workload identity federation flow: %w", err)
+		}
+		authCfgOption = sdkConfig.WithCustomAuth(wifFlow)
 	case AUTH_FLOW_USER_TOKEN:
 		p.Debug(print.DebugLevel, "authenticating using user token")
 		if userSessionExpired {
@@ -193,6 +203,15 @@ func GetValidAccessToken(p *print.Printer) (string, error) {
 	// For service account flows, just return the current token
 	if flow == AUTH_FLOW_SERVICE_ACCOUNT_TOKEN || flow == AUTH_FLOW_SERVICE_ACCOUNT_KEY {
 		return GetAccessToken()
+	}
+
+	// For workload identity federation, request a new token if the stored one expired
+	if flow == AUTH_FLOW_WORKLOAD_IDENTITY {
+		wifFlow, err := initWIFFlowWithStorage()
+		if err != nil {
+			return "", fmt.Errorf("initialize workload identity federation flow: %w", err)
+		}
+		return wifFlow.GetAccessToken()
 	}
 
 	if flow != AUTH_FLOW_USER_TOKEN {

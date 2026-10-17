@@ -46,6 +46,7 @@ const (
 	AUTH_FLOW_USER_TOKEN            AuthFlow     = "user_token"
 	AUTH_FLOW_SERVICE_ACCOUNT_TOKEN AuthFlow     = "sa_token"
 	AUTH_FLOW_SERVICE_ACCOUNT_KEY   AuthFlow     = "sa_key"
+	AUTH_FLOW_WORKLOAD_IDENTITY     AuthFlow     = "sa_wif"
 )
 
 // Returns all auth field keys managed by the auth storage
@@ -335,7 +336,7 @@ func GetProfileEmail(profile string) string {
 		if err != nil {
 			email = ""
 		}
-	case AUTH_FLOW_SERVICE_ACCOUNT_TOKEN, AUTH_FLOW_SERVICE_ACCOUNT_KEY:
+	case AUTH_FLOW_SERVICE_ACCOUNT_TOKEN, AUTH_FLOW_SERVICE_ACCOUNT_KEY, AUTH_FLOW_WORKLOAD_IDENTITY:
 		email, err = getAuthFieldWithProfile(profile, SERVICE_ACCOUNT_EMAIL)
 		if err != nil {
 			email = ""

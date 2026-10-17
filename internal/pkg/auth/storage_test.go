@@ -953,6 +953,13 @@ func TestGetProfileEmail(t *testing.T) {
 			expectedEmail:   "test@test.com",
 		},
 		{
+			description:     "default profile, workload identity",
+			activeProfile:   config.DefaultProfileName,
+			serviceAccEmail: "test@test.com",
+			authFlow:        AUTH_FLOW_WORKLOAD_IDENTITY,
+			expectedEmail:   "test@test.com",
+		},
+		{
 			description:   "custom profile, user token",
 			activeProfile: "test-profile",
 			userEmail:     "test@test.com",
