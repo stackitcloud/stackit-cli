@@ -16,6 +16,12 @@ stackit network update NETWORK_ID [flags]
   Update network with ID "xxx" with new name "network-1-new"
   $ stackit network update xxx --name network-1-new
 
+  Update the description of network with ID "xxx"
+  $ stackit network update xxx --description "My network"
+
+  Clear the description of network with ID "xxx"
+  $ stackit network update xxx --description ""
+
   Update network with ID "xxx" with no gateway
   $ stackit network update --no-ipv4-gateway
 
@@ -32,6 +38,7 @@ stackit network update NETWORK_ID [flags]
 ### Options
 
 ```
+      --description string              Description of the network (up to 255 characters). Use an empty string to clear it
   -h, --help                            Help for "stackit network update"
       --ipv4-dns-name-servers strings   List of DNS name servers IPv4. Nameservers cannot be defined for routed networks
       --ipv4-gateway string             The IPv4 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway
