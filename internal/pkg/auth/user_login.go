@@ -259,8 +259,8 @@ func AuthorizeUser(p *print.Printer, authConfig UserAuthConfig) error {
 		p.Debug(print.DebugLevel, "skipping browser opening since the commandline flag was passed")
 
 		// Print the link in terminal
-		p.Info("Open the following URL in your browser:\n\n")
-		p.Info("%s\n\n", authorizationURL)
+		p.Noticeln("Open the following URL in your browser:\n")
+		p.Outputf("%s\n\n", authorizationURL)
 	} else {
 		p.Debug(print.DebugLevel, "opening browser for authentication: %s", authorizationURL)
 
