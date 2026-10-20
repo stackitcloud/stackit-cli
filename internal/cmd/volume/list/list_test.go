@@ -22,7 +22,7 @@ const (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &iaas.APIClient{DefaultAPI: &iaas.DefaultAPIService{}}
+var testClient = &iaas.DefaultAPIServiceMock{}
 var testProjectId = uuid.NewString()
 var testLabelSelector = "label"
 
@@ -57,7 +57,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiListVolumesRequest)) iaas.ApiListVolumesRequest {
-	request := testClient.DefaultAPI.ListVolumes(testCtx, testProjectId, testRegion)
+	request := testClient.ListVolumes(testCtx, testProjectId, testRegion)
 	request = request.LabelSelector(testLabelSelector)
 	for _, mod := range mods {
 		mod(&request)
@@ -162,7 +162,7 @@ func TestBuildRequest(t *testing.T) {
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
+				cmpopts.EquateComparable(testCtx, testClient),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
