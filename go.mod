@@ -36,7 +36,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.7.3
 	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.6.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.20.1
-	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.7.2
+	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.8.0
 	github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.2
 	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.18.1
 	github.com/stackitcloud/stackit-sdk-go/services/valkey v0.3.1
