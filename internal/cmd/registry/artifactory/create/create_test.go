@@ -12,6 +12,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
@@ -22,10 +23,15 @@ const (
 type testCtxKey struct{}
 
 var (
-	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient    = &registry.APIClient{DefaultAPI: &registry.DefaultAPIService{}}
-	testProjectId = uuid.NewString()
-	testName      = "my-registry"
+	testCtx               = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient            = &registry.APIClient{DefaultAPI: &registry.DefaultAPIService{}}
+	testProjectId         = uuid.NewString()
+	testName              = "my-registry"
+	testProxyUrl          = "https://registry-1.docker.io"
+	testProxyRegistryType = "docker-hub"
+	testProxyDescription  = "Docker Hub proxy cache"
+	testProxyAccessKey    = "my-user"
+	testProxyAccessSecret = "my-secret"
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -80,6 +86,66 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModel(),
 		},
 		{
+			description: "with proxy minimal",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[proxyUrlFlag] = testProxyUrl
+				flagValues[proxyRegistryTypeFlag] = testProxyRegistryType
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.ProxyUrl = utils.Ptr(testProxyUrl)
+				model.ProxyRegistryType = utils.Ptr(testProxyRegistryType)
+			}),
+		},
+		{
+			description: "with proxy full",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[proxyUrlFlag] = testProxyUrl
+				flagValues[proxyRegistryTypeFlag] = testProxyRegistryType
+				flagValues[proxyDescriptionFlag] = testProxyDescription
+				flagValues[proxyAccessKeyFlag] = testProxyAccessKey
+				flagValues[proxyAccessSecretFlag] = testProxyAccessSecret
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.ProxyUrl = utils.Ptr(testProxyUrl)
+				model.ProxyRegistryType = utils.Ptr(testProxyRegistryType)
+				model.ProxyDescription = utils.Ptr(testProxyDescription)
+				model.ProxyAccessKey = utils.Ptr(testProxyAccessKey)
+				model.ProxyAccessSecret = utils.Ptr(testProxyAccessSecret)
+			}),
+		},
+		{
+			description: "proxy url without registry type",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[proxyUrlFlag] = testProxyUrl
+			}),
+			isValid: false,
+		},
+		{
+			description: "proxy registry type without url",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[proxyRegistryTypeFlag] = testProxyRegistryType
+			}),
+			isValid: false,
+		},
+		{
+			description: "proxy access key without secret",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[proxyUrlFlag] = testProxyUrl
+				flagValues[proxyRegistryTypeFlag] = testProxyRegistryType
+				flagValues[proxyAccessKeyFlag] = testProxyAccessKey
+			}),
+			isValid: false,
+		},
+		{
+			description: "proxy description without proxy url",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[proxyDescriptionFlag] = testProxyDescription
+			}),
+			isValid: false,
+		},
+		{
 			description: "name missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, nameFlag)
@@ -126,6 +192,29 @@ func TestBuildRequest(t *testing.T) {
 			description:     "base",
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
+		},
+		{
+			description: "with proxy full",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.ProxyUrl = utils.Ptr(testProxyUrl)
+				model.ProxyRegistryType = utils.Ptr(testProxyRegistryType)
+				model.ProxyDescription = utils.Ptr(testProxyDescription)
+				model.ProxyAccessKey = utils.Ptr(testProxyAccessKey)
+				model.ProxyAccessSecret = utils.Ptr(testProxyAccessSecret)
+			}),
+			expectedRequest: testClient.DefaultAPI.CreateArtifactory(testCtx, testProjectId, testRegion).
+				CreateArtifactoryPayload(registry.CreateArtifactoryPayload{
+					Name: testName,
+					Proxy: &registry.CreateProxyRequest{
+						Url:          testProxyUrl,
+						RegistryType: testProxyRegistryType,
+						Description:  utils.Ptr(testProxyDescription),
+						Credentials: &registry.Credentials{
+							AccessKey:    testProxyAccessKey,
+							AccessSecret: testProxyAccessSecret,
+						},
+					},
+				}),
 		},
 	}
 
