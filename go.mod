@@ -1,6 +1,6 @@
 module github.com/stackitcloud/stackit-cli
 
-go 1.26.0
+go 1.26.10
 
 require (
 	github.com/fatih/color v1.19.0
@@ -30,6 +30,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.5.0
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.15.0
+	github.com/stackitcloud/stackit-sdk-go/services/registry v0.1.0
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.26.1
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.11.0
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.19.1
@@ -208,7 +209,6 @@ require (
 	github.com/sonatard/noctx v0.5.1 // indirect
 	github.com/sourcegraph/go-diff v0.7.0 // indirect
 	github.com/ssgreg/nlreturn/v2 v2.2.1 // indirect
-	github.com/stackitcloud/stackit-sdk-go/services/registry v0.1.0 // indirect
 	github.com/stbenjam/no-sprintf-host-port v0.3.1 // indirect
 	github.com/stretchr/objx v0.5.3 // indirect
 	github.com/stretchr/testify v1.11.1 // indirect
