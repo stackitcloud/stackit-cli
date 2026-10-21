@@ -48,10 +48,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
+
 			// Configure API client
 			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
@@ -60,6 +62,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read server backup: %w", err)
@@ -69,6 +72,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -94,6 +98,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -125,10 +130,12 @@ func outputResult(p *print.Printer, outputFormat string, backup *serverbackup.Ba
 		lastRestored := utils.PtrStringDefault(backup.LastRestoredAt, "")
 		table.AddRow("LAST RESTORED AT", lastRestored)
 		table.AddSeparator()
+
 		volBackups := ""
 		if backups := backup.VolumeBackups; backups != nil {
 			volBackups = strconv.Itoa(len(backups))
 		}
+
 		table.AddRow("VOLUME BACKUPS", volBackups)
 		table.AddSeparator()
 

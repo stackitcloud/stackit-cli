@@ -36,12 +36,14 @@ func ValidateExpiration(expiration *uint64) error {
 		if *expiration > maxExpiration {
 			return fmt.Errorf("%s is too large (maximum is %d seconds)", ExpirationFlag, maxExpiration)
 		}
+
 		// If expiration is ever changed to int64 this check makes sure we never end up with negative expiration times.
 		minExpiration := uint64(math.Max(expirationSecondsMin, 0))
 		if *expiration < minExpiration {
 			return fmt.Errorf("%s is too small (minimum is %d seconds)", ExpirationFlag, minExpiration)
 		}
 	}
+
 	return nil
 }
 
@@ -115,6 +117,7 @@ func mergeKubeconfig(filePath *string, data string, switchContext bool) error {
 	if filePath == nil {
 		return fmt.Errorf("no kubeconfig file provided to be merged")
 	}
+
 	path := *filePath
 
 	// Check if the new kubeconfig data is empty
@@ -172,6 +175,7 @@ func writeKubeconfig(filePath *string, data string) error {
 	if filePath == nil {
 		return fmt.Errorf("no kubeconfig file provided to be written")
 	}
+
 	path := *filePath
 
 	// Check if the new kubeconfig data is empty
@@ -212,6 +216,7 @@ func getKubeconfigPath(filePath *string) (string, error) {
 	if isValidFilePath(filePath) {
 		return filepath.Abs(*filePath)
 	}
+
 	return "", &InvalidKubeconfigPathError{Path: *filePath}
 }
 
@@ -303,34 +308,42 @@ func WriteKubeconfig(filePath *string, kubeconfig string, options WriteOptions) 
 			if options.ConfirmFn != nil {
 				// If confirmation callback is provided, prompt the user for confirmation
 				prompt := fmt.Sprintf("Update your kubeconfig %q?", path)
+
 				err := options.ConfirmFn(prompt)
 				if err != nil {
 					// If the user doesn't confirm do not proceed with the merge
 					return nil, err
 				}
 			}
+
 			err := mergeKubeconfig(&path, kubeconfig, options.SwitchContext)
 			if err != nil {
 				return nil, err
 			}
+
 			return &path, err
 		}
+
 		// If overwrite was requested overwrite the existing file
 		if options.ConfirmFn != nil {
 			// If confirmation callback is provided, prompt the user for confirmation
 			prompt := fmt.Sprintf("Replace your kubeconfig %q?", path)
+
 			err := options.ConfirmFn(prompt)
 			if err != nil {
 				// If the user doesn't confirm do not proceed with the overwrite
 				return nil, err
 			}
+
 			// Fallthrough
 		}
 	}
+
 	// If the file doesn't exist or in case the user confirmed the overwrite (fallthrough) write the file
 	err = writeKubeconfig(&path, kubeconfig)
 	if err != nil {
 		return nil, err
 	}
+
 	return &path, err
 }

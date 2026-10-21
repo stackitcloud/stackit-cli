@@ -51,6 +51,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(p.Printer, cmd)
 			if err != nil {
 				return err
@@ -64,10 +65,12 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list Intake Users: %w", err)
 			}
+
 			users := resp.GetIntakeUsers()
 
 			// Truncate output
@@ -87,6 +90,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -121,6 +125,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -135,11 +140,13 @@ func outputResult(p *print.Printer, outputFormat, projectLabel, intakeId string,
 	return p.OutputResult(outputFormat, users, func() error {
 		if len(users) == 0 {
 			p.Outputf("No intake users found for intake %q in project %q\n", intakeId, projectLabel)
+
 			return nil
 		}
 
 		table := tables.NewTable()
 		table.SetHeader("ID", "DISPLAY NAME", "TYPE", "STATE")
+
 		for _, user := range users {
 			table.AddRow(
 				user.GetId(),
@@ -148,10 +155,12 @@ func outputResult(p *print.Printer, outputFormat, projectLabel, intakeId string,
 				user.GetState(),
 			)
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

@@ -34,6 +34,7 @@ func buildTestJWT(email string) string {
 	header, _ := json.Marshal(map[string]string{"alg": "HS256", "typ": "JWT"})
 	payload, _ := json.Marshal(map[string]string{"email": email})
 	enc := base64.RawURLEncoding
+
 	return fmt.Sprintf("%s.%s.fakesig", enc.EncodeToString(header), enc.EncodeToString(payload))
 }
 
@@ -47,6 +48,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -63,6 +65,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -84,15 +87,19 @@ func fixturePayload(mods ...func(payload *resourcemanager.CreateProjectPayload))
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
 func fixtureRequest(mods ...func(request *resourcemanager.ApiCreateProjectRequest)) resourcemanager.ApiCreateProjectRequest {
 	request := testClient.DefaultAPI.CreateProject(testCtx)
+
 	request = request.CreateProjectPayload(fixturePayload())
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -300,30 +307,36 @@ func TestBuildRequest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			keyring.MockInit()
+
 			err := auth.SetAuthFlow(tt.authFlow)
 			if err != nil {
 				t.Fatalf("Failed to set auth flow in storage: %v", err)
 			}
+
 			if tt.sa_email != nil {
 				err := auth.SetAuthField(auth.SERVICE_ACCOUNT_EMAIL, *tt.sa_email)
 				if err != nil {
 					t.Fatalf("Failed to set service account email in storage: %v", err)
 				}
 			}
+
 			if tt.user_email != nil {
 				err := auth.SetAuthField(auth.USER_EMAIL, *tt.user_email)
 				if err != nil {
 					t.Fatalf("Failed to set user email in storage: %v", err)
 				}
 			}
+
 			if tt.accessToken != nil {
 				t.Setenv("STACKIT_ACCESS_TOKEN", *tt.accessToken)
 			}
+
 			request, err := buildRequest(testCtx, tt.model, testClient)
 			if err != nil {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error building request: %v", err)
 			}
 
@@ -343,6 +356,7 @@ func Test_outputResult(t *testing.T) {
 		model inputModel
 		resp  *resourcemanager.Project
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -353,6 +367,7 @@ func Test_outputResult(t *testing.T) {
 	}
 
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, tt.args.model, tt.args.resp); (err != nil) != tt.wantErr {

@@ -36,6 +36,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -52,6 +53,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -67,15 +69,19 @@ func fixturePayload(mods ...func(payload *mongodbflex.UpdateBackupSchedulePayloa
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
 func fixtureUpdateBackupScheduleRequest(mods ...func(request *mongodbflex.ApiUpdateBackupScheduleRequest)) mongodbflex.ApiUpdateBackupScheduleRequest {
 	request := testClient.DefaultAPI.UpdateBackupSchedule(testCtx, testProjectId, testInstanceId, testRegion)
+
 	request = request.UpdateBackupSchedulePayload(fixturePayload())
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -84,6 +90,7 @@ func fixtureGetInstanceRequest(mods ...func(request *mongodbflex.ApiGetInstanceR
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -101,6 +108,7 @@ func fixtureInstance(mods ...func(instance *mongodbflex.Instance)) *mongodbflex.
 	for _, mod := range mods {
 		mod(&instance)
 	}
+
 	return &instance
 }
 

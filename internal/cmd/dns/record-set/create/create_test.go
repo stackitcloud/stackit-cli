@@ -43,6 +43,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -62,11 +63,13 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *dns.ApiCreateRecordSetRequest)) dns.ApiCreateRecordSetRequest {
 	request := testClient.DefaultAPI.CreateRecordSet(testCtx, testProjectId, testZoneId)
+
 	request = request.CreateRecordSetPayload(dns.CreateRecordSetPayload{
 		Name:    "example.com",
 		Comment: utils.Ptr("comment"),
@@ -76,9 +79,11 @@ func fixtureRequest(mods ...func(request *dns.ApiCreateRecordSetRequest)) dns.Ap
 		Ttl:  utils.Ptr(int32(3600)),
 		Type: dns.CREATERECORDSETPAYLOADTYPE_SOA,
 	})
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -253,6 +258,7 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				var content string
+
 				for idx, val := range recordTxtOver255Char {
 					content += fmt.Sprintf("%q", val)
 					if idx != len(recordTxtOver255Char)-1 {
@@ -265,6 +271,7 @@ func TestParseInput(t *testing.T) {
 			}),
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			testutils.TestParseInputWithAdditionalFlags(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, map[string][]string{
@@ -329,6 +336,7 @@ func TestOutputResult(t *testing.T) {
 		zoneLabel string
 		resp      *dns.RecordSetResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args

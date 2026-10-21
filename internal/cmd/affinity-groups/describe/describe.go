@@ -43,6 +43,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -56,6 +57,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			request := buildRequest(ctx, *model, apiClient)
+
 			result, err := request.Execute()
 			if err != nil {
 				return fmt.Errorf("get affinity group: %w", err)
@@ -64,9 +66,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err := outputResult(params.Printer, *model, *result); err != nil {
 				return err
 			}
+
 			return nil
 		},
 	}
+
 	return cmd
 }
 
@@ -86,11 +90,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func outputResult(p *print.Printer, model inputModel, resp iaas.AffinityGroup) error {
 	var outputFormat string
+
 	if model.GlobalFlagModel != nil {
 		outputFormat = model.OutputFormat
 	}
@@ -102,10 +108,12 @@ func outputResult(p *print.Printer, model inputModel, resp iaas.AffinityGroup) e
 			table.AddRow("ID", utils.PtrString(resp.Id))
 			table.AddSeparator()
 		}
+
 		table.AddRow("NAME", resp.Name)
 		table.AddSeparator()
 		table.AddRow("POLICY", resp.Policy)
 		table.AddSeparator()
+
 		if resp.HasMembers() {
 			table.AddRow("Members", strings.Join(resp.Members, ", "))
 			table.AddSeparator()
@@ -114,6 +122,7 @@ func outputResult(p *print.Printer, model inputModel, resp iaas.AffinityGroup) e
 		if err := table.Display(p); err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

@@ -71,6 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -85,18 +86,21 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			routingTableLabel, err := iaasUtils.GetRoutingTableOfAreaName(ctx, apiClient.DefaultAPI, model.OrganizationId, model.NetworkAreaId, model.Region, model.RoutingTableId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get routing-table name: %v", err)
+
 				routingTableLabel = model.RoutingTableId
 			} else if routingTableLabel == "" {
 				routingTableLabel = model.RoutingTableId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update the routing-table %q?", routingTableLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
 			}
 
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update routing-table %q : %w", model.RoutingTableId, err)
@@ -106,6 +110,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -141,6 +146,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -155,6 +161,7 @@ func outputResult(p *print.Printer, outputFormat, networkAreaId string, routingT
 		}
 
 		p.Outputf("Updated routing-table %q in network-area %q.", *routingTable.Id, networkAreaId)
+
 		return nil
 	})
 }

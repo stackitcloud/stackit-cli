@@ -52,6 +52,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -65,10 +66,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get organization roles: %w", err)
 			}
+
 			roles := resp.Roles
 
 			// Truncate output
@@ -80,6 +83,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -109,6 +113,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -120,11 +125,13 @@ func outputRolesResult(p *print.Printer, outputFormat, organizationId string, ro
 	return p.OutputResult(outputFormat, roles, func() error {
 		if len(roles) == 0 {
 			p.Outputf("No roles found for organization with ID %q\n", organizationId)
+
 			return nil
 		}
 
 		table := tables.NewTable()
 		table.SetHeader("ROLE NAME", "ROLE DESCRIPTION", "PERMISSION NAME", "PERMISSION DESCRIPTION")
+
 		for _, r := range roles {
 			if r.Permissions != nil {
 				for _, p := range r.Permissions {
@@ -135,10 +142,13 @@ func outputRolesResult(p *print.Printer, outputFormat, organizationId string, ro
 						p.Description,
 					)
 				}
+
 				table.AddSeparator()
 			}
 		}
+
 		table.EnableAutoMergeOnColumns(1, 2)
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

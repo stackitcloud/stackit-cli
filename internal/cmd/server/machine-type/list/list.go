@@ -62,6 +62,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -75,6 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read machine-types: %w", err)
@@ -83,6 +85,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
@@ -96,6 +99,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -125,6 +129,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -133,6 +138,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	if model.Filter != nil {
 		req = req.Filter(*model.Filter)
 	}
+
 	return req
 }
 
@@ -140,19 +146,24 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, machineTy
 	return p.OutputResult(outputFormat, machineTypes, func() error {
 		if len(machineTypes.Items) == 0 {
 			p.Outputf("No machine-types found for project %q\n", projectLabel)
+
 			return nil
 		}
+
 		table := tables.NewTable()
 		table.SetTitle("Machine-Types")
 		table.SetHeader("NAME", "VCPUS", "RAM (GB)", "DESCRIPTION", "EXTRA SPECS")
+
 		if items := machineTypes.GetItems(); len(items) > 0 {
 			for _, machineType := range items {
 				extraSpecMap := make(map[string]string)
+
 				if len(machineType.ExtraSpecs) > 0 {
 					for key, value := range machineType.ExtraSpecs {
 						extraSpecMap[key] = fmt.Sprintf("%v", value)
 					}
 				}
+
 				ramGB := machineType.Ram / 1024
 
 				table.AddRow(

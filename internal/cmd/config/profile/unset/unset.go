@@ -40,12 +40,15 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				params.Printer.Debug(print.WarningLevel, "both keyring and text file storage failed to find a valid authentication flow for the active profile")
 				params.Printer.Warn("The default profile is not authenticated, please login using the 'stackit auth login' command.\n")
+
 				return nil
 			}
+
 			params.Printer.Debug(print.DebugLevel, "found valid authentication flow for active profile: %s", flow)
 
 			return nil
 		},
 	}
+
 	return cmd
 }

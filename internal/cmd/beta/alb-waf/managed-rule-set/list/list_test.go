@@ -39,6 +39,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -53,15 +54,19 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request albwaf.ApiListManagedRuleSetsRequest) albwaf.ApiListManagedRuleSetsRequest) albwaf.ApiListManagedRuleSetsRequest {
 	request := testClient.DefaultAPI.ListManagedRuleSets(testCtx, testProjectId, testRegion)
+
 	request = request.PageSize("100")
+
 	for _, mod := range mods {
 		request = mod(request)
 	}
+
 	return request
 }
 
@@ -156,6 +161,7 @@ func fixtureTestResponse(mods ...func(resp *testResponse)) testResponse {
 	for _, mod := range mods {
 		mod(&resp)
 	}
+
 	return resp
 }
 
@@ -169,6 +175,7 @@ func fixtureItems(count int) []albwaf.GetLimitedManagedRuleSetResponse {
 			AdditionalProperties: map[string]interface{}{},
 		}
 	}
+
 	return items
 }
 
@@ -225,19 +232,24 @@ func TestFetchManagedRuleSets(t *testing.T) {
 			handler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				resp := tt.responses[callCount]
 				callCount++
+
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(resp.statusCode)
+
 				bs, err := json.Marshal(resp.body)
 				if err != nil {
 					t.Fatalf("marshal: %v", err)
 				}
+
 				_, err = w.Write(bs)
 				if err != nil {
 					t.Fatalf("write: %v", err)
 				}
 			})
 			server := httptest.NewServer(handler)
+
 			defer server.Close()
+
 			client, err := albwaf.NewAPIClient(
 				sdkConfig.WithEndpoint(server.URL),
 				sdkConfig.WithoutAuthentication(),
@@ -245,23 +257,30 @@ func TestFetchManagedRuleSets(t *testing.T) {
 			if err != nil {
 				t.Fatalf("failed to create test client: %v", err)
 			}
+
 			var mods []func(m *inputModel)
+
 			if tt.limit > 0 {
 				mods = append(mods, func(m *inputModel) {
 					m.Limit = utils.Ptr(tt.limit)
 				})
 			}
+
 			model := fixtureInputModel(mods...)
+
 			got, err := fetchManagedRuleSets(testCtx, model, client)
 			if err != nil {
 				if !tt.fails {
 					t.Fatalf("fetchManagedRuleSets() unexpected error: %v", err)
 				}
+
 				return
 			}
+
 			if callCount != len(tt.responses) {
 				t.Errorf("fetchManagedRuleSets() expected %d calls, got %d", len(tt.responses), callCount)
 			}
+
 			diff := cmp.Diff(got, tt.expected)
 			if diff != "" {
 				t.Errorf("fetchManagedRuleSets() mismatch (-want +got):\n%s", diff)
@@ -286,6 +305,7 @@ func TestOutputResult(t *testing.T) {
 	}
 
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			if err := outputResult(params.Printer, "", tt.items); err != nil {

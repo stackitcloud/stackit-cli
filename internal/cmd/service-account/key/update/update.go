@@ -62,6 +62,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -74,6 +75,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update the key with ID %q?", model.KeyId)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -81,6 +83,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient, time.Now())
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create service account key: %w", err)
@@ -90,12 +93,15 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("marshal key: %w", err)
 			}
+
 			params.Printer.Info("%s", string(key))
+
 			return nil
 		},
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -135,6 +141,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	activate := flags.FlagToBoolValue(p, cmd, activateFlag)
 	deactivate := flags.FlagToBoolValue(p, cmd, deactivateFlag)
+
 	if activate && deactivate {
 		return nil, fmt.Errorf("only one of %q and %q can be set", activateFlag, deactivateFlag)
 	}
@@ -149,6 +156,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -156,16 +164,21 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 	req := apiClient.DefaultAPI.PartialUpdateServiceAccountKey(ctx, model.ProjectId, model.ServiceAccountEmail, model.KeyId)
 
 	var validUntil *time.Time
+
 	validUntil = nil
+
 	if model.ExpiresInDays != nil {
 		validUntil = utils.Ptr(daysFromNow(now, *model.ExpiresInDays))
 	}
 
 	var active *bool
+
 	active = nil
+
 	if model.Deactivate {
 		active = utils.Ptr(false)
 	}
+
 	if model.Activate {
 		active = utils.Ptr(true)
 	}
@@ -174,6 +187,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 		ValidUntil: validUntil,
 		Active:     active,
 	})
+
 	return req
 }
 

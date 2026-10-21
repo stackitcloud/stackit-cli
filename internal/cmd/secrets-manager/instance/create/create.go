@@ -76,10 +76,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a Secrets Manager instance for project %q?", projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -87,15 +89,18 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API to create instance
 			req := buildCreateInstanceRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create Secrets Manager instance: %w", err)
 			}
+
 			instanceId := resp.Id
 
 			// Call API to create ACLs for instance, if ACLs are provided
 			if model.Acls != nil {
 				updateReq := buildUpdateACLsRequest(ctx, model, instanceId, apiClient)
+
 				err = updateReq.Execute()
 				if err != nil {
 					return fmt.Errorf(`the Secrets Manager instance was successfully created, but the configuration of the ACLs failed. The default behavior is to have no ACL.
@@ -109,6 +114,7 @@ If you want to retry configuring the ACLs, you can do it via:
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -144,6 +150,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -189,6 +196,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel, instanceId strin
 
 	return p.OutputResult(outputFormat, instance, func() error {
 		p.Outputf("Created instance for project %q. Instance ID: %s\n", projectLabel, instanceId)
+
 		return nil
 	})
 }

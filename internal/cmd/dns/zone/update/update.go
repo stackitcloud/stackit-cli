@@ -65,6 +65,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -79,10 +80,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient.DefaultAPI, model.ProjectId, model.ZoneId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get zone name: %v", err)
+
 				zoneLabel = model.ZoneId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update zone %s?", zoneLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -90,9 +93,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			if err != nil {
 				return err
 			}
+
 			_, err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("update DNS zone: %w", err)
@@ -113,11 +118,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered update of"
 			}
+
 			params.Printer.Info("%s zone %s\n", operationState, zoneLabel)
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -176,11 +184,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClient) dns.ApiPartialUpdateZoneRequest {
 	req := apiClient.DefaultAPI.PartialUpdateZone(ctx, model.ProjectId, model.ZoneId)
+
 	req = req.PartialUpdateZonePayload(dns.PartialUpdateZonePayload{
 		Name:          model.Name,
 		DefaultTTL:    model.DefaultTTL,
@@ -193,5 +203,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 		Description:   model.Description,
 		ContactEmail:  model.ContactEmail,
 	})
+
 	return req
 }

@@ -47,6 +47,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, inputArgs []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, inputArgs)
 			if err != nil {
 				return fmt.Errorf("unable to parse input: %w", err)
@@ -61,12 +62,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			shareLabel, err := sfsUtils.GetShareName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ResourcePoolId, model.ShareId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get share name: %v", err)
+
 				shareLabel = model.ShareId
 			} else if shareLabel == "" {
 				shareLabel = model.ShareId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete SFS share %q? (This cannot be undone)", shareLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -74,6 +77,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			_, err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("delete SFS share: %w", err)
@@ -96,10 +100,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			params.Printer.Outputf("%s share %q\n", operation, shareLabel)
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -125,6 +131,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 

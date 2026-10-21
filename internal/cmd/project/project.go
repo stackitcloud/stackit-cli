@@ -30,6 +30,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Run:  utils.CmdHelp,
 	}
 	addSubcommands(cmd, params)
+
 	return cmd
 }
 

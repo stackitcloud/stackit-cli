@@ -68,6 +68,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -113,6 +114,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, *model.NetworkId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network name: %v", err)
+
 				networkLabel = *model.NetworkId
 			} else if networkLabel == "" {
 				networkLabel = *model.NetworkId
@@ -128,6 +130,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -159,6 +162,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -184,6 +188,7 @@ func outputProjectResult(p *print.Printer, outputFormat string, nics []iaas.NIC,
 	return p.OutputResult(outputFormat, nics, func() error {
 		if len(nics) == 0 {
 			p.Outputf("No network interfaces found for project %q\n", projectLabel)
+
 			return nil
 		}
 
@@ -209,6 +214,7 @@ func outputProjectResult(p *print.Printer, outputFormat string, nics []iaas.NIC,
 		}
 
 		p.Outputln(table.Render())
+
 		return nil
 	})
 }
@@ -217,6 +223,7 @@ func outputNetworkResult(p *print.Printer, outputFormat string, nics []iaas.NIC,
 	return p.OutputResult(outputFormat, nics, func() error {
 		if len(nics) == 0 {
 			p.Outputf("No network interfaces found for network %q\n", networkLabel)
+
 			return nil
 		}
 
@@ -237,6 +244,7 @@ func outputNetworkResult(p *print.Printer, outputFormat string, nics []iaas.NIC,
 		}
 
 		p.Outputln(table.Render())
+
 		return nil
 	})
 }

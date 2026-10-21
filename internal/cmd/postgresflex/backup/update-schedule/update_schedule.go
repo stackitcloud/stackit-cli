@@ -70,10 +70,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update backup schedule of instance %q?", instanceLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -81,16 +83,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClientLegacy)
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("update backup schedule of PostgreSQL Flex instance: %w", err)
 			}
 
 			cmd.Printf("Updated backup schedule of instance %q\n", instanceLabel)
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -120,8 +125,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 // Deprecated: Will be removed after 2027-01-31.
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflexLegacy.APIClient) postgresflexLegacy.ApiUpdateBackupScheduleRequest {
 	req := apiClient.DefaultAPI.UpdateBackupSchedule(ctx, model.ProjectId, model.Region, model.InstanceId)
+
 	req = req.UpdateBackupSchedulePayload(postgresflexLegacy.UpdateBackupSchedulePayload{
 		BackupSchedule: model.BackupSchedule,
 	})
+
 	return req
 }

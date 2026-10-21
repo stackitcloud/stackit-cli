@@ -80,6 +80,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -95,10 +96,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient.DefaultAPI, *model.OrganizationId, *model.NetworkAreaId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
+
 				networkAreaLabel = *model.NetworkAreaId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a static route for STACKIT Network Area (SNA) %q?", networkAreaLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -106,6 +109,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create static route: %w", err)
@@ -115,8 +119,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("empty response from API")
 			}
 
-			var destination string
-			var nexthop string
+			var (
+				destination string
+				nexthop     string
+			)
+
 			if model.DestinationV4 != nil {
 				destination = *model.DestinationV4
 			} else if model.DestinationV6 != nil {
@@ -144,6 +151,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -165,11 +173,13 @@ func configureFlags(cmd *cobra.Command) {
 
 	destinationFlags := []string{prefixFlag, destinationFlag}
 	nexthopFlags := []string{nexthopFlag, nexthopIPv4Flag, nexthopIPv6Flag, nexthopBlackholeFlag, nexthopInternetFlag}
+
 	cmd.MarkFlagsMutuallyExclusive(destinationFlags...)
 	cmd.MarkFlagsMutuallyExclusive(nexthopFlags...)
 
 	cmd.MarkFlagsOneRequired(destinationFlags...)
 	cmd.MarkFlagsOneRequired(nexthopFlags...)
+
 	err := flags.MarkFlagsRequired(cmd, organizationIdFlag, networkAreaIdFlag)
 	cobra.CheckErr(err)
 }
@@ -179,12 +189,15 @@ func parseDestination(input string) (destinationV4, destinationV6 *string, err e
 	if err != nil {
 		return nil, nil, fmt.Errorf("parse CIDR: %w", err)
 	}
+
 	if ip.To4() != nil { // CIDR is IPv4
 		destinationV4 = utils.Ptr(input)
 		return destinationV4, nil, nil
 	}
+
 	// CIDR is IPv6
 	destinationV6 = utils.Ptr(input)
+
 	return nil, destinationV6, nil
 }
 
@@ -192,15 +205,19 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	globalFlags := globalflags.Parse(p, cmd)
 
 	var destinationV4, destinationV6 *string
+
 	if destination := flags.FlagToStringPointer(p, cmd, destinationFlag); destination != nil {
 		var err error
+
 		destinationV4, destinationV6, err = parseDestination(*destination)
 		if err != nil {
 			return nil, err
 		}
 	}
+
 	if prefix := flags.FlagToStringPointer(p, cmd, prefixFlag); prefix != nil {
 		var err error
+
 		destinationV4, destinationV6, err = parseDestination(*prefix)
 		if err != nil {
 			return nil, err
@@ -211,6 +228,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	nexthopIPv6 := flags.FlagToStringPointer(p, cmd, nexthopIPv6Flag)
 	nexthopInternet := flags.FlagToBoolPointer(p, cmd, nexthopInternetFlag)
 	nexthopBlackhole := flags.FlagToBoolPointer(p, cmd, nexthopBlackholeFlag)
+
 	if nexthop := flags.FlagToStringPointer(p, cmd, nexthopFlag); nexthop != nil {
 		nexthopIPv4 = nexthop
 	}
@@ -229,20 +247,25 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateNetworkAreaRouteRequest {
 	req := apiClient.DefaultAPI.CreateNetworkAreaRoute(ctx, *model.OrganizationId, *model.NetworkAreaId, model.Region)
 
-	var destinationV4 *iaas.DestinationCIDRv4
-	var destinationV6 *iaas.DestinationCIDRv6
+	var (
+		destinationV4 *iaas.DestinationCIDRv4
+		destinationV6 *iaas.DestinationCIDRv6
+	)
+
 	if model.DestinationV4 != nil {
 		destinationV4 = &iaas.DestinationCIDRv4{
 			Type:  destinationCIDRv4Type,
 			Value: *model.DestinationV4,
 		}
 	}
+
 	if model.DestinationV6 != nil {
 		destinationV6 = &iaas.DestinationCIDRv6{
 			Type:  destinationCIDRv6Type,
@@ -250,10 +273,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		}
 	}
 
-	var nexthopIPv4 *iaas.NexthopIPv4
-	var nexthopIPv6 *iaas.NexthopIPv6
-	var nexthopBlackhole *iaas.NexthopBlackhole
-	var nexthopInternet *iaas.NexthopInternet
+	var (
+		nexthopIPv4      *iaas.NexthopIPv4
+		nexthopIPv6      *iaas.NexthopIPv6
+		nexthopBlackhole *iaas.NexthopBlackhole
+		nexthopInternet  *iaas.NexthopInternet
+	)
 
 	if model.NexthopV4 != nil {
 		nexthopIPv4 = &iaas.NexthopIPv4{
@@ -292,12 +317,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 			},
 		},
 	}
+
 	return req.CreateNetworkAreaRoutePayload(payload)
 }
 
 func outputResult(p *print.Printer, outputFormat, networkAreaLabel string, route *iaas.Route) error {
 	return p.OutputResult(outputFormat, route, func() error {
 		p.Outputf("Created static route for SNA %q.\nStatic route ID: %s\n", networkAreaLabel, utils.PtrString(route.Id))
+
 		return nil
 	})
 }

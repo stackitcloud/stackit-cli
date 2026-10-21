@@ -49,6 +49,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -63,10 +64,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create an ALB WAF custom rule group for project %q?", projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -74,6 +77,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create ALB WAF custom rule group: %w", err)
@@ -83,6 +87,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -100,9 +105,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	payloadValue := flags.FlagToStringPointer(p, cmd, payloadFlag)
+
 	var payload *albwaf.CreateCustomRuleGroupPayload
+
 	if payloadValue != nil {
 		payload = &albwaf.CreateCustomRuleGroupPayload{}
+
 		err := json.Unmarshal([]byte(*payloadValue), payload)
 		if err != nil {
 			return nil, fmt.Errorf("decode payload: %w", err)
@@ -115,12 +123,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *albwaf.APIClient) albwaf.ApiCreateCustomRuleGroupRequest {
 	req := apiClient.DefaultAPI.CreateCustomRuleGroup(ctx, model.ProjectId, model.Region)
+
 	req = req.CreateCustomRuleGroupPayload(*model.Payload)
+
 	return req
 }
 
@@ -128,9 +139,12 @@ func outputResult(p *print.Printer, outputFormat string, resp *albwaf.GetCustomR
 	return p.OutputResult(outputFormat, resp, func() error {
 		if resp == nil {
 			p.Outputf("Received empty custom rule group response")
+
 			return nil
 		}
+
 		p.Outputf("Created custom rule group with name %q \n", resp.Name)
+
 		return nil
 	})
 }

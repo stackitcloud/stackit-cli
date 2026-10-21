@@ -12,10 +12,12 @@ import (
 func JoinStringKeys(m map[string]any, sep string) string {
 	keys := make([]string, len(m))
 	i := 0
+
 	for k := range m {
 		keys[i] = k
 		i++
 	}
+
 	return strings.Join(keys, sep)
 }
 
@@ -25,6 +27,7 @@ func JoinStringKeysPtr(m map[string]any, sep string) string {
 	if m == nil {
 		return ""
 	}
+
 	return JoinStringKeys(m, sep)
 }
 
@@ -33,15 +36,19 @@ func JoinStringMap(m map[string]string, keyValueSeparator, separator string) str
 	if m == nil {
 		return ""
 	}
+
 	keys := make([]string, 0, len(m))
 	for k := range m {
 		keys = append(keys, k)
 	}
+
 	slices.Sort(keys)
+
 	parts := make([]string, 0, len(m))
 	for _, k := range keys {
 		parts = append(parts, fmt.Sprintf("%s%s%s", k, keyValueSeparator, m[k]))
 	}
+
 	return strings.Join(parts, separator)
 }
 
@@ -51,6 +58,7 @@ func JoinStringPtr[T ~string](vals *[]T, sep string) string {
 	if vals == nil || len(*vals) == 0 {
 		return ""
 	}
+
 	deref := *vals
 	switch len(deref) {
 	case 0:
@@ -58,12 +66,16 @@ func JoinStringPtr[T ~string](vals *[]T, sep string) string {
 	case 1:
 		return string(deref[0])
 	}
+
 	var b strings.Builder
+
 	b.WriteString(string(deref[0]))
+
 	for _, s := range deref[1:] {
 		b.WriteString(sep)
 		b.WriteString(string(s))
 	}
+
 	return b.String()
 }
 
@@ -73,7 +85,9 @@ func SortedKeys[V any](m map[string]V) []string {
 	for k := range m {
 		keys = append(keys, k)
 	}
+
 	slices.Sort(keys)
+
 	return keys
 }
 
@@ -87,14 +101,19 @@ func Truncate(s *string, maxLen int) string {
 
 	if utf8.RuneCountInString(*s) > maxLen {
 		var builder strings.Builder
+
 		for i, r := range *s {
 			if i >= maxLen {
 				break
 			}
+
 			builder.WriteRune(r)
 		}
+
 		builder.WriteRune('…')
+
 		return builder.String()
 	}
+
 	return *s
 }

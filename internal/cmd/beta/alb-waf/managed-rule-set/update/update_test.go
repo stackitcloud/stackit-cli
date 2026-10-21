@@ -38,6 +38,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, mod := range mods {
 		mod(argValues)
 	}
+
 	return argValues
 }
 
@@ -50,6 +51,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -66,6 +68,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -73,18 +76,23 @@ func fixturePayload(mods ...func(payload *albwaf.PatchManagedRuleSetPayload)) (p
 	if err := json.Unmarshal(testConfiguration, &payload); err != nil {
 		log.Panicf("cannot deserialize test configuration: %v", err)
 	}
+
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
 func fixtureRequest(mods ...func(request *albwaf.ApiPatchManagedRuleSetRequest)) albwaf.ApiPatchManagedRuleSetRequest {
 	request := testClient.DefaultAPI.PatchManagedRuleSet(testCtx, testProjectId, testRegion, testName)
+
 	request = request.PatchManagedRuleSetPayload(fixturePayload())
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -165,8 +173,10 @@ func TestBuildRequest(t *testing.T) {
 				if !tt.fails {
 					t.Fatalf("cannot build request: %v", err)
 				}
+
 				return
 			}
+
 			if tt.fails {
 				t.Fatalf("did not fail on invalid input")
 			}
@@ -187,6 +197,7 @@ func TestOutputResult(t *testing.T) {
 		projectLabel string
 		resp         *albwaf.GetManagedRuleSetResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -211,6 +222,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, "", tt.args.projectLabel, tt.args.resp); (err != nil) != tt.wantErr {

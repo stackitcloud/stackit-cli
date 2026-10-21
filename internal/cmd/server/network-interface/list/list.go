@@ -54,6 +54,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -67,6 +68,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list attached network interfaces: %w", err)
@@ -77,6 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
+
 				serverLabel = model.ServerId
 			} else if serverLabel == "" {
 				serverLabel = model.ServerId
@@ -91,6 +94,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -123,6 +127,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -134,8 +139,10 @@ func outputResult(p *print.Printer, outputFormat, serverId, serverLabel string, 
 	return p.OutputResult(outputFormat, serverNics, func() error {
 		if len(serverNics) == 0 {
 			p.Outputf("No attached network interfaces found for server %q\n", serverLabel)
+
 			return nil
 		}
+
 		table := tables.NewTable()
 		table.SetHeader("NIC ID", "SERVER ID")
 
@@ -143,9 +150,11 @@ func outputResult(p *print.Printer, outputFormat, serverId, serverLabel string, 
 			nic := serverNics[i]
 			table.AddRow(utils.PtrString(nic.Id), serverId)
 		}
+
 		table.EnableAutoMergeOnColumns(2)
 
 		p.Outputln(table.Render())
+
 		return nil
 	})
 }

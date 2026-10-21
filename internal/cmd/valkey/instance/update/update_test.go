@@ -41,6 +41,7 @@ func newAPIMock(s mockSettings) valkey.DefaultAPI {
 			if s.returnError {
 				return nil, fmt.Errorf("list offerings failed")
 			}
+
 			return s.listOfferingsResp, nil
 		}),
 	}
@@ -53,6 +54,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, mod := range mods {
 		mod(argValues)
 	}
+
 	return argValues
 }
 
@@ -74,6 +76,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -99,11 +102,13 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *valkey.ApiPartialUpdateInstanceRequest)) valkey.ApiPartialUpdateInstanceRequest {
 	request := testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId)
+
 	request = request.PartialUpdateInstancePayload(valkey.PartialUpdateInstancePayload{
 		PlanId: new(testPlanId),
 		Parameters: &valkey.InstanceParameters{
@@ -118,9 +123,11 @@ func fixtureRequest(mods ...func(request *valkey.ApiPartialUpdateInstanceRequest
 			ReplBacklogSize:      new("10mb"),
 		},
 	})
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -415,11 +422,13 @@ func TestBuildRequest(t *testing.T) {
 				returnError:       tt.getOfferingsFails,
 				listOfferingsResp: tt.getOfferingsResp,
 			})
+
 			request, err := buildRequest(testCtx, tt.model, apiMock)
 			if err != nil {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error building request: %v", err)
 			}
 

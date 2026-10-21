@@ -45,6 +45,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -58,6 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list server command templates: %w", err)
@@ -69,10 +71,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.Limit != nil && len(templates) > int(*model.Limit) {
 				templates = templates[:*model.Limit]
 			}
+
 			return outputResult(params.Printer, model.OutputFormat, templates)
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -100,6 +104,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -112,12 +117,16 @@ func outputResult(p *print.Printer, outputFormat string, templates []runcommand.
 	return p.OutputResult(outputFormat, templates, func() error {
 		if len(templates) == 0 {
 			p.Outputf("No commands templates found\n")
+
 			return nil
 		}
+
 		table := tables.NewTable()
 		table.SetHeader("NAME", "OS TYPE", "TITLE")
+
 		for _, s := range templates {
 			var osType string
+
 			if len(s.OsType) > 0 {
 				osType = utils.JoinStringPtr(&s.OsType, ",")
 			}
@@ -128,10 +137,12 @@ func outputResult(p *print.Printer, outputFormat string, templates []runcommand.
 				utils.PtrString(s.Title),
 			)
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

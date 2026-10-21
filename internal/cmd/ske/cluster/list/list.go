@@ -51,6 +51,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -70,6 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				// Check if SKE is enabled for this project
@@ -77,13 +79,16 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if enabledErr != nil {
 					return fmt.Errorf("check if project is enabled failed: %w", enabledErr)
 				}
+
 				if !enabled {
 					return &errors.ServiceDisabledError{
 						Service: "ske",
 					}
 				}
+
 				return fmt.Errorf("get SKE clusters: %w", err)
 			}
+
 			clusters := resp.Items
 
 			// Truncate output
@@ -104,6 +109,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -131,6 +137,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -143,26 +150,33 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, clusters 
 	return p.OutputResult(outputFormat, clusters, func() error {
 		if len(clusters) == 0 {
 			p.Outputf("No clusters found for project %q\n", projectLabel)
+
 			return nil
 		}
 
 		table := tables.NewTable()
 		table.SetHeader("NAME", "STATE", "VERSION", "POOLS", "MONITORING")
+
 		for i := range clusters {
 			c := clusters[i]
 			monitoring := "Disabled"
+
 			if c.Extensions != nil && c.Extensions.Observability != nil && c.Extensions.Observability.Enabled {
 				monitoring = "Enabled"
 			}
+
 			statusAggregated := ""
 			if c.HasStatus() {
 				statusAggregated = utils.PtrString(c.Status.Aggregated)
 			}
+
 			kubernetesVersion := c.Kubernetes.Version
 			countNodepools := 0
+
 			if c.Nodepools != nil {
 				countNodepools = len(c.Nodepools)
 			}
+
 			table.AddRow(
 				utils.PtrString(c.Name),
 				statusAggregated,
@@ -171,6 +185,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, clusters 
 				monitoring,
 			)
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

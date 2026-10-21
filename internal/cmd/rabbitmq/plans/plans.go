@@ -48,6 +48,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -61,15 +62,18 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get RabbitMQ service plans: %w", err)
 			}
+
 			plans := resp.GetOfferings()
 
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
@@ -83,6 +87,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -110,6 +115,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -122,11 +128,13 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, plans []r
 	return p.OutputResult(outputFormat, plans, func() error {
 		if len(plans) == 0 {
 			p.Outputf("No plans found for project %q\n", projectLabel)
+
 			return nil
 		}
 
 		table := tables.NewTable()
 		table.SetHeader("OFFERING NAME", "VERSION", "ID", "NAME", "DESCRIPTION")
+
 		for i := range plans {
 			o := plans[i]
 			if o.Plans != nil {
@@ -140,10 +148,13 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, plans []r
 						plan.Description,
 					)
 				}
+
 				table.AddSeparator()
 			}
 		}
+
 		table.EnableAutoMergeOnColumns(1, 2)
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

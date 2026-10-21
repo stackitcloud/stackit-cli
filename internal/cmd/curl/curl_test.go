@@ -31,6 +31,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, mod := range mods {
 		mod(argValues)
 	}
+
 	return argValues
 }
 
@@ -46,6 +47,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -62,19 +64,24 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *http.Request)) *http.Request {
 	req, err := http.NewRequest("POST", testURL, bytes.NewBufferString("data"))
 	req.Header.Set("Test-header-1", "Test value 1")
+
 	if err != nil {
 		panic(err)
 	}
+
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", testToken))
+
 	for _, mod := range mods {
 		mod(req)
 	}
+
 	return req
 }
 
@@ -227,8 +234,10 @@ func TestParseInput(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			requestMethodFlag.Reset()
+
 			params := testparams.NewTestParams()
 			cmd := NewCmd(params.CmdParams)
+
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
@@ -243,6 +252,7 @@ func TestParseInput(t *testing.T) {
 					if !tt.isValid {
 						return
 					}
+
 					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
 				}
 			}
@@ -253,6 +263,7 @@ func TestParseInput(t *testing.T) {
 					if !tt.isValid {
 						return
 					}
+
 					t.Fatalf("setting flag --%s=%s: %v", headerFlag, value, err)
 				}
 			}
@@ -262,6 +273,7 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error validating args: %v", err)
 			}
 
@@ -270,6 +282,7 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error validating flags: %v", err)
 			}
 
@@ -278,12 +291,14 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error parsing input: %v", err)
 			}
 
 			if !tt.isValid {
 				t.Fatalf("did not fail on invalid input")
 			}
+
 			diff := cmp.Diff(model, tt.expectedModel)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -297,6 +312,7 @@ func TestBuildRequest(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create new request: %v", err)
 	}
+
 	defaultReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", testToken))
 
 	tests := []struct {
@@ -398,6 +414,7 @@ func TestBuildRequest(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error building request: %v", err)
 			}
 
@@ -407,6 +424,7 @@ func TestBuildRequest(t *testing.T) {
 				cmp.Comparer(func(x, y *bytes.Buffer) bool { // Used to compare request bodies
 					xBytes := x.Bytes()
 					yBytes := y.Bytes()
+
 					return bytes.Equal(xBytes, yBytes)
 				}),
 				cmpopts.EquateComparable(context.Background()),
@@ -423,6 +441,7 @@ func TestOutputResponse(t *testing.T) {
 		model *inputModel
 		resp  *http.Response
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -459,11 +478,13 @@ func TestOutputResponse(t *testing.T) {
 		},
 	}
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResponse(params.Printer, tt.args.model, tt.args.resp); (err != nil) != tt.wantErr {
 				t.Errorf("outputResponse() error = %v, wantErr %v", err, tt.wantErr)
 			}
+
 			if tt.args.model != nil {
 				if _, err := os.Stat(*tt.args.model.OutputFile); err == nil {
 					if err := os.Remove(*tt.args.model.OutputFile); err != nil {

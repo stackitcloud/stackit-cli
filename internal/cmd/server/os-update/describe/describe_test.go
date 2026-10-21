@@ -35,6 +35,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, mod := range mods {
 		mod(argValues)
 	}
+
 	return argValues
 }
 
@@ -47,6 +48,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -63,6 +65,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -71,6 +74,7 @@ func fixtureRequest(mods ...func(request *serverupdate.ApiGetUpdateRequest)) ser
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -175,6 +179,7 @@ func TestOutputResult(t *testing.T) {
 		outputFormat string
 		update       *serverupdate.Update
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -198,6 +203,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.update); (err != nil) != tt.wantErr {

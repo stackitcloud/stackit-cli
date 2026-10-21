@@ -30,6 +30,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -41,6 +42,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -49,6 +51,7 @@ func fixtureRequest(mods ...func(request *git.ApiDeleteInstanceRequest)) git.Api
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -106,10 +109,12 @@ func TestParseInput(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			params := testparams.NewTestParams()
 			cmd := NewCmd(params.CmdParams)
+
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
 			}
+
 			cmd.SetArgs(tt.args)
 
 			for flag, value := range tt.flagValues {
@@ -118,6 +123,7 @@ func TestParseInput(t *testing.T) {
 					if !tt.isValid {
 						return
 					}
+
 					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
 				}
 			}
@@ -133,6 +139,7 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error validating flags: %v", err)
 			}
 
@@ -141,12 +148,14 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error parsing flags: %v", err)
 			}
 
 			if !tt.isValid {
 				t.Fatalf("did not fail on invalid input")
 			}
+
 			diff := cmp.Diff(model, tt.expectedModel)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -175,6 +184,7 @@ func TestBuildRequest(t *testing.T) {
 				cmp.AllowUnexported(tt.expectedRequest, git.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
 			)
+
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
 			}

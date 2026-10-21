@@ -44,6 +44,7 @@ func GetProjectName(ctx context.Context, p *print.Printer, cliVersion string, cm
 	// (So next time we can just pull it from there)
 	if !isProjectIdSetInFlags(p, cmd) && !isProjectIdSetInEnvVar() {
 		viper.Set(config.ProjectNameKey, projectName)
+
 		err = config.Write()
 		if err != nil {
 			return "", fmt.Errorf("write new config to file: %w", err)
@@ -62,6 +63,7 @@ func useProjectNameFromConfig(p *print.Printer, cmd *cobra.Command) bool {
 	projectIdSetInEnv := isProjectIdSetInEnvVar()
 	projectName := viper.GetString(config.ProjectNameKey)
 	projectNameSet := projectName != ""
+
 	return !projectIdSetInFlags && !projectIdSetInEnv && projectNameSet
 }
 
@@ -71,6 +73,7 @@ func isProjectIdSetInFlags(p *print.Printer, cmd *cobra.Command) bool {
 	// To check if projectId was passed, we use the first rather than the second
 	projectIdFromFlag := flags.FlagToStringPointer(p, cmd, globalflags.ProjectIdFlag)
 	projectIdSetInFlag := projectIdFromFlag != nil
+
 	return projectIdSetInFlag
 }
 

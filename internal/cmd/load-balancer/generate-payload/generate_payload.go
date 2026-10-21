@@ -138,6 +138,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -155,6 +156,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read load balancer: %w", err)
@@ -171,10 +173,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				TargetPools:     resp.TargetPools,
 				Version:         resp.Version,
 			}
+
 			return outputUpdateResult(params.Printer, model.FilePath, updatePayload)
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -199,6 +203,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -211,6 +216,7 @@ func outputCreateResult(p *print.Printer, filePath *string, payload *loadbalance
 	if payload == nil {
 		return fmt.Errorf("loadbalancer payload is empty")
 	}
+
 	payloadBytes, err := json.MarshalIndent(*payload, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal create load balancer payload: %w", err)
@@ -232,6 +238,7 @@ func outputUpdateResult(p *print.Printer, filePath *string, payload *loadbalance
 	if payload == nil {
 		return fmt.Errorf("loadbalancer payload is empty")
 	}
+
 	payloadBytes, err := json.MarshalIndent(*payload, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal update load balancer payload: %w", err)

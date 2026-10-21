@@ -108,10 +108,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			client := http.Client{
 				Timeout: 30 * time.Second,
 			}
+
 			resp, err := client.Do(req)
 			if err != nil {
 				return fmt.Errorf("do request: %w", err)
 			}
+
 			defer func() {
 				closeErr := resp.Body.Close()
 				if closeErr != nil {
@@ -127,15 +129,18 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.FailOnHTTPError && resp.StatusCode >= 400 {
 				os.Exit(22)
 			}
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {
 	requestMethodFlag.Register(cmd.Flags())
+
 	headerFlagUsage := `Custom headers to include in the request, can be specified multiple times. If the "Authorization" header is set, it will override the authentication provided by the CLI`
 	cmd.Flags().StringSliceP(headerFlag, "H", []string{}, headerFlagUsage)
 	cmd.Flags().Var(flags.ReadFromFileFlag(), dataFlag, `Content to include in the request body. Can be a string or a file path prefixed with "@"`)
@@ -159,6 +164,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -166,6 +172,7 @@ func getBearerToken(p *print.Printer) (string, error) {
 	_, err := auth.AuthenticationConfig(p, auth.AuthorizeUser)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "configure authentication: %v", err)
+
 		return "", &errors.AuthError{}
 	}
 
@@ -173,6 +180,7 @@ func getBearerToken(p *print.Printer) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	if userSessionExpired {
 		return "", &errors.SessionExpiredError{}
 	}
@@ -180,6 +188,7 @@ func getBearerToken(p *print.Printer) (string, error) {
 	accessToken, err := auth.GetValidAccessToken(p)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "get valid access token: %v", err)
+
 		return "", &errors.SessionExpiredError{}
 	}
 
@@ -188,21 +197,27 @@ func getBearerToken(p *print.Printer) (string, error) {
 
 func buildRequest(model *inputModel, bearerToken string) (*http.Request, error) {
 	var body io.Reader = http.NoBody
+
 	if model.Data != nil {
 		body = bytes.NewBufferString(*model.Data)
 	}
+
 	req, err := http.NewRequest(model.RequestMethod, model.URL, body)
 	if err != nil {
 		return nil, fmt.Errorf("create request: %w", err)
 	}
+
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", bearerToken))
+
 	for _, header := range model.Headers {
 		headerSplit := strings.SplitN(header, ": ", 2)
 		if len(headerSplit) != 2 {
 			return nil, fmt.Errorf("badly formatted header %q", header)
 		}
+
 		req.Header.Set(headerSplit[0], headerSplit[1])
 	}
+
 	return req, nil
 }
 
@@ -210,14 +225,18 @@ func outputResponse(p *print.Printer, model *inputModel, resp *http.Response) er
 	if resp == nil {
 		return fmt.Errorf("http response is empty")
 	}
+
 	output := make([]byte, 0)
+
 	if model.IncludeResponseHeaders {
 		respHeader, err := httputil.DumpResponse(resp, false)
 		if err != nil {
 			return fmt.Errorf("print response headers: %w", err)
 		}
+
 		output = append(output, respHeader...)
 	}
+
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("read response body: %w", err)
@@ -232,6 +251,7 @@ func outputResponse(p *print.Printer, model *inputModel, resp *http.Response) er
 	}
 
 	var prettyJSON bytes.Buffer
+
 	if json.Valid(respBody) {
 		if err := json.Indent(&prettyJSON, respBody, "", "  "); err == nil {
 			respBody = prettyJSON.Bytes()

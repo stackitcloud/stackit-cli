@@ -41,6 +41,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(p.Printer, cmd)
 			if err != nil {
 				return err
@@ -57,6 +58,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list VPN connections: %w", err)
@@ -66,6 +68,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -88,6 +91,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -104,17 +108,23 @@ func outputResult(p *print.Printer, model *inputModel, resp *vpn.ConnectionList)
 	return p.OutputResult(model.OutputFormat, resp.Connections, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "ENABLED", "LABELS")
+
 		for _, c := range resp.Connections {
 			id := utils.PtrString(c.Id)
 			name := c.DisplayName
 			enabled := utils.PtrString(c.Enabled)
+
 			var labels string
+
 			if c.Labels != nil {
 				labels = utils.JoinStringMap(*c.Labels, "=", ", ")
 			}
+
 			table.AddRow(id, name, enabled, labels)
 		}
+
 		p.Outputln(table.Render())
+
 		return nil
 	})
 }

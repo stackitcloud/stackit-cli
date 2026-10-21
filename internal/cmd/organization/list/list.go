@@ -49,6 +49,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -58,6 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get profile: %w", err)
 			}
+
 			model.Member = auth.GetProfileEmail(activeProfile)
 
 			// Configure API client
@@ -68,6 +70,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return err
@@ -81,6 +84,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -105,15 +109,19 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *resourcemanager.APIClient) resourcemanager.ApiListOrganizationsRequest {
 	req := apiClient.DefaultAPI.ListOrganizations(ctx)
+
 	req = req.Member(model.Member)
+
 	if model.Limit != nil {
 		req = req.Limit(float32(*model.Limit))
 	}
+
 	return req
 }
 
@@ -121,6 +129,7 @@ func outputResult(p *print.Printer, outputFormat string, organizations []resourc
 	return p.OutputResult(outputFormat, organizations, func() error {
 		if len(organizations) == 0 {
 			p.Outputln("No organizations found")
+
 			return nil
 		}
 
@@ -140,6 +149,7 @@ func outputResult(p *print.Printer, outputFormat string, organizations []resourc
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

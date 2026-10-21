@@ -67,6 +67,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
@@ -76,6 +77,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -105,6 +107,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -112,6 +115,7 @@ func outputResult(p *print.Printer, outputFormat, executionId, projectLabel stri
 	return p.OutputResult(outputFormat, execution, func() error {
 		if execution == nil {
 			p.Outputf("Volume automation execution %q not found in project %q\n", executionId, projectLabel)
+
 			return nil
 		}
 
@@ -151,10 +155,12 @@ func outputResult(p *print.Printer, outputFormat, executionId, projectLabel stri
 				outputStepsTable := tables.NewTable()
 				outputStepsTable.SetTitle("OUTPUT STEPS")
 				outputStepsTable.SetHeader("NAME", "MESSAGE", "STATUS")
+
 				for _, step := range execution.Automation.Output.Steps {
 					outputStepsTable.AddRow(step.Name, utils.PtrString(step.Message), step.Status)
 					outputStepsTable.AddSeparator()
 				}
+
 				content = append(content, outputStepsTable)
 			}
 		}
@@ -163,6 +169,7 @@ func outputResult(p *print.Printer, outputFormat, executionId, projectLabel stri
 		if err != nil {
 			return fmt.Errorf("render tables: %w", err)
 		}
+
 		return nil
 	})
 }

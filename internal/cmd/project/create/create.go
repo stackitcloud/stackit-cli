@@ -65,6 +65,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -77,6 +78,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a project under the parent with ID %q?", model.ParentId)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -87,6 +89,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("build project creation request: %w", err)
 			}
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create project: %w", err)
@@ -96,6 +99,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -116,6 +120,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	if labels != nil {
 		labelKeyRegex := regexp.MustCompile(labelKeyRegex)
 		labelValueRegex := regexp.MustCompile(labelValueRegex)
+
 		for key, value := range *labels {
 			if !labelKeyRegex.MatchString(key) {
 				return nil, &errors.FlagValidationError{
@@ -142,6 +147,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -163,6 +169,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *resourceman
 		if labels == nil {
 			labels = &map[string]string{}
 		}
+
 		(*labels)[networkAreaLabel] = *model.NetworkAreaId
 	}
 
@@ -185,11 +192,14 @@ func outputResult(p *print.Printer, model inputModel, resp *resourcemanager.Proj
 	if resp == nil {
 		return fmt.Errorf("response is empty")
 	}
+
 	if model.GlobalFlagModel == nil {
 		return fmt.Errorf("globalflags are empty")
 	}
+
 	return p.OutputResult(model.OutputFormat, resp, func() error {
 		p.Outputf("Created project under the parent with ID %q. Project ID: %s\n", model.ParentId, resp.ProjectId)
+
 		return nil
 	})
 }

@@ -41,6 +41,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -55,10 +56,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := secretsmanagerUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete instance %q? (This cannot be undone)", instanceLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -66,15 +69,18 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("delete Secrets Manager instance: %w", err)
 			}
 
 			params.Printer.Info("Deleted instance %q \n", model.InstanceId)
+
 			return nil
 		},
 	}
+
 	return cmd
 }
 
@@ -92,6 +98,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 

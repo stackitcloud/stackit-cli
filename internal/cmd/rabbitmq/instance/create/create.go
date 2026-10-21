@@ -78,6 +78,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -92,10 +93,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create an RabbitMQ instance for project %q?", projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -105,15 +108,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			req, err := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
+
 				if !errors.As(err, &dsaInvalidPlanError) {
 					return fmt.Errorf("build RabbitMQ instance creation request: %w", err)
 				}
+
 				return err
 			}
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create RabbitMQ instance: %w", err)
 			}
+
 			instanceId := resp.InstanceId
 
 			// Wait for async operation, if async mode not enabled
@@ -131,6 +138,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -153,6 +161,7 @@ func configureFlags(cmd *cobra.Command) {
 
 	err = cmd.Flags().MarkDeprecated(planNameFlag, "Will be removed after 2027-02-28. Use the --plan-id flag instead.")
 	cobra.CheckErr(err)
+
 	err = cmd.Flags().MarkDeprecated(versionFlag, "Will be removed after 2027-02-28. Use the --plan-id flag instead.")
 	cobra.CheckErr(err)
 }
@@ -172,6 +181,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 			Cmd: cmd,
 		}
 	}
+
 	if planId != nil && (planName != "" || version != "") {
 		return nil, &cliErr.DSAInputPlanError{
 			Cmd: cmd,
@@ -195,6 +205,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -215,20 +226,25 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient rabbitMQClie
 		if err != nil {
 			return req, fmt.Errorf("get RabbitMQ offerings: %w", err)
 		}
+
 		foundPlanId, err := rabbitmqUtils.LoadPlanId(model.PlanName, model.Version, offerings) //nolint:staticcheck // deprecated but still supported until 2027-02-28
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
+
 			if !errors.As(err, &dsaInvalidPlanError) {
 				return req, fmt.Errorf("load plan ID: %w", err)
 			}
+
 			return req, err
 		}
+
 		planId = *foundPlanId
 	} else {
 		planId = *model.PlanId
 	}
 
 	var sgwAcl *string
+
 	if model.SgwAcl != nil {
 		sgwAcl = utils.Ptr(strings.Join(*model.SgwAcl, ","))
 	}
@@ -247,6 +263,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient rabbitMQClie
 		},
 		PlanId: planId,
 	})
+
 	return req, nil
 }
 
@@ -254,9 +271,11 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel, instanceId 
 	if model == nil {
 		return fmt.Errorf("no model passed")
 	}
+
 	if model.GlobalFlagModel == nil {
 		return fmt.Errorf("no globalflags passed")
 	}
+
 	if resp == nil {
 		return fmt.Errorf("no response passed")
 	}
@@ -266,7 +285,9 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel, instanceId 
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
+
 		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, instanceId)
+
 		return nil
 	})
 }

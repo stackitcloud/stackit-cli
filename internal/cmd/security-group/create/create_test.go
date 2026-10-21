@@ -48,6 +48,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -66,6 +67,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -82,6 +84,7 @@ func fixtureRequest(mods ...func(request *iaas.ApiCreateSecurityGroupRequest)) i
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -221,6 +224,7 @@ func TestBuildRequest(t *testing.T) {
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
+
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
 			}
@@ -233,6 +237,7 @@ func TestOutputResult(t *testing.T) {
 		outputFormat string
 		resp         iaas.SecurityGroup
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -246,6 +251,7 @@ func TestOutputResult(t *testing.T) {
 	}
 
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, tt.args.outputFormat, tt.name, &tt.args.resp); (err != nil) != tt.wantErr {

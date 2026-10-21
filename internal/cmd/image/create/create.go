@@ -106,6 +106,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -122,6 +123,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("create image: file %q is not readable: %w", model.LocalFilePath, err)
 			}
+
 			defer func() {
 				if inner := file.Close(); inner != nil {
 					err = fmt.Errorf("error closing input file: %w (%w)", inner, err)
@@ -129,6 +131,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}()
 
 			prompt := fmt.Sprintf("Are you sure you want to create the image %q?", model.Name)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -141,11 +144,15 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("create image: %w", err)
 			}
+
 			model.Id = result.Id
+
 			url, ok := result.GetUploadUrlOk()
+
 			if !ok {
 				return fmt.Errorf("create image: no upload URL has been provided")
 			}
+
 			if err := uploadAsync(ctx, params.Printer, model, file, *url); err != nil {
 				return err
 			}
@@ -159,6 +166,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -169,14 +177,19 @@ func uploadAsync(ctx context.Context, p *print.Printer, model *inputModel, file 
 	}
 
 	var reader io.Reader
+
 	if model.NoProgressIndicator != nil && *model.NoProgressIndicator {
 		reader = file
 	} else {
 		var ch <-chan int
+
 		reader, ch = newProgressReader(file)
+
 		go func() {
 			ticker := time.NewTicker(2 * time.Second)
+
 			var uploaded int
+
 		done:
 			for {
 				select {
@@ -186,6 +199,7 @@ func uploadAsync(ctx context.Context, p *print.Printer, model *inputModel, file 
 					if !ok {
 						break done
 					}
+
 					if n >= 0 {
 						uploaded += n
 					}
@@ -210,6 +224,7 @@ type progressReader struct {
 
 func newProgressReader(delegate io.Reader) (reader io.Reader, result <-chan int) {
 	ch := make(chan int)
+
 	return &progressReader{
 		delegate: delegate,
 		ch:       ch,
@@ -224,6 +239,7 @@ func (pr *progressReader) Read(p []byte) (int, error) {
 	} else {
 		pr.ch <- n
 	}
+
 	return n, err
 }
 
@@ -238,21 +254,26 @@ func uploadFile(ctx context.Context, p *print.Printer, reader io.Reader, filesiz
 	if err != nil {
 		return fmt.Errorf("create image: cannot create request: %w", err)
 	}
+
 	uploadRequest.Header.Add("Content-Type", "application/octet-stream")
+
 	uploadRequest.ContentLength = filesize
 
 	uploadResponse, err := http.DefaultClient.Do(uploadRequest)
 	if err != nil {
 		return fmt.Errorf("create image: error contacting server for upload: %w", err)
 	}
+
 	defer func() {
 		if inner := uploadResponse.Body.Close(); inner != nil {
 			err = fmt.Errorf("error closing file: %w (%w)", inner, err)
 		}
 	}()
+
 	if uploadResponse.StatusCode != http.StatusOK {
 		return fmt.Errorf("create image: server rejected image upload with %s", uploadResponse.Status)
 	}
+
 	delay := time.Since(start)
 	p.Debug(print.DebugLevel, "uploaded %d bytes in %v", filesize, delay)
 
@@ -289,6 +310,7 @@ func configureFlags(cmd *cobra.Command) {
 	if err := flags.MarkFlagsRequired(cmd, nameFlag, diskFormatFlag, localFilePathFlag); err != nil {
 		cobra.CheckErr(err)
 	}
+
 	cmd.MarkFlagsRequiredTogether(rescueBusFlag, rescueDeviceFlag)
 }
 
@@ -297,6 +319,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
+
 	name := flags.FlagToStringValue(p, cmd, nameFlag)
 
 	model := inputModel{
@@ -328,12 +351,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateImageRequest {
 	request := apiClient.DefaultAPI.CreateImage(ctx, model.ProjectId, model.Region).
 		CreateImagePayload(createPayload(ctx, model))
+
 	return request
 }
 
@@ -349,42 +374,55 @@ func createPayload(_ context.Context, model *inputModel) iaas.CreateImagePayload
 	if config := model.Config; config != nil {
 		payload.Config = &iaas.ImageConfig{}
 		payload.Config.Uefi = utils.Ptr(config.Uefi)
+
 		if config.Architecture != nil {
 			payload.Config.Architecture = model.Config.Architecture
 		}
+
 		if config.BootMenu != nil {
 			payload.Config.BootMenu = model.Config.BootMenu
 		}
+
 		if config.CdromBus != nil {
 			payload.Config.CdromBus = *iaas.NewNullableString(model.Config.CdromBus)
 		}
+
 		if config.DiskBus != nil {
 			payload.Config.DiskBus = *iaas.NewNullableString(config.DiskBus)
 		}
+
 		if config.NicModel != nil {
 			payload.Config.NicModel = *iaas.NewNullableString(config.NicModel)
 		}
+
 		if config.OperatingSystem != nil {
 			payload.Config.OperatingSystem = config.OperatingSystem
 		}
+
 		if config.OperatingSystemDistro != nil {
 			payload.Config.OperatingSystemDistro = *iaas.NewNullableString(config.OperatingSystemDistro)
 		}
+
 		if config.OperatingSystemVersion != nil {
 			payload.Config.OperatingSystemVersion = *iaas.NewNullableString(config.OperatingSystemVersion)
 		}
+
 		if config.RescueBus != nil {
 			payload.Config.RescueBus = *iaas.NewNullableString(config.RescueBus)
 		}
+
 		if config.RescueDevice != nil {
 			payload.Config.RescueDevice = *iaas.NewNullableString(config.RescueDevice)
 		}
+
 		if config.SecureBoot != nil {
 			payload.Config.SecureBoot = config.SecureBoot
 		}
+
 		if config.VideoModel != nil {
 			payload.Config.VideoModel = *iaas.NewNullableString(config.VideoModel)
 		}
+
 		if config.VirtioScsi != nil {
 			payload.Config.VirtioScsi = config.VirtioScsi
 		}
@@ -397,13 +435,16 @@ func outputResult(p *print.Printer, model *inputModel, resp *iaas.ImageCreateRes
 	if model == nil {
 		return fmt.Errorf("input model is nil")
 	}
+
 	var outputFormat string
+
 	if model.GlobalFlagModel != nil {
 		outputFormat = model.OutputFormat
 	}
 
 	return p.OutputResult(outputFormat, resp, func() error {
 		p.Outputf("Created image %q with id %s\n", model.Name, model.Id)
+
 		return nil
 	})
 }

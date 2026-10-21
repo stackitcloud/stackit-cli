@@ -35,6 +35,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -70,6 +71,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -81,6 +83,7 @@ func outputResult(p *print.Printer, outputFormat string, versions []postgresflex
 	return p.OutputResult(outputFormat, versions, func() error {
 		if len(versions) == 0 {
 			p.Outputf("No PostgreSQL Flex versions found.")
+
 			return nil
 		}
 

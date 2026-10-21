@@ -41,6 +41,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			if userSessionExpired {
 				return &cliErr.SessionExpiredError{}
 			}
@@ -48,6 +49,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			accessToken, err := auth.GetValidAccessToken(params.Printer)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get valid access token: %v", err)
+
 				return &cliErr.SessionExpiredError{}
 			}
 
@@ -59,6 +61,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("marshal image list: %w", err)
 				}
+
 				params.Printer.Outputln(string(details))
 
 				return nil
@@ -87,5 +90,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }

@@ -40,6 +40,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -56,15 +57,19 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request sfs.ApiCreateShareExportPolicyRequest)) sfs.ApiCreateShareExportPolicyRequest {
 	request := testClient.DefaultAPI.CreateShareExportPolicy(testCtx, testProjectId, testRegion)
+
 	request = request.CreateShareExportPolicyPayload(fixturePayload())
+
 	for _, mod := range mods {
 		mod(request)
 	}
+
 	return request
 }
 
@@ -76,6 +81,7 @@ func fixturePayload(mods ...func(payload *sfs.CreateShareExportPolicyPayload)) s
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
@@ -132,6 +138,7 @@ func TestParseInput(t *testing.T) {
 	opts := []testutils.TestingOption{
 		testutils.WithCmpOptions(cmp.AllowUnexported(sfs.NullableString{})),
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			testutils.TestParseInputWithOptions(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, nil, tt.isValid, opts)
@@ -173,6 +180,7 @@ func TestOutputResult(t *testing.T) {
 		projectLabel string
 		exportPolicy *sfs.CreateShareExportPolicyResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args

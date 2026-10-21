@@ -80,6 +80,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(p.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -88,6 +89,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, p.Printer, p.CliVersion, cmd)
 			if err != nil {
 				p.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
@@ -99,6 +101,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update Intake: %w", err)
@@ -119,6 +122,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -177,6 +181,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return model, nil
 }
 
@@ -198,14 +203,17 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIC
 		catalogPatch.Uri = model.CatalogURI
 		catalogNeedsPatching = true
 	}
+
 	if model.CatalogWarehouse != nil {
 		catalogPatch.Warehouse = model.CatalogWarehouse
 		catalogNeedsPatching = true
 	}
+
 	if model.CatalogNamespace != nil {
 		catalogPatch.Namespace = model.CatalogNamespace
 		catalogNeedsPatching = true
 	}
+
 	if model.CatalogTableName != nil {
 		catalogPatch.TableName = model.CatalogTableName
 		catalogNeedsPatching = true
@@ -217,16 +225,19 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIC
 
 	if model.CatalogAuthType != nil {
 		authType := intake.CatalogAuthType(*model.CatalogAuthType)
+
 		authPatch.Type = &authType
 		authNeedsPatching = true
 	}
 
 	dremioPatch := &intake.DremioAuthPatch{}
 	dremioNeedsPatching := false
+
 	if model.DremioTokenEndpoint != nil {
 		dremioPatch.TokenEndpoint = model.DremioTokenEndpoint
 		dremioNeedsPatching = true
 	}
+
 	if model.DremioToken != nil {
 		dremioPatch.PersonalAccessToken = model.DremioToken
 		dremioNeedsPatching = true
@@ -247,6 +258,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIC
 	}
 
 	req = req.UpdateIntakePayload(payload)
+
 	return req
 }
 
@@ -254,6 +266,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 	return p.OutputResult(model.OutputFormat, resp, func() error {
 		if resp == nil {
 			p.Outputf("Updated Intake for project %q, but no intake ID was returned.\n", projectLabel)
+
 			return nil
 		}
 
@@ -261,7 +274,9 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 		if model.Async {
 			operationState = "Triggered update of"
 		}
+
 		p.Outputf("%s Intake for project %q. Intake ID: %s\n", operationState, projectLabel, resp.Id)
+
 		return nil
 	})
 }

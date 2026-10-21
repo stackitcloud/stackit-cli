@@ -30,6 +30,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -44,17 +45,21 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *serviceaccount.ApiCreateServiceAccountRequest)) serviceaccount.ApiCreateServiceAccountRequest {
 	request := testClient.DefaultAPI.CreateServiceAccount(testCtx, testProjectId)
+
 	request = request.CreateServiceAccountPayload(serviceaccount.CreateServiceAccountPayload{
 		Name: "example",
 	})
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -156,6 +161,7 @@ func TestOutputResult(t *testing.T) {
 		projectLabel   string
 		serviceAccount *serviceaccount.ServiceAccount
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -175,6 +181,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.projectLabel, tt.args.serviceAccount); (err != nil) != tt.wantErr {

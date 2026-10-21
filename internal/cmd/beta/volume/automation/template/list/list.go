@@ -70,6 +70,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
@@ -79,6 +80,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -106,6 +108,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -116,6 +119,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *automation.
 func fetchTemplates(ctx context.Context, model *inputModel, apiClient *automation.APIClient) ([]automation.Template, error) {
 	req := buildRequest(ctx, model, apiClient)
 	opts := []paginate.Option{paginate.WithPageSize(maxPageSize)}
+
 	if model.Limit != nil {
 		opts = append(opts, paginate.WithLimit(int(*model.Limit)))
 	}
@@ -124,6 +128,7 @@ func fetchTemplates(ctx context.Context, model *inputModel, apiClient *automatio
 	if err != nil {
 		return nil, fmt.Errorf("list volume automation templates: %w", err)
 	}
+
 	if items == nil {
 		items = []automation.Template{}
 	}
@@ -135,6 +140,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, templates
 	return p.OutputResult(outputFormat, templates, func() error {
 		if len(templates) == 0 {
 			p.Outputf("No volume automation templates found in project %q\n", projectLabel)
+
 			return nil
 		}
 
@@ -143,6 +149,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, templates
 		table.SetTitle("Volume Automation Templates")
 		table.SetHeader("ID", "NAME", "DESCRIPTION")
 		table.AddSeparator()
+
 		for _, template := range templates {
 			table.AddRow(
 				template.Id,
@@ -156,6 +163,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, templates
 		if err != nil {
 			return fmt.Errorf("render tables: %w", err)
 		}
+
 		return nil
 	})
 }

@@ -38,6 +38,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -54,15 +55,19 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateNetworkAreaRangeRequest)) iaas.ApiCreateNetworkAreaRangeRequest {
 	request := testClient.DefaultAPI.CreateNetworkAreaRange(testCtx, testOrgId, testNetworkAreaId, testRegion)
+
 	request = request.CreateNetworkAreaRangePayload(fixturePayload())
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -77,6 +82,7 @@ func fixturePayload(mods ...func(payload *iaas.CreateNetworkAreaRangePayload)) i
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
@@ -192,6 +198,7 @@ func TestOutputResult(t *testing.T) {
 		networkAreaLabel string
 		networkRange     iaas.NetworkRange
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -211,6 +218,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.networkAreaLabel, tt.args.networkRange); (err != nil) != tt.wantErr {

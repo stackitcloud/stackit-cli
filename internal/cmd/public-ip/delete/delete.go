@@ -45,6 +45,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -59,12 +60,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			publicIpLabel, _, err := iaasUtils.GetPublicIP(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.PublicIpId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get public IP: %v", err)
+
 				publicIpLabel = model.PublicIpId
 			} else if publicIpLabel == "" {
 				publicIpLabel = model.PublicIpId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete public IP %q? (This cannot be undone)", publicIpLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -72,15 +75,18 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("delete public IP: %w", err)
 			}
 
 			params.Printer.Info("Deleted public IP %q\n", publicIpLabel)
+
 			return nil
 		},
 	}
+
 	return cmd
 }
 
@@ -98,6 +104,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 

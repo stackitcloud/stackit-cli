@@ -57,6 +57,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -71,12 +72,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient.DefaultAPI, model.ProjectId, model.ZoneId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get zone name: %v", err)
+
 				zoneLabel = model.ZoneId
 			}
 
 			recordSetLabel, err := dnsUtils.GetRecordSetName(ctx, apiClient.DefaultAPI, model.ProjectId, model.ZoneId, model.RecordSetId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get record set name: %v", err)
+
 				recordSetLabel = model.RecordSetId
 			}
 
@@ -84,6 +87,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get record set type: %v", err)
 			}
+
 			model.Type = typeLabel
 
 			if utils.PtrString(model.Type) == txtType {
@@ -94,6 +98,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update record set %s of zone %s?", recordSetLabel, zoneLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -101,6 +106,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			_, err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("update DNS record set: %w", err)
@@ -121,11 +127,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered update of"
 			}
+
 			params.Printer.Info("%s record set %s of zone %s\n", operationState, recordSetLabel, zoneLabel)
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -169,6 +178,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -176,12 +186,14 @@ func parseTxtRecord(records *[]string) error {
 	if records == nil {
 		return nil
 	}
+
 	if len(*records) == 0 {
 		return nil
 	}
 
 	for idx := range *records {
 		var err error
+
 		// Based on RFC 1035 section 2.3.4, TXT Records are limited to 255 Characters.
 		// Longer strings need to be split into multiple records
 		(*records)[idx], err = dnsUtils.FormatTxtRecord((*records)[idx])
@@ -195,6 +207,7 @@ func parseTxtRecord(records *[]string) error {
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClient) dns.ApiPartialUpdateRecordSetRequest {
 	var records []dns.RecordPayload = nil
+
 	if model.Records != nil {
 		records = make([]dns.RecordPayload, 0)
 		for _, r := range *model.Records {
@@ -203,11 +216,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 	}
 
 	req := apiClient.DefaultAPI.PartialUpdateRecordSet(ctx, model.ProjectId, model.ZoneId, model.RecordSetId)
+
 	req = req.PartialUpdateRecordSetPayload(dns.PartialUpdateRecordSetPayload{
 		Comment: model.Comment,
 		Name:    model.Name,
 		Records: records,
 		Ttl:     model.TTL,
 	})
+
 	return req
 }

@@ -35,6 +35,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, m := range mods {
 		m(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -50,6 +51,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -58,15 +60,19 @@ func fixtureRequest(mods ...func(payload *cdn.PatchDistributionPayload)) cdn.Api
 	if payload := fixturePayload(mods...); payload != nil {
 		req = req.PatchDistributionPayload(*fixturePayload(mods...))
 	}
+
 	return req
 }
 
 func fixturePayload(mods ...func(payload *cdn.PatchDistributionPayload)) *cdn.PatchDistributionPayload {
 	payload := cdn.NewPatchDistributionPayload()
+
 	payload.Config = &cdn.ConfigPatch{}
+
 	for _, m := range mods {
 		m(payload)
 	}
+
 	return payload
 }
 
@@ -243,14 +249,18 @@ func TestBuildRequest(t *testing.T) {
 					payload.Config.BlockedCountries = []string{"DE", "AT", "CH"}
 					payload.Config.BlockedIps = []string{"127.0.0.1", "10.0.0.8"}
 					payload.Config.DefaultCacheDuration = *cdn.NewNullableString(utils.Ptr(testCacheDuration))
+
 					monthlyLimitBytes := testMonthlyLimitBytes
+
 					payload.Config.MonthlyLimitBytes = *cdn.NewNullableInt64(&monthlyLimitBytes)
+
 					logSink := cdn.LokiLogSinkPatchAsConfigPatchLogSink(
 						&cdn.LokiLogSinkPatch{
 							Credentials: cdn.NewLokiLogSinkCredentials("loki-pass", "loki-user"),
 							PushUrl:     utils.Ptr("https://loki.example.com"),
 						},
 					)
+
 					payload.Config.LogSink = *cdn.NewNullableConfigPatchLogSink(&logSink)
 					payload.Config.Optimizer = &cdn.OptimizerPatch{
 						Enabled: utils.Ptr(true),
@@ -361,6 +371,7 @@ func TestOutputResult(t *testing.T) {
 			if err := outputResult(params.Printer, tt.outputFormat, testProjectId, tt.response); (err != nil) != tt.wantErr {
 				t.Fatalf("outputResult: %v", err)
 			}
+
 			if params.Out.String() != tt.expected {
 				t.Errorf("want:\n%s\ngot:\n%s", tt.expected, params.Out.String())
 			}

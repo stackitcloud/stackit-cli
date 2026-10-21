@@ -55,6 +55,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -75,15 +76,19 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiAddRoutingTableToAreaRequest)) iaas.ApiAddRoutingTableToAreaRequest {
 	request := testClient.DefaultAPI.AddRoutingTableToArea(testCtx, testOrgId, testNetworkAreaId, testRegion)
+
 	request = request.AddRoutingTableToAreaPayload(fixturePayload())
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -99,6 +104,7 @@ func fixturePayload(mods ...func(payload *iaas.AddRoutingTableToAreaPayload)) ia
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
@@ -338,6 +344,7 @@ func TestOutputResult(t *testing.T) {
 	}
 
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, tt.outputFormat, tt.routingTable); (err != nil) != tt.wantErr {

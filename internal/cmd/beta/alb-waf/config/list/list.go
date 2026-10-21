@@ -52,6 +52,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -66,6 +67,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
@@ -81,6 +83,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -108,44 +111,56 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *albwaf.APIClient, pageId string, pageSize int64) albwaf.ApiListWAFRequest {
 	req := apiClient.DefaultAPI.ListWAF(ctx, model.ProjectId, model.Region)
+
 	req = req.PageSize(strconv.FormatInt(pageSize, 10))
+
 	if pageId != "" {
 		req = req.PageId(pageId)
 	}
+
 	return req
 }
 
 func fetchWAFConfigurations(ctx context.Context, model *inputModel, apiClient *albwaf.APIClient) ([]albwaf.GetWAFResponse, error) {
 	var pageId string
+
 	items := make([]albwaf.GetWAFResponse, 0)
 	received := int64(0)
 	limit := int64(math.MaxInt64)
+
 	if model.Limit != nil {
 		limit = *model.Limit
 	}
+
 	// Replace with pagination function to be introduced in STACKITSDK-525
 	for {
 		want := min(int64(maxPageSize), limit-received)
 		request := buildRequest(ctx, model, apiClient, pageId, want)
+
 		response, err := request.Execute()
 		if err != nil {
 			return nil, fmt.Errorf("list WAF configurations: %w", err)
 		}
+
 		items = append(items, response.Items...)
 		pageId = ""
+
 		if response.NextPageId != nil {
 			pageId = *response.NextPageId
 		}
+
 		received += want
 		if pageId == "" || received >= limit {
 			break
 		}
 	}
+
 	return items, nil
 }
 
@@ -153,11 +168,13 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, items []a
 	return p.OutputResult(outputFormat, items, func() error {
 		if len(items) == 0 {
 			p.Outputf("No WAF configurations found for project %q\n", projectLabel)
+
 			return nil
 		}
 
 		table := tables.NewTable()
 		table.SetHeader("NAME", "MANAGED RULE SET", "CUSTOM RULE GROUP", "USED BY")
+
 		for i := range items {
 			item := &items[i]
 
@@ -172,6 +189,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, items []a
 			}
 
 			var usedBy int
+
 			if item.Usage != nil && item.Usage.Count != nil {
 				usedBy = int(*item.Usage.Count)
 			}
@@ -183,6 +201,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, items []a
 				usedBy,
 			)
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

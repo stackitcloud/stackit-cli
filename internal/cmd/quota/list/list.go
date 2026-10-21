@@ -37,6 +37,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -74,6 +75,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -99,6 +101,7 @@ func outputResult(p *print.Printer, outputFormat string, quotas *iaas.QuotaList)
 		table.AddRow(quotaRow("Number of snapshots [Count]", quotas.Snapshots)...)
 		table.AddRow(quotaRow("Number of server cores (vcpu) [Count]", quotas.Vcpu)...)
 		table.AddRow(quotaRow("Number of volumes [Count]", quotas.Volumes)...)
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
@@ -110,7 +113,9 @@ func outputResult(p *print.Printer, outputFormat string, quotas *iaas.QuotaList)
 
 func quotaRow(description string, quota iaas.Quota) []interface{} {
 	result := make([]interface{}, 0, 4)
+
 	result = append(result, description, conv(quota.Limit), conv(quota.Usage), fmt.Sprintf("%3.1f%%", 100.0/float64(quota.Limit)*float64(quota.Usage)))
+
 	return result
 }
 

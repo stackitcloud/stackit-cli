@@ -59,6 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, nil)
 			if err != nil {
 				return err
@@ -100,6 +101,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -135,6 +137,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -146,11 +149,13 @@ func outputResult(p *print.Printer, outputFormat string, routes []iaas.Route, or
 	return p.OutputResult(outputFormat, routes, func() error {
 		if len(routes) == 0 {
 			p.Outputf("No routes found for routing-table %q in organization %q\n", routeTableId, orgId)
+
 			return nil
 		}
 
 		table := tables.NewTable()
 		table.SetHeader("ID", "DESTINATION TYPE", "DESTINATION VALUE", "NEXTHOP TYPE", "NEXTHOP VALUE", "LABELS", "CREATED AT", "UPDATED AT")
+
 		for _, route := range routes {
 			routeDetails := routeUtils.ExtractRouteDetails(&route)
 			table.AddRow(
@@ -164,10 +169,12 @@ func outputResult(p *print.Printer, outputFormat string, routes []iaas.Route, or
 				routeDetails.UpdatedAt,
 			)
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

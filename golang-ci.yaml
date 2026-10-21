@@ -15,6 +15,7 @@ linters:
     - revive
     - sqlclosecheck
     - wastedassign
+    - wsl_v5
   disable:
     - noctx # false positive: finds errors with http.NewRequest that dont make sense
     - unparam # false positives
@@ -66,6 +67,8 @@ linters:
         - name: atomic
         - name: empty-lines
         - name: early-return
+    wsl_v5:
+      default: all
   exclusions:
     generated: lax
     paths:

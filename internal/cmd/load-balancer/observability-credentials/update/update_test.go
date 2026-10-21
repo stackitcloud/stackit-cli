@@ -39,6 +39,7 @@ func newAPIMock(s mockSettings) loadbalancer.DefaultAPI {
 			if s.getCredentialsError {
 				return nil, fmt.Errorf("get credentials failed")
 			}
+
 			return s.getCredentialsResponse, nil
 		}),
 	}
@@ -51,6 +52,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, mod := range mods {
 		mod(argValues)
 	}
+
 	return argValues
 }
 
@@ -65,6 +67,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -83,19 +86,23 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *loadbalancer.ApiUpdateCredentialsRequest)) loadbalancer.ApiUpdateCredentialsRequest {
 	request := testClient.DefaultAPI.UpdateCredentials(testCtx, testProjectId, testRegion, testCredentialsRef)
+
 	request = request.UpdateCredentialsPayload(loadbalancer.UpdateCredentialsPayload{
 		DisplayName: utils.Ptr("name"),
 		Username:    utils.Ptr("username"),
 		Password:    utils.Ptr("pwd"),
 	})
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -109,6 +116,7 @@ func fixtureGetCredentialsResponse(mods ...func(response *loadbalancer.GetCreden
 	for _, mod := range mods {
 		mod(response)
 	}
+
 	return response
 }
 
@@ -236,12 +244,13 @@ func TestBuildRequest(t *testing.T) {
 				getCredentialsError:    tt.getCredentialsFails,
 				getCredentialsResponse: tt.getCredentialsResponse,
 			}
-			request, err := buildRequest(testCtx, tt.model, newAPIMock(client))
 
+			request, err := buildRequest(testCtx, tt.model, newAPIMock(client))
 			if err != nil {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error building request: %v", err)
 			}
 

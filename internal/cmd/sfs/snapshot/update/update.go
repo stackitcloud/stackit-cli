@@ -53,6 +53,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -67,12 +68,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			resourcePoolLabel, err := sfsUtils.GetResourcePoolName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ResourcePoolId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get resource pool name: %v", err)
+
 				resourcePoolLabel = model.ResourcePoolId
 			} else if resourcePoolLabel == "" {
 				resourcePoolLabel = model.ResourcePoolId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update the snapshot %q for resource pool %q?", model.SnapshotName, resourcePoolLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -80,6 +83,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update snapshot: %w", err)
@@ -89,6 +93,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -98,6 +103,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), resourcePoolIdFlag, "The resource pool from which the snapshot should be updated")
 
 	cmd.MarkFlagsOneRequired(newSnapshotNameFlag, commentFlag)
+
 	err := flags.MarkFlagsRequired(cmd, resourcePoolIdFlag)
 	cobra.CheckErr(err)
 }
@@ -112,12 +118,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClie
 	if model.NewSnapshotName != "" {
 		payload.Name = *sfs.NewNullableString(utils.Ptr(model.NewSnapshotName))
 	}
+
 	return req.UpdateResourcePoolSnapshotPayload(payload)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	snapshotName := inputArgs[0]
 	globalFlags := globalflags.Parse(p, cmd)
+
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
@@ -131,6 +139,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -138,6 +147,7 @@ func outputResult(p *print.Printer, outputFormat, snapshotLabel, resourcePoolLab
 	return p.OutputResult(outputFormat, resp, func() error {
 		if resp == nil || resp.ResourcePoolSnapshot == nil {
 			p.Outputln("SFS snapshot response is empty")
+
 			return nil
 		}
 

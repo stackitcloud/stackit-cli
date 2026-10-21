@@ -34,11 +34,13 @@ func ClusterExists(ctx context.Context, apiClient ske.DefaultAPI, projectId, reg
 	if err != nil {
 		return false, fmt.Errorf("list SKE clusters: %w", err)
 	}
+
 	for _, cl := range clusters.Items {
 		if cl.Name != nil && *cl.Name == clusterName {
 			return true, nil
 		}
 	}
+
 	return false, nil
 }
 
@@ -52,6 +54,7 @@ func GetDefaultPayload(ctx context.Context, apiClient ske.DefaultAPI, region str
 	if err != nil {
 		return nil, err
 	}
+
 	payloadNodepool, err := getDefaultPayloadNodepool(resp)
 	if err != nil {
 		return nil, err
@@ -69,6 +72,7 @@ func GetDefaultPayload(ctx context.Context, apiClient ske.DefaultAPI, region str
 			*payloadNodepool,
 		},
 	}
+
 	return payload, nil
 }
 
@@ -78,16 +82,20 @@ func getDefaultPayloadKubernetes(resp *ske.ProviderOptions) (ske.Kubernetes, err
 	if resp.KubernetesVersions == nil {
 		return ske.Kubernetes{}, fmt.Errorf("no supported Kubernetes version found")
 	}
+
 	foundKubernetesVersion := false
 	versions := resp.KubernetesVersions
+
 	for i := range versions {
 		version := versions[i]
 		if *version.State != supportedState {
 			continue
 		}
+
 		if output.Version != "" {
 			oldSemVer := fmt.Sprintf("v%s", output.Version)
 			newSemVer := fmt.Sprintf("v%s", version.GetVersion())
+
 			if semver.Compare(newSemVer, oldSemVer) != 1 {
 				continue
 			}
@@ -96,9 +104,11 @@ func getDefaultPayloadKubernetes(resp *ske.ProviderOptions) (ske.Kubernetes, err
 		foundKubernetesVersion = true
 		output.Version = version.GetVersion()
 	}
+
 	if !foundKubernetesVersion {
 		return ske.Kubernetes{}, fmt.Errorf("no supported Kubernetes version found")
 	}
+
 	return output, nil
 }
 
@@ -106,7 +116,9 @@ func getDefaultPayloadNodepool(resp *ske.ProviderOptions) (*ske.Nodepool, error)
 	if len(resp.AvailabilityZones) == 0 {
 		return nil, fmt.Errorf("no availability zones found")
 	}
+
 	var availabilityZones []string
+
 	for i := range resp.AvailabilityZones {
 		azName := resp.AvailabilityZones[i].GetName()
 		// don't include availability zones like eu01-m, eu02-m, not all flavors are available there
@@ -118,11 +130,13 @@ func getDefaultPayloadNodepool(resp *ske.ProviderOptions) (*ske.Nodepool, error)
 	if len(resp.MachineTypes) == 0 {
 		return nil, fmt.Errorf("no machine types found")
 	}
+
 	azLen := len(availabilityZones)
 	if azLen > 1000 {
 		// check against a very large number to avoid gosec warning
 		return nil, fmt.Errorf("invalid number of availability zones")
 	}
+
 	machineType := resp.MachineTypes[0].GetName()
 
 	output := &ske.Nodepool{
@@ -152,16 +166,20 @@ func getDefaultPayloadNodepool(resp *ske.ProviderOptions) (*ske.Nodepool, error)
 	if resp.MachineImages == nil {
 		return nil, fmt.Errorf("no supported image versions found")
 	}
+
 	foundImageVersion := false
 	images := resp.MachineImages
+
 	for i := range images {
 		image := images[i]
 		if *image.Name != defaultNodepoolMachineImageName {
 			continue
 		}
+
 		if image.Versions == nil {
 			continue
 		}
+
 		versions := image.Versions
 		for j := range versions {
 			version := versions[j]
@@ -173,7 +191,9 @@ func getDefaultPayloadNodepool(resp *ske.ProviderOptions) (*ske.Nodepool, error)
 			if len(version.Cri) == 0 {
 				continue
 			}
+
 			criSupported := false
+
 			for k := range version.Cri {
 				cri := version.Cri[k]
 				if *cri.Name == defaultNodepoolCRI {
@@ -181,6 +201,7 @@ func getDefaultPayloadNodepool(resp *ske.ProviderOptions) (*ske.Nodepool, error)
 					break
 				}
 			}
+
 			if !criSupported {
 				continue
 			}
@@ -188,6 +209,7 @@ func getDefaultPayloadNodepool(resp *ske.ProviderOptions) (*ske.Nodepool, error)
 			if output.Machine.Image.Version != "" {
 				oldSemVer := fmt.Sprintf("v%s", output.Machine.Image.Version)
 				newSemVer := fmt.Sprintf("v%s", *version.Version)
+
 				if semver.Compare(newSemVer, oldSemVer) != 1 {
 					continue
 				}
@@ -197,6 +219,7 @@ func getDefaultPayloadNodepool(resp *ske.ProviderOptions) (*ske.Nodepool, error)
 			output.Machine.Image.Version = version.GetVersion()
 		}
 	}
+
 	if !foundImageVersion {
 		return nil, fmt.Errorf("no supported images found")
 	}
@@ -214,12 +237,14 @@ func ConvertToSeconds(timeStr string) (*string, error) {
 	unit := timeStr[len(timeStr)-1:]
 
 	valueStr := timeStr[:len(timeStr)-1]
+
 	value, err := strconv.ParseUint(valueStr, 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("invalid time value: %s", valueStr)
 	}
 
 	var multiplier uint64
+
 	switch unit {
 	// second
 	case "s":
@@ -241,6 +266,7 @@ func ConvertToSeconds(timeStr string) (*string, error) {
 	}
 
 	result := uint64(value) * multiplier
+
 	return utils.Ptr(strconv.FormatUint(result, 10)), nil
 }
 
@@ -295,6 +321,7 @@ func WriteConfigFile(configPath, data string) error {
 	if err != nil {
 		return fmt.Errorf("write file: %w", err)
 	}
+
 	return nil
 }
 

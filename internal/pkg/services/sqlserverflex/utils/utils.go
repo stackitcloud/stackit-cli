@@ -48,6 +48,7 @@ func ValidateStorage(storageClass string, storageSize *int64, storages *sqlserve
 			return nil
 		}
 	}
+
 	return &errors.DatabaseInvalidStorageError{
 		Service:  ServiceCmd,
 		Details:  fmt.Sprintf("You provided storage class '%s', which is invalid.", storageClass),
@@ -61,15 +62,19 @@ func LoadFlavorId(cpu, ram int64, flavors []sqlserverflex.ListFlavors) (string, 
 	}
 
 	availableFlavors := ""
+
 	for _, f := range flavors {
 		if f.Id == "" {
 			continue
 		}
+
 		if f.Cpu == cpu && f.Memory == ram {
 			return f.Id, nil
 		}
+
 		availableFlavors = fmt.Sprintf("%s\n- %d CPU, %d GB RAM", availableFlavors, f.Cpu, f.Cpu)
 	}
+
 	return "", &errors.DatabaseInvalidFlavorError{
 		Service: ServiceCmd,
 		Details: "You provided an invalid combination for CPU and RAM.",
@@ -77,19 +82,28 @@ func LoadFlavorId(cpu, ram int64, flavors []sqlserverflex.ListFlavors) (string, 
 }
 
 func ListAllFlavors(ctx context.Context, api sqlserverflex.DefaultAPI, projectId, region string) ([]sqlserverflex.ListFlavors, error) {
-	const pageSize = 100
-	const sort = sqlserverflex.FLAVORSORT_ID_ASC
+	const (
+		pageSize = 100
+		sort     = sqlserverflex.FLAVORSORT_ID_ASC
+	)
+
 	totalRows := int64(math.MaxInt64)
-	var page int64 = 1
-	var result []sqlserverflex.ListFlavors
+
+	var (
+		page   int64 = 1
+		result []sqlserverflex.ListFlavors
+	)
+
 	for ; int64(len(result)) < totalRows; page++ {
 		flavors, err := api.ListFlavors(ctx, projectId, region).Page(page).Sort(sort).Size(pageSize).Execute()
 		if err != nil {
 			return result, fmt.Errorf("listing flavors: %w", err)
 		}
+
 		result = append(result, flavors.Flavors...)
 		totalRows = flavors.Pagination.TotalRows
 	}
+
 	return result, nil
 }
 
@@ -98,6 +112,7 @@ func GetInstanceName(ctx context.Context, apiClient sqlserverflex.DefaultAPI, pr
 	if err != nil {
 		return "", fmt.Errorf("get SQLServer Flex instance: %w", err)
 	}
+
 	return resp.Name, nil
 }
 
@@ -106,6 +121,7 @@ func GetUserName(ctx context.Context, apiClient sqlserverflex.DefaultAPI, projec
 	if err != nil {
 		return "", fmt.Errorf("get SQLServer Flex user: %w", err)
 	}
+
 	return resp.Username, nil
 }
 
@@ -114,10 +130,12 @@ func GetFlavor(ctx context.Context, client sqlserverflex.DefaultAPI, projectId, 
 	if err != nil {
 		return nil, fmt.Errorf("failed to list flavors: %w", err)
 	}
+
 	for _, flavor := range flavors {
 		if flavor.Id == flavorId {
 			return &flavor, nil
 		}
 	}
+
 	return nil, fmt.Errorf("flavor with ID %q not found in project %q", flavorId, projectId)
 }

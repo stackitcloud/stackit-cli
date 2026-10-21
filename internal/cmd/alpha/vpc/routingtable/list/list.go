@@ -55,6 +55,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -66,10 +67,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list vpc routing-tables: %w", err)
 			}
+
 			if resp == nil {
 				return fmt.Errorf("list vpc routing-tables response is nil")
 			}
@@ -100,6 +103,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
+
 	if globalFlags.Region == "" {
 		return nil, &errors.RegionError{}
 	}
@@ -121,6 +125,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return model, nil
 }
 
@@ -129,6 +134,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient iaas.Default
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
 	}
+
 	if model.Filter != nil {
 		req = req.Filter(*model.Filter)
 	}
@@ -144,13 +150,16 @@ func outputResult(p *print.Printer, outputFormat, vpcId string, resp *iaas.VPCRo
 	return p.OutputResult(outputFormat, resp, func() error {
 		if len(resp.Items) == 0 {
 			p.Outputf("No routing-tables found for VPC %q\n", vpcId)
+
 			return nil
 		}
 
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "DESCRIPTION", "LABELS", "SYSTEM ROUTES", "DYNAMIC ROUTES", "CREATED AT", "UPDATED AT")
+
 		for _, routingTable := range resp.Items {
 			var labels []string
+
 			for _, key := range slices.Sorted(maps.Keys(routingTable.Labels)) {
 				labels = append(labels, fmt.Sprintf("%s: %v", key, routingTable.Labels[key]))
 			}
@@ -170,6 +179,7 @@ func outputResult(p *print.Printer, outputFormat, vpcId string, resp *iaas.VPCRo
 		if err := table.Display(p); err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

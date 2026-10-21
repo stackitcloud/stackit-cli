@@ -320,6 +320,7 @@ func (e *ObservabilityInputPlanError) Error() string {
 	if len(e.Args) > 0 {
 		fullCommandPath = fmt.Sprintf("%s %s", fullCommandPath, strings.Join(e.Args, " "))
 	}
+
 	// Assumes a structure of the form "stackit <service> <resource> <operation>"
 	service := e.Cmd.Parent().Parent().Use
 
@@ -345,6 +346,7 @@ func (e *DSAInputPlanError) Error() string {
 	if len(e.Args) > 0 {
 		fullCommandPath = fmt.Sprintf("%s %s", fullCommandPath, strings.Join(e.Args, " "))
 	}
+
 	// Assumes a structure of the form "stackit <service> <resource> <operation>"
 	service := e.Cmd.Parent().Parent().Use
 
@@ -433,11 +435,13 @@ type SingleArgExpectedError struct {
 
 func (e *SingleArgExpectedError) Error() string {
 	var err error
+
 	if e.Count > 1 {
 		err = fmt.Errorf(SINGLE_ARG_EXPECTED, e.Expected, e.Count)
 	} else {
 		err = fmt.Errorf(ARG_MISSING, e.Expected)
 	}
+
 	return AppendUsageTip(err, e.Cmd).Error()
 }
 
@@ -461,11 +465,13 @@ type InputUnknownError struct {
 func (e *InputUnknownError) Error() string {
 	// To decide whether the unexpected input is an arg or a subcommand, we assume that only leaf commands (ie, don't have subcomamnds) take args
 	var err error
+
 	if !e.Cmd.HasSubCommands() {
 		err = fmt.Errorf(ARG_UNKNOWN, e.ProvidedInput)
 	} else {
 		err = fmt.Errorf(SUBCOMMAND_UNKNOWN, e.ProvidedInput)
 	}
+
 	return AppendUsageTip(err, e.Cmd).Error()
 }
 
@@ -560,6 +566,7 @@ func (e *InvalidFormatError) Error() string {
 	if e.Format != "" {
 		return fmt.Sprintf("unsupported format provided: %s", e.Format)
 	}
+
 	return "unsupported format provided"
 }
 
@@ -581,12 +588,15 @@ func (e *BuildRequestError) Error() string {
 	if e.Reason != "" && e.Err != nil {
 		return fmt.Sprintf("could not build request (%s): %v", e.Reason, e.Err)
 	}
+
 	if e.Reason != "" {
 		return fmt.Sprintf("could not build request: %s", e.Reason)
 	}
+
 	if e.Err != nil {
 		return fmt.Sprintf("could not build request: %v", e.Err)
 	}
+
 	return "could not build request"
 }
 
@@ -614,6 +624,7 @@ func (e *RequestFailedError) Error() string {
 
 	if e.Err != nil {
 		var oApiErr *oapierror.GenericOpenAPIError
+
 		if sysErrors.As(e.Err, &oApiErr) {
 			// Extract status code from OpenAPI error header if it exists
 			if oApiErr.StatusCode > 0 {
@@ -663,6 +674,7 @@ func extractOpenApiMessageFromBody(body []byte) string {
 	var errorBody struct {
 		Message string `json:"message"`
 	}
+
 	if err := json.Unmarshal(body, &errorBody); err == nil && errorBody.Message != "" {
 		if msg := strings.TrimSpace(errorBody.Message); msg != "" {
 			return msg
@@ -671,10 +683,12 @@ func extractOpenApiMessageFromBody(body []byte) string {
 
 	// If that fails, try to unmarshal as a plain string
 	var plainBody string
+
 	if err := json.Unmarshal(body, &plainBody); err == nil && plainBody != "" {
 		if msg := strings.TrimSpace(plainBody); msg != "" {
 			return msg
 		}
+
 		return ""
 	}
 

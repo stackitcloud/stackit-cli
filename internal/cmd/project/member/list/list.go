@@ -62,6 +62,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -75,15 +76,18 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list members: %w", err)
 			}
+
 			members := resp.Members
 
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
@@ -96,6 +100,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -127,6 +132,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -135,6 +141,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *authorizati
 	if model.Subject != nil {
 		req = req.Subject(*model.Subject)
 	}
+
 	return req
 }
 
@@ -142,6 +149,7 @@ func outputResult(p *print.Printer, model inputModel, projectLabel string, membe
 	if model.GlobalFlagModel == nil {
 		return fmt.Errorf("globalflags are empty")
 	}
+
 	sortFn := func(i, j int) bool {
 		switch model.SortBy {
 		case "subject":
@@ -161,12 +169,14 @@ func outputResult(p *print.Printer, model inputModel, projectLabel string, membe
 
 		table := tables.NewTable()
 		table.SetHeader("SUBJECT", "ROLE")
+
 		for i := range members {
 			m := members[i]
 			// If the previous item differs from the current item on the element to sort by, add a separator between the rows to help readability
 			if i > 0 && sortFn(i-1, i) {
 				table.AddSeparator()
 			}
+
 			table.AddRow(m.Subject, m.Role)
 		}
 

@@ -95,6 +95,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
@@ -103,9 +104,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				// transform the model.FlavorId field from "*string" to "string" once this is removed
 				params.Printer.Warn("The --%s flag is not set, determining flavor ID by CPU und RAM. This behavior is deprecated, the --%s flag will be required after 2027-03-07.\n", flavorIdFlag, flavorIdFlag)
 			}
+
 			model.FlavorId, err = getFlavorId(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "determining flavor id: %v", err)
+
 				return err
 			}
 
@@ -113,34 +116,40 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.BackupSchedule == nil {
 				// transform the model.BackupSchedule field from "*string" to "string" once this is removed
 				params.Printer.Warn("The --%s flag is not set. Using the default value \"%s\". This behavior is deprecated, the --%s flag will be required after 2027-03-07.\n", backupScheduleFlag, defaultBackupSchedule, backupScheduleFlag)
+
 				model.BackupSchedule = utils.Ptr(defaultBackupSchedule)
 			}
 
 			// Fill in version, if needed - remove after 2027-03-07
 			if model.Version == nil {
 				params.Printer.Warn("The --%s flag is not set. Using the latest version as a default. This behavior is deprecated, the --%s flag will be required after 2027-03-07.\n", versionFlag, versionFlag)
+
 				// transform the model.Version field from "*string" to "string" once this is removed
 
 				version, err := mongodbflexUtils.GetLatestMongoDBVersion(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region) //nolint:staticcheck // SA1019 - deprecated but still supported until 2027-03-07
 				if err != nil {
 					return fmt.Errorf("get latest MongoDB version: %w", err)
 				}
+
 				model.Version = utils.Ptr(version)
 			}
 
 			// remove after 2027-03-07
 			if model.StorageSize == nil {
 				params.Printer.Warn("The --%s flag is not set. Using the default value (%d). This behavior is deprecated, the --%s flag will be required after 2027-03-07.\n", storageSizeFlag, defaultStorageSize, storageSizeFlag)
+
 				model.StorageSize = utils.Ptr(int64(defaultStorageSize))
 			}
 
 			// remove after 2027-03-07
 			if model.StorageClass == nil {
 				params.Printer.Warn("The --%s flag is not set. Using the default value (%s). This behavior is deprecated, the --%s flag will be required after 2027-03-07.\n", storageClassFlag, defaultStorageClass, storageClassFlag)
+
 				model.StorageClass = utils.Ptr(defaultStorageClass)
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a MongoDB Flex instance for project %q?", projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -151,10 +160,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create MongoDB Flex instance: %w", err)
 			}
+
 			instanceId := *resp.Id
 
 			// Wait for async operation, if async mode not enabled
@@ -172,6 +183,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -196,6 +208,7 @@ func configureFlags(cmd *cobra.Command) {
 	// remove after 2027-03-07
 	err = cmd.Flags().MarkDeprecated(cpuFlag, fmt.Sprintf("Will be removed after 2027-03-07. Use the --%s flag instead.", flavorIdFlag))
 	cobra.CheckErr(err)
+
 	err = cmd.Flags().MarkDeprecated(ramFlag, fmt.Sprintf("Will be removed after 2027-03-07. Use the --%s flag instead.", flavorIdFlag))
 	cobra.CheckErr(err)
 	cmd.MarkFlagsRequiredTogether(cpuFlag, ramFlag)
@@ -219,6 +232,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 			Cmd: cmd,
 		}
 	}
+
 	// remove after 2027-03-07: flavor id flag will be required then
 	if flavorId != nil && (cpu != nil || ram != nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
@@ -228,6 +242,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	// remove after 2027-03-07: storage size flag will be required then (no pointer anymore)
 	var storageSize *int64
+
 	if cmd.Flags().Changed(storageSizeFlag) {
 		storageSize = flags.FlagToInt64Pointer(p, cmd, storageSizeFlag)
 	}
@@ -249,6 +264,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -325,7 +341,9 @@ func outputResult(p *print.Printer, outputFormat string, async bool, projectLabe
 		if async {
 			operationState = "Triggered creation of"
 		}
+
 		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, utils.PtrString(resp.Id))
+
 		return nil
 	})
 }

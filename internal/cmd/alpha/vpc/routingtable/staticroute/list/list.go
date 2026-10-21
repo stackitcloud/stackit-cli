@@ -57,6 +57,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, nil)
 			if err != nil {
 				return err
@@ -70,6 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			request := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			response, err := request.Execute()
 			if err != nil {
 				return fmt.Errorf("list static-routes: %w", err)
@@ -87,6 +89,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -120,6 +123,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -141,11 +145,13 @@ func outputResult(p *print.Printer, outputFormat string, routes []iaas.Route, vp
 	return p.OutputResult(outputFormat, routes, func() error {
 		if len(routes) == 0 {
 			p.Outputf("No static-routes found for routing-table %q in VPC %q\n", routeTableId, vpcId)
+
 			return nil
 		}
 
 		table := tables.NewTable()
 		table.SetHeader("ID", "DESTINATION TYPE", "DESTINATION VALUE", "NEXTHOP TYPE", "NEXTHOP VALUE", "LABELS")
+
 		for _, route := range routes {
 			routeDetails := iaasUtils.ExtractRouteDetails(&route)
 			table.AddRow(
@@ -158,10 +164,12 @@ func outputResult(p *print.Printer, outputFormat string, routes []iaas.Route, vp
 			)
 			table.AddSeparator()
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

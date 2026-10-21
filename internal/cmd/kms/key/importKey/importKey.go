@@ -57,6 +57,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -71,15 +72,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			keyName, err := kmsUtils.GetKeyName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.KeyRingId, model.KeyId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get key name: %v", err)
+
 				keyName = model.KeyId
 			}
+
 			keyRingName, err := kmsUtils.GetKeyRingName(ctx, apiClient.DefaultAPI, model.ProjectId, model.KeyRingId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get key ring name: %v", err)
+
 				keyRingName = model.KeyRingId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to import a new version for the KMS Key %q inside the key ring %q?", keyName, keyRingName)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -87,6 +92,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req, _ := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("import KMS key: %w", err)
@@ -96,6 +102,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -109,7 +116,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	// WrappedKey needs to be base64 encoded
 	var wrappedKey = flags.FlagToStringValue(p, cmd, wrappedKeyFlag)
+
 	_, err := base64.StdEncoding.DecodeString(wrappedKey)
+
 	if err != nil || wrappedKey == "" {
 		return nil, &cliErr.FlagValidationError{
 			Flag:    wrappedKeyFlag,
@@ -126,6 +135,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -140,6 +150,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient kmsKeyClient
 		WrappedKey:    model.WrappedKey,
 		WrappingKeyId: model.WrappingKeyId,
 	})
+
 	return req, nil
 }
 
@@ -150,6 +161,7 @@ func outputResult(p *print.Printer, outputFormat, keyRingName, keyName string, r
 
 	return p.OutputResult(outputFormat, resp, func() error {
 		p.Outputf("Imported a new version for the key %q inside the key ring %q\n", keyName, keyRingName)
+
 		return nil
 	})
 }

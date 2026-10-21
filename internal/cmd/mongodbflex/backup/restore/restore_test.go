@@ -40,6 +40,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -57,30 +58,37 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRestoreRequest(mods ...func(request mongodbflex.ApiRestoreInstanceRequest)) mongodbflex.ApiRestoreInstanceRequest {
 	request := testClient.DefaultAPI.RestoreInstance(testCtx, testProjectId, testInstanceId, testRegion)
+
 	request = request.RestoreInstancePayload(mongodbflex.RestoreInstancePayload{
 		BackupId:   testBackupId,
 		InstanceId: testBackupInstanceId,
 	})
+
 	for _, mod := range mods {
 		mod(request)
 	}
+
 	return request
 }
 
 func fixtureCloneRequest(mods ...func(request mongodbflex.ApiCloneInstanceRequest)) mongodbflex.ApiCloneInstanceRequest {
 	request := testClient.DefaultAPI.CloneInstance(testCtx, testProjectId, testInstanceId, testRegion)
+
 	request = request.CloneInstancePayload(mongodbflex.CloneInstancePayload{
 		Timestamp:  utils.Ptr(testTimestamp),
 		InstanceId: testBackupInstanceId,
 	})
+
 	for _, mod := range mods {
 		mod(request)
 	}
+
 	return request
 }
 

@@ -39,6 +39,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, mod := range mods {
 		mod(argValues)
 	}
+
 	return argValues
 }
 
@@ -54,6 +55,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -72,15 +74,19 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *sfs.ApiUpdateResourcePoolSnapshotRequest)) sfs.ApiUpdateResourcePoolSnapshotRequest {
 	request := testClient.DefaultAPI.UpdateResourcePoolSnapshot(testCtx, testProjectId, testRegion, testResourcePoolId, testSnapshotName)
+
 	request = request.UpdateResourcePoolSnapshotPayload(fixturePayload())
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -94,6 +100,7 @@ func fixturePayload(mods ...func(request *sfs.UpdateResourcePoolSnapshotPayload)
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
@@ -210,6 +217,7 @@ func TestOutputResult(t *testing.T) {
 		resourcePoolLabel string
 		resp              *sfs.UpdateResourcePoolSnapshotResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args

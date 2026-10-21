@@ -39,6 +39,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -58,15 +59,19 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *serverupdate.ApiCreateUpdateScheduleRequest)) serverupdate.ApiCreateUpdateScheduleRequest {
 	request := testClient.DefaultAPI.CreateUpdateSchedule(testCtx, testProjectId, testServerId, testRegion)
+
 	request = request.CreateUpdateSchedulePayload(fixturePayload())
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -80,6 +85,7 @@ func fixturePayload(mods ...func(payload *serverupdate.CreateUpdateSchedulePaylo
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
@@ -163,6 +169,7 @@ func TestBuildRequest(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error building request: %v", err)
 			}
 
@@ -183,6 +190,7 @@ func TestOutputResult(t *testing.T) {
 		serverLabel  string
 		resp         serverupdate.UpdateSchedule
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -195,6 +203,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.serverLabel, tt.args.resp); (err != nil) != tt.wantErr {

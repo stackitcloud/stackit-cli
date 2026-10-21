@@ -58,6 +58,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -71,6 +72,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list volumes: %w", err)
@@ -81,6 +83,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
@@ -93,6 +96,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -122,6 +126,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -138,8 +143,10 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, volumes [
 	return p.OutputResult(outputFormat, volumes, func() error {
 		if len(volumes) == 0 {
 			p.Outputf("No volumes found for project %q\n", projectLabel)
+
 			return nil
 		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "Name", "Status", "Server", "Availability Zone", "Size (GB)")
 
@@ -157,6 +164,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, volumes [
 		}
 
 		p.Outputln(table.Render())
+
 		return nil
 	})
 }

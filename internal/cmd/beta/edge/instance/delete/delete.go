@@ -45,6 +45,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -59,16 +60,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
 			instanceLabel, err := edgeUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete instance %q of project %q?", instanceLabel, projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -76,6 +80,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("delete Edge Cloud instance: %w", err)
@@ -95,10 +100,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered deletion of"
 			}
+
 			params.Printer.Outputf("%s instance %q of project %q.\n", operationState, instanceLabel, projectLabel)
+
 			return nil
 		},
 	}
+
 	return cmd
 }
 
@@ -116,6 +124,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 

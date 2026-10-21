@@ -48,6 +48,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, inputArgs []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, inputArgs)
 			if err != nil {
 				return err
@@ -62,18 +63,21 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			routingTableLabel, err := iaasUtils.GetVPCRoutingTableName(ctx, apiClient.DefaultAPI, model.ProjectId, model.VpcId, model.Region, model.RoutingTableId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get vpc routing-table name: %v", err)
+
 				routingTableLabel = model.RoutingTableId
 			} else if routingTableLabel == "" {
 				routingTableLabel = model.RoutingTableId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update static-route %q for routing-table %q?", model.RouteId, routingTableLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
 			}
 
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update static-route %q of routing-table %q: %w", model.RouteId, model.RoutingTableId, err)
@@ -83,6 +87,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -115,6 +120,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -139,6 +145,7 @@ func outputResult(p *print.Printer, outputFormat, routingTableId, vpcId string, 
 		}
 
 		p.Outputf("Updated static-route %q for routing-table %q in VPC %q.\n", *route.Id, routingTableId, vpcId)
+
 		return nil
 	})
 }

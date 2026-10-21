@@ -61,6 +61,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -75,6 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
@@ -83,10 +85,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := logsUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a access token for the Logs instance %q in the project %q?", instanceLabel, projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -94,6 +98,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create Logs access-token : %w", err)
@@ -103,6 +108,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -133,11 +139,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *logs.APIClient) logs.ApiCreateAccessTokenRequest {
 	req := apiClient.DefaultAPI.CreateAccessToken(ctx, model.ProjectId, model.Region, model.InstanceId)
+
 	return req.CreateAccessTokenPayload(logs.CreateAccessTokenPayload{
 		Description: model.Description,
 		DisplayName: model.DisplayName,
@@ -152,8 +160,10 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, accessTo
 	if accessToken == nil {
 		return fmt.Errorf("access token cannot be nil")
 	}
+
 	return p.OutputResult(outputFormat, accessToken, func() error {
 		p.Outputf("Created access token for Logs instance %q.\n\nID: %s\nToken: %s\n", instanceLabel, accessToken.Id, utils.PtrValue(accessToken.AccessToken))
+
 		return nil
 	})
 }

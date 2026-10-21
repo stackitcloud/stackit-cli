@@ -55,6 +55,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -68,6 +69,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("describe network interface: %w", err)
@@ -77,6 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -90,6 +93,7 @@ func configureFlags(cmd *cobra.Command) {
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	nicId := inputArgs[0]
 	globalFlags := globalflags.Parse(p, cmd)
+
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
@@ -101,6 +105,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -113,47 +118,60 @@ func outputResult(p *print.Printer, outputFormat string, nic *iaas.NIC) error {
 	if nic == nil {
 		return fmt.Errorf("nic is empty")
 	}
+
 	return p.OutputResult(outputFormat, nic, func() error {
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(nic.Id))
 		table.AddSeparator()
 		table.AddRow("NETWORK ID", utils.PtrString(nic.NetworkId))
 		table.AddSeparator()
+
 		if nic.Name != nil {
 			table.AddRow("NAME", utils.PtrString(nic.Name))
 			table.AddSeparator()
 		}
+
 		if nic.Ipv4 != nil {
 			table.AddRow("IPV4", utils.PtrString(nic.Ipv4))
 			table.AddSeparator()
 		}
+
 		if nic.Ipv6 != nil {
 			table.AddRow("IPV6", utils.PtrString(nic.Ipv6))
 			table.AddSeparator()
 		}
+
 		table.AddRow("MAC", utils.PtrString(nic.Mac))
 		table.AddSeparator()
 		table.AddRow("NIC SECURITY", utils.PtrString(nic.NicSecurity))
+
 		if len(nic.AllowedAddresses) > 0 {
 			var allowedAddresses []string
+
 			for _, value := range nic.AllowedAddresses {
 				allowedAddresses = append(allowedAddresses, *value.String)
 			}
+
 			table.AddSeparator()
 			table.AddRow("ALLOWED ADDRESSES", strings.Join(allowedAddresses, "\n"))
 		}
+
 		if len(nic.Labels) > 0 {
 			var labels []string
+
 			for key, value := range nic.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
+
 			table.AddSeparator()
 			table.AddRow("LABELS", strings.Join(labels, "\n"))
 		}
+
 		table.AddSeparator()
 		table.AddRow("STATUS", utils.PtrString(nic.Status))
 		table.AddSeparator()
 		table.AddRow("TYPE", utils.PtrString(nic.Type))
+
 		if len(nic.SecurityGroups) > 0 {
 			table.AddSeparator()
 			table.AddRow("SECURITY GROUPS", strings.Join(nic.SecurityGroups, "\n"))
@@ -163,6 +181,7 @@ func outputResult(p *print.Printer, outputFormat string, nic *iaas.NIC) error {
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

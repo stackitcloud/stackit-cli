@@ -48,6 +48,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -62,6 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
+
 				serverLabel = model.ServerId
 			} else if serverLabel == "" {
 				serverLabel = model.ServerId
@@ -69,6 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("server console: %w", err)
@@ -77,6 +80,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, serverLabel, resp)
 		},
 	}
+
 	return cmd
 }
 
@@ -94,6 +98,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -106,6 +111,7 @@ func outputResult(p *print.Printer, outputFormat, serverLabel string, serverUrl 
 		if _, ok := serverUrl.GetUrlOk(); !ok {
 			return fmt.Errorf("server url is nil")
 		}
+
 		// unescape url in order to get rid of e.g. %40
 		unescapedURL, err := url.PathUnescape(serverUrl.GetUrl())
 		if err != nil {

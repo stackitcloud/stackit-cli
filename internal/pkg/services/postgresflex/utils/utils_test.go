@@ -39,18 +39,21 @@ func newAPIMockClient(s mockSettings) postgresflex.DefaultAPI {
 			if s.listVersionsFails {
 				return nil, fmt.Errorf("could not list versions")
 			}
+
 			return s.listVersionsResp, nil
 		}),
 		GetInstanceExecuteMock: utils.Ptr(func(_ postgresflex.ApiGetInstanceRequest) (*postgresflex.GetInstanceResponse, error) {
 			if s.getInstanceFails {
 				return nil, fmt.Errorf("could not get instance")
 			}
+
 			return s.getInstanceResp, nil
 		}),
 		GetUserExecuteMock: utils.Ptr(func(_ postgresflex.ApiGetUserRequest) (*postgresflex.GetUserResponse, error) {
 			if s.getUserFails {
 				return nil, fmt.Errorf("could not get user")
 			}
+
 			return s.getUserResp, nil
 		}),
 	}
@@ -131,15 +134,18 @@ func TestLoadFlavorId(t *testing.T) {
 				if err == nil {
 					t.Fatalf("should have failed")
 				}
+
 				return
 			}
 
 			if err != nil {
 				t.Fatalf("should not have failed: %v", err)
 			}
+
 			if output == nil {
 				t.Fatalf("returned nil output")
 			}
+
 			diff := cmp.Diff(output, tt.expectedOutput)
 			if diff != "" {
 				t.Fatalf("outputs do not match: %s", diff)
@@ -200,12 +206,15 @@ func TestGetLatestPostgreSQLVersion(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}
@@ -246,12 +255,15 @@ func TestGetInstanceName(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}
@@ -292,12 +304,15 @@ func TestGetUserName(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}

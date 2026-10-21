@@ -78,6 +78,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -107,16 +108,20 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *cdn.APIClient, nextPageID string, pageLimit int32) cdn.ApiListDistributionsRequest {
 	req := apiClient.DefaultAPI.ListDistributions(ctx, model.ProjectId)
+
 	req = req.SortBy(model.SortBy)
 	req = req.PageSize(pageLimit)
+
 	if nextPageID != "" {
 		req = req.PageIdentifier(nextPageID)
 	}
+
 	return req
 }
 
@@ -124,59 +129,76 @@ func outputResult(p *print.Printer, outputFormat string, distributions []cdn.Dis
 	if distributions == nil {
 		distributions = make([]cdn.Distribution, 0) // otherwise prints null in json output
 	}
+
 	return p.OutputResult(outputFormat, distributions, func() error {
 		if len(distributions) == 0 {
 			p.Outputln("No CDN distributions found")
+
 			return nil
 		}
 
 		table := tables.NewTable()
 		table.SetHeader("ID", "REGIONS", "STATUS")
+
 		for _, d := range distributions {
 			var joinedRegions string
+
 			if d.Config.Regions != nil {
 				joinedRegions = strings.Join(sdkUtils.EnumSliceToStringSlice(d.Config.Regions), ", ")
 			}
+
 			table.AddRow(
 				d.Id,
 				joinedRegions,
 				d.Status,
 			)
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }
 
 func fetchDistributions(ctx context.Context, model *inputModel, apiClient *cdn.APIClient) ([]cdn.Distribution, error) {
-	var nextPageID string
-	var distributions []cdn.Distribution
+	var (
+		nextPageID    string
+		distributions []cdn.Distribution
+	)
+
 	received := int32(0)
 	limit := int32(math.MaxInt32)
+
 	if model.Limit != nil {
 		limit = min(limit, *model.Limit)
 	}
+
 	for {
 		want := min(maxPageSize, limit-received)
 		request := buildRequest(ctx, model, apiClient, nextPageID, want)
+
 		response, err := request.Execute()
 		if err != nil {
 			return nil, fmt.Errorf("list distributions: %w", err)
 		}
+
 		if response.Distributions != nil {
 			distributions = append(distributions, response.Distributions...)
 		}
+
 		nextPageID = ""
 		if response.NextPageIdentifier != nil {
 			nextPageID = *response.NextPageIdentifier
 		}
+
 		received += want
 		if nextPageID == "" || received >= limit {
 			break
 		}
 	}
+
 	return distributions, nil
 }

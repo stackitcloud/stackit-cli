@@ -38,6 +38,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -52,6 +53,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
@@ -64,6 +66,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list plans: %w", err)
 			}
+
 			items := response.GetValidPlans()
 
 			return outputResult(params.Printer, model.OutputFormat, projectLabel, items)
@@ -84,6 +87,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -97,11 +101,13 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, items []a
 	return p.OutputResult(outputFormat, items, func() error {
 		if len(items) == 0 {
 			p.Outputf("No plans found for project %q", projectLabel)
+
 			return nil
 		}
 
 		table := tables.NewTable()
 		table.SetHeader("PLAN ID", "NAME", "FLAVOR", "MAX CONNS", "DESCRIPTION")
+
 		for _, item := range items {
 			table.AddRow(utils.PtrString(item.PlanId),
 				utils.PtrString(item.Name),
@@ -110,6 +116,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, items []a
 				utils.Truncate(item.Description, 70),
 			)
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

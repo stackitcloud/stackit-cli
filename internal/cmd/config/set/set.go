@@ -107,6 +107,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("write config to file: %w", err)
 			}
+
 			return nil
 		},
 	}
@@ -139,6 +140,7 @@ Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
 
 Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
 `)
+
 	return cmd
 }
 
@@ -183,77 +185,112 @@ func configureFlags(cmd *cobra.Command) {
 
 	err := viper.BindPFlag(config.SessionTimeLimitKey, cmd.Flags().Lookup(sessionTimeLimitFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.IdentityProviderCustomWellKnownConfigurationKey, cmd.Flags().Lookup(identityProviderCustomWellKnownConfigurationFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.IdentityProviderCustomClientIdKey, cmd.Flags().Lookup(identityProviderCustomClientIdFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.AllowedUrlDomainKey, cmd.Flags().Lookup(allowedUrlDomainFlag))
 	cobra.CheckErr(err)
 
 	err = viper.BindPFlag(config.ObservabilityCustomEndpointKey, cmd.Flags().Lookup(observabilityCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.AuthorizationCustomEndpointKey, cmd.Flags().Lookup(authorizationCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.AutomationCustomEndpointKey, cmd.Flags().Lookup(automationCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.AlbWafCustomEndpointKey, cmd.Flags().Lookup(albWafCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.DNSCustomEndpointKey, cmd.Flags().Lookup(dnsCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.EdgeCustomEndpointKey, cmd.Flags().Lookup(edgeCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.LoadBalancerCustomEndpointKey, cmd.Flags().Lookup(loadBalancerCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.LogMeCustomEndpointKey, cmd.Flags().Lookup(logMeCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.MariaDBCustomEndpointKey, cmd.Flags().Lookup(mariaDBCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.MongoDBFlexCustomEndpointKey, cmd.Flags().Lookup(mongoDBFlexCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.ObjectStorageCustomEndpointKey, cmd.Flags().Lookup(objectStorageCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.OpenSearchCustomEndpointKey, cmd.Flags().Lookup(openSearchCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.PostgresFlexCustomEndpointKey, cmd.Flags().Lookup(postgresFlexCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.RabbitMQCustomEndpointKey, cmd.Flags().Lookup(rabbitMQCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.RedisCustomEndpointKey, cmd.Flags().Lookup(redisCustomEndpointFlag)) //nolint:staticcheck // deprecated but still supported until 2027-08-31
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.ResourceManagerEndpointKey, cmd.Flags().Lookup(resourceManagerCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.SecretsManagerCustomEndpointKey, cmd.Flags().Lookup(secretsManagerCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.KMSCustomEndpointKey, cmd.Flags().Lookup(kmsCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.ServerBackupCustomEndpointKey, cmd.Flags().Lookup(serverBackupCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.ServerOsUpdateCustomEndpointKey, cmd.Flags().Lookup(serverOsUpdateCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.RunCommandCustomEndpointKey, cmd.Flags().Lookup(runCommandCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.ServiceAccountCustomEndpointKey, cmd.Flags().Lookup(serviceAccountCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.ServiceEnablementCustomEndpointKey, cmd.Flags().Lookup(serviceEnablementCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.SKECustomEndpointKey, cmd.Flags().Lookup(skeCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.SQLServerFlexCustomEndpointKey, cmd.Flags().Lookup(sqlServerFlexCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.IaaSAlphaCustomEndpointKey, cmd.Flags().Lookup(iaasAlphaCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.IaaSCustomEndpointKey, cmd.Flags().Lookup(iaasCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.TokenCustomEndpointKey, cmd.Flags().Lookup(tokenCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.IntakeCustomEndpointKey, cmd.Flags().Lookup(intakeCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.LogsCustomEndpointKey, cmd.Flags().Lookup(logsCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.SfsCustomEndpointKey, cmd.Flags().Lookup(sfsCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.CDNCustomEndpointKey, cmd.Flags().Lookup(cdnCustomEndpointFlag))
 	cobra.CheckErr(err)
+
 	err = viper.BindPFlag(config.VPNCustomEndpointKey, cmd.Flags().Lookup(vpnCustomEndpointFlag))
 	cobra.CheckErr(err)
 }
@@ -275,6 +312,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	allowedUrlDomainFromFlag := flags.FlagToStringPointer(p, cmd, allowedUrlDomainFlag)
 	allowedUrlDomainFlagValue := flags.FlagToStringValue(p, cmd, allowedUrlDomainFlag)
+
 	if allowedUrlDomainFromFlag != nil && allowedUrlDomainFlagValue == "" {
 		p.Warn("The allowed URL domain is set to empty. All URLs will be accepted regardless of their domain.\n")
 	}
@@ -285,6 +323,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -303,9 +342,11 @@ func parseSessionTimeLimit(p *print.Printer, cmd *cobra.Command) (*string, error
 	if err != nil {
 		return nil, fmt.Errorf("parse value \"%s\": %w", *sessionTimeLimit, err)
 	}
+
 	if duration <= 0 {
 		return nil, fmt.Errorf("value must be positive")
 	}
+
 	if duration > time.Duration(24)*time.Hour {
 		return nil, fmt.Errorf("value can't be larger than 24h")
 	}

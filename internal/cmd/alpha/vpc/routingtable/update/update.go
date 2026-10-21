@@ -58,6 +58,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -71,6 +72,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			vpcLabel, err := iaasUtils.GetVPCName(ctx, apiClient.DefaultAPI, model.ProjectId, model.VpcId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get VPC name: %v", err)
+
 				vpcLabel = model.VpcId
 			} else if vpcLabel == "" {
 				vpcLabel = model.VpcId
@@ -79,6 +81,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			routingTableLabel, err := iaasUtils.GetVPCRoutingTableName(ctx, apiClient.DefaultAPI, model.ProjectId, model.VpcId, model.Region, model.RoutingTableId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get VPC routing-table name: %v", err)
+
 				routingTableLabel = model.RoutingTableId
 			} else if routingTableLabel == "" {
 				routingTableLabel = model.RoutingTableId
@@ -90,6 +93,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update vpc routing-table: %w", err)
@@ -120,6 +124,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
+
 	if globalFlags.Region == "" {
 		return nil, &errors.RegionError{}
 	}
@@ -136,6 +141,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return model, nil
 }
 
@@ -155,12 +161,14 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.VPCRoutingTa
 	if resp == nil {
 		return fmt.Errorf("update vpc routing-table response is nil")
 	}
+
 	if resp.Id == nil || *resp.Id == "" {
 		return fmt.Errorf("update vpc routing-table id is empty")
 	}
 
 	return p.OutputResult(outputFormat, resp, func() error {
 		p.Outputf("Updated routing-table with ID %q.\n", *resp.Id)
+
 		return nil
 	})
 }

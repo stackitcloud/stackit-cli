@@ -34,6 +34,7 @@ func setupCmd() {
 	operation = &cobra.Command{
 		Use: "operation",
 	}
+
 	cmd.AddCommand(service)
 	service.AddCommand(resource)
 	resource.AddCommand(operation)
@@ -43,9 +44,11 @@ func setupBetaCmd() {
 	cmd = &cobra.Command{
 		Use: "stackit",
 	}
+
 	beta := &cobra.Command{
 		Use: "beta",
 	}
+
 	service = &cobra.Command{
 		Use: "service",
 	}
@@ -55,6 +58,7 @@ func setupBetaCmd() {
 	operation = &cobra.Command{
 		Use: "operation",
 	}
+
 	cmd.AddCommand(beta)
 	beta.AddCommand(service)
 	service.AddCommand(resource)
@@ -117,6 +121,7 @@ func TestObservabilityInputPlanError(t *testing.T) {
 	}
 
 	setupCmd()
+
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			err := &ObservabilityInputPlanError{
@@ -219,6 +224,7 @@ func TestDSAInputPlanError(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			setupCmd()
+
 			err := &DSAInputPlanError{
 				Cmd:  operation,
 				Args: tt.args,
@@ -300,6 +306,7 @@ func TestDatabaseInputFlavorError(t *testing.T) {
 		} else {
 			setupCmd()
 		}
+
 		t.Run(tt.description, func(t *testing.T) {
 			err := &DatabaseInputFlavorError{
 				Cmd:     operation,
@@ -543,6 +550,7 @@ func TestSingleArgExpectedError(t *testing.T) {
 	}
 
 	setupCmd()
+
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			err := &SingleArgExpectedError{
@@ -588,6 +596,7 @@ func TestSingleOptionalArgExpectedError(t *testing.T) {
 	}
 
 	setupCmd()
+
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			err := &SingleOptionalArgExpectedError{
@@ -627,6 +636,7 @@ func TestInputUnknownError(t *testing.T) {
 	}
 
 	setupCmd()
+
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			err := &InputUnknownError{
@@ -655,6 +665,7 @@ func TestSubcommandMissingError(t *testing.T) {
 	}
 
 	setupCmd()
+
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			err := &SubcommandMissingError{
@@ -684,6 +695,7 @@ func TestAppendUsageTip(t *testing.T) {
 	}
 
 	setupCmd()
+
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			err := AppendUsageTip(tt.err, cmd)
@@ -699,6 +711,7 @@ func TestInvalidFormatError(t *testing.T) {
 	type args struct {
 		format string
 	}
+
 	tests := []struct {
 		name string
 		args args
@@ -719,6 +732,7 @@ func TestInvalidFormatError(t *testing.T) {
 			want: "unsupported format provided: yaml",
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := (&InvalidFormatError{Format: tt.args.format}).Error()
@@ -734,6 +748,7 @@ func TestBuildRequestError(t *testing.T) {
 		reason string
 		err    error
 	}
+
 	tests := []struct {
 		name string
 		args args
@@ -772,6 +787,7 @@ func TestBuildRequestError(t *testing.T) {
 			want: fmt.Sprintf("could not build request (%s): %s", testErrorMessage, testErrorMessage),
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := (&BuildRequestError{Reason: tt.args.reason, Err: tt.args.err}).Error()
@@ -786,6 +802,7 @@ func TestRequestFailedError(t *testing.T) {
 	type args struct {
 		err error
 	}
+
 	tests := []struct {
 		name string
 		args args
@@ -835,6 +852,7 @@ func TestExtractMessageFromBody(t *testing.T) {
 	type args struct {
 		body []byte
 	}
+
 	tests := []struct {
 		name string
 		args args
@@ -869,6 +887,7 @@ func TestExtractMessageFromBody(t *testing.T) {
 			want: "the reason",
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := extractOpenApiMessageFromBody(tt.args.body)
@@ -913,13 +932,16 @@ func TestConstructorsReturnExpected(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			wantErr, wantIsErr := tt.want.(error)
 			gotErr, gotIsErr := tt.got.(error)
+
 			if wantIsErr {
 				if !gotIsErr {
 					t.Fatalf("expected error but got %T", tt.got)
 				}
+
 				if !errors.Is(gotErr, wantErr) {
 					t.Errorf("got error %v, want %v", gotErr, wantErr)
 				}
+
 				return
 			}
 

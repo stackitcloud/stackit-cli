@@ -47,6 +47,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
@@ -60,6 +61,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get key version: %w", err)
@@ -70,6 +72,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -86,6 +89,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -97,13 +101,16 @@ func outputResult(p *print.Printer, outputFormat, projectId, keyId string, resp 
 	if resp == nil || resp.Versions == nil {
 		return fmt.Errorf("response is nil / empty")
 	}
+
 	versions := resp.Versions
 
 	return p.OutputResult(outputFormat, versions, func() error {
 		if len(versions) == 0 {
 			p.Outputf("No key versions found for project %q for the key %q\n", projectId, keyId)
+
 			return nil
 		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "NUMBER", "CREATED AT", "DESTROY DATE", "STATUS")
 
@@ -121,6 +128,7 @@ func outputResult(p *print.Printer, outputFormat, projectId, keyId string, resp 
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

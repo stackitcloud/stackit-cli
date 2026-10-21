@@ -101,6 +101,7 @@ func TestConvertInt32PToFloat64PLossyConversion(t *testing.T) {
 	i := int32(900_000_001)
 	f := ConvertInt32PToFloat32P(&i)
 	s := fmt.Sprintf("%f", *f)
+
 	if s != "900000000.000000" {
 		t.Errorf("Expected lossy conversion of %d to %f, got %s", i, *f, s)
 	}
@@ -252,6 +253,7 @@ func TestValidateURLDomain(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("expected URL to be valid, got error: %v", err)
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("expected URL to be invalid, got no error")
 			}
@@ -263,6 +265,7 @@ func TestUserAgentConfigOption(t *testing.T) {
 	type args struct {
 		providerVersion string
 	}
+
 	tests := []struct {
 		name string
 		args args
@@ -276,15 +279,18 @@ func TestUserAgentConfigOption(t *testing.T) {
 			want: sdkConfig.WithUserAgent("stackit-cli/1.0.0"),
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			clientConfigActual := sdkConfig.Configuration{}
+
 			err := tt.want(&clientConfigActual)
 			if err != nil {
 				t.Errorf("error configuring client: %v", err)
 			}
 
 			clientConfigExpected := sdkConfig.Configuration{}
+
 			err = UserAgentConfigOption(tt.args.providerVersion)(&clientConfigExpected)
 			if err != nil {
 				t.Errorf("error configuring client: %v", err)
@@ -373,12 +379,14 @@ func TestConvertStringMapToInterfaceMap(t *testing.T) {
 			// Check if one is nil and other isn't
 			if (result == nil && tt.expected != nil) || (result != nil && tt.expected == nil) {
 				t.Errorf("ConvertStringMapToInterfaceMap() = %v, want %v", result, tt.expected)
+
 				return
 			}
 
 			// Compare maps
 			if len(*result) != len(*tt.expected) {
 				t.Errorf("ConvertStringMapToInterfaceMap() map length = %d, want %d", len(*result), len(*tt.expected))
+
 				return
 			}
 
@@ -386,8 +394,10 @@ func TestConvertStringMapToInterfaceMap(t *testing.T) {
 				expectedVal, ok := (*tt.expected)[k]
 				if !ok {
 					t.Errorf("ConvertStringMapToInterfaceMap() unexpected key %s in result", k)
+
 					continue
 				}
+
 				if v != expectedVal {
 					t.Errorf("ConvertStringMapToInterfaceMap() value for key %s = %v, want %v", k, v, expectedVal)
 				}
@@ -411,6 +421,7 @@ func TestGetSliceFromPointer(t *testing.T) {
 			name: "pointer to nil slice",
 			input: func() *[]string {
 				var s []string
+
 				return &s
 			}(),
 			expected: []string{},
@@ -433,6 +444,7 @@ func TestGetSliceFromPointer(t *testing.T) {
 
 			if result == nil {
 				t.Errorf("GetSliceFromPointer() = %v, want %v", result, tt.expected)
+
 				return
 			}
 
@@ -448,11 +460,13 @@ func TestMap(t *testing.T) {
 		input []T
 		mapFn func(T) U
 	}
+
 	type testCase[T any, U any] struct {
 		name string
 		args args[T, U]
 		want []U
 	}
+
 	tests := []testCase[string, *string]{
 		{
 			name: "default",
@@ -471,6 +485,7 @@ func TestMap(t *testing.T) {
 			want: []*string{},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := Map(tt.args.input, tt.args.mapFn); !reflect.DeepEqual(got, tt.want) {

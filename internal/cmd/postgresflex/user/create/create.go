@@ -63,6 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args: args.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -77,10 +78,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a user for instance %q?", instanceLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -88,6 +91,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create PostgreSQL Flex user: %w", err)
@@ -98,6 +102,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -124,15 +129,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiCreateUserRequest {
 	req := apiClient.DefaultAPI.CreateUser(ctx, model.ProjectId, model.Region, model.InstanceId)
+
 	req = req.CreateUserPayload(postgresflex.CreateUserPayload{
 		Name:  model.Username,
 		Roles: model.Roles,
 	})
+
 	return req
 }
 

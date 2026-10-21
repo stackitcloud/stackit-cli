@@ -85,10 +85,12 @@ The available performance class values can be obtained by running:
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a resource-pool for project %q?", projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -99,7 +101,9 @@ The available performance class values can be obtained by running:
 			if err != nil {
 				return fmt.Errorf("create SFS resource pool: %w", err)
 			}
+
 			var resourcePoolId string
+
 			if resp != nil && resp.HasResourcePool() && resp.ResourcePool.HasId() {
 				resourcePoolId = *resp.ResourcePool.Id
 			}
@@ -119,6 +123,7 @@ The available performance class values can be obtained by running:
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -139,6 +144,7 @@ func configureFlags(cmd *cobra.Command) {
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiCreateResourcePoolRequest {
 	req := apiClient.DefaultAPI.CreateResourcePool(ctx, model.ProjectId, model.Region)
+
 	req = req.CreateResourcePoolPayload(sfs.CreateResourcePoolPayload{
 		AvailabilityZone:    model.AvailabilityZone,
 		IpAcl:               model.IpAcl,
@@ -148,6 +154,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClie
 		SnapshotsAreVisible: &model.SnapshotsVisible,
 		SnapshotPolicyId:    &model.SnapshotPolicyId,
 	})
+
 	return req
 }
 
@@ -177,6 +184,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -184,13 +192,17 @@ func outputResult(p *print.Printer, outputFormat string, async bool, projectLabe
 	return p.OutputResult(outputFormat, resp, func() error {
 		if resp == nil || resp.ResourcePool == nil {
 			p.Outputln("Resource pool response is empty")
+
 			return nil
 		}
+
 		operationState := "Created"
 		if async {
 			operationState = "Triggered creation of"
 		}
+
 		p.Outputf("%s resource pool for project %q. Resource pool ID: %s\n", operationState, projectLabel, utils.PtrString(resp.ResourcePool.Id))
+
 		return nil
 	})
 }

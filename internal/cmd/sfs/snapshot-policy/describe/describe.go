@@ -40,6 +40,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return fmt.Errorf("unable to parse input: %w", err)
@@ -53,6 +54,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read snapshot policy: %w", err)
@@ -62,6 +64,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
@@ -70,6 +73,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, model.SnapshotPolicyId, projectLabel, resp)
 		},
 	}
+
 	return cmd
 }
 
@@ -87,6 +91,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -98,6 +103,7 @@ func outputResult(p *print.Printer, outputFormat, snapshotPolicyId, projectLabel
 	return p.OutputResult(outputFormat, snapshotPolicy, func() error {
 		if snapshotPolicy == nil || snapshotPolicy.SnapshotPolicy == nil {
 			p.Outputf("Snapshot policy %q not found in project %q", snapshotPolicyId, projectLabel)
+
 			return nil
 		}
 
@@ -105,6 +111,7 @@ func outputResult(p *print.Printer, outputFormat, snapshotPolicyId, projectLabel
 
 		table := tables.NewTable()
 		table.SetTitle("Snapshot Policy")
+
 		policy := snapshotPolicy.SnapshotPolicy
 
 		table.AddRow("ID", utils.PtrString(policy.Id))
@@ -144,6 +151,7 @@ func outputResult(p *print.Printer, outputFormat, snapshotPolicyId, projectLabel
 		if err := tables.DisplayTables(p, content); err != nil {
 			return fmt.Errorf("render tables: %w", err)
 		}
+
 		return nil
 	})
 }

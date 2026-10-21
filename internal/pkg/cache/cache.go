@@ -31,8 +31,10 @@ const (
 
 func Init() error {
 	var cacheDir string
+
 	if cacheDirOverwrite == "" {
 		var err error
+
 		cacheDir, err = os.UserCacheDir()
 		if err != nil {
 			return fmt.Errorf("get user cache dir: %w", err)
@@ -47,14 +49,18 @@ func Init() error {
 	// Thus, refresh the key periodically. This will invalidate all cached entries.
 	key, _ := auth.GetAuthField(auth.CACHE_ENCRYPTION_KEY)
 	age, _ := auth.GetAuthField(auth.CACHE_ENCRYPTION_KEY_AGE)
+
 	cacheEncryptionKey = nil
+
 	var keyAge time.Time
+
 	if age != "" {
 		ageSeconds, err := strconv.ParseInt(age, 10, 64)
 		if err == nil {
 			keyAge = time.Unix(ageSeconds, 0)
 		}
 	}
+
 	if key != "" && keyAge.Add(cacheKeyMaxAge).After(time.Now()) {
 		cacheEncryptionKey, _ = base64.StdEncoding.DecodeString(key)
 		// invalid key length
@@ -62,26 +68,33 @@ func Init() error {
 			cacheEncryptionKey = nil
 		}
 	}
+
 	if len(cacheEncryptionKey) == 0 {
 		cacheEncryptionKey = make([]byte, 32)
+
 		_, err := rand.Read(cacheEncryptionKey)
 		if err != nil {
 			return fmt.Errorf("cache encryption key: %w", err)
 		}
+
 		key := base64.StdEncoding.EncodeToString(cacheEncryptionKey)
+
 		err = auth.SetAuthField(auth.CACHE_ENCRYPTION_KEY, key)
 		if err != nil {
 			return fmt.Errorf("save cache encryption key: %w", err)
 		}
+
 		err = auth.SetAuthField(auth.CACHE_ENCRYPTION_KEY_AGE, fmt.Sprint(time.Now().Unix()))
 		if err != nil {
 			return fmt.Errorf("save cache encryption key age: %w", err)
 		}
+
 		// cleanup old cache entries as they won't be readable anymore
 		if err := cleanupCache(); err != nil {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -89,6 +102,7 @@ func GetObject(identifier string) ([]byte, error) {
 	if err := validateCacheFolderPath(); err != nil {
 		return nil, err
 	}
+
 	if !identifierRegex.MatchString(identifier) {
 		return nil, ErrorInvalidCacheIdentifier
 	}
@@ -102,6 +116,7 @@ func GetObject(identifier string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	aead, err := cipher.NewGCMWithRandomNonce(block)
 	if err != nil {
 		return nil, err
@@ -114,6 +129,7 @@ func PutObject(identifier string, data []byte) error {
 	if err := validateCacheFolderPath(); err != nil {
 		return err
 	}
+
 	if !identifierRegex.MatchString(identifier) {
 		return ErrorInvalidCacheIdentifier
 	}
@@ -127,10 +143,12 @@ func PutObject(identifier string, data []byte) error {
 	if err != nil {
 		return err
 	}
+
 	aead, err := cipher.NewGCMWithRandomNonce(block)
 	if err != nil {
 		return err
 	}
+
 	encrypted := aead.Seal(nil, nil, data, nil)
 
 	return os.WriteFile(filepath.Join(cacheFolderPath, identifier), encrypted, 0o600)
@@ -140,6 +158,7 @@ func DeleteObject(identifier string) error {
 	if err := validateCacheFolderPath(); err != nil {
 		return err
 	}
+
 	if !identifierRegex.MatchString(identifier) {
 		return ErrorInvalidCacheIdentifier
 	}
@@ -147,6 +166,7 @@ func DeleteObject(identifier string) error {
 	if err := os.Remove(filepath.Join(cacheFolderPath, identifier)); !errors.Is(err, os.ErrNotExist) {
 		return err
 	}
+
 	return nil
 }
 
@@ -154,6 +174,7 @@ func validateCacheFolderPath() error {
 	if cacheFolderPath == "" {
 		return errors.New("cacheFolderPath not set. Forgot to call Init()?")
 	}
+
 	return nil
 }
 
@@ -167,15 +188,18 @@ func cleanupCache() error {
 		if errors.Is(err, os.ErrNotExist) {
 			return nil
 		}
+
 		return err
 	}
 
 	for _, entry := range entries {
 		name := entry.Name()
 		err := DeleteObject(name)
+
 		if err != nil && !errors.Is(err, ErrorInvalidCacheIdentifier) {
 			return err
 		}
 	}
+
 	return nil
 }

@@ -44,6 +44,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -58,10 +59,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := observabilityUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.InstanceId, model.ProjectId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create credentials for instance %q?", instanceLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -69,9 +72,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			if err != nil {
 				return err
 			}
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create credentials for Observability instance: %w", err)
@@ -81,6 +86,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -124,6 +130,7 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, resp *ob
 		}
 
 		p.Outputf("Password: %s\n", resp.Credentials.Password)
+
 		return nil
 	})
 }

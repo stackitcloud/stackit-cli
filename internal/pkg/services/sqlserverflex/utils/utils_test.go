@@ -45,38 +45,46 @@ func newApiMock(s *mockSettings) sqlserverflex.DefaultAPI {
 			if s.listFlavorsFails {
 				return nil, fmt.Errorf("could not list flavors")
 			}
+
 			if len(s.listFlavorsResps) > 0 {
 				if s.listFlavorsCallCount >= len(s.listFlavorsResps) {
 					return nil, fmt.Errorf("no more mock responses")
 				}
+
 				resp := s.listFlavorsResps[s.listFlavorsCallCount]
 				s.listFlavorsCallCount++
+
 				return resp, nil
 			}
+
 			return s.listFlavorsResp, nil
 		}),
 		ListVersionsExecuteMock: utils.Ptr(func(_ sqlserverflex.ApiListVersionsRequest) (*sqlserverflex.ListVersionsResponse, error) {
 			if s.listVersionsFails {
 				return nil, fmt.Errorf("could not list versions")
 			}
+
 			return s.listVersionsResp, nil
 		}),
 		GetInstanceExecuteMock: utils.Ptr(func(_ sqlserverflex.ApiGetInstanceRequest) (*sqlserverflex.GetInstanceResponse, error) {
 			if s.getInstanceFails {
 				return nil, fmt.Errorf("could not get instance")
 			}
+
 			return s.getInstanceResp, nil
 		}),
 		GetUserExecuteMock: utils.Ptr(func(_ sqlserverflex.ApiGetUserRequest) (*sqlserverflex.GetUserResponse, error) {
 			if s.getUserFails {
 				return nil, fmt.Errorf("could not get user")
 			}
+
 			return s.getUserResp, nil
 		}),
 		ListCurrentRunningRestoreJobsExecuteMock: utils.Ptr(func(_ sqlserverflex.ApiListCurrentRunningRestoreJobsRequest) (*sqlserverflex.ListCurrentRunningRestoreJobs, error) {
 			if s.listRestoreJobsFails {
 				return nil, fmt.Errorf("could not list versions")
 			}
+
 			return s.listRestoreJobsResp, nil
 		}),
 	}
@@ -203,12 +211,15 @@ func TestListAllFlavors(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Fatalf("failed on valid input: %v", err)
 			}
+
 			if !tt.isValid && err == nil {
 				t.Fatalf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			diff := cmp.Diff(output, tt.expectedOutput)
 			if diff != "" {
 				t.Fatalf("outputs do not match: %s", diff)
@@ -342,6 +353,7 @@ func TestValidateStorage(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Fatalf("should not have failed: %v", err)
 			}
+
 			if !tt.isValid && err == nil {
 				t.Fatalf("should have failed")
 			}
@@ -406,6 +418,7 @@ func TestValidateFlavorId(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Fatalf("should not have failed: %v", err)
 			}
+
 			if !tt.isValid && err == nil {
 				t.Fatalf("should have failed")
 			}
@@ -535,15 +548,18 @@ func TestLoadFlavorId(t *testing.T) {
 				if err == nil {
 					t.Fatalf("should have failed")
 				}
+
 				return
 			}
 
 			if err != nil {
 				t.Fatalf("should not have failed: %v", err)
 			}
+
 			if output == "" {
 				t.Fatalf("returned nil output")
 			}
+
 			diff := cmp.Diff(output, tt.expectedOutput)
 			if diff != "" {
 				t.Fatalf("outputs do not match: %s", diff)
@@ -587,12 +603,15 @@ func TestGetInstanceName(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}
@@ -635,12 +654,15 @@ func TestGetUserName(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}

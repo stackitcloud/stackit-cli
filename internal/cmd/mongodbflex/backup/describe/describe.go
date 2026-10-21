@@ -50,6 +50,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args: args.SingleArg(backupIdArg, nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -64,13 +65,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := mongoUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
-			resp, err := req.Execute()
 
+			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("describe backup for MongoDB Flex instance: %w", err)
 			}
@@ -81,10 +83,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			restoreJobState := mongoUtils.GetRestoreStatus(model.BackupId, restoreJobs)
+
 			return outputResult(params.Printer, model.OutputFormat, restoreJobState, resp.Item)
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -110,6 +114,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -123,6 +128,7 @@ func outputResult(p *print.Printer, outputFormat, restoreStatus string, backup *
 		if backup == nil {
 			return fmt.Errorf("API response is nil")
 		}
+
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(backup.Id))
 		table.AddSeparator()
@@ -130,6 +136,7 @@ func outputResult(p *print.Printer, outputFormat, restoreStatus string, backup *
 		table.AddSeparator()
 		table.AddRow("EXPIRES AT", utils.PtrString(backup.EndTime))
 		table.AddSeparator()
+
 		backupSize := utils.PtrByteSizeDefault(backup.Size, "n/a")
 		table.AddRow("BACKUP SIZE", backupSize)
 		table.AddSeparator()

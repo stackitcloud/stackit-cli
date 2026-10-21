@@ -43,6 +43,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -66,6 +67,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to enable the server os-update service for server %s?", serverLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -73,6 +75,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			err = req.Execute()
 			if err != nil {
 				if !strings.Contains(err.Error(), "Tried to activate already active service") {
@@ -81,10 +84,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			params.Printer.Info("Enabled os-update service for server %s\n", serverLabel)
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -107,11 +112,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdate.APIClient) serverupdate.ApiEnableServiceResourceRequest {
 	payload := serverupdate.EnableServiceResourcePayload{}
 	req := apiClient.DefaultAPI.EnableServiceResource(ctx, model.ProjectId, model.ServerId, model.Region).EnableServiceResourcePayload(payload)
+
 	return req
 }

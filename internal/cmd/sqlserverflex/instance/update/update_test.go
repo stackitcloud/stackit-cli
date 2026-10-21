@@ -38,18 +38,21 @@ func newAPIMock(settings mockSettings) sqlserverflex.DefaultAPI {
 			if settings.getInstanceFails {
 				return nil, fmt.Errorf("get instance failed")
 			}
+
 			return settings.getInstanceResp, nil
 		}),
 		ListStoragesExecuteMock: utils.Ptr(func(_ sqlserverflex.ApiListStoragesRequest) (*sqlserverflex.ListStoragesResponse, error) {
 			if settings.listFlavorsFails {
 				return nil, fmt.Errorf("list storages failed")
 			}
+
 			return settings.listStoragesResp, nil
 		}),
 		ListFlavorsExecuteMock: utils.Ptr(func(_ sqlserverflex.ApiListFlavorsRequest) (*sqlserverflex.ListFlavorsResponse, error) {
 			if settings.listFlavorsFails {
 				return nil, fmt.Errorf("list flavors failed")
 			}
+
 			return settings.listFlavorsResp, nil
 		}),
 	}
@@ -66,6 +69,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, mod := range mods {
 		mod(argValues)
 	}
+
 	return argValues
 }
 
@@ -77,6 +81,7 @@ func fixtureRequiredFlagValues(mods ...func(flagValues map[string]string)) map[s
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -93,6 +98,7 @@ func fixtureStandardFlagValues(mods ...func(flagValues map[string]string)) map[s
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -108,6 +114,7 @@ func fixtureRequiredInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -128,15 +135,19 @@ func fixtureStandardInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *sqlserverflex.ApiPartialUpdateInstanceRequest)) sqlserverflex.ApiPartialUpdateInstanceRequest {
 	request := testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId)
+
 	request = request.PartialUpdateInstancePayload(sqlserverflex.PartialUpdateInstancePayload{})
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -186,6 +197,7 @@ func TestParseInput(t *testing.T) {
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureStandardFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, flavorIdFlag)
+
 				flagValues[cpuFlag] = "2"
 				flagValues[ramFlag] = "4"
 			}),
@@ -278,6 +290,7 @@ func TestParseInput(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			params := testparams.NewTestParams()
 			cmd := NewCmd(params.CmdParams)
+
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
@@ -289,6 +302,7 @@ func TestParseInput(t *testing.T) {
 					if !tt.isValid {
 						return
 					}
+
 					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
 				}
 			}
@@ -299,6 +313,7 @@ func TestParseInput(t *testing.T) {
 					if !tt.isValid {
 						return
 					}
+
 					t.Fatalf("setting flag --%s=%s: %v", aclFlag, value, err)
 				}
 			}
@@ -308,6 +323,7 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error validating args: %v", err)
 			}
 
@@ -316,6 +332,7 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error validating flags: %v", err)
 			}
 
@@ -324,12 +341,14 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error parsing flags: %v", err)
 			}
 
 			if !tt.isValid {
 				t.Fatalf("did not fail on invalid input")
 			}
+
 			diff := cmp.Diff(model, tt.expectedModel)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -474,13 +493,16 @@ func TestBuildRequest(t *testing.T) {
 				listStoragesFails: tt.listStoragesFails,
 				listStoragesResp:  tt.listStoragesResp,
 			}
+
 			request, err := buildRequest(testCtx, tt.model, newAPIMock(s))
 			if err != nil {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error building request: %v", err)
 			}
+
 			if !tt.isValid {
 				t.Fatalf("did not fail on invalid input")
 			}
@@ -506,6 +528,7 @@ func TestOutputResult(t *testing.T) {
 		instanceLabel string
 		resp          *sqlserverflex.GetInstanceResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -526,6 +549,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, tt.args.model, tt.args.instanceLabel, tt.args.resp); (err != nil) != tt.wantErr {

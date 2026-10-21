@@ -52,6 +52,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, outputProfiles)
 		},
 	}
+
 	return cmd
 }
 
@@ -94,23 +95,29 @@ func outputResult(p *print.Printer, outputFormat string, profiles []profileInfo)
 	return p.OutputResult(outputFormat, profiles, func() error {
 		table := tables.NewTable()
 		table.SetHeader("NAME", "ACTIVE", "EMAIL")
+
 		for _, profile := range profiles {
 			// Prettify the output
 			email := profile.Email
 			active := ""
+
 			if profile.Email == "" {
 				email = "Not authenticated"
 			}
+
 			if profile.Active {
 				active = "*"
 			}
+
 			table.AddRow(profile.Name, active, email)
 			table.AddSeparator()
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

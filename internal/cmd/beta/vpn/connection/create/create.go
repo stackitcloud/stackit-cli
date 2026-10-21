@@ -177,6 +177,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(p.Printer, cmd)
 			if err != nil {
 				return err
@@ -191,10 +192,12 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, p.Printer, p.CliVersion, cmd)
 			if err != nil {
 				p.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a VPN connection for gateway %q?", model.GatewayId)
+
 			err = p.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -205,6 +208,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create VPN connection: %w", err)
@@ -214,6 +218,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -328,6 +333,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -340,12 +346,14 @@ func buildTunnelConfiguration(model *tunnelInputModel) vpn.TunnelConfiguration {
 			RemoteAsn: *model.BgpRemoteAsn,
 		}
 	}
+
 	if model.PeeringLocalAddress != nil || model.PeeringRemoteAddress != nil {
 		tunnel.Peering = &vpn.PeeringConfig{
 			LocalAddress:  model.PeeringLocalAddress,
 			RemoteAddress: model.PeeringRemoteAddress,
 		}
 	}
+
 	tunnel.Phase1 = vpn.TunnelConfigurationPhase1{
 		DhGroups:             model.Phase1DhGroups,
 		EncryptionAlgorithms: model.Phase1EncryptionAlgorithms,
@@ -361,6 +369,7 @@ func buildTunnelConfiguration(model *tunnelInputModel) vpn.TunnelConfiguration {
 		StartAction:          model.Phase2StartAction,
 	}
 	tunnel.PreSharedKey = &model.PreSharedKey
+
 	return tunnel
 }
 
@@ -386,8 +395,10 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 	if resp == nil {
 		return fmt.Errorf("create response is empty")
 	}
+
 	return p.OutputResult(model.OutputFormat, resp, func() error {
 		p.Outputf("Created VPN connection %q for gateway %q in project %q.\n", utils.PtrString(resp.Id), model.GatewayId, projectLabel)
+
 		return nil
 	})
 }

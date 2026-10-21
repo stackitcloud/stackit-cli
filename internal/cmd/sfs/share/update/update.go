@@ -55,6 +55,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, inputArgs []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, inputArgs)
 			if err != nil {
 				return fmt.Errorf("unable to parse input: %w", err)
@@ -69,6 +70,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			shareLabel, err := sfsUtils.GetShareName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ResourcePoolId, model.ShareId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get share name: %v", err)
+
 				shareLabel = model.ShareId
 			} else if shareLabel == "" {
 				shareLabel = model.ShareId
@@ -77,12 +79,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			resourcePoolLabel, err := sfsUtils.GetResourcePoolName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ResourcePoolId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get resource pool name: %v", err)
+
 				resourcePoolLabel = model.ResourcePoolId
 			} else if resourcePoolLabel == "" {
 				resourcePoolLabel = model.ResourcePoolId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update SFS share %q for resource pool %q?", shareLabel, resourcePoolLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -90,6 +94,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update SFS share: %w", err)
@@ -110,6 +115,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -125,6 +131,7 @@ func configureFlags(cmd *cobra.Command) {
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	shareId := inputArgs[0]
 	globalFlags := globalflags.Parse(p, cmd)
+
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
@@ -146,15 +153,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiUpdateShareRequest {
 	req := apiClient.DefaultAPI.UpdateShare(ctx, model.ProjectId, model.Region, model.ResourcePoolId, model.ShareId)
+
 	req = req.UpdateSharePayload(sfs.UpdateSharePayload{
 		ExportPolicyName:        *sfs.NewNullableString(model.ExportPolicyName),
 		SpaceHardLimitGigabytes: *sfs.NewNullableInt32(model.HardLimit),
 	})
+
 	return req
 }
 
@@ -162,6 +172,7 @@ func outputResult(p *print.Printer, outputFormat string, async bool, resourcePoo
 	return p.OutputResult(outputFormat, item, func() error {
 		if item == nil || item.Share == nil {
 			p.Outputln("SFS share response is empty")
+
 			return nil
 		}
 
@@ -169,12 +180,14 @@ func outputResult(p *print.Printer, outputFormat string, async bool, resourcePoo
 		if async {
 			operation = "Triggered update of"
 		}
+
 		p.Outputf(
 			"%s SFS share %q in resource pool %q.\n",
 			operation,
 			utils.PtrString(item.Share.Name),
 			resourcePoolLabel,
 		)
+
 		return nil
 	})
 }

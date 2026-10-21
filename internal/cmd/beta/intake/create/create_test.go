@@ -73,6 +73,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -101,6 +102,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -129,19 +131,24 @@ func fixtureCreatePayload(mods ...func(payload *intake.CreateIntakePayload)) int
 			},
 		},
 	}
+
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
 // fixtureRequest generates an API request for tests
 func fixtureRequest(mods ...func(request *intake.ApiCreateIntakeRequest)) intake.ApiCreateIntakeRequest {
 	request := testClient.DefaultAPI.CreateIntake(testCtx, testProjectId, testRegion)
+
 	request = request.CreateIntakePayload(fixtureCreatePayload())
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -271,6 +278,7 @@ func TestBuildRequest(t *testing.T) {
 			expectedRequest: fixtureRequest(func(request *intake.ApiCreateIntakeRequest) {
 				*request = request.CreateIntakePayload(fixtureCreatePayload(func(payload *intake.CreateIntakePayload) {
 					authType := intake.CatalogAuthType("none")
+
 					payload.Catalog.Auth.Type = authType
 					payload.Catalog.Auth.Dremio = nil
 				}))
@@ -286,6 +294,7 @@ func TestBuildRequest(t *testing.T) {
 				cmpopts.EquateComparable(testCtx),
 				cmpopts.EquateComparable(testClient.DefaultAPI),
 			)
+
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
 			}
@@ -299,6 +308,7 @@ func TestOutputResult(t *testing.T) {
 		projectLabel string
 		resp         *intake.IntakeResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args

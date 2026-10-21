@@ -50,6 +50,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -62,6 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create database %q? (This cannot be undone)", model.DatabaseName)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -69,6 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := spinner.Run2(params.Printer, "Creating database", req.Execute)
 			if err != nil {
 				return fmt.Errorf("create SQLServer Flex database: %w", err)
@@ -78,12 +81,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "SQLServer Flex instance ID")
 	cmd.Flags().String(ownerFlag, "", "Username of the owner user")
+
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag, ownerFlag)
 	cobra.CheckErr(err)
 }
@@ -104,6 +109,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -113,7 +119,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverfl
 		Name:  model.DatabaseName,
 		Owner: model.Owner,
 	}
+
 	req = req.CreateDatabasePayload(payload)
+
 	return req
 }
 
@@ -124,6 +132,7 @@ func outputResult(p *print.Printer, outputFormat, databaseName string, resp *sql
 
 	return p.OutputResult(outputFormat, resp, func() error {
 		p.Outputf("Created database %q\n", databaseName)
+
 		return nil
 	})
 }

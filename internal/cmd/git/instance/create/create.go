@@ -56,6 +56,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -68,6 +69,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create the instance %q?", model.Name)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -97,6 +99,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -104,6 +107,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(nameFlag, "", "The name of the instance.")
 	cmd.Flags().String(flavorFlag, "", "Flavor of the instance.")
 	cmd.Flags().StringSlice(aclFlag, []string{}, "Acl for the instance.")
+
 	if err := flags.MarkFlagsRequired(cmd, nameFlag); err != nil {
 		cobra.CheckErr(err)
 	}
@@ -115,6 +119,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
+
 	name := flags.FlagToStringValue(p, cmd, nameFlag)
 	flavor := flags.FlagToStringValue(p, cmd, flavorFlag)
 	acl := flags.FlagToStringSliceValue(p, cmd, aclFlag)
@@ -127,6 +132,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -152,7 +158,9 @@ func outputResult(p *print.Printer, outputFormat string, async bool, instanceNam
 		if async {
 			operationState = "Triggered creation of"
 		}
+
 		p.Outputf("%s instance %q with id %s\n", operationState, instanceName, resp.Id)
+
 		return nil
 	})
 }

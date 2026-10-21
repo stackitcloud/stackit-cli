@@ -36,6 +36,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -50,12 +51,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete object storage compliance-lock for project %s?", projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -69,11 +72,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if enabledErr != nil {
 					return fmt.Errorf("check if Object Storage is enabled: %w", enabledErr)
 				}
+
 				if !enabled {
 					return &errors.ServiceDisabledError{
 						Service: "object-storage",
 					}
 				}
+
 				return fmt.Errorf("delete object storage compliance lock: %w", err)
 			}
 
@@ -82,6 +87,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return nil
 		},
 	}
+
 	return cmd
 }
 
@@ -96,6 +102,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 

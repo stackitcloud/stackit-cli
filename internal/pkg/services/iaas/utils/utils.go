@@ -19,7 +19,9 @@ func GetSecurityGroupRuleName(ctx context.Context, apiClient iaas.DefaultAPI, pr
 	if err != nil {
 		return "", fmt.Errorf("get security group rule: %w", err)
 	}
+
 	securityGroupRuleName := *resp.Ethertype + ", " + resp.Direction
+
 	return securityGroupRuleName, nil
 }
 
@@ -30,6 +32,7 @@ func GetSecurityGroupName(ctx context.Context, apiClient iaas.DefaultAPI, projec
 	} else if resp == nil {
 		return "", ErrResponseNil
 	}
+
 	return resp.Name, nil
 }
 
@@ -38,10 +41,12 @@ func GetPublicIP(ctx context.Context, apiClient iaas.DefaultAPI, projectId, regi
 	if err != nil {
 		return "", "", fmt.Errorf("get public ip: %w", err)
 	}
+
 	associatedResourceId := ""
 	if networkInterface := resp.NetworkInterface.Get(); networkInterface != nil {
 		associatedResourceId = *networkInterface
 	}
+
 	return *resp.Ip, associatedResourceId, nil
 }
 
@@ -50,6 +55,7 @@ func GetServerName(ctx context.Context, apiClient iaas.DefaultAPI, projectId, re
 	if err != nil {
 		return "", fmt.Errorf("get server: %w", err)
 	}
+
 	return resp.Name, nil
 }
 
@@ -62,6 +68,7 @@ func GetVolumeName(ctx context.Context, apiClient iaas.DefaultAPI, projectId, re
 	} else if resp.Name == nil {
 		return "", ErrNameNil
 	}
+
 	return *resp.Name, nil
 }
 
@@ -72,6 +79,7 @@ func GetNetworkName(ctx context.Context, apiClient iaas.DefaultAPI, projectId, r
 	} else if resp == nil {
 		return "", ErrResponseNil
 	}
+
 	return resp.Name, nil
 }
 
@@ -82,6 +90,7 @@ func GetRoutingTableOfAreaName(ctx context.Context, apiClient iaas.DefaultAPI, o
 	} else if resp == nil {
 		return "", ErrResponseNil
 	}
+
 	return resp.Name, nil
 }
 
@@ -92,6 +101,7 @@ func GetNetworkAreaName(ctx context.Context, apiClient iaas.DefaultAPI, organiza
 	} else if resp == nil {
 		return "", ErrResponseNil
 	}
+
 	return resp.Name, nil
 }
 
@@ -104,6 +114,7 @@ func ListAttachedProjects(ctx context.Context, apiClient iaas.DefaultAPI, organi
 	} else if resp.Items == nil {
 		return nil, ErrItemsNil
 	}
+
 	return resp.Items, nil
 }
 
@@ -112,6 +123,7 @@ func GetNetworkRangePrefix(ctx context.Context, apiClient iaas.DefaultAPI, organ
 	if err != nil {
 		return "", fmt.Errorf("get network range: %w", err)
 	}
+
 	return resp.Prefix, nil
 }
 
@@ -125,9 +137,11 @@ func GetRouteFromAPIResponse(destination, nexthop string, routes []iaas.Route) (
 		destV6 := route.Destination.DestinationCIDRv6
 		destV6Matches := destV6 != nil && destV6.Value == destination
 		destMatches := destV4Matches || destV6Matches
+
 		if !destMatches {
 			continue
 		}
+
 		// Check if nexthop matches
 		nextHopV4 := route.Nexthop.NexthopIPv4
 		nextHopV4Matches := nextHopV4 != nil && nextHopV4.Value == nexthop
@@ -138,10 +152,12 @@ func GetRouteFromAPIResponse(destination, nexthop string, routes []iaas.Route) (
 		nextHopBlackhole := route.Nexthop.NexthopBlackhole
 		nextHopBlackholeMatches := nextHopBlackhole != nil && string(nextHopBlackhole.Type) == nexthop
 		nextHopMatches := nextHopV4Matches || nextHopV6Matches || nextHopInetMatches || nextHopBlackholeMatches
+
 		if nextHopMatches {
 			return route, nil
 		}
 	}
+
 	return iaas.Route{}, fmt.Errorf("new static route not found in API response")
 }
 
@@ -153,6 +169,7 @@ func GetNetworkRangeFromAPIResponse(prefix string, networkRanges []iaas.NetworkR
 			return networkRange, nil
 		}
 	}
+
 	return iaas.NetworkRange{}, fmt.Errorf("new network range not found in API response")
 }
 
@@ -163,6 +180,7 @@ func GetImageName(ctx context.Context, apiClient iaas.DefaultAPI, projectId, reg
 	} else if resp == nil {
 		return "", ErrResponseNil
 	}
+
 	return resp.Name, nil
 }
 
@@ -173,6 +191,7 @@ func GetAffinityGroupName(ctx context.Context, apiClient iaas.DefaultAPI, projec
 	} else if resp == nil {
 		return "", ErrResponseNil
 	}
+
 	return resp.Name, nil
 }
 
@@ -185,6 +204,7 @@ func GetSnapshotName(ctx context.Context, apiClient iaas.DefaultAPI, projectId, 
 	} else if resp.Name == nil {
 		return "", ErrNameNil
 	}
+
 	return *resp.Name, nil
 }
 
@@ -193,8 +213,10 @@ func GetBackupName(ctx context.Context, apiClient iaas.DefaultAPI, projectId, re
 	if err != nil {
 		return backupId, fmt.Errorf("get backup: %w", err)
 	}
+
 	if resp != nil && resp.Name != nil {
 		return *resp.Name, nil
 	}
+
 	return backupId, nil
 }

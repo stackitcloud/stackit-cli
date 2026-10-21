@@ -33,6 +33,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -48,6 +49,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -56,6 +58,7 @@ func fixtureRequest(mods ...func(request *redis.ApiListInstancesRequest)) redis.
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -155,6 +158,7 @@ func Test_outputResult(t *testing.T) {
 		outputFormat string
 		instances    []redis.Instance
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -176,6 +180,7 @@ func Test_outputResult(t *testing.T) {
 		},
 	}
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, tt.args.outputFormat, "dummy-project-label", tt.args.instances); (err != nil) != tt.wantErr {

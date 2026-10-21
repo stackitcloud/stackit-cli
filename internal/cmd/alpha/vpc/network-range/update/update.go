@@ -72,6 +72,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -87,18 +88,21 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			vpcLabel, err := iaasUtils.GetVPCName(ctx, apiClient.DefaultAPI, model.ProjectId, model.VpcId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get vpc name: %v", err)
+
 				vpcLabel = model.VpcId
 			}
 
 			networkRangeLabel, err := iaasUtils.GetVPCNetworkRangePrefix(ctx, apiClient.DefaultAPI, model.ProjectId, model.VpcId, model.Region, model.NetworkRangeId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get vpc network range prefix: %v", err)
+
 				networkRangeLabel = model.NetworkRangeId
 			} else if networkRangeLabel == "" {
 				networkRangeLabel = model.NetworkRangeId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update the network range %q for VPC %q?", networkRangeLabel, vpcLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -109,6 +113,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update network range: %w", err)
@@ -129,6 +134,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -175,6 +181,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -194,6 +201,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient iaas.Default
 			Labels:           model.Labels,
 		},
 	}
+
 	return apiClient.UpdateVPCNetworkRange(ctx, model.ProjectId, model.VpcId, model.Region, model.NetworkRangeId).UpdateVPCNetworkRangePayload(payload), nil
 }
 
@@ -201,8 +209,10 @@ func outputResult(p *print.Printer, outputFormat string, async bool, vpcLabel st
 	if networkRange == nil {
 		return fmt.Errorf("update vpc network range response is nil")
 	}
+
 	return p.OutputResult(outputFormat, networkRange, func() error {
 		var networkRangeId string
+
 		if ipv4 := networkRange.VPCNetworkRangeIPv4; ipv4 != nil && ipv4.Id != nil {
 			networkRangeId = *ipv4.Id
 		} else if ipv6 := networkRange.VPCNetworkRangeIPv6; ipv6 != nil && ipv6.Id != nil {
@@ -217,6 +227,7 @@ func outputResult(p *print.Printer, outputFormat string, async bool, vpcLabel st
 		}
 
 		p.Outputf("%s network range for VPC %q.\nNetwork range ID: %s\n", operationState, vpcLabel, networkRangeId)
+
 		return nil
 	})
 }

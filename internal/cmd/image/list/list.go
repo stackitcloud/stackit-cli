@@ -60,6 +60,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -74,6 +75,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
@@ -81,16 +83,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			request := buildRequest(ctx, model, apiClient)
+
 			response, err := request.Execute()
 			if err != nil {
 				return fmt.Errorf("list images: %w", err)
 			}
+
 			items := response.GetItems()
 
 			// Truncate output
 			if model.Limit != nil && len(items) > int(*model.Limit) {
 				items = (items)[:*model.Limit]
 			}
+
 			if err := outputResult(params.Printer, model.OutputFormat, projectLabel, items); err != nil {
 				return fmt.Errorf("output images: %w", err)
 			}
@@ -100,6 +105,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -131,6 +137,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -139,6 +146,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	if model.LabelSelector != nil {
 		request = request.LabelSelector(*model.LabelSelector)
 	}
+
 	if model.All != nil {
 		request = request.All(*model.All)
 	}
@@ -150,12 +158,16 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, items []i
 	return p.OutputResult(outputFormat, items, func() error {
 		if len(items) == 0 {
 			p.Outputf("No images found for project %q\n", projectLabel)
+
 			return nil
 		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "OS", "ARCHITECTURE", "DISTRIBUTION", "VERSION", "SCOPE", "OWNER", "LABELS")
+
 		for i := range items {
 			item := items[i]
+
 			var (
 				architecture = "n/a"
 				os           = "n/a"
@@ -164,23 +176,29 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, items []i
 				owner        = "n/a"
 				scope        = "n/a"
 			)
+
 			if cfg := item.Config; cfg != nil {
 				if v := cfg.Architecture; v != nil {
 					architecture = *v
 				}
+
 				if v := cfg.OperatingSystem; v != nil {
 					os = *v
 				}
+
 				if v := cfg.OperatingSystemDistro; v.IsSet() {
 					distro = *v.Get()
 				}
+
 				if v := cfg.OperatingSystemVersion; v.IsSet() {
 					version = *v.Get()
 				}
 			}
+
 			if v := item.GetOwner(); v != "" {
 				owner = v
 			}
+
 			if v := item.GetScope(); v != "" {
 				scope = v
 			}
@@ -195,6 +213,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, items []i
 				owner,
 				utils.JoinStringKeysPtr(item.Labels, ","))
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

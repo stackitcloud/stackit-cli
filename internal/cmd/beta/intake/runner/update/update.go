@@ -61,6 +61,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(p.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -75,11 +76,13 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, p.Printer, p.CliVersion, cmd)
 			if err != nil {
 				p.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update Intake Runner: %w", err)
@@ -100,6 +103,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -134,6 +138,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -144,20 +149,25 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIC
 	if model.DisplayName != nil {
 		payload.DisplayName = model.DisplayName
 	}
+
 	if model.MaxMessageSizeKiB != nil {
 		payload.MaxMessageSizeKiB = model.MaxMessageSizeKiB
 	}
+
 	if model.MaxMessagesPerHour != nil {
 		payload.MaxMessagesPerHour = model.MaxMessagesPerHour
 	}
+
 	if model.Description != nil {
 		payload.Description = model.Description
 	}
+
 	if model.Labels != nil {
 		payload.Labels = utils.PtrValue(model.Labels)
 	}
 
 	req = req.UpdateIntakeRunnerPayload(payload)
+
 	return req
 }
 
@@ -165,6 +175,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 	return p.OutputResult(model.OutputFormat, resp, func() error {
 		if resp == nil {
 			p.Outputf("Triggered update of Intake Runner for project %q, but no runner ID was returned.\n", projectLabel)
+
 			return nil
 		}
 
@@ -172,7 +183,9 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 		if model.Async {
 			operationState = "Triggered update of"
 		}
+
 		p.Outputf("%s Intake Runner for project %q. Runner ID: %s\n", operationState, projectLabel, resp.Id)
+
 		return nil
 	})
 }

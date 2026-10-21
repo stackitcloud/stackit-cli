@@ -82,6 +82,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, nil)
 			if err != nil {
 				return err
@@ -95,12 +96,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			routingTableLabel, err := iaasUtils.GetVPCRoutingTableName(ctx, apiClient.DefaultAPI, model.ProjectId, model.VpcId, model.Region, model.RoutingTableId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get vpc routing-table name: %v", err)
+
 				routingTableLabel = model.RoutingTableId
 			} else if routingTableLabel == "" {
 				routingTableLabel = model.RoutingTableId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a static-route for vpc routing-table %q?", routingTableLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -120,6 +123,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -166,6 +170,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return model, nil
 }
 
@@ -255,6 +260,7 @@ func outputResult(p *print.Printer, outputFormat string, route *iaas.Route) erro
 
 	return p.OutputResult(outputFormat, route, func() error {
 		p.Outputf("Created route with ID %q\n", utils.PtrString(route.Id))
+
 		return nil
 	})
 }

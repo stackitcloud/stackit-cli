@@ -46,6 +46,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -62,15 +63,18 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 func fixturePayload(mods ...func(payload *alb.UpdateTargetPoolPayload)) (payload alb.UpdateTargetPoolPayload) {
 	if err := json.Unmarshal(testConfiguration, &payload); err != nil {
 		log.Panicf("cannot deserialize test configuration: %v", err)
 	}
+
 	for _, f := range mods {
 		f(&payload)
 	}
+
 	return payload
 }
 
@@ -81,6 +85,7 @@ func fixtureRequest(mods ...func(request *alb.ApiUpdateTargetPoolRequest)) alb.A
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -202,6 +207,7 @@ func TestOutputResult(t *testing.T) {
 		projectLabel string
 		resp         *alb.TargetPool
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -222,6 +228,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, tt.args.model, tt.args.projectLabel, tt.args.resp); (err != nil) != tt.wantErr {

@@ -42,6 +42,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, inputArgs []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, inputArgs)
 			if err != nil {
 				return fmt.Errorf("unable to parse input: %w", err)
@@ -55,6 +56,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("describe vpn gateway: %w", err)
@@ -68,12 +70,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, model.GatewayId, projectLabel, resp)
 		},
 	}
+
 	return cmd
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	gatewayId := inputArgs[0]
 	globalFlags := globalflags.Parse(p, cmd)
+
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
@@ -84,6 +88,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -95,6 +100,7 @@ func outputResult(p *print.Printer, outputFormat, gatewayId, projectLabel string
 	return p.OutputResult(outputFormat, gateway, func() error {
 		if gateway == nil {
 			p.Outputf("gateway %q not found in project %q\n", gatewayId, projectLabel)
+
 			return nil
 		}
 
@@ -120,6 +126,7 @@ func outputResult(p *print.Printer, outputFormat, gatewayId, projectLabel string
 		if err := table.Display(p); err != nil {
 			return fmt.Errorf("render tables: %w", err)
 		}
+
 		return nil
 	})
 }

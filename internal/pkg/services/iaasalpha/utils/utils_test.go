@@ -25,18 +25,21 @@ func newMock(m *IaaSClientMocked) iaas.DefaultAPI {
 			if m.GetVPCFails {
 				return nil, fmt.Errorf("could not get vpc")
 			}
+
 			return m.GetVPCResp, nil
 		}),
 		GetVPCNetworkRangeExecuteMock: new(func(_ iaas.ApiGetVPCNetworkRangeRequest) (*iaas.VPCNetworkRange, error) {
 			if m.GetVPCNetworkRangeFails {
 				return nil, fmt.Errorf("could not get vpc network range")
 			}
+
 			return m.GetVPCNetworkRangeResp, nil
 		}),
 		GetVPCRoutingTableExecuteMock: new(func(_ iaas.ApiGetVPCRoutingTableRequest) (*iaas.VPCRoutingTable, error) {
 			if m.GetVPCRoutingTableFails {
 				return nil, fmt.Errorf("could not get vpc routing table")
 			}
+
 			return m.GetVPCRoutingTableResp, nil
 		}),
 	}
@@ -47,6 +50,7 @@ func TestGetVPCName(t *testing.T) {
 		getVpcFails bool
 		getVpcResp  *iaas.VPC
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -77,6 +81,7 @@ func TestGetVPCName(t *testing.T) {
 			wantErr: true,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &IaaSClientMocked{
@@ -84,10 +89,13 @@ func TestGetVPCName(t *testing.T) {
 				GetVPCResp:  tt.args.getVpcResp,
 			}
 			got, err := GetVPCName(context.Background(), newMock(m), "", "")
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetVPCName() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetVPCName() = %v, want %v", got, tt.want)
 			}
@@ -100,6 +108,7 @@ func TestGetVPCNetworkRangePrefix(t *testing.T) {
 		getVpcNetworkRangeFails bool
 		getVpcNetworkRangeResp  *iaas.VPCNetworkRange
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -153,6 +162,7 @@ func TestGetVPCNetworkRangePrefix(t *testing.T) {
 			wantErr: true,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &IaaSClientMocked{
@@ -160,10 +170,13 @@ func TestGetVPCNetworkRangePrefix(t *testing.T) {
 				GetVPCNetworkRangeResp:  tt.args.getVpcNetworkRangeResp,
 			}
 			got, err := GetVPCNetworkRangePrefix(context.Background(), newMock(m), "", "", "", "")
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetVPCNetworkRangePrefix() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetVPCNetworkRangePrefix() = %v, want %v", got, tt.want)
 			}
@@ -176,6 +189,7 @@ func TestGetVPCRoutingTable(t *testing.T) {
 		getVpcRoutingTableFails bool
 		getVpcRoutingTableResp  *iaas.VPCRoutingTable
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -206,6 +220,7 @@ func TestGetVPCRoutingTable(t *testing.T) {
 			wantErr: true,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &IaaSClientMocked{
@@ -213,10 +228,13 @@ func TestGetVPCRoutingTable(t *testing.T) {
 				GetVPCRoutingTableResp:  tt.args.getVpcRoutingTableResp,
 			}
 			got, err := GetVPCRoutingTableName(context.Background(), newMock(m), "", "", "", "")
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetVPCNetworkRangePrefix() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetVPCNetworkRangePrefix() = %v, want %v", got, tt.want)
 			}

@@ -47,6 +47,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -59,6 +60,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete database %q? (This cannot be undone)", model.DatabaseName)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -66,6 +68,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			err = spinner.Run(params.Printer, "Deleting database", func() error {
 				err := req.Execute()
 				return err
@@ -75,15 +78,18 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			params.Printer.Info("Deleted database %q\n", model.DatabaseName)
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "SQLServer Flex instance ID")
+
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag)
 	cobra.CheckErr(err)
 }
@@ -103,6 +109,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 

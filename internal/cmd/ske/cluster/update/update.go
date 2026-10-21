@@ -59,6 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -71,6 +72,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update cluster %q?", model.ClusterName)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -81,16 +83,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			if !exists {
 				return fmt.Errorf("cluster with name %s does not exist", model.ClusterName)
 			}
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update SKE cluster: %w", err)
 			}
+
 			name := *resp.Name
 
 			// Wait for async operation, if async mode not enabled
@@ -108,6 +113,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -127,7 +133,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	payloadString := flags.FlagToStringValue(p, cmd, payloadFlag)
+
 	var payload ske.CreateOrUpdateClusterPayload
+
 	err := json.Unmarshal([]byte(payloadString), &payload)
 	if err != nil {
 		return nil, fmt.Errorf("encode payload: %w", err)
@@ -140,6 +148,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -147,6 +156,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *ske.APIClie
 	req := apiClient.DefaultAPI.CreateOrUpdateCluster(ctx, model.ProjectId, model.Region, model.ClusterName)
 
 	req = req.CreateOrUpdateClusterPayload(model.Payload)
+
 	return req
 }
 
@@ -160,7 +170,9 @@ func outputResult(p *print.Printer, outputFormat string, async bool, clusterName
 		if async {
 			operationState = "Triggered update of"
 		}
+
 		p.Info("%s cluster %q\n", operationState, clusterName)
+
 		return nil
 	})
 }

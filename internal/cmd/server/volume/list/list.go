@@ -46,6 +46,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -60,6 +61,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
+
 				serverLabel = model.ServerId
 			} else if serverLabel == "" {
 				serverLabel = model.ServerId
@@ -67,6 +69,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list server volumes: %w", err)
@@ -76,12 +79,15 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// get volume names
 			var volumeNames []string
+
 			for i := range volumes {
 				volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, *volumes[i].VolumeId)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get volume name: %v", err)
+
 					volumeLabel = ""
 				}
+
 				volumeNames = append(volumeNames, volumeLabel)
 			}
 
@@ -89,6 +95,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -111,6 +118,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -123,22 +131,30 @@ func outputResult(p *print.Printer, outputFormat, serverLabel string, volumeName
 	return p.OutputResult(outputFormat, volumes, func() error {
 		if len(volumes) == 0 {
 			p.Outputf("No volumes found for server %s\n", serverLabel)
+
 			return nil
 		}
+
 		table := tables.NewTable()
 		table.SetHeader("SERVER ID", "SERVER NAME", "VOLUME ID", "VOLUME NAME")
+
 		for i := range volumes {
 			s := volumes[i]
+
 			var volumeName string
+
 			if len(volumeNames)-1 > i {
 				volumeName = volumeNames[i]
 			}
+
 			table.AddRow(utils.PtrString(s.ServerId), serverLabel, utils.PtrString(s.VolumeId), volumeName)
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

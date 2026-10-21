@@ -87,6 +87,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a Backup Schedule for server %s?", serverLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -97,6 +98,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create Server Backup Schedule: %w", err)
@@ -106,6 +108,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -140,6 +143,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -150,21 +154,25 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbacku
 		RetentionPeriod: model.BackupRetentionPeriod,
 		VolumeIds:       model.BackupVolumeIds,
 	}
+
 	if model.BackupVolumeIds == nil {
 		backupProperties.VolumeIds = nil
 	}
+
 	req = req.CreateBackupSchedulePayload(serverbackup.CreateBackupSchedulePayload{
 		Enabled:          model.Enabled,
 		Name:             model.BackupScheduleName,
 		Rrule:            model.Rrule,
 		BackupProperties: &backupProperties,
 	})
+
 	return req, nil
 }
 
 func outputResult(p *print.Printer, outputFormat, serverLabel string, resp serverbackup.BackupSchedule) error {
 	return p.OutputResult(outputFormat, resp, func() error {
 		p.Outputf("Created server backup schedule for server %s. Backup Schedule ID: %d\n", serverLabel, resp.Id)
+
 		return nil
 	})
 }

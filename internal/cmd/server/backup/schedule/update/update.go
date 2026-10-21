@@ -78,10 +78,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			currentBackupSchedule, err := apiClient.DefaultAPI.GetBackupSchedule(ctx, model.ProjectId, model.ServerId, model.Region, model.BackupScheduleId).Execute()
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get current server backup schedule: %v", err)
+
 				return err
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update Server Backup Schedule %q?", model.BackupScheduleId)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -92,6 +94,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update Server Backup Schedule: %w", err)
@@ -101,6 +104,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -139,6 +143,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -148,18 +153,23 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbacku
 	if model.BackupName != nil {
 		old.BackupProperties.Name = *model.BackupName
 	}
+
 	if model.BackupRetentionPeriod != nil {
 		old.BackupProperties.RetentionPeriod = *model.BackupRetentionPeriod
 	}
+
 	if model.BackupVolumeIds != nil {
 		old.BackupProperties.VolumeIds = model.BackupVolumeIds
 	}
+
 	if model.Enabled != nil {
 		old.Enabled = *model.Enabled
 	}
+
 	if model.BackupScheduleName != nil {
 		old.Name = *model.BackupScheduleName
 	}
+
 	if model.Rrule != nil {
 		old.Rrule = *model.Rrule
 	}
@@ -170,12 +180,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbacku
 		Rrule:            old.Rrule,
 		BackupProperties: old.BackupProperties,
 	})
+
 	return req, nil
 }
 
 func outputResult(p *print.Printer, outputFormat string, resp serverbackup.BackupSchedule) error {
 	return p.OutputResult(outputFormat, resp, func() error {
 		p.Outputf("Updated server backup schedule %d\n", resp.Id)
+
 		return nil
 	})
 }

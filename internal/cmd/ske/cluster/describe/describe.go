@@ -45,10 +45,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
+
 			// Configure API client
 			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
@@ -57,6 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read SKE cluster: %w", err)
@@ -65,6 +68,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
+
 	return cmd
 }
 
@@ -82,6 +86,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -104,19 +109,23 @@ func outputResult(p *print.Printer, outputFormat string, cluster *ske.Cluster) e
 		table := tables.NewTable()
 		table.AddRow("NAME", utils.PtrString(cluster.Name))
 		table.AddSeparator()
+
 		if cluster.HasStatus() {
 			table.AddRow("STATE", utils.PtrString(cluster.Status.Aggregated))
 			table.AddSeparator()
+
 			if clusterErrs := cluster.Status.GetErrors(); len(clusterErrs) != 0 {
 				handleClusterErrors(clusterErrs, &table)
 			}
 		}
+
 		if cluster.Kubernetes.Version != "" {
 			table.AddRow("VERSION", cluster.Kubernetes.Version)
 			table.AddSeparator()
 		}
 
 		table.AddRow("ACL", acl)
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
@@ -131,11 +140,14 @@ func handleClusterErrors(clusterErrs []ske.ClusterError, table *tables.Table) {
 	for _, e := range clusterErrs {
 		b := new(strings.Builder)
 		fmt.Fprint(b, e.GetCode())
+
 		if msg, ok := e.GetMessageOk(); ok {
 			fmt.Fprintf(b, ": %s", *msg)
 		}
+
 		errs = append(errs, b.String())
 	}
+
 	table.AddRow("ERRORS", strings.Join(errs, "\n"))
 	table.AddSeparator()
 }

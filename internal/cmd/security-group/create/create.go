@@ -46,6 +46,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -58,6 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create the security group %q?", model.Name)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -80,6 +82,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -99,6 +102,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
+
 	name := flags.FlagToStringValue(p, cmd, nameFlag)
 
 	model := inputModel{
@@ -111,6 +115,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -130,6 +135,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 func outputResult(p *print.Printer, outputFormat, name string, resp *iaas.SecurityGroup) error {
 	return p.OutputResult(outputFormat, resp, func() error {
 		p.Outputf("Created security group %q.\nSecurity Group ID %s\n", name, utils.PtrString(resp.Id))
+
 		return nil
 	})
 }

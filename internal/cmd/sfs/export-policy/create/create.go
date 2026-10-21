@@ -49,6 +49,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return fmt.Errorf("unable to parse input: %w", err)
@@ -63,12 +64,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a export policy for project %q?", projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -76,6 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create export policy: %w", err)
@@ -85,6 +89,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -103,13 +108,17 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	rulesString := flags.FlagToStringValue(p, cmd, rulesFlag)
+
 	var rules []sfs.CreateShareExportPolicyRequestRule
+
 	if rulesString != "" {
 		var r []sfs.CreateShareExportPolicyRequestRule
+
 		err := json.Unmarshal([]byte(rulesString), &r)
 		if err != nil {
 			return nil, fmt.Errorf("could not parse rules: %w", err)
 		}
+
 		rules = r
 	}
 
@@ -120,17 +129,20 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiCreateShareExportPolicyRequest {
 	req := apiClient.DefaultAPI.CreateShareExportPolicy(ctx, model.ProjectId, model.Region)
+
 	req = req.CreateShareExportPolicyPayload(
 		sfs.CreateShareExportPolicyPayload{
 			Name:  model.Name,
 			Rules: model.Rules,
 		},
 	)
+
 	return req
 }
 
@@ -139,12 +151,14 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, item *sfs
 		if item == nil || item.ShareExportPolicy == nil {
 			return fmt.Errorf("no export policy found")
 		}
+
 		p.Outputf(
 			"Created export policy %q for project %q.\nExport policy ID: %s\n",
 			utils.PtrString(item.ShareExportPolicy.Name),
 			projectLabel,
 			utils.PtrString(item.ShareExportPolicy.Id),
 		)
+
 		return nil
 	})
 }

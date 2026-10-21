@@ -41,18 +41,24 @@ var _ http.RoundTripper = &keyFlowWithStorage{}
 // If disableWriting is set to true the credentials are not stored on disk (keyring, file).
 func AuthenticateServiceAccount(p *print.Printer, rt http.RoundTripper, disableWriting bool) (email, accessToken string, err error) {
 	authFields := make(map[authFieldKey]string)
+
 	var authFlowType AuthFlow
+
 	switch flow := rt.(type) {
 	case keyFlowInterface:
 		p.Debug(print.DebugLevel, "authenticating using service account key")
+
 		authFlowType = AUTH_FLOW_SERVICE_ACCOUNT_KEY
 
 		accessToken, err := flow.GetAccessToken()
 		if err != nil {
 			p.Debug(print.ErrorLevel, "get access token: %v", err)
+
 			return "", "", &errors.ActivateServiceAccountError{}
 		}
+
 		serviceAccountKey := flow.GetConfig().ServiceAccountKey
+
 		saKeyBytes, err := json.Marshal(serviceAccountKey)
 		if err != nil {
 			return "", "", fmt.Errorf("marshal service account key: %w", err)
@@ -63,18 +69,22 @@ func AuthenticateServiceAccount(p *print.Printer, rt http.RoundTripper, disableW
 		authFields[PRIVATE_KEY] = flow.GetConfig().PrivateKey
 	case tokenFlowInterface:
 		p.Debug(print.DebugLevel, "authenticating using service account token")
+
 		authFlowType = AUTH_FLOW_SERVICE_ACCOUNT_TOKEN
 
 		authFields[ACCESS_TOKEN] = flow.GetConfig().ServiceAccountToken
 	case wifFlowInterface:
 		p.Debug(print.DebugLevel, "authenticating using workload identity federation")
+
 		authFlowType = AUTH_FLOW_SERVICE_ACCOUNT_KEY
 
 		accessToken, err := flow.GetAccessToken()
 		if err != nil {
 			p.Debug(print.ErrorLevel, "get workload identity access token: %v", err)
+
 			return "", "", &errors.ActivateServiceAccountError{}
 		}
+
 		authFields[ACCESS_TOKEN] = accessToken
 		disableWriting = true
 	default:
@@ -94,6 +104,7 @@ func AuthenticateServiceAccount(p *print.Printer, rt http.RoundTripper, disableW
 	if err != nil {
 		return "", "", fmt.Errorf("compute session expiration timestamp: %w", err)
 	}
+
 	authFields[SESSION_EXPIRES_AT_UNIX] = sessionExpiresAtUnix
 	// clear idp token endpoint as it is not set by default for service accounts
 	authFields[IDP_TOKEN_ENDPOINT] = ""
@@ -103,6 +114,7 @@ func AuthenticateServiceAccount(p *print.Printer, rt http.RoundTripper, disableW
 		if err != nil {
 			return "", "", fmt.Errorf("set auth flow type: %w", err)
 		}
+
 		err = SetAuthFieldMap(authFields)
 		if err != nil {
 			return "", "", fmt.Errorf("set in auth storage: %w", err)
@@ -119,12 +131,14 @@ func initKeyFlowWithStorage() (*keyFlowWithStorage, error) {
 		PRIVATE_KEY:           "",
 		TOKEN_CUSTOM_ENDPOINT: "",
 	}
+
 	err := GetAuthFieldMap(authFields)
 	if err != nil {
 		return nil, fmt.Errorf("get from auth storage: %w", err)
 	}
 
 	var serviceAccountKey = &clients.ServiceAccountKeyResponse{}
+
 	err = json.Unmarshal([]byte(authFields[SERVICE_ACCOUNT_KEY]), serviceAccountKey)
 	if err != nil {
 		return nil, fmt.Errorf("unmarshalling service account key: %w", err)
@@ -137,6 +151,7 @@ func initKeyFlowWithStorage() (*keyFlowWithStorage, error) {
 	}
 
 	keyFlow := &clients.KeyFlow{}
+
 	err = keyFlow.Init(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("initialize key flow: %w", err)
@@ -146,6 +161,7 @@ func initKeyFlowWithStorage() (*keyFlowWithStorage, error) {
 	keyFlowWithStorage := &keyFlowWithStorage{
 		keyFlow: keyFlow,
 	}
+
 	return keyFlowWithStorage, nil
 }
 
@@ -168,6 +184,7 @@ func (kf *keyFlowWithStorage) RoundTrip(req *http.Request) (*http.Response, erro
 		if err == nil {
 			return resp, nil
 		}
+
 		return nil, fmt.Errorf("set access token in the storage: %w", err)
 	}
 

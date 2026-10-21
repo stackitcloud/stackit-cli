@@ -58,6 +58,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -72,10 +73,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.VolumeId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get volume name: %v", err)
+
 				volumeLabel = model.VolumeId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update volume %q?", volumeLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -83,6 +86,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update volume: %w", err)
@@ -92,6 +96,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -118,6 +123,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -137,8 +143,10 @@ func outputResult(p *print.Printer, outputFormat, volumeLabel string, volume *ia
 	if volume == nil {
 		return fmt.Errorf("volume response is empty")
 	}
+
 	return p.OutputResult(outputFormat, volume, func() error {
 		p.Outputf("Updated volume %q.\n", volumeLabel)
+
 		return nil
 	})
 }

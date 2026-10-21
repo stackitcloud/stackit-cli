@@ -44,6 +44,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -57,6 +58,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read ALB WAF custom rule group: %w", err)
@@ -65,6 +67,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
+
 	return cmd
 }
 
@@ -82,6 +85,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -94,6 +98,7 @@ func outputResult(p *print.Printer, outputFormat string, crg *albwaf.GetCustomRu
 		if crg == nil {
 			return fmt.Errorf("custom rule group response is empty")
 		}
+
 		content := []tables.Table{buildOverviewTable(crg)}
 
 		for i := range crg.Rules {
@@ -104,6 +109,7 @@ func outputResult(p *print.Printer, outputFormat string, crg *albwaf.GetCustomRu
 		if err != nil {
 			return fmt.Errorf("display table: %w", err)
 		}
+
 		return nil
 	})
 }
@@ -115,10 +121,12 @@ func buildOverviewTable(crg *albwaf.GetCustomRuleGroupResponse) tables.Table {
 	table.AddSeparator()
 	table.AddRow("RULES", len(crg.Rules))
 	table.AddSeparator()
+
 	if crg.Usage != nil {
 		table.AddRow("USED BY WAF CONFIGS", strings.Join(crg.Usage.Items, "\n"))
 		table.AddSeparator()
 	}
+
 	return table
 }
 
@@ -137,17 +145,20 @@ func buildRuleTable(rule *albwaf.GetCustomRule) tables.Table {
 	table.AddSeparator()
 	table.AddRow("LOG MESSAGE", utils.PtrString(rule.Behavior.LogMsg))
 	table.AddSeparator()
+
 	for i := range rule.Conditions {
 		condition := &rule.Conditions[i]
 		table.AddRow("CONDITION VARIABLE", conditionVariableString(condition.Variable))
 		table.AddSeparator()
 		table.AddRow("CONDITION OPERATOR", conditionOperatorString(condition.Operator))
 		table.AddSeparator()
+
 		if len(condition.Transformations) > 0 {
 			table.AddRow("CONDITION TRANSFORMATIONS", strings.Join(sdkUtils.EnumSliceToStringSlice(condition.Transformations), ", "))
 			table.AddSeparator()
 		}
 	}
+
 	return table
 }
 
@@ -156,6 +167,7 @@ func conditionVariableString(variable albwaf.ConditionVariable) string {
 	if variable.Value != nil && *variable.Value != "" {
 		return fmt.Sprintf("%s:%s", string(variable.Type), *variable.Value)
 	}
+
 	return string(variable.Type)
 }
 
@@ -164,5 +176,6 @@ func conditionOperatorString(operator albwaf.ConditionOperator) string {
 	if operator.Value != nil && *operator.Value != "" {
 		return fmt.Sprintf("%s %q", string(operator.Type), *operator.Value)
 	}
+
 	return string(operator.Type)
 }

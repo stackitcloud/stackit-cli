@@ -31,6 +31,7 @@ func fixtureArgValues(mods ...func(argVales []string)) []string {
 	for _, m := range mods {
 		m(argVales)
 	}
+
 	return argVales
 }
 
@@ -42,6 +43,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, m := range mods {
 		m(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -57,6 +59,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -65,6 +68,7 @@ func fixtureRequest(mods ...func(request *alb.ApiGetLoadBalancerRequest)) alb.Ap
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -151,6 +155,7 @@ func Test_outputResult(t *testing.T) {
 		showOnlyPublicKey bool
 		response          *alb.LoadBalancer
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -167,6 +172,7 @@ func Test_outputResult(t *testing.T) {
 		},
 	}
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.response); (err != nil) != tt.wantErr {

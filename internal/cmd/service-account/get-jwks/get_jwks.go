@@ -37,6 +37,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -50,13 +51,16 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get JWKS: %w", err)
 			}
+
 			jwks := resp.Keys
 			if len(jwks) == 0 {
 				params.Printer.Info("Empty JWKS for service account %s\n", model.Email)
+
 				return nil
 			}
 
@@ -75,6 +79,7 @@ func parseInput(p *print.Printer, _ *cobra.Command, inputArgs []string) (*inputM
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -88,6 +93,8 @@ func outputResult(p *print.Printer, serviceAccounts []serviceaccount.JWK) error 
 	if err != nil {
 		return fmt.Errorf("marshal JWK list: %w", err)
 	}
+
 	p.Outputln(string(details))
+
 	return nil
 }

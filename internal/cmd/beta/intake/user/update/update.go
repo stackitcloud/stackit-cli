@@ -58,6 +58,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(p.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -71,6 +72,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update Intake User: %w", err)
@@ -82,7 +84,6 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 					_, err = wait.UpdateIntakeUserWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.IntakeId, model.UserId).WaitWithContext(ctx)
 					return err
 				})
-
 				if err != nil {
 					return fmt.Errorf("wait for STACKIT Intake User update: %w", err)
 				}
@@ -92,6 +93,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd, p)
+
 	return cmd
 }
 
@@ -99,6 +101,7 @@ func configureFlags(cmd *cobra.Command, p *types.CmdParams) {
 	cmd.Flags().Var(flags.UUIDFlag(), intakeIdFlag, "Intake ID")
 	cmd.Flags().String(displayNameFlag, "", "Display name")
 	cmd.Flags().String(descriptionFlag, "", "Description")
+
 	password := flags.SecretFlag(passwordFlag, p)
 	cmd.Flags().Var(password, passwordFlag, password.Usage()+" Must contain lower, upper, number, and special characters (min 12 chars)")
 	cmd.Flags().String(userTypeFlag, "", "Type of user. One of 'intake' or 'dead-letter'")
@@ -132,6 +135,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return model, nil
 }
 
@@ -147,10 +151,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIC
 
 	if model.UserType != nil {
 		userType := intake.UserType(*model.UserType)
+
 		payload.Type = &userType
 	}
 
 	req = req.UpdateIntakeUserPayload(payload)
+
 	return req
 }
 
@@ -158,6 +164,7 @@ func outputResult(p *print.Printer, model *inputModel, resp *intake.IntakeUserRe
 	return p.OutputResult(model.OutputFormat, resp, func() error {
 		if resp == nil {
 			p.Outputf("Triggered update of Intake User for intake %q, but no user ID was returned.\n", model.IntakeId)
+
 			return nil
 		}
 
@@ -165,7 +172,9 @@ func outputResult(p *print.Printer, model *inputModel, resp *intake.IntakeUserRe
 		if model.Async {
 			operationState = "Triggered update of"
 		}
+
 		p.Outputf("%s Intake User for intake %q. User ID: %s\n", operationState, model.IntakeId, resp.Id)
+
 		return nil
 	})
 }

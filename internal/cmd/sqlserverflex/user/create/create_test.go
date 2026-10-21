@@ -34,6 +34,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -51,11 +52,13 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *sqlserverflex.ApiCreateUserRequest)) sqlserverflex.ApiCreateUserRequest {
 	request := testClient.DefaultAPI.CreateUser(testCtx, testProjectId, testRegion, testInstanceId)
+
 	request = request.CreateUserPayload(sqlserverflex.CreateUserPayload{
 		Username: "johndoe",
 		Roles:    []string{"read"},
@@ -64,6 +67,7 @@ func fixtureRequest(mods ...func(request *sqlserverflex.ApiCreateUserRequest)) s
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -188,6 +192,7 @@ func TestOutputResult(t *testing.T) {
 		instanceLabel string
 		user          *sqlserverflex.CreateUserResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args

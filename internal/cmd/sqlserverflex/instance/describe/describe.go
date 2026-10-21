@@ -46,10 +46,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
+
 			// Configure API client
 			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
@@ -58,10 +60,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read SQLServer Flex instance: %w", err)
 			}
+
 			flavor, err := sqlserverflexUtils.GetFlavor(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, resp.FlavorId)
 			if err != nil {
 				return fmt.Errorf("get flavor: %w", err)
@@ -70,6 +74,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, resp, flavor)
 		},
 	}
+
 	return cmd
 }
 
@@ -87,6 +92,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -124,6 +130,7 @@ func outputResult(p *print.Printer, outputFormat string, instance *sqlserverflex
 		table.AddSeparator()
 		table.AddRow("RAM (GB)", flavor.Memory)
 		table.AddSeparator()
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

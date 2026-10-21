@@ -26,6 +26,7 @@ func newTestCmdFactory(flagSetup func(*cobra.Command)) func(*types.CmdParams) *c
 		if flagSetup != nil {
 			flagSetup(cmd)
 		}
+
 		return cmd
 	}
 }
@@ -140,8 +141,11 @@ func TestRunParseInputCase(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cmdFactory := newTestCmdFactory(tt.flagSetup)
+
 			var parseCalled bool
+
 			parseFn := tt.parseFunc
+
 			if parseFn == nil {
 				parseFn = func(*print.Printer, *cobra.Command, []string) (*parseInputTestModel, error) {
 					return &parseInputTestModel{}, nil

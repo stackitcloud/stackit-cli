@@ -31,6 +31,7 @@ func fixtureArgValues(mods ...func(argVales []string)) []string {
 	for _, m := range mods {
 		m(argVales)
 	}
+
 	return argVales
 }
 
@@ -42,6 +43,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, m := range mods {
 		m(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -57,6 +59,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -65,6 +68,7 @@ func fixtureRequest(mods ...func(request *alb.ApiGetCredentialsRequest)) alb.Api
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -151,6 +155,7 @@ func Test_outputResult(t *testing.T) {
 		showOnlyPublicKey bool
 		response          alb.CredentialsResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args

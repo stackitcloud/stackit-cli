@@ -52,6 +52,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return fmt.Errorf("unable to parse input: %w", err)
@@ -66,6 +67,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			exportPolicyLabel, err := sfsUtils.GetExportPolicyName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ExportPolicyId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get export policy name: %v", err)
+
 				exportPolicyLabel = model.ExportPolicyId
 			} else if exportPolicyLabel == "" {
 				exportPolicyLabel = model.ExportPolicyId
@@ -74,12 +76,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update export policy %q for project %q?", exportPolicyLabel, projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -87,6 +91,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update export policy: %w", err)
@@ -96,6 +101,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -114,6 +120,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClie
 	payload := sfs.UpdateShareExportPolicyPayload{
 		Rules: *model.Rules,
 	}
+
 	return req.UpdateShareExportPolicyPayload(payload)
 }
 
@@ -126,16 +133,21 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	var rules *[]sfs.UpdateShareExportPolicyBodyRule
+
 	noRulesErr := fmt.Errorf("no rules specified")
+
 	if rulesString := flags.FlagToStringPointer(p, cmd, rulesFlag); rulesString != nil {
 		var r []sfs.UpdateShareExportPolicyBodyRule
+
 		err := json.Unmarshal([]byte(*rulesString), &r)
 		if err != nil {
 			return nil, fmt.Errorf("could not parse rules: %w", err)
 		}
+
 		if r == nil {
 			return nil, noRulesErr
 		}
+
 		rules = &r
 	}
 
@@ -156,6 +168,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -163,9 +176,12 @@ func outputResult(p *print.Printer, outputFormat, projectLabel, exportPolicyLabe
 	return p.OutputResult(outputFormat, resp, func() error {
 		if resp == nil {
 			p.Outputln("Empty export policy response")
+
 			return nil
 		}
+
 		p.Outputf("Updated export policy %q for project %q\n", exportPolicyLabel, projectLabel)
+
 		return nil
 	})
 }

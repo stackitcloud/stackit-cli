@@ -46,6 +46,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, inputArgs []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, inputArgs)
 			if err != nil {
 				return fmt.Errorf("unable to parse input: %w", err)
@@ -59,6 +60,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("describe SFS share: %w", err)
@@ -67,6 +69,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			resourcePoolLabel, err := sfsUtils.GetResourcePoolName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ResourcePoolId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get resource pool name: %v", err)
+
 				resourcePoolLabel = model.ResourcePoolId
 			} else if resourcePoolLabel == "" {
 				resourcePoolLabel = model.ResourcePoolId
@@ -76,6 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -89,6 +93,7 @@ func configureFlags(cmd *cobra.Command) {
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	shareId := inputArgs[0]
 	globalFlags := globalflags.Parse(p, cmd)
+
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
@@ -100,6 +105,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -111,6 +117,7 @@ func outputResult(p *print.Printer, outputFormat, resourcePoolLabel, shareId str
 	return p.OutputResult(outputFormat, share, func() error {
 		if share == nil || share.Share == nil {
 			p.Outputf("Share %q not found in resource pool %q\n", shareId, resourcePoolLabel)
+
 			return nil
 		}
 
@@ -118,6 +125,7 @@ func outputResult(p *print.Printer, outputFormat, resourcePoolLabel, shareId str
 
 		table := tables.NewTable()
 		table.SetTitle("Share")
+
 		item := *share.Share
 
 		table.AddRow("ID", utils.PtrString(item.Id))
@@ -164,9 +172,11 @@ func outputResult(p *print.Printer, outputFormat, resourcePoolLabel, shareId str
 
 				for _, rule := range policy.Rules {
 					var description string
+
 					if rule.Description.IsSet() && *rule.Description.Get() != "" {
 						description = utils.PtrString(rule.Description.Get())
 					}
+
 					ruleTable.AddRow(
 						utils.PtrString(rule.Id),
 						utils.PtrString(rule.Order),
@@ -187,6 +197,7 @@ func outputResult(p *print.Printer, outputFormat, resourcePoolLabel, shareId str
 		if err := tables.DisplayTables(p, content); err != nil {
 			return fmt.Errorf("render tables: %w", err)
 		}
+
 		return nil
 	})
 }

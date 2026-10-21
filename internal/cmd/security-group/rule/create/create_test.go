@@ -50,6 +50,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -76,26 +77,33 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateSecurityGroupRuleRequest)) iaas.ApiCreateSecurityGroupRuleRequest {
 	request := testClient.DefaultAPI.CreateSecurityGroupRule(testCtx, testProjectId, testRegion, testSecurityGroupId)
+
 	request = request.CreateSecurityGroupRulePayload(fixturePayload())
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
 func fixtureRequiredRequest(mods ...func(request *iaas.ApiCreateSecurityGroupRuleRequest)) iaas.ApiCreateSecurityGroupRuleRequest {
 	request := testClient.DefaultAPI.CreateSecurityGroupRule(testCtx, testProjectId, testRegion, testSecurityGroupId)
+
 	request = request.CreateSecurityGroupRulePayload(iaas.CreateSecurityGroupRulePayload{
 		Direction: "ingress",
 	})
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -122,6 +130,7 @@ func fixturePayload(mods ...func(payload *iaas.CreateSecurityGroupRulePayload)) 
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
@@ -281,6 +290,7 @@ func TestBuildRequest(t *testing.T) {
 			expectedRequest: fixtureRequiredRequest(),
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
@@ -304,6 +314,7 @@ func TestOutputResult(t *testing.T) {
 		securityGroupName string
 		securityGroupRule *iaas.SecurityGroupRule
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -324,6 +335,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, tt.args.model, tt.args.projectLabel, tt.args.securityGroupName, tt.args.securityGroupRule); (err != nil) != tt.wantErr {

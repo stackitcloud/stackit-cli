@@ -42,6 +42,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -55,6 +56,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read managed rule set: %w", err)
@@ -63,6 +65,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
+
 	return cmd
 }
 
@@ -79,6 +82,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -90,6 +94,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *albwaf.GetManaged
 	if resp == nil {
 		return fmt.Errorf("no managed rule set found")
 	}
+
 	return p.OutputResult(outputFormat, resp, func() error {
 		usageCount := ""
 		if resp.Usage != nil {
@@ -107,6 +112,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *albwaf.GetManaged
 		table.AddRow("VERSION", resp.Version)
 		table.AddSeparator()
 		table.AddRow("USAGE COUNT", usageCount)
+
 		content = append(content, table)
 
 		if resp.Groups != nil && len(*resp.Groups) > 0 {
@@ -115,14 +121,17 @@ func outputResult(p *print.Printer, outputFormat string, resp *albwaf.GetManaged
 				if group.Rules == nil || len(*group.Rules) == 0 {
 					continue
 				}
+
 				groupTable := tables.NewTable()
 				groupTable.SetTitle(fmt.Sprintf("Rule Group: %s (%s)", groupId, group.GroupName))
 				groupTable.SetHeader("DESCRIPTION", "RULE ID", "SEVERITY", "MODE")
+
 				for _, ruleId := range utils.SortedKeys(*group.Rules) {
 					rule := (*group.Rules)[ruleId]
 					groupTable.AddRow(utils.Truncate(new(rule.Description), 70), ruleId, rule.Severity, string(rule.Mode))
 					groupTable.AddSeparator()
 				}
+
 				content = append(content, groupTable)
 			}
 		}
@@ -131,9 +140,11 @@ func outputResult(p *print.Printer, outputFormat string, resp *albwaf.GetManaged
 		if err != nil {
 			return fmt.Errorf("render tables: %w", err)
 		}
+
 		if resp.Groups != nil && len(*resp.Groups) > 0 {
 			p.Outputln("\nUse --output-format json/yaml to see the untruncated rule descriptions and severity.")
 		}
+
 		return nil
 	})
 }

@@ -48,84 +48,98 @@ func newMock(m *IaaSClientMocked) iaas.DefaultAPI {
 			if m.GetAffinityGroupsFails {
 				return nil, fmt.Errorf("could not get affinity groups")
 			}
+
 			return m.GetAffinityGroupResp, nil
 		}),
 		GetSecurityGroupRuleExecuteMock: utils.Ptr(func(_ iaas.ApiGetSecurityGroupRuleRequest) (*iaas.SecurityGroupRule, error) {
 			if m.GetSecurityGroupRuleFails {
 				return nil, fmt.Errorf("could not get security group rule")
 			}
+
 			return m.GetSecurityGroupRuleResp, nil
 		}),
 		GetSecurityGroupExecuteMock: utils.Ptr(func(_ iaas.ApiGetSecurityGroupRequest) (*iaas.SecurityGroup, error) {
 			if m.GetSecurityGroupFails {
 				return nil, fmt.Errorf("could not get security group")
 			}
+
 			return m.GetSecurityGroupResp, nil
 		}),
 		GetPublicIPExecuteMock: utils.Ptr(func(_ iaas.ApiGetPublicIPRequest) (*iaas.PublicIp, error) {
 			if m.GetPublicIpFails {
 				return nil, fmt.Errorf("could not get public ip")
 			}
+
 			return m.GetPublicIpResp, nil
 		}),
 		GetServerExecuteMock: utils.Ptr(func(_ iaas.ApiGetServerRequest) (*iaas.Server, error) {
 			if m.GetServerFails {
 				return nil, fmt.Errorf("could not get server")
 			}
+
 			return m.GetServerResp, nil
 		}),
 		GetVolumeExecuteMock: utils.Ptr(func(_ iaas.ApiGetVolumeRequest) (*iaas.Volume, error) {
 			if m.GetVolumeFails {
 				return nil, fmt.Errorf("could not get volume")
 			}
+
 			return m.GetVolumeResp, nil
 		}),
 		GetNetworkExecuteMock: utils.Ptr(func(_ iaas.ApiGetNetworkRequest) (*iaas.Network, error) {
 			if m.GetNetworkFails {
 				return nil, fmt.Errorf("could not get network")
 			}
+
 			return m.GetNetworkResp, nil
 		}),
 		GetRoutingTableOfAreaExecuteMock: utils.Ptr(func(_ iaas.ApiGetRoutingTableOfAreaRequest) (*iaas.RoutingTable, error) {
 			if m.GetRoutingTableOfAreaFails {
 				return nil, fmt.Errorf("could not get routing table")
 			}
+
 			return m.GetRoutingTableOfAreaResp, nil
 		}),
 		GetNetworkAreaExecuteMock: utils.Ptr(func(_ iaas.ApiGetNetworkAreaRequest) (*iaas.NetworkArea, error) {
 			if m.GetNetworkAreaFails {
 				return nil, fmt.Errorf("could not get network area")
 			}
+
 			return m.GetNetworkAreaResp, nil
 		}),
 		ListNetworkAreaProjectsExecuteMock: utils.Ptr(func(_ iaas.ApiListNetworkAreaProjectsRequest) (*iaas.ProjectListResponse, error) {
 			if m.GetAttachedProjectsFails {
 				return nil, fmt.Errorf("could not get attached projects")
 			}
+
 			return m.GetAttachedProjectsResp, nil
 		}),
 		GetNetworkAreaRangeExecuteMock: utils.Ptr(func(_ iaas.ApiGetNetworkAreaRangeRequest) (*iaas.NetworkRange, error) {
 			if m.GetNetworkAreaRangeFails {
 				return nil, fmt.Errorf("could not get network range")
 			}
+
 			return m.GetNetworkAreaRangeResp, nil
 		}),
 		GetImageExecuteMock: utils.Ptr(func(_ iaas.ApiGetImageRequest) (*iaas.Image, error) {
 			if m.GetImageFails {
 				return nil, fmt.Errorf("could not get image")
 			}
+
 			return m.GetImageResp, nil
 		}),
 		GetBackupExecuteMock: utils.Ptr(func(_ iaas.ApiGetBackupRequest) (*iaas.Backup, error) {
 			if m.GetBackupFails {
 				return nil, fmt.Errorf("could not get backup")
 			}
+
 			return m.GetBackupResp, nil
 		}),
 		GetSnapshotExecuteMock: utils.Ptr(func(_ iaas.ApiGetSnapshotRequest) (*iaas.Snapshot, error) {
 			if m.GetSnapshotFails {
 				return nil, fmt.Errorf("could not get snapshot")
 			}
+
 			return m.GetSnapshotResp, nil
 		}),
 	}
@@ -136,6 +150,7 @@ func TestGetSecurityGroupRuleName(t *testing.T) {
 		getInstanceFails bool
 		getInstanceResp  *iaas.SecurityGroupRule
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -160,6 +175,7 @@ func TestGetSecurityGroupRuleName(t *testing.T) {
 			wantErr: true,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &IaaSClientMocked{
@@ -167,10 +183,13 @@ func TestGetSecurityGroupRuleName(t *testing.T) {
 				GetSecurityGroupRuleResp:  tt.args.getInstanceResp,
 			}
 			got, err := GetSecurityGroupRuleName(context.Background(), newMock(m), "", "", "", "")
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetSecurityGroupRuleName() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetSecurityGroupRuleName() = %v, want %v", got, tt.want)
 			}
@@ -183,6 +202,7 @@ func TestGetSecurityGroupName(t *testing.T) {
 		getInstanceFails bool
 		getInstanceResp  *iaas.SecurityGroup
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -215,6 +235,7 @@ func TestGetSecurityGroupName(t *testing.T) {
 			want:    "",
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &IaaSClientMocked{
@@ -222,10 +243,13 @@ func TestGetSecurityGroupName(t *testing.T) {
 				GetSecurityGroupResp:  tt.args.getInstanceResp,
 			}
 			got, err := GetSecurityGroupName(context.Background(), newMock(m), "", "", "")
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetSecurityGroupName() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetSecurityGroupName() = %v, want %v", got, tt.want)
 			}
@@ -238,6 +262,7 @@ func TestGetPublicIp(t *testing.T) {
 		getPublicIpFails bool
 		getPublicIpResp  *iaas.PublicIp
 	}
+
 	tests := []struct {
 		name                   string
 		args                   args
@@ -275,6 +300,7 @@ func TestGetPublicIp(t *testing.T) {
 			wantAssociatedResource: "",
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &IaaSClientMocked{
@@ -282,13 +308,17 @@ func TestGetPublicIp(t *testing.T) {
 				GetPublicIpResp:  tt.args.getPublicIpResp,
 			}
 			gotPublicIP, gotAssociatedResource, err := GetPublicIP(context.Background(), newMock(m), "", "", "")
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetPublicIP() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
+
 			if gotPublicIP != tt.wantPublicIp {
 				t.Errorf("GetPublicIP() = %v, want public IP %v", gotPublicIP, tt.wantPublicIp)
 			}
+
 			if gotAssociatedResource != tt.wantAssociatedResource {
 				t.Errorf("GetPublicIP() = %v, want associated resource %v", gotAssociatedResource, tt.wantAssociatedResource)
 			}
@@ -301,6 +331,7 @@ func TestGetServerName(t *testing.T) {
 		getInstanceFails bool
 		getInstanceResp  *iaas.Server
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -324,6 +355,7 @@ func TestGetServerName(t *testing.T) {
 			wantErr: true,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &IaaSClientMocked{
@@ -331,10 +363,13 @@ func TestGetServerName(t *testing.T) {
 				GetServerResp:  tt.args.getInstanceResp,
 			}
 			got, err := GetServerName(context.Background(), newMock(m), "", "", "")
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetServerName() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetServerName() = %v, want %v", got, tt.want)
 			}
@@ -347,6 +382,7 @@ func TestGetVolumeName(t *testing.T) {
 		getInstanceFails bool
 		getInstanceResp  *iaas.Volume
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -390,6 +426,7 @@ func TestGetVolumeName(t *testing.T) {
 			want:    "",
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &IaaSClientMocked{
@@ -397,10 +434,13 @@ func TestGetVolumeName(t *testing.T) {
 				GetVolumeResp:  tt.args.getInstanceResp,
 			}
 			got, err := GetVolumeName(context.Background(), newMock(m), "", "", "")
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetVolumeName() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetVolumeName() = %v, want %v", got, tt.want)
 			}
@@ -413,6 +453,7 @@ func TestGetNetworkName(t *testing.T) {
 		getInstanceFails bool
 		getInstanceResp  *iaas.Network
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -445,6 +486,7 @@ func TestGetNetworkName(t *testing.T) {
 			want:    "",
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &IaaSClientMocked{
@@ -452,10 +494,13 @@ func TestGetNetworkName(t *testing.T) {
 				GetNetworkResp:  tt.args.getInstanceResp,
 			}
 			got, err := GetNetworkName(context.Background(), newMock(m), "", "", "")
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetNetworkName() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetNetworkName() = %v, want %v", got, tt.want)
 			}
@@ -468,6 +513,7 @@ func TestGetNetworkAreaName(t *testing.T) {
 		getInstanceFails bool
 		getInstanceResp  *iaas.NetworkArea
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -501,6 +547,7 @@ func TestGetNetworkAreaName(t *testing.T) {
 			want:    "",
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &IaaSClientMocked{
@@ -508,10 +555,13 @@ func TestGetNetworkAreaName(t *testing.T) {
 				GetNetworkAreaResp:  tt.args.getInstanceResp,
 			}
 			got, err := GetNetworkAreaName(context.Background(), newMock(m), "", "")
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetNetworkAreaName() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetNetworkAreaName() = %v, want %v", got, tt.want)
 			}
@@ -524,6 +574,7 @@ func TestListAttachedProjects(t *testing.T) {
 		getAttachedProjectsFails bool
 		getAttachedProjectsResp  *iaas.ProjectListResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -547,6 +598,7 @@ func TestListAttachedProjects(t *testing.T) {
 			wantErr: true,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &IaaSClientMocked{
@@ -554,10 +606,13 @@ func TestListAttachedProjects(t *testing.T) {
 				GetAttachedProjectsResp:  tt.args.getAttachedProjectsResp,
 			}
 			got, err := ListAttachedProjects(context.Background(), newMock(m), "", "")
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetAttachedProjects() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
+
 			if fmt.Sprintf("%v", got) != fmt.Sprintf("%v", tt.want) {
 				t.Errorf("GetAttachedProjects() = %v, want %v", got, tt.want)
 			}
@@ -570,6 +625,7 @@ func TestGetNetworkRangePrefix(t *testing.T) {
 		getNetworkAreaRangeFails bool
 		getNetworkAreaRangeResp  *iaas.NetworkRange
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -593,6 +649,7 @@ func TestGetNetworkRangePrefix(t *testing.T) {
 			wantErr: true,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &IaaSClientMocked{
@@ -600,10 +657,13 @@ func TestGetNetworkRangePrefix(t *testing.T) {
 				GetNetworkAreaRangeResp:  tt.args.getNetworkAreaRangeResp,
 			}
 			got, err := GetNetworkRangePrefix(context.Background(), newMock(m), "", "", "", "")
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetNetworkRangePrefix() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetNetworkRangePrefix() = %v, want %v", got, tt.want)
 			}
@@ -617,6 +677,7 @@ func TestGetRouteFromAPIResponse(t *testing.T) {
 		nexthop string
 		routes  []iaas.Route
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -880,13 +941,16 @@ func TestGetRouteFromAPIResponse(t *testing.T) {
 			wantErr: true,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := GetRouteFromAPIResponse(tt.args.prefix, tt.args.nexthop, tt.args.routes)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetRouteFromAPIResponse() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
+
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetRouteFromAPIResponse() = %v, want %v", got, tt.want)
 			}
@@ -899,6 +963,7 @@ func TestGetNetworkRangeFromAPIResponse(t *testing.T) {
 		prefix        string
 		networkRanges []iaas.NetworkRange
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -949,13 +1014,16 @@ func TestGetNetworkRangeFromAPIResponse(t *testing.T) {
 			wantErr: true,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := GetNetworkRangeFromAPIResponse(tt.args.prefix, tt.args.networkRanges)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetNetworkRangeFromAPIResponse() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
+
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetNetworkRangeFromAPIResponse() = %v, want %v", got, tt.want)
 			}
@@ -997,10 +1065,13 @@ func TestGetImageName(t *testing.T) {
 				GetImageResp:  tt.imageResp,
 			}
 			got, err := GetImageName(context.Background(), newMock(client), "", "", "")
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetImageName() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetImageName() = %v, want %v", got, tt.want)
 			}
@@ -1043,10 +1114,13 @@ func TestGetAffinityGroupName(t *testing.T) {
 				GetAffinityGroupResp:   tt.affinityResp,
 			}
 			got, err := GetAffinityGroupName(ctx, newMock(client), "", "", "")
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetAffinityGroupName() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetAffinityGroupName() = %v, want %v", got, tt.want)
 			}
@@ -1059,6 +1133,7 @@ func TestGetRoutingTableOfAreaName(t *testing.T) {
 		getInstanceFails bool
 		getInstanceResp  *iaas.RoutingTable
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -1092,6 +1167,7 @@ func TestGetRoutingTableOfAreaName(t *testing.T) {
 			want:    "",
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &IaaSClientMocked{
@@ -1102,8 +1178,10 @@ func TestGetRoutingTableOfAreaName(t *testing.T) {
 			got, err := GetRoutingTableOfAreaName(context.Background(), newMock(m), "", "", "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetRoutingTableOfAreaName() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetRoutingTableOfAreaName() = %v, want %v", got, tt.want)
 			}

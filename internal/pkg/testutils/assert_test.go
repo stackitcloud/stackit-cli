@@ -112,6 +112,7 @@ func TestAssertError(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
+
 			mock := &mockTB{}
 			result := AssertError(mock, tt.got, tt.want)
 
@@ -119,6 +120,7 @@ func TestAssertError(t *testing.T) {
 			if mock.failed != tt.wantErr {
 				t.Fatalf("AssertError() failed = %v, wantErr %v (msg: %s)", mock.failed, tt.wantErr, mock.msg)
 			}
+
 			// if we expected an error the result of AssertError() should be false (this is what AssertError() does in case of error)
 			if tt.wantErr && result != false {
 				t.Fatalf("AssertError() returned = %v, want %v", result, tt.wantErr)
@@ -132,6 +134,7 @@ func TestCheckErrorMatch(t *testing.T) {
 
 	underlying := &customError{msg: "root"}
 	wrapped := fmt.Errorf("wrap: %w", underlying)
+
 	if !checkErrorMatch(wrapped, &customError{}) {
 		t.Fatalf("expected wrapped customError to match via errors.As")
 	}
@@ -154,6 +157,7 @@ func TestAssertValue(t *testing.T) {
 		if reflect.DeepEqual(got, want) {
 			return ""
 		}
+
 		return "custom diff"
 	}
 
@@ -215,6 +219,7 @@ func TestAssertValue(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			mock := &mockTB{}
 			AssertValue(mock, tt.got, tt.want, tt.opts...)
 

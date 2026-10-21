@@ -51,6 +51,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -65,10 +66,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update an application loadbalancer for project %q?", projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -79,11 +82,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			// Call API
 			req, err := buildRequest(ctx, model, apiClient)
 			if err != nil {
 				return err
 			}
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update application loadbalancer: %w", err)
@@ -94,6 +99,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				err := spinner.Run(params.Printer, "updating loadbalancer", func() error {
 					_, err = wait.CreateOrUpdateLoadbalancerWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, *resp.Name).
 						WaitWithContext(ctx)
+
 					return err
 				})
 				if err != nil {
@@ -105,11 +111,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(configurationFlag, "c", "", "Filename of the input configuration file")
+
 	err := flags.MarkFlagsRequired(cmd, configurationFlag)
 	cobra.CheckErr(err)
 }
@@ -126,6 +134,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -135,16 +144,20 @@ func getCurrentAlbVersion(ctx context.Context, apiClient *alb.APIClient, model *
 	if err != nil {
 		return nil, err
 	}
+
 	if updatePayload.Name == nil {
 		return nil, fmt.Errorf("no name found in configuration")
 	}
+
 	if err != nil {
 		return nil, err
 	}
+
 	resp, err := apiClient.DefaultAPI.GetLoadBalancer(ctx, model.ProjectId, model.Region, *updatePayload.Name).Execute()
 	if err != nil {
 		return nil, err
 	}
+
 	return resp.Version, nil
 }
 
@@ -153,11 +166,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClie
 	if err != nil {
 		return req, err
 	}
+
 	if payload.Name == nil {
 		return req, fmt.Errorf("no name found in loadbalancer configuration")
 	}
+
 	payload.Version = model.Version
 	req = apiClient.DefaultAPI.UpdateLoadBalancer(ctx, model.ProjectId, model.Region, *payload.Name)
+
 	return req.UpdateLoadBalancerPayload(payload), nil
 }
 
@@ -165,6 +181,7 @@ func readPayload(_ context.Context, model *inputModel) (payload alb.UpdateLoadBa
 	if model.Configuration == nil {
 		return payload, fmt.Errorf("no configuration file defined")
 	}
+
 	file, err := os.Open(*model.Configuration)
 	if err != nil {
 		return payload, fmt.Errorf("cannot open configuration file %q: %w", *model.Configuration, err)
@@ -192,12 +209,15 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 	if resp == nil {
 		return fmt.Errorf("update loadbalancer response is empty")
 	}
+
 	return p.OutputResult(model.OutputFormat, resp, func() error {
 		operationState := "Updated"
 		if model.Async {
 			operationState = "Triggered update of"
 		}
+
 		p.Outputf("%s application loadbalancer for %q. Name: %s\n", operationState, projectLabel, utils.PtrString(resp.Name))
+
 		return nil
 	})
 }

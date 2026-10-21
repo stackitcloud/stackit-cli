@@ -44,6 +44,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(p.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -60,6 +61,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get VPN connection status: %w", err)
@@ -69,6 +71,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -94,6 +97,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -143,6 +147,7 @@ func tunnelTables(tunnel *vpn.TunnelStatus) []tables.Table {
 		phase1Table.AddRow("DH Group", utils.PtrString(tunnel.Phase1.DhGroup))
 		phase1Table.AddRow("Encryption Algo", utils.PtrString(tunnel.Phase1.EncryptionAlgorithm))
 		phase1Table.AddRow("Integrity Algo", utils.PtrString(tunnel.Phase1.IntegrityAlgorithm))
+
 		res = append(res, phase1Table)
 	}
 
@@ -157,6 +162,7 @@ func tunnelTables(tunnel *vpn.TunnelStatus) []tables.Table {
 		phase2Table.AddRow("Encap", utils.PtrString(tunnel.Phase2.Encap))
 		phase2Table.AddRow("Bytes In/Out", fmt.Sprintf("%s / %s", utils.PtrString(tunnel.Phase2.BytesIn), utils.PtrString(tunnel.Phase2.BytesOut)))
 		phase2Table.AddRow("Packets In/Out", fmt.Sprintf("%s / %s", utils.PtrString(tunnel.Phase2.PacketsIn), utils.PtrString(tunnel.Phase2.PacketsOut)))
+
 		res = append(res, phase2Table)
 	}
 

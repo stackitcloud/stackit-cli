@@ -55,6 +55,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -68,6 +69,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list network ranges: %w", err)
@@ -78,6 +80,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			vpcLabel, err := iaasUtils.GetVPCName(ctx, apiClient.DefaultAPI, model.ProjectId, model.VpcId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get vpc name: %v", err)
+
 				vpcLabel = model.VpcId
 			}
 
@@ -90,6 +93,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -122,6 +126,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -133,8 +138,10 @@ func outputResult(p *print.Printer, outputFormat, vpcLabel string, networkRanges
 	return p.OutputResult(outputFormat, networkRanges, func() error {
 		if len(networkRanges) == 0 {
 			p.Outputf("No network ranges found for VPC %q\n", vpcLabel)
+
 			return nil
 		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "PREFIX", "DESCRIPTION", "IP VERSION", "STATUS")
 
@@ -159,6 +166,7 @@ func outputResult(p *print.Printer, outputFormat, vpcLabel string, networkRanges
 		}
 
 		p.Outputln(table.Render())
+
 		return nil
 	})
 }

@@ -52,6 +52,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -65,10 +66,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list credentials: %w", err)
 			}
+
 			items := resp.GetCredentials()
 
 			// Truncate output
@@ -80,6 +83,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -104,6 +108,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -116,6 +121,7 @@ func outputResult(p *print.Printer, outputFormat string, items []alb.Credentials
 	return p.OutputResult(outputFormat, items, func() error {
 		if len(items) == 0 {
 			p.Outputf("No credentials found\n")
+
 			return nil
 		}
 
@@ -132,6 +138,7 @@ func outputResult(p *print.Printer, outputFormat string, items []alb.Credentials
 		}
 
 		p.Outputln(table.Render())
+
 		return nil
 	})
 }

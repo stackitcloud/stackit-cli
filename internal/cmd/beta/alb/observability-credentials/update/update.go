@@ -59,12 +59,16 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
+
 			prompt := fmt.Sprintf("Are you sure you want to update credential %q for %q?", *model.CredentialsRef, projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return fmt.Errorf("update credential: %w", err)
@@ -75,6 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("update credential: %w", err)
 			}
+
 			if resp == nil {
 				return fmt.Errorf("response is nil")
 			}
@@ -83,12 +88,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd, params)
+
 	return cmd
 }
 
 func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.Flags().StringP(usernameFlag, "u", "", "Username for the credentials")
 	cmd.Flags().StringP(displaynameFlag, "d", "", "Displayname for the credentials")
+
 	password := flags.SecretFlag(passwordFlag, params)
 	cmd.Flags().Var(password, passwordFlag, password.Usage())
 
@@ -121,20 +128,24 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) inputM
 	}
 
 	p.DebugInputModel(model)
+
 	return model
 }
 
 func outputResult(p *print.Printer, model inputModel, response *alb.UpdateCredentialsResponse) error {
 	var outputFormat string
+
 	if model.GlobalFlagModel != nil {
 		outputFormat = model.OutputFormat
 	}
+
 	if response == nil {
 		return fmt.Errorf("no response passed")
 	}
 
 	return p.OutputResult(outputFormat, response.Credential, func() error {
 		p.Outputf("Updated credential %q\n", utils.PtrString(model.CredentialsRef))
+
 		return nil
 	})
 }

@@ -14,6 +14,7 @@ import (
 
 func overwriteCacheDir(t *testing.T) func() {
 	cacheDirOverwrite = t.TempDir()
+
 	return func() {
 		cacheDirOverwrite = ""
 	}
@@ -21,6 +22,7 @@ func overwriteCacheDir(t *testing.T) func() {
 
 func TestGetObjectErrors(t *testing.T) {
 	defer overwriteCacheDir(t)()
+
 	if err := Init(); err != nil {
 		t.Fatalf("cache init failed: %s", err)
 	}
@@ -61,6 +63,7 @@ func TestGetObjectErrors(t *testing.T) {
 }
 func TestPutObject(t *testing.T) {
 	defer overwriteCacheDir(t)()
+
 	if err := Init(); err != nil {
 		t.Fatalf("cache init failed: %s", err)
 	}
@@ -108,8 +111,10 @@ func TestPutObject(t *testing.T) {
 				cacheFolderPath = tt.customPath
 			} else {
 				cacheDir, _ := os.UserCacheDir()
+
 				cacheFolderPath = filepath.Join(cacheDir, "stackit")
 			}
+
 			path := filepath.Join(cacheFolderPath, id)
 
 			// setup
@@ -118,10 +123,12 @@ func TestPutObject(t *testing.T) {
 				if err != nil {
 					t.Fatalf("create cache folder: %s", err.Error())
 				}
+
 				if err := os.WriteFile(path, []byte("dummy"), 0o600); err != nil {
 					t.Fatalf("setup: WriteFile (%s) failed", path)
 				}
 			}
+
 			// test
 			err := PutObject(id, []byte("dummy"))
 
@@ -140,6 +147,7 @@ func TestPutObject(t *testing.T) {
 
 func TestDeleteObject(t *testing.T) {
 	defer overwriteCacheDir(t)()
+
 	if err := Init(); err != nil {
 		t.Fatalf("cache init failed: %s", err)
 	}
@@ -180,10 +188,12 @@ func TestDeleteObject(t *testing.T) {
 				if err := os.MkdirAll(cacheFolderPath, 0o700); err != nil {
 					t.Fatalf("setup: MkdirAll (%s) failed: %v", path, err)
 				}
+
 				if err := os.WriteFile(path, []byte("dummy"), 0o600); err != nil {
 					t.Fatalf("setup: WriteFile (%s) failed: %v", path, err)
 				}
 			}
+
 			// test
 			err := DeleteObject(id)
 
@@ -202,10 +212,12 @@ func TestDeleteObject(t *testing.T) {
 
 func clearKeys(t *testing.T) {
 	t.Helper()
+
 	err := auth.DeleteAuthField(auth.CACHE_ENCRYPTION_KEY)
 	if err != nil {
 		t.Fatalf("delete cache encryption key: %v", err)
 	}
+
 	err = auth.DeleteAuthField(auth.CACHE_ENCRYPTION_KEY_AGE)
 	if err != nil {
 		t.Fatalf("delete cache encryption key age: %v", err)
@@ -227,15 +239,18 @@ func TestWriteAndRead(t *testing.T) {
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			defer overwriteCacheDir(t)()
+
 			if tt.clearKeys {
 				clearKeys(t)
 			}
+
 			if err := Init(); err != nil {
 				t.Fatalf("cache init failed: %s", err)
 			}
 
 			id := "test-cycle-" + uuid.NewString()
 			data := []byte("test-data")
+
 			err := PutObject(id, data)
 			if err != nil {
 				t.Fatalf("putobject failed: %v", err)
@@ -256,12 +271,14 @@ func TestWriteAndRead(t *testing.T) {
 
 func TestCacheCleanup(t *testing.T) {
 	defer overwriteCacheDir(t)()
+
 	if err := Init(); err != nil {
 		t.Fatalf("cache init failed: %s", err)
 	}
 
 	id := "test-cycle-" + uuid.NewString()
 	data := []byte("test-data")
+
 	err := PutObject(id, data)
 	if err != nil {
 		t.Fatalf("putobject failed: %v", err)

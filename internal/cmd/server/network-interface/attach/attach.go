@@ -55,6 +55,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -69,6 +70,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, *model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
+
 				serverLabel = *model.ServerId
 			}
 
@@ -77,9 +79,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, *model.NetworkId)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get network name: %v", err)
+
 					networkLabel = *model.NetworkId
 				}
+
 				prompt := fmt.Sprintf("Are you sure you want to create a network interface for network %q and attach it to server %q?", networkLabel, serverLabel)
+
 				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -87,15 +92,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 				// Call API
 				req := buildRequestCreateAndAttach(ctx, model, apiClient)
+
 				err = req.Execute()
 				if err != nil {
 					return fmt.Errorf("create and attach network interface: %w", err)
 				}
+
 				params.Printer.Info("Created a network interface for network %q and attached it to server %q\n", networkLabel, serverLabel)
+
 				return nil
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to attach network interface %q to server %q?", *model.NicId, serverLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -103,16 +112,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequestAttach(ctx, model, apiClient)
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("attach network interface: %w", err)
 			}
+
 			params.Printer.Info("Attached network interface %q to server %q\n", utils.PtrString(model.NicId), serverLabel)
 
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -139,6 +151,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	// if create is not provided then network-interface-id is needed
 	networkInterfaceId := flags.FlagToStringPointer(p, cmd, networkInterfaceIdFlag)
 	create := flags.FlagToBoolPointer(p, cmd, createFlag)
+
 	if create == nil && networkInterfaceId == nil {
 		return nil, &cliErr.ServerNicAttachMissingNicIdError{Cmd: cmd}
 	}
@@ -152,6 +165,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 

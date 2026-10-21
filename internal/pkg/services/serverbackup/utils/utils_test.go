@@ -31,12 +31,14 @@ func newServerbackupClientMock(s mockSettings) serverbackup.DefaultAPI {
 			if s.listBackupSchedulesFails {
 				return nil, fmt.Errorf("could not list backup schedules")
 			}
+
 			return s.listBackupSchedulesResp, nil
 		}),
 		ListBackupsExecuteMock: utils.Ptr(func(_ serverbackup.ApiListBackupsRequest) (*serverbackup.GetBackupsListResponse, error) {
 			if s.listBackupsFails {
 				return nil, fmt.Errorf("could not list backups")
 			}
+
 			return s.listBackupsResp, nil
 		}),
 	}
@@ -138,12 +140,15 @@ func TestCanDisableBackupService(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %t, got %t", tt.expectedOutput, output)
 			}

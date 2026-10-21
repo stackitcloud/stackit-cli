@@ -36,12 +36,14 @@ func newAPIMock(m mockSettings) mariadb.DefaultAPI {
 			if m.getInstanceFails {
 				return nil, fmt.Errorf("could not get instance")
 			}
+
 			return m.getInstanceResp, nil
 		}),
 		GetCredentialsExecuteMock: utils.Ptr(func(_ mariadb.ApiGetCredentialsRequest) (*mariadb.CredentialsResponse, error) {
 			if m.getCredentialsFails {
 				return nil, fmt.Errorf("could not get user")
 			}
+
 			return m.getCredentialsResp, nil
 		}),
 	}
@@ -82,12 +84,15 @@ func TestGetInstanceName(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}
@@ -134,12 +139,15 @@ func TestGetCredentialsUsername(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}

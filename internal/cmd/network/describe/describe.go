@@ -48,6 +48,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -61,6 +62,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read network: %w", err)
@@ -69,6 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
+
 	return cmd
 }
 
@@ -86,6 +89,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -97,35 +101,47 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 	if network == nil {
 		return fmt.Errorf("network cannot be nil")
 	}
+
 	return p.OutputResult(outputFormat, network, func() error {
 		// IPv4
-		var ipv4Nameservers, ipv4Prefixes []string
-		var publicIp, ipv4Gateway *string
+		var (
+			ipv4Nameservers, ipv4Prefixes []string
+			publicIp, ipv4Gateway         *string
+		)
+
 		if ipv4 := network.Ipv4; ipv4 != nil {
 			if ipv4.Nameservers != nil {
 				ipv4Nameservers = append(ipv4Nameservers, ipv4.Nameservers...)
 			}
+
 			if ipv4.Prefixes != nil {
 				ipv4Prefixes = append(ipv4Prefixes, ipv4.Prefixes...)
 			}
+
 			if ipv4.PublicIp != nil {
 				publicIp = ipv4.PublicIp
 			}
+
 			if ipv4.Gateway.IsSet() {
 				ipv4Gateway = ipv4.Gateway.Get()
 			}
 		}
 
 		// IPv6
-		var ipv6Nameservers, ipv6Prefixes []string
-		var ipv6Gateway *string
+		var (
+			ipv6Nameservers, ipv6Prefixes []string
+			ipv6Gateway                   *string
+		)
+
 		if ipv6 := network.Ipv6; ipv6 != nil {
 			if ipv6.Nameservers != nil {
 				ipv6Nameservers = append(ipv6Nameservers, ipv6.Nameservers...)
 			}
+
 			if ipv6.Prefixes != nil {
 				ipv6Prefixes = append(ipv6Prefixes, ipv6.Prefixes...)
 			}
+
 			if ipv6.Gateway.IsSet() {
 				ipv6Gateway = ipv6.Gateway.Get()
 			}
@@ -167,10 +183,13 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 		if len(ipv4Nameservers) > 0 {
 			table.AddRow("IPv4 NAME SERVERS", strings.Join(ipv4Nameservers, ", "))
 		}
+
 		table.AddSeparator()
+
 		if len(ipv4Prefixes) > 0 {
 			table.AddRow("IPv4 PREFIXES", strings.Join(ipv4Prefixes, ", "))
 		}
+
 		table.AddSeparator()
 
 		if ipv6Gateway != nil {
@@ -182,15 +201,19 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 			table.AddRow("IPv6 NAME SERVERS", strings.Join(ipv6Nameservers, ", "))
 			table.AddSeparator()
 		}
+
 		if len(ipv6Prefixes) > 0 {
 			table.AddRow("IPv6 PREFIXES", strings.Join(ipv6Prefixes, ", "))
 			table.AddSeparator()
 		}
+
 		if len(network.Labels) > 0 {
 			var labels []string
+
 			for key, value := range network.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
+
 			table.AddRow("LABELS", strings.Join(labels, "\n"))
 			table.AddSeparator()
 		}
@@ -199,6 +222,7 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

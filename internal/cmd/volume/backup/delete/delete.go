@@ -44,6 +44,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -61,6 +62,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete backup %q? (This cannot be undone)", backupLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -68,6 +70,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("delete backup: %w", err)
@@ -89,9 +92,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			} else {
 				params.Printer.Outputf("Deleted backup %q\n", backupLabel)
 			}
+
 			return nil
 		},
 	}
+
 	return cmd
 }
 
@@ -109,6 +114,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 

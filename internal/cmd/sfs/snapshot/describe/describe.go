@@ -45,6 +45,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, inputArgs []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, inputArgs)
 			if err != nil {
 				return err
@@ -58,6 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create snapshot: %w", err)
@@ -67,6 +69,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -96,6 +99,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -103,22 +107,28 @@ func outputResult(p *print.Printer, outputFormat string, resp *sfs.GetResourcePo
 	return p.OutputResult(outputFormat, resp, func() error {
 		if resp == nil || resp.ResourcePoolSnapshot == nil {
 			p.Outputln("Resource pool snapshot response is empty")
+
 			return nil
 		}
 
 		table := tables.NewTable()
 
 		snap := *resp.ResourcePoolSnapshot
+
 		var snaplockExpiryTime string
+
 		if snap.SnaplockExpiryTime.IsSet() && snap.SnaplockExpiryTime.Get() != nil {
 			snaplockExpiryTime = utils.ConvertTimePToDateTimeString(snap.SnaplockExpiryTime.Get())
 		}
+
 		table.AddRow("NAME", utils.PtrString(snap.SnapshotName))
 		table.AddSeparator()
+
 		if snap.Comment.IsSet() && snap.Comment.Get() != nil {
 			table.AddRow("COMMENT", utils.PtrString(snap.Comment.Get()))
 			table.AddSeparator()
 		}
+
 		table.AddRow("RESOURCE POOL ID", utils.PtrString(snap.ResourcePoolId))
 		table.AddSeparator()
 		table.AddRow("SIZE (GB)", utils.PtrString(snap.SizeGigabytes))
@@ -131,6 +141,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *sfs.GetResourcePo
 		table.AddSeparator()
 
 		p.Outputln(table.Render())
+
 		return nil
 	})
 }

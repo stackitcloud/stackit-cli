@@ -50,6 +50,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -67,6 +68,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update backup %q? (This cannot be undone)", model.BackupId)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -74,6 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update backup: %w", err)
@@ -84,6 +87,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -102,6 +106,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	name := flags.FlagToStringPointer(p, cmd, nameFlag)
 	labels := flags.FlagToStringToAny(p, cmd, labelsFlag)
+
 	if labels == nil {
 		labels = map[string]any{}
 	}
@@ -114,6 +119,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -126,6 +132,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	}
 
 	req = req.UpdateBackupPayload(payload)
+
 	return req
 }
 
@@ -136,6 +143,7 @@ func outputResult(p *print.Printer, outputFormat, backupLabel string, backup *ia
 
 	return p.OutputResult(outputFormat, backup, func() error {
 		p.Outputf("Updated backup %q\n", backupLabel)
+
 		return nil
 	})
 }

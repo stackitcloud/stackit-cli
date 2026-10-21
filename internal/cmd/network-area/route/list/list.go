@@ -56,6 +56,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -69,6 +70,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list static routes: %w", err)
@@ -77,9 +79,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			items := resp.GetItems()
 
 			var networkAreaLabel string
+
 			networkAreaLabel, err = iaasUtils.GetNetworkAreaName(ctx, apiClient.DefaultAPI, model.OrganizationId, model.NetworkAreaId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
+
 				networkAreaLabel = model.NetworkAreaId
 			}
 
@@ -92,6 +96,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -107,6 +112,7 @@ func configureFlags(cmd *cobra.Command) {
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
+
 	if limit != nil && *limit < 1 {
 		return nil, &cliErr.FlagValidationError{
 			Flag:    limitFlag,
@@ -122,6 +128,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -133,22 +140,30 @@ func outputResult(p *print.Printer, outputFormat, networkAreaLabel string, route
 	return p.OutputResult(outputFormat, routes, func() error {
 		if len(routes) == 0 {
 			p.Outputf("No static routes found for STACKIT Network Area %q\n", networkAreaLabel)
+
 			return nil
 		}
+
 		table := tables.NewTable()
 		table.SetHeader("Static Route ID", "Next Hop", "Next Hop Type", "Destination")
 
 		for _, route := range routes {
-			var nextHop string
-			var nextHopType string
-			var destination string
+			var (
+				nextHop     string
+				nextHopType string
+				destination string
+			)
+
 			routeDest := route.Destination
+
 			if routeDest.DestinationCIDRv4 != nil {
 				destination = routeDest.DestinationCIDRv4.Value
 			}
+
 			if routeDest.DestinationCIDRv6 != nil {
 				destination = routeDest.DestinationCIDRv6.Value
 			}
+
 			routeNexthop := route.Nexthop
 			if routeNexthop.NexthopIPv4 != nil {
 				nextHop = routeNexthop.NexthopIPv4.Value
@@ -171,6 +186,7 @@ func outputResult(p *print.Printer, outputFormat, networkAreaLabel string, route
 		}
 
 		p.Outputln(table.Render())
+
 		return nil
 	})
 }

@@ -36,6 +36,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -50,16 +51,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
 			listReq := buildListCredentialsRequest(ctx, model, apiClient)
+
 			resp, err := listReq.Execute()
 			if err != nil {
 				return fmt.Errorf("list Load Balancer observability credentials: %w", err)
 			}
 
 			var credentials []loadbalancer.CredentialsResponse
+
 			if len(resp.Credentials) > 0 {
 				credentials, err = utils.FilterCredentials(ctx, apiClient.DefaultAPI, resp.Credentials, model.ProjectId, model.Region, utils.OP_FILTER_UNUSED)
 				if err != nil {
@@ -69,19 +73,25 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			if len(credentials) == 0 {
 				params.Printer.Info("No unused observability credentials found on project %q\n", projectLabel)
+
 				return nil
 			}
 
 			prompt := "Will delete the following unused observability credentials: \n"
+
 			for _, credential := range credentials {
 				if credential.DisplayName == nil || credential.Username == nil {
 					return fmt.Errorf("list unused Load Balancer observability credentials: credentials %q missing display name or username", *credential.CredentialsRef)
 				}
+
 				name := *credential.DisplayName
 				username := *credential.Username
+
 				prompt += fmt.Sprintf("  - %s (username: %q)\n", name, username)
 			}
+
 			prompt += fmt.Sprintf("Are you sure you want to delete unused observability credentials on project %q? (This cannot be undone)", projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -91,9 +101,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if credential.CredentialsRef == nil {
 					return fmt.Errorf("delete Load Balancer observability credentials: missing credentials reference")
 				}
+
 				credentialsRef := *credential.CredentialsRef
 				// Call API
 				req := buildDeleteCredentialRequest(ctx, model, apiClient, credentialsRef)
+
 				_, err = req.Execute()
 				if err != nil {
 					return fmt.Errorf("delete Load Balancer observability credentials: %w", err)
@@ -101,9 +113,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			params.Printer.Info("Deleted unused Load Balancer observability credentials on project %q\n", projectLabel)
+
 			return nil
 		},
 	}
+
 	return cmd
 }
 
@@ -118,6 +132,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 

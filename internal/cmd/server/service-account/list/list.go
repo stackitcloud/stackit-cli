@@ -52,6 +52,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -66,6 +67,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			serverName, err := iaasUtils.GetServerName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
+
 				serverName = model.ServerId
 			} else if serverName == "" {
 				serverName = model.ServerId
@@ -73,10 +75,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list service accounts: %w", err)
 			}
+
 			serviceAccounts := resp.Items
 
 			if model.Limit != nil && len(serviceAccounts) > int(*model.Limit) {
@@ -87,6 +91,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -119,6 +124,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -131,17 +137,22 @@ func outputResult(p *print.Printer, outputFormat, serverId, serverName string, s
 	return p.OutputResult(outputFormat, serviceAccounts, func() error {
 		if len(serviceAccounts) == 0 {
 			p.Info("No service accounts found for server %s\n", serverName)
+
 			return nil
 		}
+
 		table := tables.NewTable()
 		table.SetHeader("SERVER ID", "SERVER NAME", "SERVICE ACCOUNT")
+
 		for i := range serviceAccounts {
 			table.AddRow(serverId, serverName, serviceAccounts[i])
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

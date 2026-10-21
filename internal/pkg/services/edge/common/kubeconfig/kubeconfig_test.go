@@ -97,6 +97,7 @@ func TestValidateExpiration(t *testing.T) {
 	type args struct {
 		expiration *uint64
 	}
+
 	tests := []struct {
 		name string
 		args *args
@@ -179,6 +180,7 @@ func TestErrors(t *testing.T) {
 	type args struct {
 		err error
 	}
+
 	tests := []struct {
 		name    string
 		args    *args
@@ -228,6 +230,7 @@ func TestWriteOptions(t *testing.T) {
 		modify func(WriteOptions) WriteOptions
 		check  func(*testing.T, WriteOptions)
 	}
+
 	tests := []struct {
 		name string
 		args *args
@@ -241,9 +244,11 @@ func TestWriteOptions(t *testing.T) {
 					if opts.Overwrite {
 						t.Error("expected Overwrite to be false by default")
 					}
+
 					if opts.SwitchContext {
 						t.Error("expected SwitchContext to be false by default")
 					}
+
 					if opts.ConfirmFn != nil {
 						t.Error("expected ConfirmFn to be nil by default")
 					}
@@ -299,9 +304,11 @@ func TestWriteOptions(t *testing.T) {
 					if !opts.Overwrite {
 						t.Error("expected Overwrite to be true")
 					}
+
 					if !opts.SwitchContext {
 						t.Error("expected SwitchContext to be true")
 					}
+
 					if opts.ConfirmFn == nil {
 						t.Error("expected ConfirmFn to be set")
 					}
@@ -322,6 +329,7 @@ func TestGetDefaultKubeconfigPath(t *testing.T) {
 	type args struct {
 		kubeconfigEnv *string // nil means unset
 	}
+
 	tests := []struct {
 		name string
 		args *args
@@ -353,6 +361,7 @@ func TestGetDefaultKubeconfigPath(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Save original env and restore after test
 			oldKubeconfig := os.Getenv("KUBECONFIG")
+
 			defer func() {
 				if err := os.Setenv("KUBECONFIG", oldKubeconfig); err != nil {
 					t.Logf("failed to restore KUBECONFIG: %v", err)
@@ -393,6 +402,7 @@ func TestGetKubeconfigPath(t *testing.T) {
 		path      *string
 		checkPath func(t *testing.T, path string)
 	}
+
 	tests := []struct {
 		name    string
 		args    *args
@@ -435,6 +445,7 @@ func TestGetKubeconfigPath(t *testing.T) {
 			if !testUtils.AssertError(t, err, tt.wantErr) {
 				return
 			}
+
 			if tt.args.checkPath != nil {
 				tt.args.checkPath(t, path)
 			}
@@ -446,6 +457,7 @@ func TestIsValidFilePath(t *testing.T) {
 	type args struct {
 		path *string
 	}
+
 	tests := []struct {
 		name string
 		args *args
@@ -530,6 +542,7 @@ func TestWriteKubeconfig(t *testing.T) {
 		setupEnv  func()
 		checkFile func(t *testing.T, path string)
 	}
+
 	tests := []struct {
 		name     string
 		args     *args
@@ -597,6 +610,7 @@ func TestWriteKubeconfig(t *testing.T) {
 					if err != nil {
 						t.Fatalf("failed to read kubeconfig: %v", err)
 					}
+
 					if !strings.Contains(string(content), "server-2.com") {
 						t.Error("file was not overwritten")
 					}
@@ -655,6 +669,7 @@ func TestMergeKubeconfig(t *testing.T) {
 		switchCtx bool
 		setupEnv  func()
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -735,6 +750,7 @@ func TestMergeKubeconfig(t *testing.T) {
 				if tt.args.path == nil {
 					t.Fatalf("expected path to be set")
 				}
+
 				tt.verify(t, *tt.args.path)
 			}
 		})

@@ -149,12 +149,14 @@ func (m *observabilityClientMocked) newMock() observability.DefaultAPI {
 			if m.getInstanceFails {
 				return nil, fmt.Errorf("could not get instance")
 			}
+
 			return m.getInstanceResp, nil
 		}),
 		GetGrafanaConfigsExecuteMock: utils.Ptr(func(_ observability.ApiGetGrafanaConfigsRequest) (*observability.GrafanaConfigs, error) {
 			if m.getGrafanaConfigsFails {
 				return nil, fmt.Errorf("could not get grafana configs")
 			}
+
 			return m.getGrafanaConfigsResp, nil
 		}),
 	}
@@ -181,6 +183,7 @@ func fixtureGrafanaConfigs(mods ...func(gc *observability.GrafanaConfigs)) *obse
 	for _, mod := range mods {
 		mod(&gc)
 	}
+
 	return &gc
 }
 
@@ -219,12 +222,15 @@ func TestGetInstanceName(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}
@@ -287,12 +293,15 @@ func TestLoadPlanId(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}
@@ -352,9 +361,11 @@ func TestValidatePlanId(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
@@ -396,9 +407,11 @@ func TestMapToUpdateScrapeConfigPayload(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
@@ -871,9 +884,11 @@ func TestGetPartialUpdateGrafanaConfigsPayload(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
@@ -890,30 +905,38 @@ func TestGetPartialUpdateGrafanaConfigsPayload(t *testing.T) {
 func TestUpdateScrapeConfigPayloadMetricsRelabelConfigsInnerActionIsAction(t *testing.T) {
 	innerKeys := make(map[string]struct{})
 	actionKeys := make(map[string]struct{})
+
 	for _, innerEnumVal := range observability.AllowedUpdateScrapeConfigPayloadMetricsRelabelConfigsInnerActionEnumValues {
 		innerKeys[string(innerEnumVal)] = struct{}{}
 	}
+
 	for _, actionEnumVal := range observability.AllowedActionEnumValues {
 		actionKeys[string(actionEnumVal)] = struct{}{}
 	}
+
 	onlyInInner := make([]string, 0)
 	onlyInAction := make([]string, 0)
+
 	for innerKey := range innerKeys {
 		if _, ok := actionKeys[innerKey]; !ok {
 			onlyInInner = append(onlyInInner, innerKey)
 		}
 	}
+
 	for actionKey := range actionKeys {
 		if _, ok := innerKeys[actionKey]; !ok {
 			onlyInAction = append(onlyInAction, actionKey)
 		}
 	}
+
 	if len(onlyInInner) > 0 {
 		t.Logf("the following keys are only in AllowedUpdateScrapeConfigPayloadMetricsRelabelConfigsInnerActionEnumValues: %v", onlyInInner)
 	}
+
 	if len(onlyInAction) > 0 {
 		t.Logf("the following keys are only in AllowedActionEnumValues: %v", onlyInAction)
 	}
+
 	if len(onlyInInner) > 0 || len(onlyInAction) > 0 {
 		t.Fail()
 	}

@@ -48,6 +48,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -63,6 +64,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("enable key version: %w", err)
@@ -90,12 +92,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	versionStr := inputArgs[0]
 	versionNumber, err := strconv.ParseInt(versionStr, 10, 64)
+
 	if err != nil || versionNumber < 0 {
 		return nil, &errors.ArgValidationError{
 			Arg:     versionNumberArg,
@@ -116,6 +120,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -141,7 +146,9 @@ func outputResult(p *print.Printer, outputFormat string, async bool, resp *kms.V
 		if async {
 			operationState = "Triggered enable of"
 		}
+
 		p.Outputf("%s version %d of the key %q\n", operationState, resp.Number, resp.KeyId)
+
 		return nil
 	})
 }

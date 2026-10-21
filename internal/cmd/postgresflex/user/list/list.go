@@ -51,6 +51,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args: args.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -64,10 +65,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get PostgreSQL Flex users: %w", err)
 			}
+
 			users := resp.Users
 
 			// Truncate output
@@ -78,13 +81,16 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
+
 			return outputResult(params.Printer, model.OutputFormat, instanceLabel, users)
 		},
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -117,6 +123,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -137,10 +144,13 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, users []
 	return p.OutputResult(outputFormat, users, func() error {
 		if len(users) == 0 {
 			p.Outputf("No users found for instance %q\n", instanceLabel)
+
 			return nil
 		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "USERNAME")
+
 		for i := range users {
 			user := users[i]
 			table.AddRow(
@@ -148,6 +158,7 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, users []
 				user.Name,
 			)
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

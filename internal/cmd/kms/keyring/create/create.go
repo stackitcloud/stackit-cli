@@ -52,6 +52,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
@@ -98,6 +99,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -122,6 +124,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -138,6 +141,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient kmsKeyringCl
 		// Description should be empty by default and only be overwritten with the descriptionFlag if it was passed.
 		Description: &model.Description,
 	})
+
 	return req, nil
 }
 
@@ -151,7 +155,9 @@ func outputResult(p *print.Printer, model *inputModel, resp *kms.KeyRing) error 
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
+
 		p.Outputf("%s key ring. KMS key ring ID: %s\n", operationState, resp.Id)
+
 		return nil
 	})
 }

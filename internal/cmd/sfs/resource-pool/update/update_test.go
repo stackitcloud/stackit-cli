@@ -44,6 +44,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, mod := range mods {
 		mod(argValues)
 	}
+
 	return argValues
 }
 
@@ -60,6 +61,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -82,11 +84,13 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *sfs.ApiUpdateResourcePoolRequest)) sfs.ApiUpdateResourcePoolRequest {
 	request := testClient.DefaultAPI.UpdateResourcePool(testCtx, testProjectId, testRegion, testResourcePoolId)
+
 	request = request.UpdateResourcePoolPayload(sfs.UpdateResourcePoolPayload{
 		IpAcl:               testResourcePoolIpAcl,
 		PerformanceClass:    &testResourcePoolPerformanceClass,
@@ -94,9 +98,11 @@ func fixtureRequest(mods ...func(request *sfs.ApiUpdateResourcePoolRequest)) sfs
 		SnapshotsAreVisible: &testSnapshotsVisible,
 		SnapshotPolicyId:    *sfs.NewNullableString(&testSnapshotPolicyId),
 	})
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -211,6 +217,7 @@ func TestParseInput(t *testing.T) {
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, globalflags.ProjectIdFlag)
+
 				flagValues[sizeFlag] = "50"
 			}),
 			isValid: false,
@@ -255,6 +262,7 @@ func TestParseInput(t *testing.T) {
 				if model.IpAcl == nil {
 					model.IpAcl = []string{}
 				}
+
 				model.IpAcl = append(model.IpAcl, "198.51.100.14/24", "198.51.100.14/32")
 			}),
 		},
@@ -268,6 +276,7 @@ func TestParseInput(t *testing.T) {
 				if model.IpAcl == nil {
 					model.IpAcl = []string{}
 				}
+
 				model.IpAcl = append(model.IpAcl, "198.51.100.14/24", "198.51.100.14/32")
 			}),
 		},
@@ -328,6 +337,7 @@ func TestOutputResult(t *testing.T) {
 		async        bool
 		resp         *sfs.UpdateResourcePoolResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args

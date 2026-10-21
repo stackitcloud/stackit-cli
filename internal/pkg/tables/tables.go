@@ -16,6 +16,7 @@ type Table struct {
 // Creates a new table
 func NewTable() Table {
 	t := table.NewWriter()
+
 	return Table{
 		table: t,
 	}
@@ -53,9 +54,11 @@ func (t *Table) AddSeparator() {
 // Enables auto-merging of cells with similar values in the given columns
 func (t *Table) EnableAutoMergeOnColumns(columns ...int) {
 	var colConfigs []table.ColumnConfig
+
 	for _, c := range columns {
 		colConfigs = append(colConfigs, table.ColumnConfig{Number: c, AutoMerge: true})
 	}
+
 	t.table.SetColumnConfigs(colConfigs)
 }
 

@@ -79,6 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -93,10 +94,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := valkeyUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update instance %q?", instanceLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -108,8 +111,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if _, ok := errors.AsType[*cliErr.DSAInvalidPlanError](err); !ok {
 					return fmt.Errorf("build Valkey instance update request: %w", err)
 				}
+
 				return err
 			}
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("update Valkey instance: %w", err)
@@ -130,6 +135,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -175,6 +181,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 			Cmd: cmd,
 		}
 	}
+
 	if planId == nil && (planName == "") != (version == "") {
 		return nil, &cliErr.DSAInputPlanError{
 			Cmd: cmd,
@@ -206,6 +213,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -225,6 +233,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient valkey.Defau
 			if err := valkeyUtils.ValidatePlanId(*model.PlanId, offerings); err != nil {
 				return req, err
 			}
+
 			planId = model.PlanId
 		} else {
 			foundPlanId, err := valkeyUtils.LoadPlanId(model.PlanName, model.Version, offerings)
@@ -232,13 +241,16 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient valkey.Defau
 				if _, ok := errors.AsType[*cliErr.DSAInvalidPlanError](err); !ok {
 					return req, fmt.Errorf("load plan ID: %w", err)
 				}
+
 				return req, err
 			}
+
 			planId = foundPlanId
 		}
 	}
 
 	var sgwAcl *string
+
 	if model.SgwAcl != nil {
 		sgwAcl = new(strings.Join(*model.SgwAcl, ","))
 	}
@@ -257,6 +269,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient valkey.Defau
 		},
 		PlanId: planId,
 	})
+
 	return req, nil
 }
 
@@ -265,6 +278,8 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string) err
 	if model.Async {
 		operationState = "Triggered update of"
 	}
+
 	p.Info("%s instance %q\n", operationState, instanceLabel)
+
 	return nil
 }

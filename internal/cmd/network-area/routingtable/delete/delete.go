@@ -44,6 +44,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -58,6 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			routingTableLabel, err := iaasUtils.GetRoutingTableOfAreaName(ctx, apiClient.DefaultAPI, model.OrganizationId, model.NetworkAreaId, model.Region, model.RoutingTableId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get routing-table name: %v", err)
+
 				routingTableLabel = model.RoutingTableId
 			} else if routingTableLabel == "" {
 				routingTableLabel = model.RoutingTableId
@@ -78,17 +80,20 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				model.Region,
 				model.RoutingTableId,
 			)
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("delete routing-table: %w", err)
 			}
 
 			params.Printer.Outputf("Routing-table %q deleted.", model.RoutingTableId)
+
 			return nil
 		},
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -113,5 +118,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }

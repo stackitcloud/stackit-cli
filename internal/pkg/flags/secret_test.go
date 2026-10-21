@@ -19,6 +19,7 @@ type testFile struct {
 
 func TestSecretFlag(t *testing.T) {
 	t.Parallel()
+
 	tests := []struct {
 		name       string
 		value      string
@@ -81,6 +82,7 @@ func TestSecretFlag(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			params := testparams.NewTestParams()
 			if tt.file != nil {
 				params.Fs = fstest.MapFS{
@@ -89,9 +91,11 @@ func TestSecretFlag(t *testing.T) {
 					},
 				}
 			}
+
 			flag := SecretFlag("test", params.CmdParams)
 			cmd := cobra.Command{}
 			cmd.Flags().Var(flag, "test", flag.Usage())
+
 			if tt.stdin != "" {
 				params.In.WriteString(tt.stdin)
 				params.In.WriteString("\n")
@@ -102,6 +106,7 @@ func TestSecretFlag(t *testing.T) {
 				if err != nil && !tt.wantErr {
 					t.Fatalf("unexpected error: %v", err)
 				}
+
 				if err == nil && tt.wantErr {
 					t.Fatalf("expected error, got none")
 				}
@@ -112,11 +117,13 @@ func TestSecretFlag(t *testing.T) {
 			if got != tt.want && *got != *tt.want {
 				t.Fatalf("unexpected value: got %q, want %q", *got, *tt.want)
 			}
+
 			if tt.wantStdErr != "" {
 				message, err := params.Err.ReadString('\n')
 				if err != nil && err != io.EOF {
 					t.Fatalf("reading stderr: %v", err)
 				}
+
 				if message != tt.wantStdErr {
 					t.Fatalf("unexpected stderr: got %q, want %q", message, tt.wantStdErr)
 				}
@@ -127,6 +134,7 @@ func TestSecretFlag(t *testing.T) {
 
 func TestSecretFlag_Usage(t *testing.T) {
 	t.Parallel()
+
 	tests := []struct {
 		in   string
 		want string
@@ -151,9 +159,11 @@ func TestSecretFlag_Usage(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%q -> %q", tt.in, tt.want), func(t *testing.T) {
 			t.Parallel()
+
 			params := testparams.NewTestParams()
 			flag := SecretFlag(tt.in, params.CmdParams)
 			got := flag.Usage()
+
 			if !strings.HasPrefix(got, tt.want) {
 				t.Fatalf("unexpected usage: got %q, want %q", got, tt.want)
 			}

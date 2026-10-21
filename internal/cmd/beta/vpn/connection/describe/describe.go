@@ -45,6 +45,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(p.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -61,6 +62,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("describe VPN connection: %w", err)
@@ -70,6 +72,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -95,6 +98,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -113,10 +117,13 @@ func outputResult(p *print.Printer, model *inputModel, resp *vpn.ConnectionRespo
 		mainTable.AddRow("ID", utils.PtrString(resp.Id))
 		mainTable.AddRow("Name", resp.DisplayName)
 		mainTable.AddRow("Enabled", utils.PtrString(resp.Enabled))
+
 		var labels string
+
 		if resp.Labels != nil {
 			labels = utils.JoinStringMap(*resp.Labels, "=", ", ")
 		}
+
 		mainTable.AddRow("Labels", labels)
 		mainTable.AddRow("Local Subnets", strings.Join(resp.LocalSubnets, ", "))
 		mainTable.AddRow("Remote Subnets", strings.Join(resp.RemoteSubnets, ", "))
@@ -125,8 +132,10 @@ func outputResult(p *print.Printer, model *inputModel, resp *vpn.ConnectionRespo
 		ts := []tables.Table{
 			mainTable,
 		}
+
 		ts = append(ts, tunnelTables(&resp.Tunnel1, "Tunnel 1")...)
 		ts = append(ts, tunnelTables(&resp.Tunnel2, "Tunnel 2")...)
+
 		return tables.DisplayTables(p, ts)
 	})
 }
@@ -135,15 +144,21 @@ func tunnelTables(tunnel *vpn.TunnelConfiguration, title string) []tables.Table 
 	table := tables.NewTable()
 	table.SetTitle(title)
 	table.AddRow("IP Address", tunnel.RemoteAddress)
+
 	var bgp string
+
 	if tunnel.Bgp != nil {
 		bgp = fmt.Sprintf("%d", tunnel.Bgp.RemoteAsn)
 	}
+
 	table.AddRow("BGP ASN", bgp)
+
 	var peering string
+
 	if tunnel.Peering != nil {
 		peering = fmt.Sprintf("%s/%s", utils.PtrString(tunnel.Peering.LocalAddress), utils.PtrString(tunnel.Peering.RemoteAddress))
 	}
+
 	table.AddRow("Peering (local/remote)", peering)
 
 	phase1Table := tables.NewTable()

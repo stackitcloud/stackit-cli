@@ -60,13 +60,16 @@ func AssertError(t testing.TB, got error, want any) bool {
 		if want == nil || want == false {
 			return true
 		}
+
 		t.Errorf("got nil error, want %v", want)
+
 		return false
 	}
 
 	// Case 2: Error occurred
 	if want == nil || want == false {
 		t.Errorf("got unexpected error: %v", got)
+
 		return false
 	}
 
@@ -79,6 +82,7 @@ func AssertError(t testing.TB, got error, want any) bool {
 		if !strings.Contains(got.Error(), wantStr) {
 			t.Errorf("got error %q, want substring %q", got, wantStr)
 		}
+
 		return false
 	}
 
@@ -87,11 +91,14 @@ func AssertError(t testing.TB, got error, want any) bool {
 		if checkErrorMatch(got, wantErr) {
 			return false
 		}
+
 		t.Errorf("got error %v, want %v", got, wantErr)
+
 		return false
 	}
 
 	t.Errorf("invalid want type %T for AssertError", want)
+
 	return false
 }
 
@@ -131,6 +138,7 @@ func (config *valueComparisonConfig) getDiffFunc() DiffFunc {
 	if config.diffFunc != nil {
 		return config.diffFunc
 	}
+
 	return func(got, want any) string {
 		return cmp.Diff(got, want, config.cmpOptions...)
 	}
@@ -168,11 +176,13 @@ func WithIgnoreFields(typ any, names ...string) ValueComparisonOption {
 // reported as an error containing the diff output.
 func AssertValue[T any](t testing.TB, got, want T, opts ...ValueComparisonOption) {
 	t.Helper()
+
 	// Configure comparison options
 	config := &valueComparisonConfig{}
 	for _, opt := range opts {
 		opt(config)
 	}
+
 	// Perform comparison and report diff
 	diff := config.getDiffFunc()(got, want)
 	if diff != "" {

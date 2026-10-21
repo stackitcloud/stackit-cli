@@ -26,6 +26,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -40,6 +41,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -185,8 +187,10 @@ func TestStoreCustomEndpointFlags(t *testing.T) {
 				if err == nil {
 					t.Fatalf("did not fail on invalid input")
 				}
+
 				return
 			}
+
 			if err != nil {
 				t.Fatalf("store flags: %v", err)
 			}
@@ -195,6 +199,7 @@ func TestStoreCustomEndpointFlags(t *testing.T) {
 			if err != nil {
 				t.Errorf("Failed to get value of auth field: %v", err)
 			}
+
 			if value != tt.tokenCustomEndpoint {
 				t.Errorf("Value of \"%s\" does not match: expected \"%s\", got \"%s\"", auth.TOKEN_CUSTOM_ENDPOINT, tt.tokenCustomEndpoint, value)
 			}

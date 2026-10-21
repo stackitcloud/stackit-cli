@@ -41,11 +41,13 @@ func (utf *userTokenFlow) RoundTrip(req *http.Request) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if utf.authFlow != AUTH_FLOW_USER_TOKEN {
 		return nil, fmt.Errorf("auth flow is not user token")
 	}
 
 	accessTokenValid := false
+
 	accessTokenExpired, err := TokenExpired(utf.accessToken)
 	if err != nil {
 		return nil, fmt.Errorf("check if access token has expired: %w", err)
@@ -53,6 +55,7 @@ func (utf *userTokenFlow) RoundTrip(req *http.Request) (*http.Response, error) {
 		accessTokenValid = true
 	} else {
 		utf.printer.Debug(print.DebugLevel, "access token expired, refreshing...")
+
 		err = refreshTokens(utf)
 		if err == nil {
 			accessTokenValid = true
@@ -63,6 +66,7 @@ func (utf *userTokenFlow) RoundTrip(req *http.Request) (*http.Response, error) {
 
 	if !accessTokenValid {
 		utf.printer.Debug(print.DebugLevel, "user access token is not valid, reauthenticating...")
+
 		err = reauthenticateUser(utf)
 		if err != nil {
 			return nil, fmt.Errorf("reauthenticate user: %w", err)
@@ -70,6 +74,7 @@ func (utf *userTokenFlow) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", utf.accessToken))
+
 	return utf.client.Do(req) //nolint:gosec // URL is request specific
 }
 
@@ -78,11 +83,13 @@ func loadVarsFromStorage(utf *userTokenFlow) error {
 	if err != nil {
 		return fmt.Errorf("get auth flow type: %w", err)
 	}
+
 	authFields := map[authFieldKey]string{
 		ACCESS_TOKEN:       "",
 		REFRESH_TOKEN:      "",
 		IDP_TOKEN_ENDPOINT: "",
 	}
+
 	err = GetAuthFieldMap(authFields)
 	if err != nil {
 		return fmt.Errorf("get tokens from auth storage: %w", err)
@@ -92,6 +99,7 @@ func loadVarsFromStorage(utf *userTokenFlow) error {
 	utf.accessToken = authFields[ACCESS_TOKEN]
 	utf.refreshToken = authFields[REFRESH_TOKEN]
 	utf.tokenEndpoint = authFields[IDP_TOKEN_ENDPOINT]
+
 	return nil
 }
 
@@ -105,13 +113,16 @@ func reauthenticateUser(utf *userTokenFlow) error {
 	if err != nil {
 		return fmt.Errorf("authenticate user: %w", err)
 	}
+
 	err = loadVarsFromStorage(utf)
 	if err != nil {
 		return fmt.Errorf("load auth vars after user authentication: %w", err)
 	}
+
 	if utf.authFlow != AUTH_FLOW_USER_TOKEN {
 		return fmt.Errorf("auth flow is not user token")
 	}
+
 	return nil
 }
 
@@ -122,12 +133,14 @@ func TokenExpirationTime(token string) (time.Time, error) {
 	if err != nil {
 		return time.Time{}, fmt.Errorf("parse access token: %w", err)
 	}
+
 	expirationTimestampNumeric, err := tokenParsed.Claims.GetExpirationTime()
 	if err != nil {
 		return time.Time{}, fmt.Errorf("get expiration timestamp from access token: %w", err)
 	} else if expirationTimestampNumeric == nil {
 		return time.Time{}, nil
 	}
+
 	return expirationTimestampNumeric.Time, nil
 }
 
@@ -136,6 +149,7 @@ func TokenExpired(token string) (bool, error) {
 	if err != nil || expirationTimestamp.Equal(time.Time{}) {
 		return false, err
 	}
+
 	return time.Now().After(expirationTimestamp), nil
 }
 
@@ -150,6 +164,7 @@ func refreshTokens(utf *userTokenFlow) (err error) {
 	if err != nil {
 		return fmt.Errorf("call API: %w", err)
 	}
+
 	defer func() {
 		tempErr := resp.Body.Close()
 		if tempErr != nil {
@@ -161,6 +176,7 @@ func refreshTokens(utf *userTokenFlow) (err error) {
 	if err != nil {
 		return fmt.Errorf("parse API response: %w", err)
 	}
+
 	err = SetAuthFieldMap(map[authFieldKey]string{
 		ACCESS_TOKEN:  accessToken,
 		REFRESH_TOKEN: refreshToken,
@@ -168,8 +184,10 @@ func refreshTokens(utf *userTokenFlow) (err error) {
 	if err != nil {
 		return fmt.Errorf("set refreshed tokens in auth storage: %w", err)
 	}
+
 	utf.accessToken = accessToken
 	utf.refreshToken = refreshToken
+
 	return nil
 }
 
@@ -192,6 +210,7 @@ func buildRequestToRefreshTokens(utf *userTokenFlow) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	return req, nil
@@ -202,6 +221,7 @@ func parseRefreshTokensResponse(resp *http.Response) (accessToken, refreshToken 
 	if err != nil {
 		return "", "", fmt.Errorf("read body: %w", err)
 	}
+
 	if resp.StatusCode != http.StatusOK {
 		return "", "", fmt.Errorf("non-OK %d status: %s", resp.StatusCode, string(respBody))
 	}
@@ -210,15 +230,19 @@ func parseRefreshTokensResponse(resp *http.Response) (accessToken, refreshToken 
 		AccessToken  string `json:"access_token"`
 		RefreshToken string `json:"refresh_token"`
 	}{}
+
 	err = json.Unmarshal(respBody, &respContent)
 	if err != nil {
 		return "", "", fmt.Errorf("unmarshal body: %w", err)
 	}
+
 	if respContent.AccessToken == "" {
 		return "", "", fmt.Errorf("no access token found")
 	}
+
 	if respContent.RefreshToken == "" {
 		return "", "", fmt.Errorf("refresh token found")
 	}
+
 	return respContent.AccessToken, respContent.RefreshToken, nil
 }

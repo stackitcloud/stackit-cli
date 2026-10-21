@@ -28,7 +28,9 @@ func (f *emailFlag) Set(value string) error {
 	if !isEmail {
 		return fmt.Errorf("invalid email address: %s", value)
 	}
+
 	f.value = value
+
 	return nil
 }
 

@@ -73,6 +73,7 @@ func TestGetWellKnownConfig(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Fatalf("expected no error, got %v", err)
 			}
+
 			if !tt.isValid && err == nil {
 				t.Fatalf("expected error, got none")
 			}
@@ -114,6 +115,7 @@ func TestGetIDPClientID(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Fatalf("expected no error, got %v", err)
 			}
+
 			if !tt.isValid && err == nil {
 				t.Fatalf("expected error, got none")
 			}
@@ -194,6 +196,7 @@ func TestParseWellKnownConfig(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Fatalf("expected no error, got %v", err)
 			}
+
 			if !tt.isValid && err == nil {
 				t.Fatalf("expected error, got none")
 			}
@@ -207,10 +210,13 @@ func TestParseWellKnownConfig(t *testing.T) {
 
 func TestParseWellKnownConfigWithoutStorage(t *testing.T) {
 	keyring.MockInit()
+
 	const existingEndpoint = "https://existing.stackit.cloud/oauth"
+
 	if err := SetAuthField(IDP_TOKEN_ENDPOINT, existingEndpoint); err != nil {
 		t.Fatalf("Set existing token endpoint: %v", err)
 	}
+
 	testClient := apiClientMocked{
 		false,
 		`{"issuer":"https://issuer.stackit.cloud/endpoint","authorization_endpoint":"https://auth.stackit.cloud/endpoint","token_endpoint":"https://token.stackit.cloud/endpoint"}`,
@@ -220,6 +226,7 @@ func TestParseWellKnownConfigWithoutStorage(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}
+
 	if wellKnownConfig.TokenEndpoint != "https://token.stackit.cloud/endpoint" {
 		t.Fatalf("Unexpected token endpoint %q", wellKnownConfig.TokenEndpoint)
 	}
@@ -228,6 +235,7 @@ func TestParseWellKnownConfigWithoutStorage(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Get stored token endpoint: %v", err)
 	}
+
 	if storedTokenEndpoint != existingEndpoint {
 		t.Fatalf("Expected token endpoint not to be changed, got %q", storedTokenEndpoint)
 	}
@@ -239,18 +247,22 @@ func TestGetIDPTokenEndpointStatelessIgnoresStorage(t *testing.T) {
 	keyring.MockInit()
 
 	const storedEndpoint = "https://stored.stackit.cloud/oauth"
+
 	if err := SetAuthField(IDP_TOKEN_ENDPOINT, storedEndpoint); err != nil {
 		t.Fatalf("Set stored token endpoint: %v", err)
 	}
 
 	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+
 		_, _ = w.Write([]byte(`{"issuer":"https://issuer.stackit.cloud/endpoint","authorization_endpoint":"https://auth.stackit.cloud/endpoint","token_endpoint":"https://discovered.stackit.cloud/oauth"}`))
 	}))
 	defer server.Close()
 
 	originalTransport := http.DefaultTransport
+
 	http.DefaultTransport = server.Client().Transport
+
 	t.Cleanup(func() {
 		http.DefaultTransport = originalTransport
 	})
@@ -258,12 +270,16 @@ func TestGetIDPTokenEndpointStatelessIgnoresStorage(t *testing.T) {
 	viper.Set(config.AllowedUrlDomainKey, "")
 
 	params := testparams.NewTestParams()
+
 	params.Printer.AssumeYes = true
+
 	actual, err := GetIDPTokenEndpointStateless(params.Printer)
 	if err != nil {
 		t.Fatalf("Get stateless token endpoint: %v", err)
 	}
+
 	const discoveredEndpoint = "https://discovered.stackit.cloud/oauth"
+
 	if actual != discoveredEndpoint {
 		t.Fatalf("Expected discovered endpoint %q, got %q", discoveredEndpoint, actual)
 	}
@@ -272,6 +288,7 @@ func TestGetIDPTokenEndpointStatelessIgnoresStorage(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Get stored token endpoint: %v", err)
 	}
+
 	if actualStoredEndpoint != storedEndpoint {
 		t.Fatalf("Expected stored endpoint to remain %q, got %q", storedEndpoint, actualStoredEndpoint)
 	}

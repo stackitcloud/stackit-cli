@@ -42,6 +42,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -58,15 +59,19 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiListImagesRequest)) iaas.ApiListImagesRequest {
 	request := testClient.DefaultAPI.ListImages(testCtx, testProjectId, testRegion)
+
 	request = request.LabelSelector(testLabels)
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -178,6 +183,7 @@ func TestBuildRequest(t *testing.T) {
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
+
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
 			}
@@ -191,6 +197,7 @@ func Test_outputResult(t *testing.T) {
 		projectLabel string
 		items        []iaas.Image
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -214,6 +221,7 @@ func Test_outputResult(t *testing.T) {
 		},
 	}
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.projectLabel, tt.args.items); (err != nil) != tt.wantErr {

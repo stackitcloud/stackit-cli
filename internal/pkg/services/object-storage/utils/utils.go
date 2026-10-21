@@ -16,11 +16,14 @@ func ProjectEnabled(ctx context.Context, apiClient objectstorage.DefaultAPI, pro
 		if !ok {
 			return false, err
 		}
+
 		if oapiErr.StatusCode == http.StatusNotFound {
 			return false, nil
 		}
+
 		return false, err
 	}
+
 	return true, nil
 }
 
@@ -46,9 +49,10 @@ func GetCredentialsGroupName(ctx context.Context, apiClient objectstorage.Defaul
 
 func GetCredentialsName(ctx context.Context, apiClient objectstorage.DefaultAPI, projectId, credentialsGroupId, keyId, region string) (string, error) {
 	req := apiClient.ListAccessKeys(ctx, projectId, region)
-	req = req.CredentialsGroup(credentialsGroupId)
-	resp, err := req.Execute()
 
+	req = req.CredentialsGroup(credentialsGroupId)
+
+	resp, err := req.Execute()
 	if err != nil {
 		return "", fmt.Errorf("list Object Storage credentials: %w", err)
 	}

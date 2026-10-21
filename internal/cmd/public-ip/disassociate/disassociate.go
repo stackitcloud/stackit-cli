@@ -43,6 +43,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -57,12 +58,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			publicIpLabel, associatedResourceId, err := iaasUtils.GetPublicIP(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.PublicIpId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get public IP: %v", err)
+
 				publicIpLabel = model.PublicIpId
 			} else if publicIpLabel == "" {
 				publicIpLabel = model.PublicIpId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to disassociate public IP %q from the associated resource %q?", publicIpLabel, associatedResourceId)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -70,15 +73,18 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			_, err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("disassociate public IP: %w", err)
 			}
 
 			params.Printer.Outputf("Disassociated public IP %q from the associated resource %q.\n", publicIpLabel, associatedResourceId)
+
 			return nil
 		},
 	}
+
 	return cmd
 }
 
@@ -96,6 +102,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
