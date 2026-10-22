@@ -1,6 +1,6 @@
 module github.com/stackitcloud/stackit-cli
 
-go 1.26.0
+go 1.26.10
 
 require (
 	github.com/fatih/color v1.19.0
@@ -31,7 +31,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.5.0
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.15.0
 	github.com/stackitcloud/stackit-sdk-go/services/registry v0.1.0
-	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.26.1
+	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.27.0
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.11.0
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.19.1
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.7.3
@@ -271,7 +271,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/kms v1.14.0
 	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.16.0
 	github.com/stackitcloud/stackit-sdk-go/services/logme v1.5.0
-	github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.3.1
+	github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.4.0
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.25.2
 	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.5.0
