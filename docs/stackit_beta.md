@@ -46,6 +46,7 @@ stackit beta [flags]
 * [stackit beta cdn](./stackit_beta_cdn.md)	 - Manage CDN resources
 * [stackit beta edge-cloud](./stackit_beta_edge-cloud.md)	 - Provides functionality for Edge Cloud services.
 * [stackit beta intake](./stackit_beta_intake.md)	 - Provides functionality for intake
+* [stackit beta telemetryrouter](./stackit_beta_telemetryrouter.md)	 - Provides functionality for Telemetry Router
 * [stackit beta volume](./stackit_beta_volume.md)	 - Provides functionality for Volume
 * [stackit beta vpn](./stackit_beta_vpn.md)	 - Provides functionality for VPN
 
