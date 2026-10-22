@@ -2,11 +2,16 @@ package add
 
 import (
 	"context"
+	"strings"
 	"testing"
+	"testing/fstest"
+
+	"github.com/spf13/cobra"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -27,13 +32,15 @@ var (
 	testPassword    = "testpassword"
 )
 
+const testPwFile = "pw.txt"
+
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
 		globalflags.RegionFlag:    testRegion,
 		usernameFlag:              testUsername,
 		displaynameFlag:           testDisplayname,
-		passwordFlag:              testPassword,
+		passwordFlag:              "@" + testPwFile,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -81,6 +88,7 @@ func fixturePayload(mods ...func(payload *alb.CreateCredentialsPayload)) alb.Cre
 
 func TestParseInput(t *testing.T) {
 	tests := []struct {
+		stdin         string
 		description   string
 		argValues     []string
 		flagValues    map[string]string
@@ -98,11 +106,46 @@ func TestParseInput(t *testing.T) {
 			flagValues:  map[string]string{},
 			isValid:     false,
 		},
+		{
+			description: "password from explicit stdin",
+			stdin:       "stdin-pw\n",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[passwordFlag] = "-"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Password = new("stdin-pw")
+			}),
+		},
+		{
+			description: "password from implicit stdin",
+			stdin:       "stdin-pw\n",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, passwordFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Password = new("stdin-pw")
+			}),
+		},
+		{
+			description: "literal password rejected",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[passwordFlag] = "top-secret"
+			}),
+			isValid: false,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
+			testutils.TestParseInput(t, func(params *types.CmdParams) *cobra.Command {
+				params.Fs = fstest.MapFS{
+					testPwFile: {Data: []byte(testPassword)},
+				}
+				params.Printer.StdIn = strings.NewReader(tt.stdin)
+				return NewCmd(params)
+			}, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
 	}
 }
