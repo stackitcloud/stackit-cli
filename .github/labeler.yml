@@ -13,7 +13,7 @@
 - changed-files:
   - any-glob-to-any-file:
     - "internal/cmd/ske/**"
-    - "internal/cmd/scf/**"
+    - "internal/cmd/beta/scf/**"
     - "internal/cmd/edge/**"
 # support
 # no support domain sdk modules available yet
