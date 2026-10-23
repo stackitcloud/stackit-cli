@@ -41,6 +41,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -61,6 +62,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, flavor)
 		},
 	}
+
 	return cmd
 }
 
@@ -71,19 +73,20 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
 	}
+
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		FlavorId:        flavorId,
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildAndExecuteRequest(ctx context.Context, model *inputModel, apiClient sqlserverflex.DefaultAPI) (*sqlserverflex.ListFlavors, error) {
 	// Note: There's currently no GET endpoint for a single flavor. So we have to use the list endpoint and
 	// do client-side filtering for the correct flavor.
-
 	flavors, err := apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Size(100).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("listing flavors: %w", err)
@@ -133,6 +136,7 @@ func outputResult(p *print.Printer, outputFormat string, flavor *sqlserverflex.L
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

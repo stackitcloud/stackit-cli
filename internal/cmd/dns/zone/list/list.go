@@ -77,6 +77,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -97,6 +98,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
@@ -104,6 +106,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -141,6 +144,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	active := flags.FlagToBoolValue(p, cmd, activeFlag)
 	inactive := flags.FlagToBoolValue(p, cmd, inactiveFlag)
+
 	if active && inactive {
 		return nil, fmt.Errorf("only one of %s and %s can be set", activeFlag, inactiveFlag)
 	}
@@ -157,6 +161,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -165,15 +170,19 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient dnsClient, p
 	if model.Active {
 		req = req.ActiveEq(true)
 	}
+
 	if model.Inactive {
 		req = req.ActiveEq(false)
 	}
+
 	if model.NameLike != nil {
 		req = req.NameLike(*model.NameLike)
 	}
+
 	if model.OrderByName != nil {
 		req = req.OrderByName(dns.ListZonesOrderByNameParameter(strings.ToUpper(*model.OrderByName)))
 	}
+
 	if !model.IncludeDeleted {
 		req = req.StateNeq(deleteSucceededState)
 	}
@@ -202,31 +211,39 @@ func fetchZones(ctx context.Context, model *inputModel, apiClient dnsClient) ([]
 	if model.Limit != nil && *model.Limit < model.PageSize {
 		model.PageSize = *model.Limit
 	}
+
 	page := 1
 	zones := []dns.Zone{}
+
 	for {
 		// Call API
 		req := buildRequest(ctx, model, apiClient, page)
+
 		resp, err := req.Execute()
 		if err != nil {
 			return nil, fmt.Errorf("get DNS zones: %w", err)
 		}
+
 		respZones := resp.Zones
 		if len(respZones) == 0 {
 			break
 		}
+
 		zones = append(zones, respZones...)
 		// Stop if no more pages
 		if len(respZones) < int(model.PageSize) {
 			break
 		}
+
 		// Stop and truncate if limit is reached
 		if model.Limit != nil && len(zones) >= int(*model.Limit) {
 			zones = zones[:*model.Limit]
 			break
 		}
+
 		page++
 	}
+
 	return zones, nil
 }
 
@@ -234,11 +251,13 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, zones []d
 	return p.OutputResult(outputFormat, zones, func() error {
 		if len(zones) == 0 {
 			p.Outputf("No zones found for project %q matching the criteria\n", projectLabel)
+
 			return nil
 		}
 
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "STATE", "TYPE", "DNS NAME", "RECORD COUNT")
+
 		for i := range zones {
 			z := zones[i]
 			table.AddRow(
@@ -250,6 +269,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, zones []d
 				utils.PtrString(z.RecordCount),
 			)
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

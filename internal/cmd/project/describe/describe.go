@@ -50,6 +50,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -63,6 +64,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read project details: %w", err)
@@ -72,6 +74,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -81,6 +84,7 @@ func configureFlags(cmd *cobra.Command) {
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	var projectId string
+
 	if len(inputArgs) > 0 {
 		projectId = inputArgs[0]
 	}
@@ -101,12 +105,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *resourcemanager.APIClient) resourcemanager.ApiGetProjectRequest {
 	req := apiClient.DefaultAPI.GetProject(ctx, model.ArgProjectId)
 	req.IncludeParents(model.IncludeParents)
+
 	return req
 }
 
@@ -126,6 +132,7 @@ func outputResult(p *print.Printer, outputFormat string, project *resourcemanage
 		table.AddRow("STATE", project.LifecycleState)
 		table.AddSeparator()
 		table.AddRow("PARENT ID", project.Parent.Id)
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

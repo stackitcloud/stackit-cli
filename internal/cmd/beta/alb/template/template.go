@@ -78,6 +78,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				template string
 				target   any
 			)
+
 			if model.Type != nil && *model.Type == "pool" {
 				template = templatePool
 				target = alb.CreateLoadBalancerPayload{}
@@ -94,6 +95,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if err := yaml.Unmarshal([]byte(template), &target); err != nil {
 					return fmt.Errorf("cannot unmarshal template: %w", err)
 				}
+
 				encoder := json.NewEncoder(params.Printer.StdOut)
 				if err := encoder.Encode(target); err != nil {
 					return fmt.Errorf("cannot marshal template to yaml: %w", err)
@@ -107,6 +109,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -128,5 +131,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }

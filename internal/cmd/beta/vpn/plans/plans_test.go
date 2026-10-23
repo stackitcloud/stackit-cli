@@ -32,6 +32,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -46,6 +47,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -54,6 +56,7 @@ func fixtureRequest(mods ...func(request *vpn.ApiListPlansRequest)) vpn.ApiListP
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -136,6 +139,7 @@ func TestOutputResult(t *testing.T) {
 		projectLabel string
 		plans        []vpn.Plan
 	}
+
 	tests := []struct {
 		name    string
 		args    args

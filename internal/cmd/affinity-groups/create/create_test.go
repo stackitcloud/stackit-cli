@@ -41,6 +41,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -57,15 +58,19 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateAffinityGroupRequest)) iaas.ApiCreateAffinityGroupRequest {
 	request := testClient.DefaultAPI.CreateAffinityGroup(testCtx, testProjectId, testRegion)
+
 	request = request.CreateAffinityGroupPayload(fixturePayload())
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -77,6 +82,7 @@ func fixturePayload(mods ...func(payload *iaas.CreateAffinityGroupPayload)) iaas
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
@@ -148,6 +154,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}))
+
 			if diff != "" {
 				t.Fatalf("Request does not match: %s", diff)
 			}
@@ -181,6 +188,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			err := outputResult(params.Printer, tt.model, tt.response)
@@ -188,11 +196,15 @@ func TestOutputResult(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error output result: %v", err)
+
 				return
 			}
+
 			if !tt.isValid {
 				t.Fatalf("did not fail on invalid input")
+
 				return
 			}
 		})

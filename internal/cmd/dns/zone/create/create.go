@@ -75,6 +75,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -89,10 +90,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a zone for project %q?", projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -100,10 +103,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create DNS zone: %w", err)
 			}
+
 			zoneId := resp.Zone.Id
 
 			// Wait for async operation, if async mode not enabled
@@ -121,6 +126,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -150,6 +156,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	var zoneType *dns.CreateZonePayloadType
+
 	if typeFlagValue := typeFlag.Ptr(); typeFlagValue != nil && *typeFlagValue != "" {
 		zoneType = typeFlagValue
 	}
@@ -172,11 +179,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClient) dns.ApiCreateZoneRequest {
 	req := apiClient.DefaultAPI.CreateZone(ctx, model.ProjectId)
+
 	req = req.CreateZonePayload(dns.CreateZonePayload{
 		Name:          model.Name,
 		DnsName:       model.DnsName,
@@ -192,6 +201,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 		Description:   model.Description,
 		ContactEmail:  model.ContactEmail,
 	})
+
 	return req
 }
 
@@ -199,12 +209,15 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 	if resp == nil {
 		return fmt.Errorf("dns zone response is empty")
 	}
+
 	return p.OutputResult(model.OutputFormat, resp, func() error {
 		operationState := "Created"
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
+
 		p.Outputf("%s zone for project %q. Zone ID: %s\n", operationState, projectLabel, resp.Zone.Id)
+
 		return nil
 	})
 }

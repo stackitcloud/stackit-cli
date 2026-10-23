@@ -49,6 +49,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args: args.SingleArg(userIdArg, nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -63,16 +64,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := sqlserverflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
 			userLabel, err := sqlserverflexUtils.GetUserName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.UserId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get user name: %v", err)
+
 				userLabel = fmt.Sprintf("%d", model.UserId)
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to reset the password of user %q of instance %q? (This cannot be undone)", userLabel, instanceLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -80,6 +84,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			user, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("reset SQLServer Flex user password: %w", err)
@@ -90,6 +95,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -102,6 +108,7 @@ func configureFlags(cmd *cobra.Command) {
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	userIdStr := inputArgs[0]
+
 	userId, err := strconv.ParseInt(userIdStr, 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("invalid user id %q: %w", userIdStr, err)
@@ -119,6 +126,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -136,9 +144,11 @@ func outputResult(p *print.Printer, outputFormat, userLabel, instanceLabel strin
 		p.Outputf("Reset password for user %q of instance %q\n\n", userLabel, instanceLabel)
 		p.Outputf("Username: %s\n", user.Username)
 		p.Outputf("New password: %s\n", user.Password)
+
 		if user.Uri != "" {
 			p.Outputf("New URI: %s\n", user.Uri)
 		}
+
 		return nil
 	})
 }

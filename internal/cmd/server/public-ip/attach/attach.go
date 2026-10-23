@@ -45,6 +45,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			)),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -59,6 +60,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			publicIpLabel, _, err := iaasUtils.GetPublicIP(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.PublicIpId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get public ip name: %v", err)
+
 				publicIpLabel = model.PublicIpId
 			} else if publicIpLabel == "" {
 				publicIpLabel = model.PublicIpId
@@ -67,12 +69,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
+
 				serverLabel = model.ServerId
 			} else if serverLabel == "" {
 				serverLabel = model.ServerId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to attach public IP %q to server %q?", publicIpLabel, serverLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -80,16 +84,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("attach server to public ip: %w", err)
 			}
 
 			params.Printer.Info("Attached public IP %q to server %q\n", publicIpLabel, serverLabel)
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -103,6 +110,7 @@ func configureFlags(cmd *cobra.Command) {
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	volumeId := inputArgs[0]
 	globalFlags := globalflags.Parse(p, cmd)
+
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
@@ -114,6 +122,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 

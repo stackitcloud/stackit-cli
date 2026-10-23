@@ -34,6 +34,7 @@ func TestWrite(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			configPath := filepath.Join(os.TempDir(), tt.folderName, "config.json")
 			viper.SetConfigFile(configPath)
+
 			configFolderPath = filepath.Dir(configPath)
 
 			if tt.folderExists {

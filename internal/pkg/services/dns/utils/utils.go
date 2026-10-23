@@ -15,6 +15,7 @@ func GetZoneName(ctx context.Context, apiClient dns.DefaultAPI, projectId, zoneI
 	if err != nil {
 		return "", fmt.Errorf("get DNS zone: %w", err)
 	}
+
 	return resp.Zone.Name, nil
 }
 
@@ -23,6 +24,7 @@ func GetRecordSetName(ctx context.Context, apiClient dns.DefaultAPI, projectId, 
 	if err != nil {
 		return "", fmt.Errorf("get DNS recordset: %w", err)
 	}
+
 	return resp.Rrset.Name, nil
 }
 
@@ -31,6 +33,7 @@ func GetRecordSetType(ctx context.Context, apiClient dns.DefaultAPI, projectId, 
 	if err != nil {
 		return utils.Ptr(""), fmt.Errorf("get DNS recordset: %w", err)
 	}
+
 	return utils.Ptr(string(resp.Rrset.Type)), nil
 }
 
@@ -39,6 +42,7 @@ func FormatTxtRecord(input string) (string, error) {
 	if length <= 255 {
 		return input, nil
 	}
+
 	// Max length with quotes and white spaces is 4096. Without the quotes and white spaces the max length is 4049
 	if length > 4049 {
 		return "", fmt.Errorf("max input length is 4049. The length of the input is %v", length)
@@ -46,6 +50,7 @@ func FormatTxtRecord(input string) (string, error) {
 
 	result := ""
 	chunks := int(math.Ceil(length / 255))
+
 	for i := range chunks {
 		skip := 255 * i
 		if i == chunks-1 {

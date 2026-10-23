@@ -53,6 +53,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args: args.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -67,11 +68,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, *model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = *model.InstanceId
 			}
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get backups for PostgreSQL Flex instance %q: %w", instanceLabel, err)
@@ -82,6 +85,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -131,6 +135,7 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, backups 
 	return p.OutputResult(outputFormat, backups, func() error {
 		if len(backups) == 0 {
 			p.Outputf("No backups found for instance %q", instanceLabel)
+
 			return nil
 		}
 
@@ -155,6 +160,7 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, backups 
 				backup.Size,
 			)
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

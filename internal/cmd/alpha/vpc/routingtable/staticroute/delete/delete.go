@@ -45,6 +45,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, inputArgs []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, inputArgs)
 			if err != nil {
 				return err
@@ -59,12 +60,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			routingTableLabel, err := iaasUtils.GetVPCRoutingTableName(ctx, apiClient.DefaultAPI, model.ProjectId, model.VpcId, model.Region, model.RoutingTableId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get vpc routing-table name: %v", err)
+
 				routingTableLabel = model.RoutingTableId
 			} else if routingTableLabel == "" {
 				routingTableLabel = model.RoutingTableId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete static-route %q in routing-table %q?", model.RouteId, routingTableLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -72,17 +75,20 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("delete static-route from routing-table: %w", err)
 			}
 
 			params.Printer.Outputf("Deleted static-route %q from routing-table %q.\n", model.RouteId, model.RoutingTableId)
+
 			return nil
 		},
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -107,6 +113,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 

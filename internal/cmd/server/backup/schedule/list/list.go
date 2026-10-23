@@ -50,6 +50,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -74,20 +75,24 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list server backup schedules: %w", err)
 			}
+
 			schedules := resp.GetItems()
 
 			// Truncate output
 			if model.Limit != nil && len(schedules) > int(*model.Limit) {
 				schedules = schedules[:*model.Limit]
 			}
+
 			return outputResult(params.Printer, model.OutputFormat, serverLabel, schedules)
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -120,6 +125,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -132,22 +138,27 @@ func outputResult(p *print.Printer, outputFormat, serverLabel string, schedules 
 	return p.OutputResult(outputFormat, schedules, func() error {
 		if len(schedules) == 0 {
 			p.Outputf("No backup schedules found for server %s\n", serverLabel)
+
 			return nil
 		}
+
 		table := tables.NewTable()
 		table.SetHeader("SCHEDULE ID", "SCHEDULE NAME", "ENABLED", "RRULE", "BACKUP NAME", "BACKUP RETENTION DAYS", "BACKUP VOLUME IDS")
+
 		for i := range schedules {
 			s := schedules[i]
 
 			backupName := ""
 			retentionPeriod := ""
 			ids := ""
+
 			if s.BackupProperties != nil {
 				backupName = s.BackupProperties.Name
 				retentionPeriod = string(s.BackupProperties.RetentionPeriod)
 
 				ids = utils.JoinStringPtr(&s.BackupProperties.VolumeIds, ",")
 			}
+
 			table.AddRow(
 				s.Id,
 				s.Name,
@@ -158,10 +169,12 @@ func outputResult(p *print.Printer, outputFormat, serverLabel string, schedules 
 				ids,
 			)
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

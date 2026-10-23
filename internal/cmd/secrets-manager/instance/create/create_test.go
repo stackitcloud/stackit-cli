@@ -42,6 +42,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -57,22 +58,27 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *secretsmanager.ApiCreateInstanceRequest)) secretsmanager.ApiCreateInstanceRequest {
 	request := testClient.DefaultAPI.CreateInstance(testCtx, testProjectId)
+
 	request = request.CreateInstancePayload(secretsmanager.CreateInstancePayload{
 		Name: "example",
 	})
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
 func fixtureUpdateACLsRequest(mods ...func(request *secretsmanager.ApiUpdateACLsRequest)) secretsmanager.ApiUpdateACLsRequest {
 	request := testClient.DefaultAPI.UpdateACLs(testCtx, testProjectId, testInstanceId)
+
 	request = request.UpdateACLsPayload(secretsmanager.UpdateACLsPayload{
 		Cidrs: []secretsmanager.UpdateACLPayload{
 			{Cidr: "198.51.100.14/24"},
@@ -81,6 +87,7 @@ func fixtureUpdateACLsRequest(mods ...func(request *secretsmanager.ApiUpdateACLs
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -174,6 +181,7 @@ func TestParseInput(t *testing.T) {
 			description: "kms flags",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, aclFlag)
+
 				flagValues[kmsKeyIdFlag] = testKmsKeyId
 				flagValues[kmsKeyringIdFlag] = testKmsKeyringId
 				flagValues[kmsKeyVersionFlag] = "1"
@@ -250,6 +258,7 @@ func TestBuildCreateInstanceRequest(t *testing.T) {
 						ServiceAccountEmail: testKmsServiceAccountEmail,
 					},
 				}
+
 				*request = request.CreateInstancePayload(payload)
 			}),
 		},
@@ -315,6 +324,7 @@ func TestOutputResult(t *testing.T) {
 		instanceId   string
 		instance     *secretsmanager.Instance
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -334,6 +344,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.projectLabel, tt.args.instanceId, tt.args.instance); (err != nil) != tt.wantErr {

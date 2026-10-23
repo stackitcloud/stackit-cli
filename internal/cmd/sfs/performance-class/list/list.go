@@ -37,6 +37,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return fmt.Errorf("unable to parse input: %w", err)
@@ -58,6 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
@@ -68,6 +70,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, projectLabel, performanceClasses)
 		},
 	}
+
 	return cmd
 }
 
@@ -82,6 +85,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -93,11 +97,13 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, performan
 	return p.OutputResult(outputFormat, performanceClasses, func() error {
 		if len(performanceClasses) == 0 {
 			p.Outputf("No performance classes found for project %q\n", projectLabel)
+
 			return nil
 		}
 
 		table := tables.NewTable()
 		table.SetHeader("NAME", "IOPS", "THROUGHPUT")
+
 		for _, performanceClass := range performanceClasses {
 			table.AddRow(
 				utils.PtrString(performanceClass.Name),
@@ -105,7 +111,9 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, performan
 				utils.PtrString(performanceClass.Throughput),
 			)
 		}
+
 		p.Outputln(table.Render())
+
 		return nil
 	})
 }

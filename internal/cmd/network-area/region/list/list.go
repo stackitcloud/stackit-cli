@@ -46,6 +46,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -61,11 +62,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient.DefaultAPI, model.OrganizationId, model.NetworkAreaId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
+
 				networkAreaLabel = model.NetworkAreaId
 			}
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list network area region: %w", err)
@@ -79,6 +82,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -100,6 +104,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -111,15 +116,19 @@ func outputResult(p *print.Printer, outputFormat, areaLabel string, regionalArea
 	return p.OutputResult(outputFormat, regionalArea, func() error {
 		if len(regionalArea.Regions) == 0 {
 			p.Outputf("No regions found for network area %q\n", areaLabel)
+
 			return nil
 		}
 
 		table := tables.NewTable()
 		table.SetHeader("REGION", "STATUS", "DNS NAME SERVERS", "NETWORK RANGES", "TRANSFER NETWORK")
+
 		for region, regionConfig := range regionalArea.Regions {
-			var dnsNames string
-			var networkRanges []string
-			var transferNetwork string
+			var (
+				dnsNames        string
+				networkRanges   []string
+				transferNetwork string
+			)
 
 			if ipv4 := regionConfig.Ipv4; ipv4 != nil {
 				// Set dnsNames
@@ -148,6 +157,7 @@ func outputResult(p *print.Printer, outputFormat, areaLabel string, regionalArea
 		if err := table.Display(p); err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

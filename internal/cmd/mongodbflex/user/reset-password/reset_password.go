@@ -49,6 +49,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args: args.SingleArg(userIdArg, utils.ValidateUUID),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -63,16 +64,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := mongodbflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
 			userLabel, err := mongodbflexUtils.GetUserName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.UserId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get user name: %v", err)
+
 				userLabel = model.UserId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to reset the password of user %q of instance %q? (This cannot be undone)", userLabel, instanceLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -80,6 +84,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			user, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("reset MongoDB Flex user password: %w", err)
@@ -90,6 +95,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -115,6 +121,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -133,6 +140,7 @@ func outputResult(p *print.Printer, outputFormat, userLabel, instanceLabel strin
 		p.Outputf("Username: %s\n", utils.PtrString(user.Username))
 		p.Outputf("New password: %s\n", utils.PtrString(user.Password))
 		p.Outputf("New URI: %s\n", utils.PtrString(user.Uri))
+
 		return nil
 	})
 }

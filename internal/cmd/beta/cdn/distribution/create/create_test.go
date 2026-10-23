@@ -34,15 +34,18 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		flagRegion.Name():         string(testRegions),
 	}
 	flagsHTTPBackend()(flagValues)
+
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
 func flagsHTTPBackend() func(flagValues map[string]string) {
 	return func(flagValues map[string]string) {
 		delete(flagValues, flagBucket)
+
 		flagValues[flagHTTP] = "true"
 		flagValues[flagHTTPOriginURL] = "https://http-backend.example.com"
 	}
@@ -51,6 +54,7 @@ func flagsHTTPBackend() func(flagValues map[string]string) {
 func flagsBucketBackend() func(flagValues map[string]string) {
 	return func(flagValues map[string]string) {
 		delete(flagValues, flagHTTP)
+
 		flagValues[flagBucket] = "true"
 		flagValues[flagBucketURL] = "https://bucket-backend.example.com"
 		flagValues[flagBucketCredentialsAccessKeyID] = "access-key-id"
@@ -70,9 +74,12 @@ func flagRegions(regions ...cdn.Region) func(flagValues map[string]string) {
 	return func(flagValues map[string]string) {
 		if len(regions) == 0 {
 			delete(flagValues, flagRegion.Name())
+
 			return
 		}
+
 		stringRegions := sdkUtils.EnumSliceToStringSlice(regions)
+
 		flagValues[flagRegion.Name()] = strings.Join(stringRegions, ",")
 	}
 }
@@ -86,9 +93,11 @@ func fixtureModel(mods ...func(model *inputModel)) *inputModel {
 		Regions: []cdn.Region{testRegions},
 	}
 	modelHTTPBackend()(model)
+
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -140,6 +149,7 @@ func fixturePayload(mods ...func(payload *cdn.CreateDistributionPayload)) cdn.Cr
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
@@ -179,7 +189,9 @@ func payloadLoki() func(payload *cdn.CreateDistributionPayload) {
 
 func fixtureRequest(mods ...func(payload *cdn.CreateDistributionPayload)) cdn.ApiCreateDistributionRequest {
 	req := testClient.DefaultAPI.CreateDistribution(testCtx, testProjectId)
+
 	req = req.CreateDistributionPayload(fixturePayload(mods...))
+
 	return req
 }
 
@@ -530,6 +542,7 @@ func TestOutputResult(t *testing.T) {
 			if err := outputResult(params.Printer, tt.outputFormat, testProjectId, tt.response); (err != nil) != tt.wantErr {
 				t.Fatalf("outputResult: %v", err)
 			}
+
 			if params.Out.String() != tt.expected {
 				t.Errorf("want:\n%s\ngot:\n%s", tt.expected, params.Out.String())
 			}

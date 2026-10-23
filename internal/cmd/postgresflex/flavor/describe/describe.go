@@ -41,6 +41,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -61,6 +62,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, flavor)
 		},
 	}
+
 	return cmd
 }
 
@@ -71,12 +73,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
 	}
+
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		FlavorId:        flavorId,
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -86,7 +90,6 @@ func buildAndExecuteRequest(ctx context.Context, model *inputModel, apiClient po
 	// for a single flavor to the API.
 
 	// TODO: Use GET endpoint instead of list endpoint after https://support.stackit.cloud/servicedesk/customer/portal/3/SSD-23311 is done
-
 	flavors, err := apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Size(100).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("listing flavors: %w", err)

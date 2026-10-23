@@ -37,20 +37,24 @@ func TestParseInputWithOptions[T any](t *testing.T, cmdFactory func(*types.CmdPa
 		err := option(&opts)
 		if err != nil {
 			t.Errorf("Configuring testing options: %v", err)
+
 			return
 		}
 	}
 
 	params := testparams.NewTestParams()
 	cmd := cmdFactory(params.CmdParams)
+
 	err := globalflags.Configure(cmd.Flags())
 	if err != nil {
 		t.Fatalf("configure global flags: %v", err)
 	}
+
 	cmd.Flags().VisitAll(func(flag *pflag.Flag) {
 		if flag.Value == nil {
 			return
 		}
+
 		// StringEnum and StringEnumSlice Flags are stateful singletons. During tests we reset their state.
 		if r, ok := flag.Value.(Resettable); ok {
 			r.Reset()
@@ -64,6 +68,7 @@ func TestParseInputWithOptions[T any](t *testing.T, cmdFactory func(*types.CmdPa
 			if !isValid {
 				return
 			}
+
 			t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
 		}
 	}
@@ -76,6 +81,7 @@ func TestParseInputWithOptions[T any](t *testing.T, cmdFactory func(*types.CmdPa
 				if !isValid {
 					return
 				}
+
 				t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
 			}
 		}
@@ -92,6 +98,7 @@ func TestParseInputWithOptions[T any](t *testing.T, cmdFactory func(*types.CmdPa
 			if !isValid {
 				return
 			}
+
 			t.Fatalf("error in PreRunE: %v", err)
 		}
 	}
@@ -101,6 +108,7 @@ func TestParseInputWithOptions[T any](t *testing.T, cmdFactory func(*types.CmdPa
 		if !isValid {
 			return
 		}
+
 		t.Fatalf("error validating args: %v", err)
 	}
 
@@ -109,6 +117,7 @@ func TestParseInputWithOptions[T any](t *testing.T, cmdFactory func(*types.CmdPa
 		if !isValid {
 			return
 		}
+
 		t.Fatalf("error validating flags: %v", err)
 	}
 
@@ -117,6 +126,7 @@ func TestParseInputWithOptions[T any](t *testing.T, cmdFactory func(*types.CmdPa
 		if !isValid {
 			return
 		}
+
 		t.Fatalf("error validating flags: %v", err)
 	}
 
@@ -125,12 +135,14 @@ func TestParseInputWithOptions[T any](t *testing.T, cmdFactory func(*types.CmdPa
 		if !isValid {
 			return
 		}
+
 		t.Fatalf("error parsing input: %v", err)
 	}
 
 	if !isValid {
 		t.Fatalf("did not fail on invalid input")
 	}
+
 	diff := cmp.Diff(expectedModel, model, opts.cmpOptions...)
 	if diff != "" {
 		t.Fatalf("Data does not match (-expected, +actual): %s", diff)

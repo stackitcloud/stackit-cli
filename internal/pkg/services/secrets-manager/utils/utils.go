@@ -17,6 +17,7 @@ func GetInstanceName(ctx context.Context, apiClient SecretsManagerClient, projec
 	if err != nil {
 		return "", fmt.Errorf("get Secrets Manager instance: %w", err)
 	}
+
 	return resp.Name, nil
 }
 
@@ -32,10 +33,12 @@ func GetUserLabel(ctx context.Context, apiClient SecretsManagerClient, projectId
 	}
 
 	var userLabel string
+
 	if resp.Description == "" {
 		userLabel = fmt.Sprintf("%q", resp.Username)
 	} else {
 		userLabel = fmt.Sprintf("%q (%s)", resp.Username, resp.Description)
 	}
+
 	return userLabel, nil
 }

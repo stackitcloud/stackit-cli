@@ -96,10 +96,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update instance %q? (This may cause downtime)", instanceLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -110,6 +112,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("update PostgreSQL Flex instance: %w", err)
@@ -138,6 +141,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -161,8 +165,10 @@ func configureFlags(cmd *cobra.Command) {
 	// remove after 2027-01-31
 	err = cmd.Flags().MarkDeprecated(typeFlag.Name(), fmt.Sprintf("Will be removed after 2027-01-31. Use the --%s flag instead.", flavorIdFlag))
 	cobra.CheckErr(err)
+
 	err = cmd.Flags().MarkDeprecated(cpuFlag, fmt.Sprintf("Will be removed after 2027-01-31. Use the --%s flag instead.", flavorIdFlag))
 	cobra.CheckErr(err)
+
 	err = cmd.Flags().MarkDeprecated(ramFlag, fmt.Sprintf("Will be removed after 2027-01-31. Use the --%s flag instead.", flavorIdFlag))
 	cobra.CheckErr(err)
 	cmd.MarkFlagsMutuallyExclusive(flavorIdFlag, cpuFlag)
@@ -219,12 +225,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex.DefaultAPI) (postgresflex.ApiPartialUpdateInstanceRequest, error) {
-	var flavorId *string
-	var err error
+	var (
+		flavorId *string
+		err      error
+	)
 
 	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 
@@ -246,6 +255,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex
 		// if only one of the cpu/ram flags is set
 		if model.RAM == nil || model.CPU == nil {
 			var currentFlavor *postgresflex.ListFlavors
+
 			for _, f := range flavors.Flavors {
 				if f.Id == currentInstance.FlavorId {
 					currentFlavor = &f
@@ -259,6 +269,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex
 			if model.RAM == nil {
 				ram = utils.Ptr(currentFlavor.Memory)
 			}
+
 			if model.CPU == nil {
 				cpu = utils.Ptr(currentFlavor.Cpu)
 			}
@@ -267,9 +278,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex
 		flavorId, err = postgresflexUtils.LoadFlavorId(*cpu, *ram, flavors.Flavors)
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
+
 			if !errors.As(err, &dsaInvalidPlanError) {
 				return req, fmt.Errorf("load flavor ID: %w", err)
 			}
+
 			return req, err
 		}
 	} else if model.FlavorId != nil {
@@ -277,6 +290,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex
 	}
 
 	var payloadNetwork *postgresflex.InstanceNetworkOpt
+
 	if model.ACL != nil {
 		payloadNetwork = &postgresflex.InstanceNetworkOpt{
 			Acl: model.ACL,
@@ -284,6 +298,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex
 	}
 
 	var payloadStorage *postgresflex.StorageUpdate
+
 	if model.StorageSize != nil {
 		payloadStorage = &postgresflex.StorageUpdate{
 			Size: model.StorageSize,
@@ -315,6 +330,7 @@ func outputResult(p *print.Printer, outputFormat string, async bool, instanceLab
 		}
 
 		p.Outputf("%s instance %q\n", operationState, instanceLabel)
+
 		return nil
 	})
 }

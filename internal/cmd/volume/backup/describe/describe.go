@@ -46,6 +46,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -59,6 +60,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			backup, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get backup details: %w", err)
@@ -67,6 +69,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, backup)
 		},
 	}
+
 	return cmd
 }
 
@@ -84,6 +87,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -116,9 +120,11 @@ func outputResult(p *print.Printer, outputFormat string, backup *iaas.Backup) er
 
 		if len(backup.Labels) > 0 {
 			var labels []string
+
 			for key, value := range backup.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
+
 			table.AddRow("LABELS", strings.Join(labels, "\n"))
 			table.AddSeparator()
 		}

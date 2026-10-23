@@ -34,6 +34,7 @@ func newAPIMock(s mockSettings) redis.DefaultAPI {
 			if s.returnError {
 				return nil, fmt.Errorf("list flavors failed")
 			}
+
 			return s.listOfferingsResp, nil
 		}),
 	}
@@ -53,6 +54,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, mod := range mods {
 		mod(argValues)
 	}
+
 	return argValues
 }
 
@@ -72,6 +74,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -95,11 +98,13 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *redis.ApiPartialUpdateInstanceRequest)) redis.ApiPartialUpdateInstanceRequest {
 	request := testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId)
+
 	request = request.PartialUpdateInstancePayload(redis.PartialUpdateInstancePayload{
 		Parameters: &redis.InstanceParameters{
 			EnableMonitoring:     utils.Ptr(true),
@@ -112,9 +117,11 @@ func fixtureRequest(mods ...func(request *redis.ApiPartialUpdateInstanceRequest)
 		},
 		PlanId: utils.Ptr(testPlanId),
 	})
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -280,6 +287,7 @@ func TestParseInput(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			params := testparams.NewTestParams()
 			cmd := NewCmd(params.CmdParams)
+
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
@@ -291,6 +299,7 @@ func TestParseInput(t *testing.T) {
 					if !tt.isValid {
 						return
 					}
+
 					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
 				}
 			}
@@ -301,6 +310,7 @@ func TestParseInput(t *testing.T) {
 					if !tt.isValid {
 						return
 					}
+
 					t.Fatalf("setting flag --%s=%s: %v", sgwAclFlag, value, err)
 				}
 			}
@@ -311,6 +321,7 @@ func TestParseInput(t *testing.T) {
 					if !tt.isValid {
 						return
 					}
+
 					t.Fatalf("setting flag --%s=%s: %v", syslogFlag, value, err)
 				}
 			}
@@ -320,6 +331,7 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error validating args: %v", err)
 			}
 
@@ -328,6 +340,7 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error validating flags: %v", err)
 			}
 
@@ -336,12 +349,14 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error parsing flags: %v", err)
 			}
 
 			if !tt.isValid {
 				t.Fatalf("did not fail on invalid input")
 			}
+
 			diff := cmp.Diff(model, tt.expectedModel)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -458,11 +473,13 @@ func TestBuildRequest(t *testing.T) {
 				returnError:       tt.getOfferingsFails,
 				listOfferingsResp: tt.listOfferingsResp,
 			}
+
 			request, err := buildRequest(testCtx, tt.model, newAPIMock(client))
 			if err != nil {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error building request: %v", err)
 			}
 

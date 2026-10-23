@@ -50,6 +50,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -63,6 +64,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				// Check if the service is enabled for the given project
@@ -70,18 +72,22 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if enabledErr != nil {
 					return fmt.Errorf("check if Object Storage is enabled: %w", enabledErr)
 				}
+
 				if !enabled {
 					return &errors.ServiceDisabledError{
 						Service: "object-storage",
 					}
 				}
+
 				return fmt.Errorf("list Object Storage credentials: %w", err)
 			}
+
 			credentials := resp.GetAccessKeys()
 
 			credentialsGroupLabel, err := objectStorageUtils.GetCredentialsGroupName(ctx, apiClient.DefaultAPI, model.ProjectId, model.CredentialsGroupId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get credentials group name: %v", err)
+
 				credentialsGroupLabel = model.CredentialsGroupId
 			}
 
@@ -89,10 +95,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.Limit != nil && len(credentials) > int(*model.Limit) {
 				credentials = credentials[:*model.Limit]
 			}
+
 			return outputResult(params.Printer, model.OutputFormat, credentialsGroupLabel, credentials)
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -125,12 +133,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiListAccessKeysRequest {
 	req := apiClient.DefaultAPI.ListAccessKeys(ctx, model.ProjectId, model.Region)
+
 	req = req.CredentialsGroup(model.CredentialsGroupId)
+
 	return req
 }
 
@@ -138,11 +149,13 @@ func outputResult(p *print.Printer, outputFormat, credentialsGroupLabel string, 
 	return p.OutputResult(outputFormat, credentials, func() error {
 		if len(credentials) == 0 {
 			p.Outputf("No credentials found for credentials group %q\n", credentialsGroupLabel)
+
 			return nil
 		}
 
 		table := tables.NewTable()
 		table.SetHeader("CREDENTIALS ID", "ACCESS KEY ID", "EXPIRES AT")
+
 		for i := range credentials {
 			c := credentials[i]
 
@@ -150,12 +163,15 @@ func outputResult(p *print.Printer, outputFormat, credentialsGroupLabel string, 
 			if c.Expires.Get() != nil && *c.Expires.Get() != "" {
 				expiresAt = *c.Expires.Get()
 			}
+
 			table.AddRow(c.KeyId, c.DisplayName, expiresAt)
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

@@ -64,6 +64,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
@@ -72,6 +73,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, model.AutomationId, projectLabel, resp)
 		},
 	}
+
 	return cmd
 }
 
@@ -93,6 +95,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -100,6 +103,7 @@ func outputResult(p *print.Printer, outputFormat, automationId, projectLabel str
 	return p.OutputResult(outputFormat, item, func() error {
 		if item == nil {
 			p.Outputf("Volume automation %q not found in project %q\n", automationId, projectLabel)
+
 			return nil
 		}
 
@@ -129,6 +133,7 @@ func outputResult(p *print.Printer, outputFormat, automationId, projectLabel str
 
 			inputTable.AddRow("KIND", input.Kind)
 			inputTable.AddSeparator()
+
 			for key, value := range utils.FlattenMap(input.AdditionalProperties) {
 				inputTable.AddRow(key, value)
 				inputTable.AddSeparator()
@@ -153,8 +158,10 @@ func outputResult(p *print.Printer, outputFormat, automationId, projectLabel str
 			outputStepsTable := tables.NewTable()
 			outputStepsTable.SetTitle("Output Steps")
 			outputStepsTable.SetHeader("NAME", "KIND", "DETAILS")
+
 			for _, step := range item.Output.Steps {
 				var kind, details string
+
 				if step.Result != nil {
 					kind = step.Result.Kind
 					// step.Result is an open object, so we need to read here the AdditionalProperties
@@ -174,6 +181,7 @@ func outputResult(p *print.Printer, outputFormat, automationId, projectLabel str
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

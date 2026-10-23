@@ -77,6 +77,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				// If project label can't be determined, fall back to project ID
 				projectLabel = model.ProjectId
 			}
@@ -84,10 +85,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := edgeUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a new token for Edge Cloud instance %q for project %q?", instanceLabel, projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -98,12 +101,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create edge cloud instance token: %w", err)
 			}
 
 			var expiration = int64(model.Expiration) // #nosec G115 ValidateExpiration ensures safe bounds, conversion is safe
+
 			err = spinner.Run(params.Printer, "Creating token", func() error {
 				_, err = wait.TokenWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId, &expiration).WaitWithContext(ctx)
 				return err
@@ -118,6 +123,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -151,16 +157,19 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 				Details: err.Error(),
 			}
 		}
+
 		if err := commonKubeconfig.ValidateExpiration(&expTime); err != nil {
 			return nil, &cliErr.FlagValidationError{
 				Flag:    expirationFlag,
 				Details: err.Error(),
 			}
 		}
+
 		model.Expiration = expTime
 	} else {
 		// Default expiration is 1 hour
 		defaultExp := uint64(expirationSecondsDefault)
+
 		model.Expiration = defaultExp
 	}
 
@@ -174,6 +183,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 
 	// Log the parsed model if --verbosity is set to debug
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -193,6 +203,7 @@ func outputResult(p *print.Printer, outputFormat string, token *edge.Token) erro
 		}
 
 		p.Outputln(token.Token)
+
 		return nil
 	})
 }

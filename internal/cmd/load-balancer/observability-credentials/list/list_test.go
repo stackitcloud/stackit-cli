@@ -35,6 +35,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -50,6 +51,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -58,6 +60,7 @@ func fixtureRequest(mods ...func(request *loadbalancer.ApiListCredentialsRequest
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -220,8 +223,10 @@ func TestGetFilterOp(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error getting filter op: %v", err)
 			}
+
 			if filterOp != tt.expectedFilterOp {
 				t.Fatalf("Data does not match: %d", filterOp)
 			}
@@ -236,6 +241,7 @@ func TestOutputResult(t *testing.T) {
 		projectLabel string
 		credentials  []loadbalancer.CredentialsResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -255,6 +261,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.projectLabel, tt.args.opLabel, tt.args.credentials); (err != nil) != tt.wantErr {

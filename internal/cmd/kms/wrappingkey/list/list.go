@@ -44,6 +44,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
@@ -57,6 +58,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get KMS wrapping keys: %w", err)
@@ -67,6 +69,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -82,6 +85,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -92,6 +96,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClie
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS key ring where the key is stored")
+
 	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag)
 	cobra.CheckErr(err)
 }
@@ -106,8 +111,10 @@ func outputResult(p *print.Printer, outputFormat, keyRingId string, resp *kms.Wr
 	return p.OutputResult(outputFormat, wrappingKeys, func() error {
 		if len(wrappingKeys) == 0 {
 			p.Outputf("No wrapping keys found under the key ring %q\n", keyRingId)
+
 			return nil
 		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "SCOPE", "ALGORITHM", "EXPIRES AT", "STATUS")
 
@@ -127,6 +134,7 @@ func outputResult(p *print.Printer, outputFormat, keyRingId string, resp *kms.Wr
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

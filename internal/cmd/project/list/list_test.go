@@ -41,6 +41,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -60,23 +61,28 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *resourcemanager.ApiListProjectsRequest)) resourcemanager.ApiListProjectsRequest {
 	request := testClient.DefaultAPI.ListProjects(testCtx)
+
 	request = request.ContainerParentId(testParentId)
 
 	testCreationTimeAfter, err := time.Parse(creationTimeAfterFormat, testCreationTimeAfter)
 	if err != nil {
 		return resourcemanager.ApiListProjectsRequest{}
 	}
+
 	request = request.CreationTimeStart(testCreationTimeAfter)
 	request = request.Member("member")
 	request = request.Limit(pageSizeDefault)
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -206,6 +212,7 @@ func TestParseInput(t *testing.T) {
 
 func TestBuildRequest(t *testing.T) {
 	keyring.MockInit()
+
 	err := auth.SetAuthFlow(auth.AUTH_FLOW_USER_TOKEN)
 	if err != nil {
 		t.Fatalf("Failed to set auth flow: %v", err)
@@ -262,6 +269,7 @@ func TestBuildRequest(t *testing.T) {
 			if tt.projectIdLike != nil {
 				tt.model.ProjectIdLike = tt.projectIdLike
 			}
+
 			request, err := buildRequest(testCtx, tt.model, testClient.DefaultAPI, tt.offset)
 			if err != nil {
 				t.Fatalf("Failed to build request: %v", err)
@@ -366,34 +374,42 @@ func TestFetchProjects(t *testing.T) {
 				numAPICalls++
 
 				w.Header().Set("Content-Type", "application/json")
+
 				if tt.apiCallFails {
 					w.WriteHeader(http.StatusInternalServerError)
+
 					_, err := w.Write([]byte("{\"message\": \"Something bad happened\""))
 					if err != nil {
 						t.Errorf("Failed to write bad response: %v", err)
 					}
+
 					return
 				}
 
 				query := r.URL.Query()
 				offsetStr := query.Get("offset")
+
 				if offsetStr == "" {
 					t.Errorf("Expected offset param page to be set")
 				}
+
 				offset, err := strconv.Atoi(offsetStr)
 				if err != nil {
 					t.Errorf("Failed to parse query param offset: %v", err)
 				}
+
 				limitStr := query.Get("limit")
 				if limitStr == "" {
 					t.Errorf("Expected query param limit to be set")
 				}
+
 				limit, err := strconv.Atoi(limitStr)
 				if err != nil {
 					t.Errorf("Failed to parse query param limit: %v", err)
 				}
 
 				var numItemsToReturn int
+
 				if offset >= tt.totalItems {
 					numItemsToReturn = 0 // Total items reached
 				} else if offset+limit < tt.totalItems {
@@ -418,7 +434,9 @@ func TestFetchProjects(t *testing.T) {
 				}
 			})
 			mockedServer := httptest.NewServer(handler)
+
 			defer mockedServer.Close()
+
 			client, err := resourcemanager.NewAPIClient(
 				sdkConfig.WithEndpoint(mockedServer.URL),
 				sdkConfig.WithoutAuthentication(),
@@ -432,14 +450,18 @@ func TestFetchProjects(t *testing.T) {
 				if !tt.apiCallFails {
 					t.Fatalf("did not fail on invalid input")
 				}
+
 				return
 			}
+
 			if tt.apiCallFails {
 				t.Fatalf("did not fail on invalid input")
 			}
+
 			if numAPICalls != tt.expectedNumAPICalls {
 				t.Fatalf("Expected %d API calls, got %d", tt.expectedNumAPICalls, numAPICalls)
 			}
+
 			if len(projects) != tt.expectedNumItems {
 				t.Fatalf("Expected %d projects, got %d", tt.totalItems, len(projects))
 			}
@@ -452,6 +474,7 @@ func Test_outputResult(t *testing.T) {
 		outputFormat string
 		projects     []resourcemanager.Project
 	}
+
 	tests := []struct {
 		name    string
 		args    args

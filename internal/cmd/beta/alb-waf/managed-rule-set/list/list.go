@@ -54,6 +54,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -74,6 +75,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -101,44 +103,58 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *albwaf.APIClient, nextPageID string, pageLimit int64) albwaf.ApiListManagedRuleSetsRequest {
 	req := apiClient.DefaultAPI.ListManagedRuleSets(ctx, model.ProjectId, model.Region)
+
 	req = req.PageSize(fmt.Sprintf("%d", pageLimit))
+
 	if nextPageID != "" {
 		req = req.PageId(nextPageID)
 	}
+
 	return req
 }
 
 // TODO: Replace with utils function within STACKITSDK-525
 func fetchManagedRuleSets(ctx context.Context, model *inputModel, apiClient *albwaf.APIClient) ([]albwaf.GetLimitedManagedRuleSetResponse, error) {
-	var nextPageID string
-	var items []albwaf.GetLimitedManagedRuleSetResponse
+	var (
+		nextPageID string
+		items      []albwaf.GetLimitedManagedRuleSetResponse
+	)
+
 	received := int64(0)
 	limit := int64(math.MaxInt64)
+
 	if model.Limit != nil {
 		limit = min(limit, *model.Limit)
 	}
+
 	for {
 		want := min(maxPageSize, limit-received)
 		request := buildRequest(ctx, model, apiClient, nextPageID, want)
+
 		response, err := request.Execute()
 		if err != nil {
 			return nil, err
 		}
+
 		items = append(items, response.Items...)
 		nextPageID = ""
+
 		if response.NextPageId != nil {
 			nextPageID = *response.NextPageId
 		}
+
 		received += int64(len(response.Items))
 		if nextPageID == "" || received >= limit {
 			break
 		}
 	}
+
 	return items, nil
 }
 
@@ -146,6 +162,7 @@ func outputResult(p *print.Printer, outputFormat string, items []albwaf.GetLimit
 	return p.OutputResult(outputFormat, items, func() error {
 		if len(items) == 0 {
 			p.Outputln("No managed rule sets found")
+
 			return nil
 		}
 
@@ -157,6 +174,7 @@ func outputResult(p *print.Printer, outputFormat string, items []albwaf.GetLimit
 			if item.Usage != nil {
 				usageCount = utils.PtrString(item.Usage.Count)
 			}
+
 			table.AddRow(
 				item.Name,
 				string(item.Type),
@@ -170,6 +188,7 @@ func outputResult(p *print.Printer, outputFormat string, items []albwaf.GetLimit
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

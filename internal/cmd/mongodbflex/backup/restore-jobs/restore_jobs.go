@@ -52,6 +52,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args: args.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -66,11 +67,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := mongodbflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, *model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = *model.InstanceId
 			}
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get restore jobs for MongoDB Flex instance %q: %w", instanceLabel, err)
@@ -88,6 +91,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -120,6 +124,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -132,10 +137,13 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, restoreJ
 	return p.OutputResult(outputFormat, restoreJobs, func() error {
 		if len(restoreJobs) == 0 {
 			p.Outputf("No restore jobs found for instance %q\n", instanceLabel)
+
 			return nil
 		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "BACKUP ID", "BACKUP INSTANCE ID", "DATE", "STATUS")
+
 		for i := range restoreJobs {
 			restoreJob := restoreJobs[i]
 
@@ -147,6 +155,7 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, restoreJ
 				utils.PtrString(restoreJob.Status),
 			)
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

@@ -58,6 +58,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -70,6 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to complete the rotation of the credentials for SKE cluster %q?", model.ClusterName)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -77,6 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			_, err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("complete rotation of SKE credentials: %w", err)
@@ -97,11 +100,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered completion of credentials rotation"
 			}
+
 			params.Printer.Info("%s for cluster %q\n", operationState, model.ClusterName)
 			params.Printer.Warn("Consider updating your kubeconfig with the new credentials, create a new kubeconfig by running:\n  $ stackit ske kubeconfig create %s\n", model.ClusterName)
+
 			return nil
 		},
 	}
+
 	return cmd
 }
 
@@ -119,6 +125,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 

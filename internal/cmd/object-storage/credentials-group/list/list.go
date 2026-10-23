@@ -48,6 +48,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -61,6 +62,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				// Check if the service is enabled for the given project
@@ -68,23 +70,28 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if enabledErr != nil {
 					return fmt.Errorf("check if Object Storage is enabled: %w", enabledErr)
 				}
+
 				if !enabled {
 					return &errors.ServiceDisabledError{
 						Service: "object-storage",
 					}
 				}
+
 				return fmt.Errorf("list Object Storage credentials groups: %w", err)
 			}
+
 			credentialsGroups := resp.GetCredentialsGroups()
 
 			// Truncate output
 			if model.Limit != nil && len(credentialsGroups) > int(*model.Limit) {
 				credentialsGroups = credentialsGroups[:*model.Limit]
 			}
+
 			return outputResult(params.Printer, model.OutputFormat, credentialsGroups)
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -112,6 +119,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -124,11 +132,13 @@ func outputResult(p *print.Printer, outputFormat string, credentialsGroups []obj
 	return p.OutputResult(outputFormat, credentialsGroups, func() error {
 		if len(credentialsGroups) == 0 {
 			p.Outputf("No credentials groups found for your project")
+
 			return nil
 		}
 
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "URN")
+
 		for i := range credentialsGroups {
 			c := credentialsGroups[i]
 			table.AddRow(
@@ -137,10 +147,12 @@ func outputResult(p *print.Printer, outputFormat string, credentialsGroups []obj
 				c.Urn,
 			)
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

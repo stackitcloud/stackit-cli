@@ -47,10 +47,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
+
 			// Configure API client
 			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
@@ -59,6 +61,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read server backup schedule: %w", err)
@@ -68,6 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -93,6 +97,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -112,14 +117,17 @@ func outputResult(p *print.Printer, outputFormat string, schedule serverbackup.B
 		table.AddSeparator()
 		table.AddRow("RRULE", schedule.Rrule)
 		table.AddSeparator()
+
 		if schedule.BackupProperties != nil {
 			table.AddRow("BACKUP NAME", schedule.BackupProperties.Name)
 			table.AddSeparator()
 			table.AddRow("BACKUP RETENTION DAYS", schedule.BackupProperties.RetentionPeriod)
 			table.AddSeparator()
+
 			ids := schedule.BackupProperties.VolumeIds
 			table.AddRow("BACKUP VOLUME IDS", utils.JoinStringPtr(&ids, "\n"))
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

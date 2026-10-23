@@ -71,6 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -85,10 +86,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := mariadbUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update instance %q?", instanceLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -98,15 +101,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			req, err := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
+
 				if !errors.As(err, &dsaInvalidPlanError) {
 					return fmt.Errorf("build MariaDB instance update request: %w", err)
 				}
+
 				return err
 			}
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("update MariaDB instance: %w", err)
 			}
+
 			instanceId := model.InstanceId
 
 			// Wait for async operation, if async mode not enabled
@@ -124,11 +131,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered update of"
 			}
+
 			params.Printer.Info("%s instance %q\n", operationState, instanceLabel)
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -146,6 +156,7 @@ func configureFlags(cmd *cobra.Command) {
 
 	err := cmd.Flags().MarkDeprecated(planNameFlag, "Will be removed after 2027-02-28. Use the --plan-id flag instead.")
 	cobra.CheckErr(err)
+
 	err = cmd.Flags().MarkDeprecated(versionFlag, "Will be removed after 2027-02-28. Use the --plan-id flag instead.")
 	cobra.CheckErr(err)
 }
@@ -199,6 +210,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -213,12 +225,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient mariadb.Defa
 		if err != nil {
 			return req, fmt.Errorf("get MariaDB offerings: %w", err)
 		}
+
 		planId, err = mariadbUtils.LoadPlanId(model.PlanName, model.Version, offerings) //nolint:staticcheck // deprecated but still supported until 2027-02-28
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
+
 			if !errors.As(err, &dsaInvalidPlanError) {
 				return req, fmt.Errorf("load plan ID: %w", err)
 			}
+
 			return req, err
 		}
 	} else {
@@ -227,6 +242,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient mariadb.Defa
 	}
 
 	var sgwAcl *string
+
 	if model.SgwAcl != nil {
 		sgwAcl = utils.Ptr(strings.Join(*model.SgwAcl, ","))
 	}
@@ -243,5 +259,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient mariadb.Defa
 		},
 		PlanId: planId,
 	})
+
 	return req, nil
 }

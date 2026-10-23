@@ -38,6 +38,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -85,6 +86,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -92,6 +94,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.SecurityGrou
 	if resp == nil {
 		return fmt.Errorf("security group response is empty")
 	}
+
 	return p.OutputResult(outputFormat, resp, func() error {
 		var content []tables.Table
 
@@ -101,6 +104,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.SecurityGrou
 		if id := resp.Id; id != nil {
 			table.AddRow("ID", *id)
 		}
+
 		table.AddSeparator()
 
 		table.AddRow("NAME", resp.Name)
@@ -118,9 +122,11 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.SecurityGrou
 
 		if len(resp.Labels) > 0 {
 			var labels []string
+
 			for key, value := range resp.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
+
 			table.AddRow("LABELS", strings.Join(labels, "\n"))
 			table.AddSeparator()
 		}
@@ -154,16 +160,19 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.SecurityGrou
 
 			for _, rule := range resp.Rules {
 				var portRange string
+
 				if rule.PortRange != nil {
 					portRange = fmt.Sprintf("%d-%d", rule.PortRange.Min, rule.PortRange.Max)
 				}
 
 				var protocol string
+
 				if rule.Protocol != nil {
 					protocol = utils.PtrString(rule.Protocol.Name)
 				}
 
 				var icmpParameter string
+
 				if rule.IcmpParameters != nil {
 					icmpParameter = fmt.Sprintf("type: %d, code: %d", rule.IcmpParameters.Type, rule.IcmpParameters.Code)
 				}

@@ -58,6 +58,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -70,6 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update scrape configuration %q?", model.JobName)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -77,6 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			_, err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("update scrape config: %w", err)
@@ -84,10 +87,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// The API has no status to wait on, so async mode is default
 			params.Printer.Info("Updated Observability scrape configuration with name %q\n", model.JobName)
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -108,7 +113,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	payloadString := flags.FlagToStringValue(p, cmd, payloadFlag)
+
 	var payload observability.UpdateScrapeConfigPayload
+
 	err := json.Unmarshal([]byte(payloadString), &payload)
 	if err != nil {
 		return nil, fmt.Errorf("encode payload: %w", err)
@@ -126,5 +133,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient observabilit
 	req := apiClient.UpdateScrapeConfig(ctx, model.InstanceId, model.JobName, model.ProjectId)
 
 	req = req.UpdateScrapeConfigPayload(model.Payload)
+
 	return req
 }

@@ -48,6 +48,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -61,6 +62,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("describe network range: %w", err)
@@ -70,6 +72,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -83,6 +86,7 @@ func configureFlags(cmd *cobra.Command) {
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	networkRangeId := inputArgs[0]
 	globalFlags := globalflags.Parse(p, cmd)
+
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
@@ -94,6 +98,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -131,9 +136,11 @@ func outputResult(p *print.Printer, outputFormat string, networkRange *iaas.VPCN
 			table.AddSeparator()
 
 			var labels []string
+
 			for key, value := range ipv4.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
+
 			table.AddRow("LABELS", strings.Join(labels, "\n"))
 			table.AddSeparator()
 			table.AddRow("CREATED AT", utils.ConvertTimePToDateTimeString(ipv4.CreatedAt))
@@ -161,9 +168,11 @@ func outputResult(p *print.Printer, outputFormat string, networkRange *iaas.VPCN
 			table.AddSeparator()
 
 			var labels []string
+
 			for key, value := range ipv6.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
+
 			table.AddRow("LABELS", strings.Join(labels, "\n"))
 			table.AddSeparator()
 			table.AddRow("CREATED AT", utils.ConvertTimePToDateTimeString(ipv6.CreatedAt))
@@ -178,6 +187,7 @@ func outputResult(p *print.Printer, outputFormat string, networkRange *iaas.VPCN
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

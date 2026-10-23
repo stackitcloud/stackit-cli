@@ -120,6 +120,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
@@ -128,6 +129,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				// transform the model.FlavorId field from "*string" to "string" once this is removed
 				params.Printer.Warn("The --%s flag is not set, determining flavor ID by CPU und RAM. This behavior is deprecated, the --%s flag will be required after 2027-01-31.\n", flavorIdFlag, flavorIdFlag)
 			}
+
 			model.FlavorId, err = getFlavorId(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "determining flavor id: %v", err)
@@ -136,12 +138,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// remove after 2027-01-31
 			if model.RetentionDays == nil {
 				params.Printer.Warn("The --%s flag is not set. Using the default value (32). This behavior is deprecated, the --%s flag will be required after 2027-01-31.\n", retentionDaysFlag, retentionDaysFlag)
+
 				model.RetentionDays = utils.Ptr(int32(32)) // transform the model.RetentionDays field from "*int32" to "int32" once this is removed
 			}
 
 			// remove after 2027-01-31
 			if model.BackupSchedule == nil {
 				params.Printer.Warn("The --%s flag is not set. Using the default value \"%s\". This behavior is deprecated, the --%s flag will be required after 2027-01-31.\n", backupScheduleFlag, defaultBackupSchedule, backupScheduleFlag)
+
 				model.BackupSchedule = utils.Ptr(defaultBackupSchedule) // transform the model.BackupSchedule field from "*string" to "string" once this is removed
 			}
 
@@ -153,20 +157,24 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("get latest PostgreSQL version: %w", err)
 				}
+
 				model.Version = utils.Ptr(version) // transform the model.Version field from "*string" to "string" once this is removed
 			}
 
 			if model.StorageSize == nil {
 				params.Printer.Warn("The --%s flag is not set. Using the default value (%d). This behavior is deprecated, the --%s flag will be required after 2027-01-31.\n", storageSizeFlag, defaultStorageSize, storageSizeFlag)
+
 				model.StorageSize = utils.Ptr(int64(defaultStorageSize))
 			}
 
 			if model.StorageClass == nil {
 				params.Printer.Warn("The --%s flag is not set. Using the default value (%s). This behavior is deprecated, the --%s flag will be required after 2027-01-31.\n", storageClassFlag, defaultStorageClass, storageClassFlag)
+
 				model.StorageClass = utils.Ptr(defaultStorageClass)
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a PostgreSQL Flex instance for project %q?", projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -177,6 +185,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create PostgreSQL Flex instance: %w", err)
@@ -197,6 +206,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -229,8 +239,10 @@ func configureFlags(cmd *cobra.Command) {
 	// remove after 2027-01-31
 	err = cmd.Flags().MarkDeprecated(typeFlag.Name(), fmt.Sprintf("Will be removed after 2027-01-31. Use the --%s flag instead.", flavorIdFlag))
 	cobra.CheckErr(err)
+
 	err = cmd.Flags().MarkDeprecated(cpuFlag, fmt.Sprintf("Will be removed after 2027-01-31. Use the --%s flag instead.", flavorIdFlag))
 	cobra.CheckErr(err)
+
 	err = cmd.Flags().MarkDeprecated(ramFlag, fmt.Sprintf("Will be removed after 2027-01-31. Use the --%s flag instead.", flavorIdFlag))
 	cobra.CheckErr(err)
 	cmd.MarkFlagsRequiredTogether(cpuFlag, ramFlag)
@@ -254,6 +266,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 			Cmd: cmd,
 		}
 	}
+
 	// remove after 2027-01-31: flavor id flag will be required then
 	if flavorId != nil && (cpu != nil || ram != nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
@@ -263,12 +276,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	// remove after 2027-01-31: storage size flag will be required then (no pointer anymore)
 	var storageSize *int64
+
 	if cmd.Flags().Changed(storageSizeFlag) {
 		storageSize = flags.FlagToInt64Pointer(p, cmd, storageSizeFlag)
 	}
 
 	// remove after 2027-01-31: retention days flag will be required then (no pointer anymore)
 	var retentionDays *int32
+
 	if cmd.Flags().Changed(retentionDaysFlag) {
 		retentionDays = flags.FlagToInt32Pointer(p, cmd, retentionDaysFlag)
 	}
@@ -297,6 +312,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -329,6 +345,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex
 	req := apiClient.CreateInstance(ctx, model.ProjectId, model.Region)
 
 	var encryption *postgresflex.InstanceEncryption
+
 	if model.EncryptionKekKeyId != nil && model.EncryptionKekKeyringId != nil && model.EncryptionKekKeyVersion != nil && model.EncryptionServiceAccount != nil {
 		encryption = &postgresflex.InstanceEncryption{
 			KekKeyId:       *model.EncryptionKekKeyId,
@@ -339,6 +356,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex
 	}
 
 	var accessScope *postgresflex.InstanceNetworkAccessScope
+
 	if model.AccessScope != nil {
 		accessScope = new(postgresflex.InstanceNetworkAccessScope(*model.AccessScope))
 	}
@@ -370,6 +388,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex
 		},
 		Version: *model.Version,
 	})
+
 	return req, nil
 }
 
@@ -378,11 +397,14 @@ func outputResult(p *print.Printer, outputFormat string, async bool, projectLabe
 		if resp == nil {
 			return fmt.Errorf("no response passed")
 		}
+
 		operationState := "Created"
 		if async {
 			operationState = "Triggered creation of"
 		}
+
 		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, instanceId)
+
 		return nil
 	})
 }

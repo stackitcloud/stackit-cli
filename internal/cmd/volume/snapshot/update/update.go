@@ -50,6 +50,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -65,10 +66,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			snapshotLabel, err := iaasUtils.GetSnapshotName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.SnapshotId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get snapshot name: %v", err)
+
 				snapshotLabel = model.SnapshotId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update snapshot %q?", snapshotLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -76,17 +79,20 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			_, err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("update snapshot: %w", err)
 			}
 
 			params.Printer.Outputf("Updated snapshot %q\n", snapshotLabel)
+
 			return nil
 		},
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -105,6 +111,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	name := flags.FlagToStringPointer(p, cmd, nameFlag)
 	labels := flags.FlagToStringToAny(p, cmd, labelsFlag)
+
 	if labels == nil {
 		labels = map[string]any{}
 	}
@@ -121,15 +128,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiUpdateSnapshotRequest {
 	req := apiClient.DefaultAPI.UpdateSnapshot(ctx, model.ProjectId, model.Region, model.SnapshotId)
 	payload := iaas.NewUpdateSnapshotPayloadWithDefaults()
+
 	payload.Name = model.Name
 	payload.Labels = model.Labels
 
 	req = req.UpdateSnapshotPayload(*payload)
+
 	return req
 }

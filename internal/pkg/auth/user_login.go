@@ -70,8 +70,10 @@ func AuthorizeUser(p *print.Printer, authConfig UserAuthConfig) error {
 	if err != nil {
 		return err
 	}
+
 	if idpClientID != defaultCLIClientID {
 		p.Warn("You are using a custom client ID (%s) for authentication.\n", idpClientID)
+
 		err := p.PromptForEnter("Press Enter to proceed with the login...")
 		if err != nil {
 			return err
@@ -85,39 +87,51 @@ func AuthorizeUser(p *print.Printer, authConfig UserAuthConfig) error {
 		}
 	}
 
-	var redirectURL string
-	var listener net.Listener
-	var listenerErr error
-	var ipv6Listener net.Listener
-	var ipv6ListenerErr error
-	var port int
+	var (
+		redirectURL     string
+		listener        net.Listener
+		listenerErr     error
+		ipv6Listener    net.Listener
+		ipv6ListenerErr error
+		port            int
+	)
+
 	startingPort := defaultPort
 	portRange := configuredPortRange
+
 	if authConfig.Port != nil {
 		startingPort = *authConfig.Port
 		portRange = 1
 	}
+
 	for i := range portRange {
 		port = startingPort + i
+
 		ipv4addr := fmt.Sprintf("127.0.0.1:%d", port)
 		ipv6addr := fmt.Sprintf("[::1]:%d", port)
 		p.Debug(print.DebugLevel, "trying to bind port %d for login redirect", port)
+
 		ipv6Listener, ipv6ListenerErr = net.Listen("tcp6", ipv6addr)
 		if ipv6ListenerErr != nil {
 			continue
 		}
+
 		listener, listenerErr = net.Listen("tcp4", ipv4addr)
 		if listenerErr == nil {
 			_ = ipv6Listener.Close()
 			redirectURL = fmt.Sprintf("http://localhost:%d", port)
 			p.Debug(print.DebugLevel, "bound port %d for login redirect", port)
+
 			break
 		}
+
 		p.Debug(print.DebugLevel, "unable to bind port %d for login redirect: %s", port, listenerErr)
 	}
+
 	if ipv6ListenerErr != nil {
 		return fmt.Errorf("unable to bind port for login redirect, tried from port %d to %d: %w", startingPort, port, ipv6ListenerErr)
 	}
+
 	if listenerErr != nil {
 		return fmt.Errorf("unable to bind port for login redirect, tried from port %d to %d: %w", startingPort, port, listenerErr)
 	}
@@ -139,6 +153,7 @@ func AuthorizeUser(p *print.Printer, authConfig UserAuthConfig) error {
 	if err != nil {
 		return err
 	}
+
 	// Construct the authorization URL
 	authorizationURL := conf.AuthCodeURL("", oauth2.S256ChallengeOption(codeVerifier), oauth2.SetAuthURLParam("max_age", fmt.Sprintf("%d", int64(maxSessionDuration.Seconds()))))
 
@@ -152,8 +167,10 @@ func AuthorizeUser(p *print.Printer, authConfig UserAuthConfig) error {
 
 	// Define a handler that will get the authorization code, call the token endpoint, and close the HTTP server
 	var errServer error
+
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		p.Debug(print.DebugLevel, "received request from authentication server")
+
 		// Close the server only if there was an error
 		// Otherwise, it will redirect to the successful login page
 		defer func() {
@@ -166,11 +183,13 @@ func AuthorizeUser(p *print.Printer, authConfig UserAuthConfig) error {
 		// Get the authorization code
 		code := r.URL.Query().Get("code")
 		errDescription := r.URL.Query().Get("error_description")
+
 		if code == "" {
 			errServer = fmt.Errorf("could not find 'code' URL parameter")
 			if errDescription != "" {
 				errServer = fmt.Errorf("%w: %s", errServer, errDescription)
 			}
+
 			return
 		}
 
@@ -278,6 +297,7 @@ func AuthorizeUser(p *print.Printer, authConfig UserAuthConfig) error {
 	// Start the blocking web server loop
 	// It will exit when the handlers get fired and call server.Close()
 	p.Debug(print.DebugLevel, "listening for response from authentication server on %s", redirectURL)
+
 	err = server.Serve(listener)
 	if !errors.Is(err, http.ErrServerClosed) {
 		return fmt.Errorf("server for PKCE flow closed unexpectedly: %w", err)
@@ -305,7 +325,9 @@ func getUserAccessAndRefreshTokens(idpWellKnownConfig *wellKnownConfig, clientID
 	// Create the request and execute it
 	req, _ := http.NewRequest("POST", idpWellKnownConfig.TokenEndpoint, payload)
 	req.Header.Add("content-type", "application/x-www-form-urlencoded")
+
 	httpClient := &http.Client{}
+
 	res, err := httpClient.Do(req) //nolint:gosec // URL from well known
 	if err != nil {
 		return "", "", fmt.Errorf("call access token endpoint: %w", err)
@@ -318,6 +340,7 @@ func getUserAccessAndRefreshTokens(idpWellKnownConfig *wellKnownConfig, clientID
 			err = fmt.Errorf("close response body: %w", closeErr)
 		}
 	}()
+
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return "", "", fmt.Errorf("read response body: %w", err)
@@ -328,13 +351,16 @@ func getUserAccessAndRefreshTokens(idpWellKnownConfig *wellKnownConfig, clientID
 		AccessToken  string `json:"access_token"`
 		RefreshToken string `json:"refresh_token"`
 	}{}
+
 	err = json.Unmarshal(body, &responseData)
 	if err != nil {
 		return "", "", fmt.Errorf("unmarshal response: %w", err)
 	}
+
 	if responseData.AccessToken == "" {
 		return "", "", fmt.Errorf("found no access token")
 	}
+
 	if responseData.RefreshToken == "" {
 		return "", "", fmt.Errorf("found no refresh token")
 	}
@@ -365,6 +391,7 @@ func openBrowser(pageUrl string) (err error) {
 			err = exec.Command("xdg-open", pageUrl).Start() //nolint:gosec // url is validated
 			break
 		}
+
 		fallthrough
 	case "windows":
 		err = exec.Command("rundll32.exe", "url.dll,FileProtocolHandler", pageUrl).Start() //nolint:gosec // url is validated
@@ -373,8 +400,10 @@ func openBrowser(pageUrl string) (err error) {
 	default:
 		err = fmt.Errorf("unsupported platform")
 	}
+
 	if err != nil {
 		return err
 	}
+
 	return nil
 }

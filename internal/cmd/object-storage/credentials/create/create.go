@@ -49,6 +49,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -63,10 +64,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			credentialsGroupLabel, err := objectStorageUtils.GetCredentialsGroupName(ctx, apiClient.DefaultAPI, model.ProjectId, model.CredentialsGroupId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get credentials group name: %v", err)
+
 				credentialsGroupLabel = model.CredentialsGroupId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create credentials in group %q?", credentialsGroupLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -74,6 +77,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				// Check if the service is enabled for the given project
@@ -81,11 +85,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if enabledErr != nil {
 					return fmt.Errorf("check if Object Storage is enabled: %w", enabledErr)
 				}
+
 				if !enabled {
 					return &errors.ServiceDisabledError{
 						Service: "object-storage",
 					}
 				}
+
 				return fmt.Errorf("create Object Storage credentials: %w", err)
 			}
 
@@ -93,6 +99,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -125,15 +132,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiCreateAccessKeyRequest {
 	req := apiClient.DefaultAPI.CreateAccessKey(ctx, model.ProjectId, model.Region)
+
 	req = req.CredentialsGroup(model.CredentialsGroupId)
 	req = req.CreateAccessKeyPayload(objectstorage.CreateAccessKeyPayload{
 		Expires: *objectstorage.NewNullableTime(model.ExpireDate),
 	})
+
 	return req
 }
 

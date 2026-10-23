@@ -40,6 +40,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -56,6 +57,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -64,6 +66,7 @@ func fixtureRequest(mods ...func(request *automation.ApiGetVolumeAutomationReque
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -160,10 +163,12 @@ func TestBuildRequest(t *testing.T) {
 
 func TestOutputResult(t *testing.T) {
 	tempDir := t.TempDir()
+
 	type args struct {
 		filePath *string
 		item     *automation.VolumeAutomation
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -211,6 +216,7 @@ func TestOutputResult(t *testing.T) {
 			if err := outputResult(params.Printer, tt.args.filePath, tt.args.item); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
+
 			if tt.args.filePath != nil && !tt.wantErr {
 				if _, err := os.Stat(*tt.args.filePath); os.IsNotExist(err) {
 					t.Errorf("expected file %s to be created", *tt.args.filePath)

@@ -54,6 +54,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return fmt.Errorf("unable to parse input: %w", err)
@@ -68,12 +69,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			resourcePoolLabel, err := sfsUtils.GetResourcePoolName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ResourcePoolId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get resource pool name: %v", err)
+
 				resourcePoolLabel = model.ResourcePoolId
 			} else if resourcePoolLabel == "" {
 				resourcePoolLabel = model.ResourcePoolId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a SFS share for resource pool %q?", resourcePoolLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -81,11 +84,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create SFS share: %w", err)
 			}
+
 			var shareId string
+
 			if resp != nil && resp.HasShare() && resp.Share.HasId() {
 				shareId = *resp.Share.Id
 			}
@@ -105,6 +111,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -143,11 +150,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClient) sfs.ApiCreateShareRequest {
 	req := apiClient.DefaultAPI.CreateShare(ctx, model.ProjectId, model.Region, model.ResourcePoolId)
+
 	req = req.CreateSharePayload(
 		sfs.CreateSharePayload{
 			Name:                    model.Name,
@@ -155,6 +164,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClie
 			SpaceHardLimitGigabytes: *model.HardLimit,
 		},
 	)
+
 	return req
 }
 
@@ -162,12 +172,15 @@ func outputResult(p *print.Printer, outputFormat string, async bool, resourcePoo
 	return p.OutputResult(outputFormat, item, func() error {
 		if item == nil || item.Share == nil {
 			p.Outputln("SFS share response is empty")
+
 			return nil
 		}
+
 		operation := "Created"
 		if async {
 			operation = "Triggered creation of"
 		}
+
 		p.Outputf(
 			"%s SFS Share %q in resource pool %q.\nShare ID: %s\n",
 			operation,
@@ -175,6 +188,7 @@ func outputResult(p *print.Printer, outputFormat string, async bool, resourcePoo
 			resourcePoolLabel,
 			utils.PtrString(item.Share.Id),
 		)
+
 		return nil
 	})
 }

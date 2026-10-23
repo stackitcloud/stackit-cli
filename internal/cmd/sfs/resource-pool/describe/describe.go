@@ -64,6 +64,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
@@ -72,6 +73,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, model.ResourcePoolId, projectLabel, resp.ResourcePool)
 		},
 	}
+
 	return cmd
 }
 
@@ -94,6 +96,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -101,17 +104,21 @@ func outputResult(p *print.Printer, outputFormat, resourcePoolId, projectLabel s
 	return p.OutputResult(outputFormat, resourcePool, func() error {
 		if resourcePool == nil {
 			p.Outputf("Resource pool %q not found in project %q\n", resourcePoolId, projectLabel)
+
 			return nil
 		}
+
 		table := tables.NewTable()
 
 		// convert the string slice to a comma separated list
 		var ipAclStr string
+
 		if resourcePool.IpAcl != nil {
 			ipAclStr = strings.Join(resourcePool.IpAcl, ", ")
 		}
 
 		var snapshotPolicyId string
+
 		if resourcePool.SnapshotPolicy.Get() != nil {
 			snapshotPolicyId = *resourcePool.SnapshotPolicy.Get().Id
 		}
@@ -128,10 +135,12 @@ func outputResult(p *print.Printer, outputFormat, resourcePoolId, projectLabel s
 		table.AddSeparator()
 		table.AddRow("MOUNT PATH", utils.PtrString(resourcePool.MountPath))
 		table.AddSeparator()
+
 		if resourcePool.PerformanceClass != nil {
 			table.AddRow("PERFORMANCE CLASS", utils.PtrString(resourcePool.PerformanceClass.Name))
 			table.AddSeparator()
 		}
+
 		table.AddRow("SNAPSHOTS ARE VISIBLE", utils.PtrString(resourcePool.SnapshotsAreVisible))
 		table.AddSeparator()
 		table.AddRow("SNAPSHOT POLICY ID", snapshotPolicyId)
@@ -140,6 +149,7 @@ func outputResult(p *print.Printer, outputFormat, resourcePoolId, projectLabel s
 		table.AddSeparator()
 		table.AddRow("NEXT SIZE REDUCTION TIME", resourcePool.SizeReducibleAt)
 		table.AddSeparator()
+
 		if resourcePool.HasSpace() {
 			table.AddRow("TOTAL SIZE (GB)", utils.PtrString(resourcePool.Space.SizeGigabytes))
 			table.AddSeparator()
@@ -150,6 +160,7 @@ func outputResult(p *print.Printer, outputFormat, resourcePoolId, projectLabel s
 			table.AddRow("USED BY SNAPSHOTS (GB)", utils.PtrString(resourcePool.Space.UsedBySnapshotsGigabytes.Get()))
 			table.AddSeparator()
 		}
+
 		table.AddRow("STATE", utils.PtrString(resourcePool.State))
 		table.AddSeparator()
 
@@ -157,6 +168,7 @@ func outputResult(p *print.Printer, outputFormat, resourcePoolId, projectLabel s
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

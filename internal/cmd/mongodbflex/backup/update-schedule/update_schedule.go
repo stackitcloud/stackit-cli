@@ -86,10 +86,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := mongoDBflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, *model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = *model.InstanceId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update backup schedule of instance %q?", instanceLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -97,6 +99,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Get current instance
 			getReq := buildGetInstanceRequest(ctx, model, apiClient)
+
 			getResp, err := getReq.Execute()
 			if err != nil {
 				return fmt.Errorf("get MongoDB Flex instance %q: %w", instanceLabel, err)
@@ -106,16 +109,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildUpdateBackupScheduleRequest(ctx, model, instance, apiClient)
+
 			_, err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("update backup schedule of MongoDB Flex instance: %w", err)
 			}
 
 			cmd.Printf("Updated backup schedule of instance %q\n", instanceLabel)
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -166,20 +172,25 @@ func buildUpdateBackupScheduleRequest(ctx context.Context, model *inputModel, in
 	if model.BackupSchedule != nil {
 		payload.BackupSchedule = model.BackupSchedule
 	}
+
 	if model.DailySnaphotRetentionDays != nil {
 		payload.DailySnapshotRetentionDays = model.DailySnaphotRetentionDays
 	}
+
 	if model.MonthlySnapshotRetentionMonths != nil {
 		payload.MonthlySnapshotRetentionMonths = model.MonthlySnapshotRetentionMonths
 	}
+
 	if model.SnapshotRetentionDays != nil {
 		payload.SnapshotRetentionDays = model.SnapshotRetentionDays
 	}
+
 	if model.WeeklySnapshotRetentionWeeks != nil {
 		payload.WeeklySnapshotRetentionWeeks = model.WeeklySnapshotRetentionWeeks
 	}
 
 	req = req.UpdateBackupSchedulePayload(payload)
+
 	return req
 }
 
@@ -196,36 +207,51 @@ func getUpdateBackupSchedulePayload(instance *mongodbflex.Instance) mongodbflex.
 	if backupSchedule == nil {
 		backupSchedule = utils.Ptr(defaultBackupSchedule)
 	}
+
 	parsedDailySnapshotRetentionDays, err := strconv.ParseInt(options["dailySnapshotRetentionDays"], 10, 32)
+
 	var dailySnapshotRetentionDays int32
+
 	if err != nil {
 		dailySnapshotRetentionDays = defaultDailySnapshotRetentionDays
 	} else {
 		dailySnapshotRetentionDays = int32(parsedDailySnapshotRetentionDays)
 	}
+
 	parsedWeeklySnapshotRetentionWeeks, err := strconv.ParseInt(options["weeklySnapshotRetentionWeeks"], 10, 32)
+
 	var weeklySnapshotRetentionWeeks int32
+
 	if err != nil {
 		weeklySnapshotRetentionWeeks = defaultWeeklySnapshotRetentionWeeks
 	} else {
 		weeklySnapshotRetentionWeeks = int32(parsedWeeklySnapshotRetentionWeeks)
 	}
+
 	parsedMonthlySnapshotRetentionMonths, err := strconv.ParseInt(options["monthlySnapshotRetentionMonths"], 10, 32)
+
 	var monthlySnapshotRetentionMonths int32
+
 	if err != nil {
 		monthlySnapshotRetentionMonths = defaultMonthlySnapshotRetentionMonths
 	} else {
 		monthlySnapshotRetentionMonths = int32(parsedMonthlySnapshotRetentionMonths)
 	}
+
 	parsedPointInTimeWindowHours, err := strconv.ParseInt(options["pointInTimeWindowHours"], 10, 32)
+
 	var pointInTimeWindowHours int32
+
 	if err != nil {
 		pointInTimeWindowHours = defaultPointInTimeWindowHours
 	} else {
 		pointInTimeWindowHours = int32(parsedPointInTimeWindowHours)
 	}
+
 	parsedSnapshotRetentionDays, err := strconv.ParseInt(options["snapshotRetentionDays"], 10, 32)
+
 	var snapshotRetentionDays int32
+
 	if err != nil {
 		snapshotRetentionDays = defaultSnapshotRetentionDays
 	} else {
@@ -240,6 +266,7 @@ func getUpdateBackupSchedulePayload(instance *mongodbflex.Instance) mongodbflex.
 		SnapshotRetentionDays:          &snapshotRetentionDays,
 		WeeklySnapshotRetentionWeeks:   &weeklySnapshotRetentionWeeks,
 	}
+
 	return defaultPayload
 }
 

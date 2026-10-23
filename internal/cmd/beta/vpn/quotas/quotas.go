@@ -43,6 +43,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return fmt.Errorf("unable to parse input: %w", err)
@@ -56,6 +57,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list vpn quotas: %w", err)
@@ -70,6 +72,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -97,6 +100,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -108,6 +112,7 @@ func outputResult(p *print.Printer, outputFormat string, quota *vpn.QuotaListRes
 	return p.OutputResult(outputFormat, quota, func() error {
 		if quota == nil {
 			p.Info("No quotas for %q\n", projectLabel)
+
 			return nil
 		}
 
@@ -116,6 +121,7 @@ func outputResult(p *print.Printer, outputFormat string, quota *vpn.QuotaListRes
 
 		table.AddRow("Gateway Instances", quota.Quotas.Gateways.Limit, quota.Quotas.Gateways.Usage)
 		p.Outputln(table.Render())
+
 		return nil
 	})
 }

@@ -38,16 +38,20 @@ func GetProfile() (string, error) {
 // If the profile is not valid, it returns an error.
 func GetConfiguredProfile() (configuredProfile, activeProfile, configurationMethod string, err error) {
 	var configMethod string
+
 	profile, profileSetInEnv := GetProfileFromEnv()
+
 	if !profileSetInEnv {
 		contents, exists, err := fileutils.ReadFileIfExists(profileFilePath)
 		if err != nil {
 			return "", "", "", fmt.Errorf("read profile from file: %w", err)
 		}
+
 		if !exists {
 			// No profile set in env or file
 			return DefaultProfileName, DefaultProfileName, "", nil
 		}
+
 		profile = contents
 		configMethod = "profile file"
 	} else {
@@ -59,6 +63,7 @@ func GetConfiguredProfile() (configuredProfile, activeProfile, configurationMeth
 	if err != nil {
 		return "", "", "", fmt.Errorf("check if profile exists: %w", err)
 	}
+
 	if !profileExists {
 		// Profile is configured but does not exist
 		return profile, DefaultProfileName, configMethod, nil
@@ -68,6 +73,7 @@ func GetConfiguredProfile() (configuredProfile, activeProfile, configurationMeth
 	if err != nil {
 		return "", "", "", fmt.Errorf("validate profile: %w", err)
 	}
+
 	return profile, profile, configMethod, nil
 }
 
@@ -107,8 +113,10 @@ func CreateProfile(p *print.Printer, profile string, setProfile, ignoreExisting,
 					return fmt.Errorf("set profile: %w", err)
 				}
 			}
+
 			return nil
 		}
+
 		return fmt.Errorf("profile %q already exists", profile)
 	}
 
@@ -116,6 +124,7 @@ func CreateProfile(p *print.Printer, profile string, setProfile, ignoreExisting,
 	if err != nil {
 		return fmt.Errorf("create config folder: %w", err)
 	}
+
 	p.Debug(print.DebugLevel, "created folder for the new profile: %s", configFolderPath)
 
 	if !emptyProfile {
@@ -126,11 +135,13 @@ func CreateProfile(p *print.Printer, profile string, setProfile, ignoreExisting,
 			if cleanupErr != nil {
 				return fmt.Errorf("get active profile: %w, cleanup directories: %w", err, cleanupErr)
 			}
+
 			return fmt.Errorf("get active profile: %w", err)
 		}
 
 		p.Debug(print.DebugLevel, "current active profile: %q", currentProfile)
 		p.Debug(print.DebugLevel, "duplicating profile configuration from %q to new profile %q", currentProfile, profile)
+
 		err = DuplicateProfileConfiguration(p, currentProfile, profile)
 		if err != nil {
 			// Cleanup created directory
@@ -138,6 +149,7 @@ func CreateProfile(p *print.Printer, profile string, setProfile, ignoreExisting,
 			if cleanupErr != nil {
 				return fmt.Errorf("get active profile: %w, cleanup directories: %w", err, cleanupErr)
 			}
+
 			return fmt.Errorf("duplicate profile configuration: %w", err)
 		}
 	}
@@ -167,8 +179,10 @@ func DuplicateProfileConfiguration(p *print.Printer, currentProfile, newProfile 
 	if err != nil {
 		if os.IsNotExist(err) {
 			p.Debug(print.DebugLevel, "current profile %q has no configuration, nothing to duplicate", currentProfile)
+
 			return nil
 		}
+
 		return fmt.Errorf("get current profile configuration: %w", err)
 	}
 
@@ -206,6 +220,7 @@ func SetProfile(p *print.Printer, profile string) error {
 	if err != nil {
 		return fmt.Errorf("write profile to file: %w", err)
 	}
+
 	p.Debug(print.DebugLevel, "persisted new active profile in: %s", profileFilePath)
 
 	configFolderPath = GetProfileFolderPath(profile)
@@ -221,9 +236,11 @@ func UnsetProfile(p *print.Printer) error {
 	if err != nil && !os.IsNotExist(err) {
 		return fmt.Errorf("remove profile file: %w", err)
 	}
+
 	if p != nil {
 		p.Debug(print.DebugLevel, "removed active profile file: %s", profileFilePath)
 	}
+
 	return nil
 }
 
@@ -236,11 +253,13 @@ func ValidateProfile(profile string) error {
 	if err != nil {
 		return fmt.Errorf("match string regex: %w", err)
 	}
+
 	if !match {
 		return &errors.InvalidProfileNameError{
 			Profile: profile,
 		}
 	}
+
 	return nil
 }
 
@@ -250,8 +269,10 @@ func ProfileExists(profile string) (bool, error) {
 		if os.IsNotExist(err) {
 			return false, nil
 		}
+
 		return false, fmt.Errorf("get profile folder: %w", err)
 	}
+
 	return true, nil
 }
 
@@ -265,6 +286,7 @@ func GetProfileFolderPath(profile string) string {
 	if profile == DefaultProfileName {
 		return defaultConfigFolderPath
 	}
+
 	return filepath.Join(defaultConfigFolderPath, profileRootFolder, profile)
 }
 
@@ -279,6 +301,7 @@ func ListProfiles() ([]string, error) {
 		if os.IsNotExist(err) {
 			return profiles, nil
 		}
+
 		return nil, fmt.Errorf("get profile root folder: %w", err)
 	}
 
@@ -356,17 +379,20 @@ func ImportProfile(p *print.Printer, profileName, config string, setAsActive boo
 	if err != nil {
 		return fmt.Errorf("check if profile exists: %w", err)
 	}
+
 	if exists {
 		return &errors.ProfileAlreadyExistsError{Profile: profileName}
 	}
 
 	importConfig := &map[string]interface{}{}
+
 	err = json.Unmarshal([]byte(config), importConfig)
 	if err != nil {
 		return fmt.Errorf("unmarshal config: %w", err)
 	}
 
 	configFolderPath = GetProfileFolderPath(profileName)
+
 	err = os.MkdirAll(configFolderPath, 0o750)
 	if err != nil {
 		return fmt.Errorf("create config folder: %w", err)
@@ -378,16 +404,19 @@ func ImportProfile(p *print.Printer, profileName, config string, setAsActive boo
 		if cleanupErr != nil {
 			return fmt.Errorf("json marshal config: %w, cleanup directories: %w", err, cleanupErr)
 		}
+
 		return fmt.Errorf("marshal config file: %w", err)
 	}
 
 	filePath := getConfigFilePath(configFolderPath)
+
 	err = os.WriteFile(filePath, content, 0o600)
 	if err != nil {
 		cleanupErr := os.RemoveAll(configFolderPath)
 		if cleanupErr != nil {
 			return fmt.Errorf("write config file: %w, cleanup directories: %w", err, cleanupErr)
 		}
+
 		return fmt.Errorf("write config file: %w", err)
 	}
 
@@ -421,6 +450,7 @@ func ExportProfile(p *print.Printer, profile, exportPath string) error {
 	if err != nil {
 		return fmt.Errorf("check if profile exists: %w", err)
 	}
+
 	if !exists {
 		return &errors.ProfileDoesNotExistError{Profile: profile}
 	}
@@ -433,6 +463,7 @@ func ExportProfile(p *print.Printer, profile, exportPath string) error {
 		if stats.IsDir() {
 			return fmt.Errorf("export path %q is a directory. Please specify a full path", exportPath)
 		}
+
 		return &errors.FileAlreadyExistsError{Filename: exportPath}
 	}
 
@@ -443,6 +474,7 @@ func ExportProfile(p *print.Printer, profile, exportPath string) error {
 	} else {
 		err = fileutils.CopyFile(configFile, exportPath)
 	}
+
 	if err != nil {
 		return fmt.Errorf("export config file to %q: %w", exportPath, err)
 	}

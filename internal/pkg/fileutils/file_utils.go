@@ -12,6 +12,7 @@ func WriteToFile(outputFileName, content string) (err error) {
 	if err != nil {
 		return fmt.Errorf("create output file: %w", err)
 	}
+
 	defer func() {
 		tempErr := fo.Close()
 		if tempErr != nil {
@@ -22,10 +23,12 @@ func WriteToFile(outputFileName, content string) (err error) {
 			}
 		}
 	}()
+
 	_, err = fo.WriteString(content)
 	if err != nil {
 		return fmt.Errorf("write content to output file: %w", err)
 	}
+
 	return err
 }
 
@@ -38,6 +41,7 @@ func ReadFileIfExists(filePath string) (contents string, exists bool, err error)
 		if os.IsNotExist(err) {
 			return "", false, nil
 		}
+
 		return "", true, err
 	}
 

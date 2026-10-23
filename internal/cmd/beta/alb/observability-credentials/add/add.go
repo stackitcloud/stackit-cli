@@ -56,6 +56,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := "Are your sure you want to add credentials?"
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -63,6 +64,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("add credential: %w", err)
@@ -72,6 +74,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd, params)
+
 	return cmd
 }
 
@@ -96,6 +99,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -106,6 +110,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClie
 		Password:    model.Password,
 		Username:    model.Username,
 	}
+
 	return req.CreateCredentialsPayload(payload)
 }
 
@@ -118,6 +123,7 @@ func outputResult(p *print.Printer, outputFormat string, item *alb.CreateCredent
 		if item.Credential != nil {
 			p.Outputf("Created credential %s\n", utils.PtrString(item.Credential.CredentialsRef))
 		}
+
 		return nil
 	})
 }

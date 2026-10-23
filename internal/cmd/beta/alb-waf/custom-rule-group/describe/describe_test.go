@@ -33,6 +33,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, m := range mods {
 		m(argValues)
 	}
+
 	return argValues
 }
 
@@ -44,6 +45,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, m := range mods {
 		m(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -59,6 +61,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -67,6 +70,7 @@ func fixtureRequest(mods ...func(request *albwaf.ApiGetCustomRuleGroupRequest)) 
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 

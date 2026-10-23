@@ -36,12 +36,14 @@ func newAPIMock(s mockSettings) sqlserverflex.DefaultAPI {
 			if s.listFlavorsFails {
 				return nil, fmt.Errorf("list storages failed")
 			}
+
 			return s.listStoragesResp, nil
 		}),
 		ListFlavorsExecuteMock: utils.Ptr(func(_ sqlserverflex.ApiListFlavorsRequest) (*sqlserverflex.ListFlavorsResponse, error) {
 			if s.listFlavorsFails {
 				return nil, fmt.Errorf("list flavors failed")
 			}
+
 			return s.listFlavorsResp, nil
 		}),
 	}
@@ -71,6 +73,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -98,15 +101,19 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *sqlserverflex.ApiCreateInstanceRequest)) sqlserverflex.ApiCreateInstanceRequest {
 	request := testClient.DefaultAPI.CreateInstance(testCtx, testProjectId, testRegion)
+
 	request = request.CreateInstancePayload(fixturePayload())
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -134,6 +141,7 @@ func fixturePayload(mods ...func(payload *sqlserverflex.CreateInstancePayload)) 
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
@@ -496,11 +504,13 @@ func TestBuildRequest(t *testing.T) {
 				listStoragesFails: tt.listStoragesFails,
 				listStoragesResp:  tt.listStoragesResp,
 			}
+
 			request, err := buildRequest(testCtx, tt.model, newAPIMock(client))
 			if err != nil {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error building request: %v", err)
 			}
 
@@ -524,6 +534,7 @@ func TestOutputResult(t *testing.T) {
 		projectLabel string
 		resp         *sqlserverflex.CreateInstanceResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args

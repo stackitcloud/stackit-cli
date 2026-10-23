@@ -71,6 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -85,10 +86,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a LogMe instance for project %q?", projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -98,15 +101,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			req, err := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
+
 				if !errors.As(err, &dsaInvalidPlanError) {
 					return fmt.Errorf("build LogMe instance creation request: %w", err)
 				}
+
 				return err
 			}
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create LogMe instance: %w", err)
 			}
+
 			instanceId := resp.InstanceId
 
 			// Wait for async operation, if async mode not enabled
@@ -124,6 +131,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -145,6 +153,7 @@ func configureFlags(cmd *cobra.Command) {
 
 	err = cmd.Flags().MarkDeprecated(planNameFlag, "Will be removed after 2027-02-28. Use the --plan-id flag instead.")
 	cobra.CheckErr(err)
+
 	err = cmd.Flags().MarkDeprecated(versionFlag, "Will be removed after 2027-02-28. Use the --plan-id flag instead.")
 	cobra.CheckErr(err)
 }
@@ -164,6 +173,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 			Cmd: cmd,
 		}
 	}
+
 	if planId != nil && (planName != "" || version != "") {
 		return nil, &cliErr.DSAInputPlanError{
 			Cmd: cmd,
@@ -186,6 +196,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -200,12 +211,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient logme.Defaul
 		if err != nil {
 			return req, fmt.Errorf("get LogMe offerings: %w", err)
 		}
+
 		planId, err = logmeUtils.LoadPlanId(model.PlanName, model.Version, offerings) //nolint:staticcheck // deprecated but still supported until 2027-02-28
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
+
 			if !errors.As(err, &dsaInvalidPlanError) {
 				return req, fmt.Errorf("load plan ID: %w", err)
 			}
+
 			return req, err
 		}
 	} else {
@@ -213,6 +227,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient logme.Defaul
 	}
 
 	var sgwAcl *string
+
 	if model.SgwAcl != nil {
 		sgwAcl = utils.Ptr(strings.Join(*model.SgwAcl, ","))
 	}
@@ -230,6 +245,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient logme.Defaul
 		},
 		PlanId: utils.PtrValue(planId),
 	})
+
 	return req, nil
 }
 
@@ -243,7 +259,9 @@ func outputResult(p *print.Printer, outputFormat string, async bool, projectLabe
 		if async {
 			operationState = "Triggered creation of"
 		}
+
 		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, resp.InstanceId)
+
 		return nil
 	})
 }

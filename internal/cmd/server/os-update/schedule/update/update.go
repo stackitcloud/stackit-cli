@@ -71,10 +71,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			currentSchedule, err := apiClient.DefaultAPI.GetUpdateSchedule(ctx, model.ProjectId, model.ServerId, model.ScheduleId, model.Region).Execute()
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get current server os-update schedule: %v", err)
+
 				return err
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update Server os-update Schedule %q?", model.ScheduleId)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -85,6 +87,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update Server os-update Schedule: %w", err)
@@ -94,6 +97,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -128,6 +132,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -137,12 +142,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdat
 	if model.MaintenanceWindow != nil {
 		old.MaintenanceWindow = *model.MaintenanceWindow
 	}
+
 	if model.Enabled != nil {
 		old.Enabled = *model.Enabled
 	}
+
 	if model.ScheduleName != nil {
 		old.Name = *model.ScheduleName
 	}
+
 	if model.Rrule != nil {
 		old.Rrule = *model.Rrule
 	}
@@ -153,12 +161,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdat
 		Rrule:             old.Rrule,
 		MaintenanceWindow: old.MaintenanceWindow,
 	})
+
 	return req, nil
 }
 
 func outputResult(p *print.Printer, outputFormat string, resp serverupdate.UpdateSchedule) error {
 	return p.OutputResult(outputFormat, resp, func() error {
 		p.Info("Updated server os-update schedule %d\n", resp.Id)
+
 		return nil
 	})
 }

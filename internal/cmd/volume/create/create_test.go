@@ -44,6 +44,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -68,26 +69,33 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateVolumeRequest)) iaas.ApiCreateVolumeRequest {
 	request := testClient.DefaultAPI.CreateVolume(testCtx, testProjectId, testRegion)
+
 	request = request.CreateVolumePayload(fixturePayload())
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
 func fixtureRequiredRequest(mods ...func(request *iaas.ApiCreateVolumeRequest)) iaas.ApiCreateVolumeRequest {
 	request := testClient.DefaultAPI.CreateVolume(testCtx, testProjectId, testRegion)
+
 	request = request.CreateVolumePayload(iaas.CreateVolumePayload{
 		AvailabilityZone: "eu01-1",
 	})
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -109,6 +117,7 @@ func fixturePayload(mods ...func(payload *iaas.CreateVolumePayload)) iaas.Create
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
@@ -260,6 +269,7 @@ func TestOutputResult(t *testing.T) {
 		projectLabel string
 		volume       *iaas.Volume
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -280,6 +290,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, tt.args.model, tt.args.projectLabel, tt.args.volume); (err != nil) != tt.wantErr {

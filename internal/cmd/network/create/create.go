@@ -102,6 +102,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -116,12 +117,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a network for project %q?", projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -129,6 +132,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create network : %w", err)
@@ -137,6 +141,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if resp == nil {
 				return fmt.Errorf("create network : empty response")
 			}
+
 			networkId := resp.Id
 
 			// Wait for async operation, if async mode not enabled
@@ -149,10 +154,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 					return fmt.Errorf("wait for network creation: %w", err)
 				}
 			}
+
 			return outputResult(params.Printer, model.OutputFormat, model.Async, projectLabel, resp)
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -217,14 +224,17 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	// IPv4 nameserver can not be set alone. IPv4 Prefix || IPv4 Prefix length must be set as well
 	isIPv4NameserverSet := len(model.IPv4DnsNameServers) > 0
 	isIPv4PrefixOrPrefixLengthSet := model.IPv4Prefix != nil || model.IPv4PrefixLength != nil
+
 	if isIPv4NameserverSet && !isIPv4PrefixOrPrefixLengthSet {
 		return nil, &cliErr.OneOfFlagsIsMissing{
 			MissingFlags: []string{ipv4PrefixLengthFlag, ipv4PrefixFlag},
 			SetFlag:      ipv4DnsNameServersFlag,
 		}
 	}
+
 	isIPv4GatewaySet := model.IPv4Gateway != nil
 	isIPv4PrefixSet := model.IPv4Prefix != nil
+
 	if isIPv4GatewaySet && !isIPv4PrefixSet {
 		return nil, &cliErr.DependingFlagIsMissing{
 			MissingFlag: ipv4PrefixFlag,
@@ -235,14 +245,17 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	// IPv6 nameserver can not be set alone. IPv6 Prefix || IPv6 Prefix length must be set as well
 	isIPv6NameserverSet := len(model.IPv6DnsNameServers) > 0
 	isIPv6PrefixOrPrefixLengthSet := model.IPv6Prefix != nil || model.IPv6PrefixLength != nil
+
 	if isIPv6NameserverSet && !isIPv6PrefixOrPrefixLengthSet {
 		return nil, &cliErr.OneOfFlagsIsMissing{
 			MissingFlags: []string{ipv6PrefixLengthFlag, ipv6PrefixFlag},
 			SetFlag:      ipv6DnsNameServersFlag,
 		}
 	}
+
 	isIPv6GatewaySet := model.IPv6Gateway != nil
 	isIPv6PrefixSet := model.IPv6Prefix != nil
+
 	if isIPv6GatewaySet && !isIPv6PrefixSet {
 		return nil, &cliErr.DependingFlagIsMissing{
 			MissingFlag: ipv6PrefixFlag,
@@ -251,13 +264,17 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient iaas.DefaultAPI) iaas.ApiCreateNetworkRequest {
 	req := apiClient.CreateNetwork(ctx, model.ProjectId, model.Region)
-	var ipv4Network *iaas.CreateNetworkIPv4
-	var ipv6Network *iaas.CreateNetworkIPv6
+
+	var (
+		ipv4Network *iaas.CreateNetworkIPv4
+		ipv6Network *iaas.CreateNetworkIPv6
+	)
 
 	if model.IPv6Prefix != nil {
 		ipv6Network = &iaas.CreateNetworkIPv6{
@@ -320,12 +337,15 @@ func outputResult(p *print.Printer, outputFormat string, async bool, projectLabe
 	if network == nil {
 		return fmt.Errorf("network cannot be nil")
 	}
+
 	return p.OutputResult(outputFormat, network, func() error {
 		operationState := "Created"
 		if async {
 			operationState = "Triggered creation of"
 		}
+
 		p.Outputf("%s network for project %q.\nNetwork ID: %s\n", operationState, projectLabel, network.Id)
+
 		return nil
 	})
 }

@@ -74,6 +74,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Deprecated: `Command "stackit mongodbflex options" is deprecated and will be removed after 2027-03-07. Please use "stackit mongodbflex version list", "stackit mongodbflex flavor list" and "stackit mongodbflex storage list" commands instead.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -95,6 +96,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -136,6 +138,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -148,10 +151,12 @@ type mongoDBFlexOptionsClient interface {
 
 // Deprecated: Will be removed after 2027-03-07.
 func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputModel, apiClient mongoDBFlexOptionsClient) error {
-	var flavors *mongodbflex.ListFlavorsResponse
-	var versions *mongodbflex.ListVersionsResponse
-	var storages *mongodbflex.ListStoragesResponse
-	var err error
+	var (
+		flavors  *mongodbflex.ListFlavorsResponse
+		versions *mongodbflex.ListVersionsResponse
+		storages *mongodbflex.ListStoragesResponse
+		err      error
+	)
 
 	if model.Flavors {
 		flavors, err = apiClient.ListFlavors(ctx, model.ProjectId, model.Region).Execute()
@@ -159,12 +164,14 @@ func buildAndExecuteRequest(ctx context.Context, p *print.Printer, model *inputM
 			return fmt.Errorf("get MongoDB Flex flavors: %w", err)
 		}
 	}
+
 	if model.Versions {
 		versions, err = apiClient.ListVersions(ctx, model.ProjectId, model.Region).Execute()
 		if err != nil {
 			return fmt.Errorf("get MongoDB Flex versions: %w", err)
 		}
 	}
+
 	if model.Storages {
 		storages, err = apiClient.ListStorages(ctx, model.ProjectId, *model.FlavorId, model.Region).Execute()
 		if err != nil {
@@ -185,9 +192,11 @@ func outputResult(p *print.Printer, model *inputModel, flavors *mongodbflex.List
 	if flavors != nil {
 		options.Flavors = flavors.Flavors
 	}
+
 	if versions != nil {
 		options.Versions = versions.Versions
 	}
+
 	if storages != nil && model.FlavorId != nil {
 		options.Storages = &flavorStorages{
 			FlavorId: *model.FlavorId,
@@ -212,9 +221,11 @@ func outputResultAsTable(p *print.Printer, model *inputModel, options *options) 
 	if model.Flavors && len(options.Flavors) != 0 {
 		content = append(content, buildFlavorsTable(options.Flavors))
 	}
+
 	if model.Versions && len(options.Versions) != 0 {
 		content = append(content, buildVersionsTable(options.Versions))
 	}
+
 	if model.Storages && options.Storages.Storages != nil && len(options.Storages.Storages.StorageClasses) > 0 {
 		content = append(content, buildStoragesTable(*options.Storages.Storages))
 	}
@@ -232,6 +243,7 @@ func buildFlavorsTable(flavors []mongodbflex.InstanceFlavor) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Flavors")
 	table.SetHeader("ID", "CPU", "MEMORY", "DESCRIPTION", "VALID INSTANCE TYPES")
+
 	for i := range flavors {
 		f := flavors[i]
 		table.AddRow(
@@ -242,6 +254,7 @@ func buildFlavorsTable(flavors []mongodbflex.InstanceFlavor) tables.Table {
 			f.Categories,
 		)
 	}
+
 	return table
 }
 
@@ -250,10 +263,12 @@ func buildVersionsTable(versions []string) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Versions")
 	table.SetHeader("VERSION")
+
 	for i := range versions {
 		v := versions[i]
 		table.AddRow(v)
 	}
+
 	return table
 }
 
@@ -263,6 +278,7 @@ func buildStoragesTable(storagesResp mongodbflex.ListStoragesResponse) tables.Ta
 	table := tables.NewTable()
 	table.SetTitle("Storages")
 	table.SetHeader("MINIMUM", "MAXIMUM", "STORAGE CLASS")
+
 	for _, storageClass := range storages {
 		table.AddRow(
 			utils.PtrString(storagesResp.StorageRange.Min),
@@ -270,6 +286,8 @@ func buildStoragesTable(storagesResp mongodbflex.ListStoragesResponse) tables.Ta
 			storageClass,
 		)
 	}
+
 	table.EnableAutoMergeOnColumns(1, 2, 3)
+
 	return table
 }

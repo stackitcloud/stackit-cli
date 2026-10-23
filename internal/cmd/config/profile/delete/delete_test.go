@@ -23,6 +23,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, mod := range mods {
 		mod(argValues)
 	}
+
 	return argValues
 }
 
@@ -36,6 +37,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -91,29 +93,38 @@ func TestParseInput(t *testing.T) {
 
 func TestDeleteProfileWithoutKeyring(t *testing.T) {
 	params := testparams.NewTestParams()
+
 	params.Printer.AssumeYes = true
+
 	profile := fmt.Sprintf("test-profile-%s", time.Now().Format("20060102150405"))
 	path := config.GetProfileFolderPath(profile)
+
 	t.Cleanup(func() {
 		err := os.RemoveAll(path)
 		if err != nil {
 			t.Fatalf("cleanup: remove profile folder at path %q: %v", path, err)
 		}
 	})
+
 	err := config.ValidateProfile(profile)
 	if err != nil {
 		t.Fatalf("validate profile %q: %v", profile, err)
 	}
+
 	err = config.CreateProfile(params.Printer, profile, true, false, true)
 	if err != nil {
 		t.Fatalf("create profile %q: %v", profile, err)
 	}
+
 	keyring.MockInitWithError(keyring.ErrUnsupportedPlatform)
+
 	deleteCmd := NewCmd(params.CmdParams)
+
 	err = deleteCmd.RunE(deleteCmd, []string{profile})
 	if err != nil {
 		t.Fatalf("run cmd: %v", err)
 	}
+
 	if _, err := os.Stat(path); !os.IsNotExist(err) {
 		t.Fatalf("expected profile folder to be deleted, but it still exists at path %q", path)
 	}

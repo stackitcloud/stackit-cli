@@ -56,6 +56,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -69,6 +70,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list security group rules: %w", err)
@@ -79,12 +81,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			securityGroupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.SecurityGroupId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get security group name: %v", err)
+
 				securityGroupLabel = model.SecurityGroupId
 			}
 
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
@@ -97,6 +101,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -129,6 +134,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -140,8 +146,10 @@ func outputResult(p *print.Printer, outputFormat, projectLabel, securityGroupLab
 	return p.OutputResult(outputFormat, securityGroupRules, func() error {
 		if len(securityGroupRules) == 0 {
 			p.Outputf("No rules found in security group %q for project %q\n", securityGroupLabel, projectLabel)
+
 			return nil
 		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "ETHER TYPE", "DIRECTION", "PROTOCOL", "REMOTE SECURITY GROUP ID")
 
@@ -149,6 +157,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel, securityGroupLab
 			etherType := utils.PtrStringDefault(securityGroupRule.Ethertype, "")
 
 			protocolName := ""
+
 			if securityGroupRule.Protocol != nil {
 				if securityGroupRule.Protocol.Name != nil {
 					protocolName = *securityGroupRule.Protocol.Name
@@ -166,6 +175,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel, securityGroupLab
 		}
 
 		p.Outputln(table.Render())
+
 		return nil
 	})
 }

@@ -41,6 +41,7 @@ func fixtureTokenExchangeRequest(tokenEndpoint string) *http.Request {
 		strings.NewReader(form.Encode()),
 	)
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
 	return req
 }
 
@@ -50,29 +51,35 @@ func fixtureTokenExchangeResponse() string {
 		IssuedTokeType string `json:"issued_token_type"`
 		TokenType      string `json:"token_type"`
 	}
+
 	response, _ := json.Marshal(exchangeReponse{ //nolint:gosec // just a testcase, no valid credentials
 		AccessToken:    testExchangedToken,
 		IssuedTokeType: "urn:ietf:params:oauth:token-type:id_token",
 		TokenType:      "Bearer",
 	})
+
 	return string(response)
 }
 
 func TestBuildTokenExchangeRequest(t *testing.T) {
 	expectedRequest := fixtureTokenExchangeRequest(testTokenEndpoint)
+
 	req, err := buildRequestToExchangeTokens(testCtx, testTokenEndpoint, testAccessToken, testExchangeResource)
 	if err != nil {
 		t.Fatalf("func returned error: %s", err)
 	}
+
 	// directly using cmp.Diff is not possible, so dump the requests first
 	expected, err := httputil.DumpRequest(expectedRequest, true)
 	if err != nil {
 		t.Fatalf("fail to dump expected: %s", err)
 	}
+
 	actual, err := httputil.DumpRequest(req, true)
 	if err != nil {
 		t.Fatalf("fail to dump actual: %s", err)
 	}
+
 	diff := cmp.Diff(actual, expected)
 	if diff != "" {
 		t.Fatalf("Data does not match: %s", diff)
@@ -111,7 +118,9 @@ func TestParseTokenExchangeResponse(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			w := httptest.NewRecorder()
 			w.WriteHeader(tt.status)
+
 			_, _ = w.WriteString(tt.response)
+
 			resp := w.Result()
 
 			defer func() {
@@ -120,6 +129,7 @@ func TestParseTokenExchangeResponse(t *testing.T) {
 					t.Fatalf("failed to close response body: %v", tempErr)
 				}
 			}()
+
 			accessToken, err := parseTokenExchangeResponse(resp)
 			if tt.expectError {
 				if err == nil {
@@ -129,6 +139,7 @@ func TestParseTokenExchangeResponse(t *testing.T) {
 				if err != nil {
 					t.Fatalf("func returned error: %s", err)
 				}
+
 				diff := cmp.Diff(accessToken, testExchangedToken)
 				if diff != "" {
 					t.Fatalf("Token does not match: %s", diff)
@@ -140,6 +151,7 @@ func TestParseTokenExchangeResponse(t *testing.T) {
 
 func TestExchangeToken(t *testing.T) {
 	var request *http.Request
+
 	response := fixtureTokenExchangeResponse()
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -148,29 +160,35 @@ func TestExchangeToken(t *testing.T) {
 		if err != nil {
 			t.Errorf("fail to dump expected: %s", err)
 		}
+
 		actual, err := io.ReadAll(req.Body)
 		if err != nil {
 			t.Errorf("fail to dump actual: %s", err)
 		}
+
 		diff := cmp.Diff(actual, expected)
 		if diff != "" {
 			w.WriteHeader(http.StatusBadRequest)
 			t.Errorf("request mismatch: %v", diff)
+
 			return
 		}
 
 		w.Header().Set("Content-Type", "application/json")
+
 		_, err = w.Write([]byte(response))
 		if err != nil {
 			t.Errorf("Failed to write response: %v", err)
 		}
 	})
 	server := httptest.NewServer(handler)
+
 	defer server.Close()
 
 	request = fixtureTokenExchangeRequest(server.URL)
 	// use mock keyring to inject the token endpoint URL
 	keyring.MockInit()
+
 	err := SetAuthField(IDP_TOKEN_ENDPOINT, server.URL)
 	if err != nil {
 		t.Errorf("failed to inject idp token endpoint: %s", err)
@@ -180,6 +198,7 @@ func TestExchangeToken(t *testing.T) {
 	if err != nil {
 		t.Fatalf("func returned error: %s", err)
 	}
+
 	diff := cmp.Diff(idToken, testExchangedToken)
 	if diff != "" {
 		t.Fatalf("Exchanged token does not match: %s", diff)

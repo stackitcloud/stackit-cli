@@ -39,10 +39,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return fmt.Errorf("unable to parse input: %w", err)
 			}
+
 			// Configure API client
 			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
@@ -52,12 +54,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			exportPolicyLabel, err := sfsUtils.GetExportPolicyName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ExportPolicyId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get export policy name: %v", err)
+
 				exportPolicyLabel = model.ExportPolicyId
 			} else if exportPolicyLabel == "" {
 				exportPolicyLabel = model.ExportPolicyId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete export policy %q? (This cannot be undone)", exportPolicyLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -65,15 +69,18 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			_, err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("delete export policy: %w", err)
 			}
 
 			params.Printer.Outputf("Deleted export policy %q\n", exportPolicyLabel)
+
 			return nil
 		},
 	}
+
 	return cmd
 }
 
@@ -95,5 +102,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }

@@ -48,6 +48,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -62,18 +63,21 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			vpcLabel, err := iaasUtils.GetVPCName(ctx, apiClient.DefaultAPI, model.ProjectId, model.VpcId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get vpc name: %v", err)
+
 				vpcLabel = model.VpcId
 			}
 
 			networkRangeLabel, err := iaasUtils.GetVPCNetworkRangePrefix(ctx, apiClient.DefaultAPI, model.ProjectId, model.VpcId, model.Region, model.NetworkRangeId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get vpc network range prefix: %v", err)
+
 				networkRangeLabel = model.NetworkRangeId
 			} else if networkRangeLabel == "" {
 				networkRangeLabel = model.NetworkRangeId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete network range %q on VPC %q?", networkRangeLabel, vpcLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -81,6 +85,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("delete vpc network range: %w", err)
@@ -103,10 +108,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			params.Printer.Outputf("%s network range %q on VPC %q\n", operationState, networkRangeLabel, vpcLabel)
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -119,6 +126,7 @@ func configureFlags(cmd *cobra.Command) {
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	networkRangeId := inputArgs[0]
 	globalFlags := globalflags.Parse(p, cmd)
+
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
@@ -130,6 +138,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 

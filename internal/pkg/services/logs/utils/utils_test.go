@@ -36,12 +36,14 @@ func newAPIMock(s mockSettings) logs.DefaultAPI {
 			if s.getInstanceFails {
 				return nil, fmt.Errorf("could not get instance")
 			}
+
 			return s.getInstanceResp, nil
 		}),
 		GetAccessTokenExecuteMock: utils.Ptr(func(_ logs.ApiGetAccessTokenRequest) (*logs.AccessToken, error) {
 			if s.getAccessTokenFails {
 				return nil, fmt.Errorf("could not get access token")
 			}
+
 			return s.getAccessTokenResp, nil
 		}),
 	}
@@ -88,12 +90,15 @@ func TestGetInstanceName(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}
@@ -142,12 +147,15 @@ func TestGetAccessTokenName(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}

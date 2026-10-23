@@ -56,11 +56,13 @@ func TestOutputf(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			var buf bytes.Buffer
+
 			p := &Printer{
 				StdOut:    &buf,
 				StdErr:    &buf,
 				Verbosity: tt.verbosity,
 			}
+
 			viper.Reset()
 
 			if tt.outputFormatNone {
@@ -74,6 +76,7 @@ func TestOutputf(t *testing.T) {
 			}
 
 			var expectedOutput string
+
 			if !tt.outputFormatNone {
 				expectedOutput = tt.message
 				if len(tt.args) > 0 {
@@ -126,11 +129,13 @@ func TestOutputln(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			var buf bytes.Buffer
+
 			p := &Printer{
 				StdOut:    &buf,
 				StdErr:    &buf,
 				Verbosity: tt.verbosity,
 			}
+
 			viper.Reset()
 
 			if tt.outputFormatNone {
@@ -140,6 +145,7 @@ func TestOutputln(t *testing.T) {
 			p.Outputln(tt.message)
 
 			var expectedOutput string
+
 			if !tt.outputFormatNone {
 				expectedOutput = fmt.Sprintf("%s\n", tt.message)
 			}
@@ -208,12 +214,15 @@ func TestNoticef(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			var stdout, stderr bytes.Buffer
+
 			p := &Printer{
 				StdOut:    &stdout,
 				StdErr:    &stderr,
 				Verbosity: tt.verbosity,
 			}
+
 			viper.Reset()
+
 			if tt.outputFormatNone {
 				viper.Set(outputFormatKey, NoneOutputFormat)
 			}
@@ -223,6 +232,7 @@ func TestNoticef(t *testing.T) {
 			if output := stderr.String(); output != tt.expectedOutput {
 				t.Errorf("unexpected stderr: got %q, want %q", output, tt.expectedOutput)
 			}
+
 			if output := stdout.String(); output != "" {
 				t.Errorf("unexpected stdout: got %q, want %q", output, "")
 			}
@@ -276,12 +286,15 @@ func TestNoticeln(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			var stdout, stderr bytes.Buffer
+
 			p := &Printer{
 				StdOut:    &stdout,
 				StdErr:    &stderr,
 				Verbosity: tt.verbosity,
 			}
+
 			viper.Reset()
+
 			if tt.outputFormatNone {
 				viper.Set(outputFormatKey, NoneOutputFormat)
 			}
@@ -292,6 +305,7 @@ func TestNoticeln(t *testing.T) {
 			if output := stderr.String(); output != expectedOutput {
 				t.Errorf("unexpected stderr: got %q, want %q", output, expectedOutput)
 			}
+
 			if output := stdout.String(); output != "" {
 				t.Errorf("unexpected stdout: got %q, want %q", output, "")
 			}
@@ -336,11 +350,13 @@ func TestPagerDisplay(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			var buf bytes.Buffer
+
 			p := &Printer{
 				StdOut:    &buf,
 				StdErr:    &buf,
 				Verbosity: tt.verbosity,
 			}
+
 			viper.Reset()
 
 			if tt.outputFormatNone {
@@ -351,7 +367,9 @@ func TestPagerDisplay(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error: %s", err.Error())
 			}
+
 			var expectedOutput string
+
 			if !tt.outputFormatNone {
 				expectedOutput = tt.content
 			}
@@ -434,8 +452,10 @@ func TestDebug(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			var buf bytes.Buffer
+
 			logger := slog.New(slog.NewTextHandler(&buf, &slog.HandlerOptions{AddSource: true, Level: slog.LevelDebug}))
 			slog.SetDefault(logger)
+
 			p := &Printer{
 				StdOut:    &buf,
 				StdErr:    &buf,
@@ -445,6 +465,7 @@ func TestDebug(t *testing.T) {
 			if len(tt.args) == 0 {
 				p.Debug(tt.logLevel, tt.message)
 			}
+
 			if len(tt.args) > 0 {
 				p.Debug(tt.logLevel, tt.message, tt.args...)
 			}
@@ -454,6 +475,7 @@ func TestDebug(t *testing.T) {
 			if tt.expectsLog && output == "" {
 				t.Errorf("expected a log but got none")
 			}
+
 			if !tt.expectsLog && output != "" {
 				t.Errorf("got log when it wasn't expected: got %q", output)
 			}
@@ -496,6 +518,7 @@ func TestInfo(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			var buf bytes.Buffer
+
 			p := &Printer{
 				StdOut:    &buf,
 				StdErr:    &buf,
@@ -506,6 +529,7 @@ func TestInfo(t *testing.T) {
 
 			expectedOutput := tt.message
 			output := buf.String()
+
 			if tt.shouldPrint {
 				if output != expectedOutput {
 					t.Errorf("unexpected output: got %q, want %q", output, expectedOutput)
@@ -554,6 +578,7 @@ func TestWarn(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			var buf bytes.Buffer
+
 			p := &Printer{
 				StdOut:    &buf,
 				StdErr:    &buf,
@@ -564,6 +589,7 @@ func TestWarn(t *testing.T) {
 
 			expectedOutput := fmt.Sprintf("Warning: %s", tt.message)
 			output := buf.String()
+
 			if tt.shouldPrint {
 				if output != expectedOutput {
 					t.Errorf("unexpected output: got %q, want %q", output, expectedOutput)
@@ -612,6 +638,7 @@ func TestError(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			var buf bytes.Buffer
+
 			p := &Printer{
 				StdOut:    &buf,
 				StdErr:    &buf,
@@ -623,6 +650,7 @@ func TestError(t *testing.T) {
 
 			expectedOutput := fmt.Sprintf("Error: %s\n", tt.message)
 			output := buf.String()
+
 			if tt.shouldPrint {
 				if output != expectedOutput {
 					t.Errorf("unexpected output: got %q, want %q", output, expectedOutput)
@@ -794,6 +822,7 @@ func TestPromptForConfirmation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			buffer := &bytes.Buffer{}
+
 			_, err := buffer.WriteString(tt.input)
 			if err != nil {
 				t.Fatalf("failed to initialize mock input: %v", err)
@@ -812,12 +841,15 @@ func TestPromptForConfirmation(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("should not have failed: %v", err)
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("should have failed")
 			}
+
 			if tt.isAborted && !errors.Is(err, errAborted) {
 				t.Errorf("should have returned aborted error, instead returned: %v", err)
 			}
+
 			if !tt.isAborted && errors.Is(err, errAborted) {
 				t.Errorf("should not have returned aborted error")
 			}
@@ -999,6 +1031,7 @@ func TestOutputResult(t *testing.T) {
 		output           any
 		prettyOutputFunc func() error
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -1054,9 +1087,11 @@ func TestOutputResult(t *testing.T) {
 			},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var buffer bytes.Buffer
+
 			p := &Printer{
 				StdOut:    &buffer,
 				Verbosity: ErrorLevel,
@@ -1086,29 +1121,40 @@ func TestPromptForPassword(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			r, w := io.Pipe()
+
 			defer func() {
 				r.Close() //nolint:errcheck // ignore error on close
 				w.Close() //nolint:errcheck // ignore error on close
 			}()
+
 			p := &Printer{
 				StdIn:     r,
 				StdErr:    &bytes.Buffer{},
 				StdOut:    &bytes.Buffer{},
 				Verbosity: ErrorLevel,
 			}
-			var pw string
-			var err error
-			var wg sync.WaitGroup
+
+			var (
+				pw  string
+				err error
+				wg  sync.WaitGroup
+			)
+
 			wg.Add(1)
+
 			go func() {
 				pw, err = p.PromptForPassword("Enter password: ")
+
 				wg.Done()
 			}()
+
 			w.Write([]byte(tt.input)) //nolint:errcheck // ignore error
 			wg.Wait()
+
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
+
 			withoutNewline := tt.input[:len(tt.input)-1]
 			if pw != withoutNewline {
 				t.Fatalf("unexpected password: got %q, want %q", pw, withoutNewline)

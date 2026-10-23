@@ -51,6 +51,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -73,6 +74,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -105,6 +107,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -116,13 +119,16 @@ func outputResult(p *print.Printer, model *inputModel, storagesResp *mongodbflex
 	if model == nil {
 		return fmt.Errorf("no model passed")
 	}
+
 	return p.OutputResult(model.OutputFormat, storagesResp, func() error {
 		if storagesResp == nil {
 			return fmt.Errorf("storages resp is empty")
 		}
+
 		storages := storagesResp.StorageClasses
 		if len(storages) == 0 {
 			p.Outputf("No MongoDB Flex storages found.")
+
 			return nil
 		}
 
@@ -134,6 +140,7 @@ func outputResult(p *print.Printer, model *inputModel, storagesResp *mongodbflex
 		table := tables.NewTable()
 		table.SetTitle("Storages")
 		table.SetHeader("MINIMUM", "MAXIMUM", "STORAGE CLASS")
+
 		for _, storageClass := range storages {
 			table.AddRow(
 				utils.PtrString(storagesResp.StorageRange.Min),

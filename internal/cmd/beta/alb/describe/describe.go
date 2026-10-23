@@ -43,6 +43,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -56,6 +57,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read loadbalancer: %w", err)
@@ -64,10 +66,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if loadbalancer := resp; loadbalancer != nil {
 				return outputResult(params.Printer, model.OutputFormat, loadbalancer)
 			}
+
 			params.Printer.Outputln("No load balancer found.")
+
 			return nil
 		},
 	}
+
 	return cmd
 }
 
@@ -81,6 +86,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -114,6 +120,7 @@ func outputResult(p *print.Printer, outputFormat string, loadbalancer *alb.LoadB
 func buildLoadBalancerTable(loadbalancer *alb.LoadBalancer) tables.Table {
 	acl := []string{}
 	privateAccessOnly := false
+
 	if loadbalancer.Options != nil {
 		if loadbalancer.Options.AccessControl != nil && loadbalancer.Options.AccessControl.AllowedSourceRanges != nil {
 			acl = loadbalancer.Options.AccessControl.AllowedSourceRanges
@@ -125,14 +132,17 @@ func buildLoadBalancerTable(loadbalancer *alb.LoadBalancer) tables.Table {
 	}
 
 	networkId := "-"
+
 	if len(loadbalancer.Networks) > 0 {
 		networks := loadbalancer.Networks
+
 		networkId = *networks[0].NetworkId
 	}
 
 	externalAddress := utils.PtrStringDefault(loadbalancer.ExternalAddress, "-")
 
 	errorDescriptions := []string{}
+
 	if len(loadbalancer.Errors) > 0 {
 		for _, err := range loadbalancer.Errors {
 			errorDescriptions = append(errorDescriptions, *err.Description)
@@ -145,10 +155,12 @@ func buildLoadBalancerTable(loadbalancer *alb.LoadBalancer) tables.Table {
 	table.AddSeparator()
 	table.AddRow("STATE", utils.PtrString(loadbalancer.Status))
 	table.AddSeparator()
+
 	if len(errorDescriptions) > 0 {
 		table.AddRow("ERROR DESCRIPTIONS", strings.Join(errorDescriptions, "\n"))
 		table.AddSeparator()
 	}
+
 	table.AddRow("PRIVATE ACCESS ONLY", privateAccessOnly)
 	table.AddSeparator()
 	table.AddRow("ATTACHED PUBLIC IP", externalAddress)
@@ -156,6 +168,7 @@ func buildLoadBalancerTable(loadbalancer *alb.LoadBalancer) tables.Table {
 	table.AddRow("ATTACHED NETWORK ID", networkId)
 	table.AddSeparator()
 	table.AddRow("ACL", acl)
+
 	return table
 }
 
@@ -163,6 +176,7 @@ func buildListenersTable(listeners []alb.Listener) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Listeners")
 	table.SetHeader("NAME", "PORT", "PROTOCOL", "TARGET POOL")
+
 	for i := range listeners {
 		listener := listeners[i]
 		table.AddRow(
@@ -171,6 +185,7 @@ func buildListenersTable(listeners []alb.Listener) tables.Table {
 			utils.PtrString(listener.Protocol),
 		)
 	}
+
 	return table
 }
 
@@ -178,8 +193,10 @@ func buildTargetPoolsTable(targetPools []alb.TargetPool) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Target Pools")
 	table.SetHeader("NAME", "PORT", "TARGETS")
+
 	for _, targetPool := range targetPools {
 		table.AddRow(utils.PtrString(targetPool.Name), utils.PtrString(targetPool.TargetPort), len(targetPool.Targets))
 	}
+
 	return table
 }

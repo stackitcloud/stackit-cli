@@ -49,6 +49,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -62,16 +63,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read DNS record set: %w", err)
 			}
+
 			recordSet := resp.Rrset
 
 			return outputResult(params.Printer, model.OutputFormat, &recordSet)
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -97,6 +101,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -115,6 +120,7 @@ func outputResult(p *print.Printer, outputFormat string, recordSet *dns.RecordSe
 		for _, r := range recordSet.Records {
 			recordsData = append(recordsData, r.Content)
 		}
+
 		recordsDataJoin := strings.Join(recordsData, ", ")
 
 		table := tables.NewTable()
@@ -129,6 +135,7 @@ func outputResult(p *print.Printer, outputFormat string, recordSet *dns.RecordSe
 		table.AddRow("TYPE", recordSet.Type)
 		table.AddSeparator()
 		table.AddRow("RECORDS DATA", recordsDataJoin)
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

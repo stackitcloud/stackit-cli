@@ -51,6 +51,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -64,6 +65,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read security group rule: %w", err)
@@ -73,6 +75,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -98,6 +101,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -109,6 +113,7 @@ func outputResult(p *print.Printer, outputFormat string, securityGroupRule *iaas
 	if securityGroupRule == nil {
 		return fmt.Errorf("security group rule is empty")
 	}
+
 	return p.OutputResult(outputFormat, securityGroupRule, func() error {
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(securityGroupRule.Id))
@@ -155,6 +160,7 @@ func outputResult(p *print.Printer, outputFormat string, securityGroupRule *iaas
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

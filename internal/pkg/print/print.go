@@ -63,6 +63,7 @@ func NewPrinter(stdIn io.Reader, stdOut, stdErr io.Writer) *Printer {
 	if f, ok := stdErr.(*os.File); ok {
 		logW = colorable.NewColorable(f)
 	}
+
 	logger := slog.New(
 		tint.NewTextHandler(logW, &tint.Options{AddSource: false, Level: slog.LevelDebug}),
 	)
@@ -84,6 +85,7 @@ func (p *Printer) Outputf(msg string, args ...any) {
 	if outputFormat == NoneOutputFormat {
 		return
 	}
+
 	mustPrint(fmt.Fprintf(p.StdOut, msg, args...))
 }
 
@@ -94,6 +96,7 @@ func (p *Printer) Outputln(msg string) {
 	if outputFormat == NoneOutputFormat {
 		return
 	}
+
 	mustPrint(fmt.Fprintln(p.StdOut, msg))
 }
 
@@ -113,7 +116,9 @@ func (p *Printer) Debug(level Level, msg string, args ...any) {
 	if !p.IsVerbosityDebug() {
 		return
 	}
+
 	msg = fmt.Sprintf(msg, args...)
+
 	switch level {
 	case DebugLevel:
 		slog.Debug(msg)
@@ -132,6 +137,7 @@ func (p *Printer) Info(msg string, args ...any) {
 	if !p.IsVerbosityDebug() && !p.IsVerbosityInfo() {
 		return
 	}
+
 	mustPrint(fmt.Fprintf(p.StdErr, msg, args...))
 }
 
@@ -141,6 +147,7 @@ func (p *Printer) Warn(msg string, args ...any) {
 	if !p.IsVerbosityDebug() && !p.IsVerbosityInfo() && !p.IsVerbosityWarning() {
 		return
 	}
+
 	warning := fmt.Sprintf(msg, args...)
 	mustPrint(fmt.Fprintf(p.StdErr, "%s %s", YellowBold("Warning:"), warning))
 }
@@ -158,24 +165,31 @@ func (p *Printer) Error(msg string, args ...any) {
 func (p *Printer) PromptForConfirmation(prompt string) error {
 	if p.AssumeYes {
 		p.Warn("Auto-confirming prompt: %q\n", prompt)
+
 		return nil
 	}
+
 	question := fmt.Sprintf("%s [y/N] ", prompt)
 	reader := bufio.NewReader(p.StdIn)
+
 	for i := 0; i < 3; i++ {
 		mustPrint(fmt.Fprint(p.StdErr, question))
+
 		answer, err := reader.ReadString('\n')
 		if err != nil {
 			continue
 		}
+
 		answer = strings.ToLower(strings.TrimSpace(answer))
 		if answer == "y" || answer == "yes" {
 			return nil
 		}
+
 		if answer == "" || answer == "n" || answer == "no" {
 			return errAborted
 		}
 	}
+
 	return fmt.Errorf("max number of wrong inputs")
 }
 
@@ -185,14 +199,18 @@ func (p *Printer) PromptForConfirmation(prompt string) error {
 func (p *Printer) PromptForEnter(prompt string) error {
 	if p.AssumeYes {
 		p.Warn("Auto-confirming prompt: %q", prompt)
+
 		return nil
 	}
+
 	reader := bufio.NewReader(p.StdIn)
 	mustPrint(fmt.Fprint(p.StdErr, prompt))
+
 	_, err := reader.ReadString('\n')
 	if err != nil {
 		return fmt.Errorf("read user response: %w", err)
 	}
+
 	return nil
 }
 
@@ -208,22 +226,26 @@ func (p *Printer) PromptForPassword(prompt string) (string, error) {
 		if uint_fd > math.MaxInt {
 			return "", fmt.Errorf("uint_fd is too large")
 		}
+
 		fd := int(uint_fd)
 		if term.IsTerminal(fd) {
 			bytePassword, err := term.ReadPassword(fd)
 			if err != nil {
 				return "", fmt.Errorf("read password: %w", err)
 			}
+
 			return string(bytePassword), nil
 		}
 	}
 
 	// Fallback for non-terminal environments
 	reader := bufio.NewReader(p.StdIn)
+
 	pw, err := reader.ReadString('\n')
 	if err != nil {
 		return "", fmt.Errorf("read password from non-terminal: %w", err)
 	}
+
 	return pw[:len(pw)-1], nil // remove trailing newline
 }
 
@@ -252,11 +274,13 @@ func (p *Printer) PagerDisplay(content string) error {
 	pagerCmd.Stdout = p.StdOut
 
 	p.Debug(DebugLevel, "using pager: %s", pagerCmd.Args[0])
+
 	err := pagerCmd.Run()
 	if err != nil {
 		p.Debug(ErrorLevel, "run pager command: %v", err)
 		p.Outputln(content)
 	}
+
 	return nil
 }
 
@@ -299,10 +323,12 @@ func (p *Printer) OutputResult(outputFormat string, output any, prettyOutputFunc
 		encoder := json.NewEncoder(buffer)
 		encoder.SetEscapeHTML(false)
 		encoder.SetIndent("", "  ")
+
 		err := encoder.Encode(output)
 		if err != nil {
 			return fmt.Errorf("marshal json: %w", err)
 		}
+
 		details := buffer.Bytes()
 		p.Outputln(string(details))
 
@@ -312,6 +338,7 @@ func (p *Printer) OutputResult(outputFormat string, output any, prettyOutputFunc
 		if err != nil {
 			return fmt.Errorf("marshal yaml: %w", err)
 		}
+
 		p.Outputln(string(details))
 
 		return nil

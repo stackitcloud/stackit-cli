@@ -48,6 +48,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -67,12 +68,14 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 // Request
 func fixtureRequest(mods ...func(request *logs.ApiCreateLogsInstanceRequest)) logs.ApiCreateLogsInstanceRequest {
 	request := testClient.DefaultAPI.CreateLogsInstance(testCtx, testProjectId, testRegion)
+
 	request = request.CreateLogsInstancePayload(logs.CreateLogsInstancePayload{
 		DisplayName:   testDisplayName,
 		Description:   utils.Ptr(testDescription),
@@ -83,6 +86,7 @@ func fixtureRequest(mods ...func(request *logs.ApiCreateLogsInstanceRequest)) lo
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -194,6 +198,7 @@ func TestBuildRequest(t *testing.T) {
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx, logs.DefaultAPIService{}),
 			)
+
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
 			}

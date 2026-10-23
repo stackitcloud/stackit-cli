@@ -32,6 +32,7 @@ func fixtureFlagValues(mods ...func(map[string]string)) map[string]string {
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -50,6 +51,7 @@ func fixtureInputModel(mods ...func(*inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -62,6 +64,7 @@ func fixturePayload(mods ...func(*iaas.AddVPCRoutingTablePayload)) iaas.AddVPCRo
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
@@ -259,6 +262,7 @@ func TestBuildRequest(t *testing.T) {
 
 			want := client.AddVPCRoutingTable(ctx, testProjectId, testVpcId, "eu02").AddVPCRoutingTablePayload(tt.wantPayload)
 			got := buildRequest(ctx, tt.model, client)
+
 			if diff := cmp.Diff(want, got, cmp.AllowUnexported(want), cmpopts.EquateComparable(ctx, iaas.DefaultAPIService{})); diff != "" {
 				t.Fatalf("request mismatch (-want +got): %s", diff)
 			}
@@ -323,6 +327,7 @@ func TestOutputResult(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
+
 			if !strings.Contains(params.Out.String(), tt.want) {
 				t.Errorf("output %q does not contain %q", params.Out.String(), tt.want)
 			}

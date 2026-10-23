@@ -51,6 +51,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -65,10 +66,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to add observability credentials for Load Balancer on project %q?", projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -76,6 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("add Load Balancer observability credentials: %w", err)
@@ -85,12 +89,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd, params)
+
 	return cmd
 }
 
 func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.Flags().String(displayNameFlag, "", "Credentials display name")
 	cmd.Flags().String(usernameFlag, "", "Username")
+
 	password := flags.SecretFlag(passwordFlag, params)
 	cmd.Flags().Var(password, passwordFlag, password.Usage())
 
@@ -112,11 +118,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalancer.APIClient) loadbalancer.ApiCreateCredentialsRequest {
 	req := apiClient.DefaultAPI.CreateCredentials(ctx, model.ProjectId, model.Region)
+
 	req = req.XRequestID(uuid.NewString())
 
 	req = req.CreateCredentialsPayload(loadbalancer.CreateCredentialsPayload{
@@ -124,6 +132,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalance
 		Username:    model.Username,
 		Password:    model.Password,
 	})
+
 	return req
 }
 
@@ -134,6 +143,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *loa
 
 	return p.OutputResult(outputFormat, resp, func() error {
 		p.Outputf("Added Load Balancer observability credentials on project %q. Credentials reference: %q\n", projectLabel, utils.PtrString(resp.Credential.CredentialsRef))
+
 		return nil
 	})
 }

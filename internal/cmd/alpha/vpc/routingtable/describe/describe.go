@@ -51,6 +51,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -62,6 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("describe vpc routing-table: %w", err)
@@ -86,6 +88,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
+
 	if globalFlags.Region == "" {
 		return nil, &errors.RegionError{}
 	}
@@ -97,6 +100,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return model, nil
 }
 
@@ -120,9 +124,11 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.VPCRoutingTa
 
 		if len(resp.Labels) > 0 {
 			var labels []string
+
 			for _, key := range slices.Sorted(maps.Keys(resp.Labels)) {
 				labels = append(labels, fmt.Sprintf("%s: %v", key, resp.Labels[key]))
 			}
+
 			table.AddRow("LABELS", strings.Join(labels, "\n"))
 			table.AddSeparator()
 		}
@@ -138,6 +144,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.VPCRoutingTa
 		if err := table.Display(p); err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

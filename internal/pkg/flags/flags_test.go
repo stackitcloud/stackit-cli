@@ -50,6 +50,7 @@ func TestUUIDFlag(t *testing.T) {
 			if !tt.isValid && err == nil {
 				t.Fatalf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
@@ -57,6 +58,7 @@ func TestUUIDFlag(t *testing.T) {
 			if err != nil {
 				t.Fatalf("failed on valid input: %v", err)
 			}
+
 			value := FlagToStringValue(nil, cmd, "test-flag")
 			if value != tt.value {
 				t.Fatalf("flag did not return set value")
@@ -144,9 +146,11 @@ func TestUUIDSliceFlag(t *testing.T) {
 			cmd.Flags().Var(flag, "test-flag", "test")
 
 			var err1, err2 error
+
 			if tt.value1 != nil {
 				err1 = cmd.Flags().Set("test-flag", *tt.value1)
 			}
+
 			if tt.value2 != nil {
 				err2 = cmd.Flags().Set("test-flag", *tt.value2)
 			}
@@ -154,6 +158,7 @@ func TestUUIDSliceFlag(t *testing.T) {
 			if !tt.isValid && err1 == nil && err2 == nil {
 				t.Fatalf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
@@ -161,9 +166,11 @@ func TestUUIDSliceFlag(t *testing.T) {
 			if err1 != nil {
 				t.Fatalf("failed on valid input: %v", err1)
 			}
+
 			if err2 != nil {
 				t.Fatalf("failed on valid input: %v", err2)
 			}
+
 			value := FlagToStringSliceValue(nil, cmd, "test-flag")
 			if !reflect.DeepEqual(tt.expectedValue, value) {
 				t.Fatalf("flag did not return set value (expected %s, got %s)", tt.expectedValue, value)
@@ -261,6 +268,7 @@ func TestCIDRFlag(t *testing.T) {
 			if !tt.isValid && err == nil {
 				t.Fatalf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
@@ -268,6 +276,7 @@ func TestCIDRFlag(t *testing.T) {
 			if err != nil {
 				t.Fatalf("failed on valid input: %v", err)
 			}
+
 			value := FlagToStringValue(nil, cmd, "test-flag")
 			if value != tt.value {
 				t.Fatalf("flag did not return set value")
@@ -359,9 +368,11 @@ func TestCIDRSliceFlag(t *testing.T) {
 			cmd.Flags().Var(flag, "test-flag", "test")
 
 			var err1, err2 error
+
 			if tt.value1 != nil {
 				err1 = cmd.Flags().Set("test-flag", *tt.value1)
 			}
+
 			if tt.value2 != nil {
 				err2 = cmd.Flags().Set("test-flag", *tt.value2)
 			}
@@ -369,6 +380,7 @@ func TestCIDRSliceFlag(t *testing.T) {
 			if !tt.isValid && err1 == nil && err2 == nil {
 				t.Fatalf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
@@ -376,9 +388,11 @@ func TestCIDRSliceFlag(t *testing.T) {
 			if err1 != nil {
 				t.Fatalf("failed on valid input: %v", err1)
 			}
+
 			if err2 != nil {
 				t.Fatalf("failed on valid input: %v", err2)
 			}
+
 			value := FlagToStringSliceValue(nil, cmd, "test-flag")
 			if !reflect.DeepEqual(tt.expectedValue, value) {
 				t.Fatalf("flag did not return set value (expected %s, got %s)", tt.expectedValue, value)
@@ -440,12 +454,15 @@ func TestReadFromFileFlag(t *testing.T) {
 			readFileCalled := false
 			reader := func(filename string) ([]byte, error) {
 				readFileCalled = true
+
 				if filename != tt.expectedFileName {
 					t.Errorf("expected file name %q, got %q instead", tt.expectedFileName, filename)
 				}
+
 				if tt.readFileFails {
 					return nil, fmt.Errorf("something failed")
 				}
+
 				return []byte(tt.fileValue), nil
 			}
 
@@ -465,12 +482,15 @@ func TestReadFromFileFlag(t *testing.T) {
 			if !readFileCalled && (tt.expectedFileName != "") {
 				t.Errorf("read file should've been called")
 			}
+
 			if readFileCalled && (tt.expectedFileName == "") {
 				t.Errorf("read file shouldn't have been called")
 			}
+
 			if tt.readFileFails && err == nil {
 				t.Fatalf("did not fail on invalid input")
 			}
+
 			if tt.readFileFails {
 				return
 			}
@@ -478,6 +498,7 @@ func TestReadFromFileFlag(t *testing.T) {
 			if err != nil {
 				t.Fatalf("failed on valid input: %v", err)
 			}
+
 			value := FlagToStringValue(nil, cmd, "test-flag")
 			if value != tt.expectedValue {
 				t.Fatalf("flag returned %q, expected %q", value, tt.expectedValue)

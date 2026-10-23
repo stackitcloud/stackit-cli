@@ -19,29 +19,35 @@ func LoadPlanId(planName, version string, offerings *logme.ListOfferingsResponse
 	availableVersions := ""
 	availablePlanNames := ""
 	isValidVersion := false
+
 	for _, offer := range offerings.Offerings {
 		if !strings.EqualFold(offer.Version, version) {
 			availableVersions = fmt.Sprintf("%s\n- %s", availableVersions, offer.Version)
 			continue
 		}
+
 		isValidVersion = true
 
 		for _, plan := range offer.Plans {
 			if strings.EqualFold(plan.Name, planName) {
 				return &plan.Id, nil
 			}
+
 			availablePlanNames = fmt.Sprintf("%s\n- %s", availablePlanNames, plan.Name)
 		}
 	}
 
 	if !isValidVersion {
 		details := fmt.Sprintf("You provided version %q, which is invalid. Available versions are: %s", version, availableVersions)
+
 		return nil, &errors.DSAInvalidPlanError{
 			Service: service,
 			Details: details,
 		}
 	}
+
 	details := fmt.Sprintf("You provided plan_name %q for version %s, which is invalid. Available plan names for that version are: %s", planName, version, availablePlanNames)
+
 	return nil, &errors.DSAInvalidPlanError{
 		Service: service,
 		Details: details,
@@ -53,6 +59,7 @@ func GetInstanceName(ctx context.Context, apiClient logme.DefaultAPI, projectId,
 	if err != nil {
 		return "", fmt.Errorf("get LogMe instance: %w", err)
 	}
+
 	return resp.Name, nil
 }
 
@@ -61,5 +68,6 @@ func GetCredentialsUsername(ctx context.Context, apiClient logme.DefaultAPI, pro
 	if err != nil {
 		return "", fmt.Errorf("get LogMe credentials: %w", err)
 	}
+
 	return resp.Raw.Credentials.Username, nil
 }

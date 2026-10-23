@@ -45,6 +45,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -67,6 +68,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -86,9 +88,11 @@ func fixtureRequest(mods ...func(request *automation.ApiCreateVolumeAutomationRe
 		TemplateId: testTemplateId,
 	}
 	request := testClient.DefaultAPI.CreateVolumeAutomation(testCtx, testProjectId, testRegion).CreateVolumeAutomationPayload(payload)
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -196,6 +200,7 @@ func TestBuildRequest(t *testing.T) {
 					TemplateId:  testTemplateId,
 					Triggers:    automation.NullableAutomationTriggers{},
 				}
+
 				*request = testClient.DefaultAPI.CreateVolumeAutomation(testCtx, testProjectId, testRegion).CreateVolumeAutomationPayload(payload)
 			}),
 		},
@@ -228,6 +233,7 @@ func TestOutputResult(t *testing.T) {
 		projectLabel string
 		item         *automation.VolumeAutomation
 	}
+
 	tests := []struct {
 		name    string
 		args    args

@@ -42,24 +42,28 @@ func newAPIClientMock(m mockSettings) mongodbflex.DefaultAPI {
 			if m.listVersionsFails {
 				return nil, fmt.Errorf("could not list versions")
 			}
+
 			return m.listVersionsResp, nil
 		}),
 		ListRestoreJobsExecuteMock: utils.Ptr(func(_ mongodbflex.ApiListRestoreJobsRequest) (*mongodbflex.ListRestoreJobsResponse, error) {
 			if m.listRestoreJobsFails {
 				return nil, fmt.Errorf("could not list versions")
 			}
+
 			return m.listRestoreJobsResp, nil
 		}),
 		GetInstanceExecuteMock: utils.Ptr(func(_ mongodbflex.ApiGetInstanceRequest) (*mongodbflex.InstanceResponse, error) {
 			if m.getInstanceFails {
 				return nil, fmt.Errorf("could not get instance")
 			}
+
 			return m.getInstanceResp, nil
 		}),
 		GetUserExecuteMock: utils.Ptr(func(_ mongodbflex.ApiGetUserRequest) (*mongodbflex.GetUserResponse, error) {
 			if m.getUserFails {
 				return nil, fmt.Errorf("could not get user")
 			}
+
 			return m.getUserResp, nil
 		}),
 	}
@@ -187,15 +191,18 @@ func TestLoadFlavorId(t *testing.T) {
 				if err == nil {
 					t.Fatalf("should have failed")
 				}
+
 				return
 			}
 
 			if err != nil {
 				t.Fatalf("should not have failed: %v", err)
 			}
+
 			if output == nil {
 				t.Fatalf("returned nil output")
 			}
+
 			diff := cmp.Diff(output, tt.expectedOutput)
 			if diff != "" {
 				t.Fatalf("outputs do not match: %s", diff)
@@ -246,12 +253,15 @@ func TestGetLatestMongoDBFlexVersion(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}
@@ -296,12 +306,15 @@ func TestGetInstanceName(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}
@@ -346,12 +359,15 @@ func TestGetUserName(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}

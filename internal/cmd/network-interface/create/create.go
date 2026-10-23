@@ -68,6 +68,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -82,12 +83,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a network interface for project %q?", projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -95,6 +98,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create network interface: %w", err)
@@ -104,6 +108,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -128,7 +133,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	allowedAddresses := flags.FlagToStringSlicePointer(p, cmd, allowedAddressesFlag)
+
 	var allowedAddressesInner []iaas.AllowedAddressesInner
+
 	if allowedAddresses != nil && len(*allowedAddresses) > 0 {
 		allowedAddressesInner = make([]iaas.AllowedAddressesInner, len(*allowedAddresses))
 		for i, address := range *allowedAddresses {
@@ -145,6 +152,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 				Details: fmt.Sprintf("name %s is too long (maximum length is %d characters)", *name, maxNameLength),
 			}
 		}
+
 		nameRegex := regexp.MustCompile(nameRegex)
 		if !nameRegex.MatchString(*name) {
 			return nil, &errors.FlagValidationError{
@@ -166,6 +174,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 					Details: fmt.Sprintf("security groups uuid %s does not match (must be %d characters long)", value, securityGroupLength),
 				}
 			}
+
 			if !securityGroupsRegex.MatchString(value) {
 				return nil, &errors.FlagValidationError{
 					Flag:    securityGroupsFlag,
@@ -191,6 +200,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -206,6 +216,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		NicSecurity:      model.NicSecurity,
 		SecurityGroups:   model.SecurityGroups,
 	}
+
 	return req.CreateNicPayload(payload)
 }
 
@@ -213,8 +224,10 @@ func outputResult(p *print.Printer, outputFormat, projectId string, nic *iaas.NI
 	if nic == nil {
 		return fmt.Errorf("nic is empty")
 	}
+
 	return p.OutputResult(outputFormat, nic, func() error {
 		p.Outputf("Created network interface for project %q.\nNIC ID: %s\n", projectId, utils.PtrString(nic.Id))
+
 		return nil
 	})
 }

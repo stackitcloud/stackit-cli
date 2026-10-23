@@ -32,12 +32,14 @@ func (s *resourceManagerClientMocked) newMock() resourcemanager.DefaultAPI {
 			if s.getOrganizationFails {
 				return nil, fmt.Errorf("could not get organization")
 			}
+
 			return s.getOrganizationResp, nil
 		}),
 		GetProjectExecuteMock: utils.Ptr(func(_ resourcemanager.ApiGetProjectRequest) (*resourcemanager.GetProjectResponse, error) {
 			if s.getProjectFails {
 				return nil, fmt.Errorf("could not get project")
 			}
+
 			return s.getProjectResp, nil
 		}),
 	}
@@ -78,12 +80,15 @@ func TestGetOrganizationName(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}
@@ -126,12 +131,15 @@ func TestGetProjectName(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}

@@ -72,6 +72,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return fmt.Errorf("unable to parse input: %w", err)
@@ -89,6 +90,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a vpn gateway for project %q?", projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -96,11 +98,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create vpn gateway: %w", err)
 			}
+
 			var gatewayId string
+
 			if resp != nil && resp.HasId() {
 				gatewayId = *resp.Id
 			}
@@ -120,6 +125,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -152,6 +158,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 			}
 		}
 	}
+
 	bgpOverrideAdvertisedRoutes := flags.FlagToStringArrayValue(p, cmd, bgpOverrideAdvertisedRoutesFlag)
 	if bgpOverrideAdvertisedRoutes != nil {
 		if bgpLocalAsn == nil {
@@ -163,6 +170,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	var bgp *vpn.BGPGatewayConfig
+
 	if bgpLocalAsn != nil || bgpOverrideAdvertisedRoutes != nil {
 		bgp = &vpn.BGPGatewayConfig{
 			LocalAsn:                 *bgpLocalAsn,
@@ -184,11 +192,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *vpn.APIClient) vpn.ApiCreateGatewayRequest {
 	req := apiClient.DefaultAPI.CreateGateway(ctx, model.ProjectId, model.Region)
+
 	req = req.CreateGatewayPayload(
 		vpn.CreateGatewayPayload{
 			AvailabilityZones: model.AvailabilityZone,
@@ -199,6 +209,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *vpn.APIClie
 			RoutingType:       model.RoutingType,
 		},
 	)
+
 	return req
 }
 
@@ -206,12 +217,15 @@ func outputResult(p *print.Printer, outputFormat string, async bool, projectLabe
 	return p.OutputResult(outputFormat, item, func() error {
 		if item == nil {
 			p.Outputln("vpn gateway response is empty")
+
 			return nil
 		}
+
 		operation := "Created"
 		if async {
 			operation = "Triggered creation of"
 		}
+
 		p.Outputf(
 			"%s vpn gateway %q in project %q.\nGateway ID: %s\n",
 			operation,
@@ -219,6 +233,7 @@ func outputResult(p *print.Printer, outputFormat string, async bool, projectLabe
 			projectLabel,
 			utils.PtrString(item.Id),
 		)
+
 		return nil
 	})
 }

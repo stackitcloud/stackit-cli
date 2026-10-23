@@ -77,13 +77,16 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
 func parseLabels(labelstring string) map[string]any {
 	labels := map[string]any{}
+
 	for _, part := range strings.Split(labelstring, ",") {
 		v := strings.Split(part, "=")
+
 		labels[v[0]] = v[1]
 	}
 
@@ -123,6 +126,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -157,6 +161,7 @@ func fixtureCreatePayload(mods ...func(payload *iaas.UpdateImagePayload)) (paylo
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
@@ -168,6 +173,7 @@ func fixtureRequest(mods ...func(*iaas.ApiUpdateImageRequest)) iaas.ApiUpdateIma
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -325,6 +331,7 @@ func TestParseInput(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			params := testparams.NewTestParams()
 			cmd := NewCmd(params.CmdParams)
+
 			if err := globalflags.Configure(cmd.Flags()); err != nil {
 				t.Errorf("cannot configure global flags: %v", err)
 			}
@@ -334,6 +341,7 @@ func TestParseInput(t *testing.T) {
 					if !tt.isValid {
 						return
 					}
+
 					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
 				}
 			}
@@ -342,6 +350,7 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error validating flags: %v", err)
 			}
 
@@ -349,6 +358,7 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error validating flag groups: %v", err)
 			}
 
@@ -363,12 +373,14 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error parsing flags: %v", err)
 			}
 
 			if !tt.isValid {
 				t.Fatalf("did not fail on invalid input")
 			}
+
 			diff := cmp.Diff(model, tt.expectedModel)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -441,6 +453,7 @@ func TestBuildRequest(t *testing.T) {
 				cmp.AllowUnexported(tt.expectedRequest, iaas.NullableString{}),
 				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
+
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
 			}

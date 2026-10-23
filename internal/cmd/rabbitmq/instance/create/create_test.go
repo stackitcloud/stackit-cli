@@ -33,6 +33,7 @@ func newAPIMock(settings mockSettings) rabbitmq.DefaultAPI {
 			if settings.returnError {
 				return nil, fmt.Errorf("list flavors failed")
 			}
+
 			return settings.listOfferingsResp, nil
 		}),
 	}
@@ -63,6 +64,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -87,11 +89,13 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *rabbitmq.ApiCreateInstanceRequest)) rabbitmq.ApiCreateInstanceRequest {
 	request := testClient.DefaultAPI.CreateInstance(testCtx, testProjectId, testRegion)
+
 	request = request.CreateInstancePayload(rabbitmq.CreateInstancePayload{
 		InstanceName: "example-name",
 		Parameters: &rabbitmq.InstanceParameters{
@@ -106,9 +110,11 @@ func fixtureRequest(mods ...func(request *rabbitmq.ApiCreateInstanceRequest)) ra
 		},
 		PlanId: testPlanId,
 	})
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -411,11 +417,13 @@ func TestBuildRequest(t *testing.T) {
 				returnError:       tt.getOfferingsFails,
 				listOfferingsResp: tt.getOfferingsResp,
 			}
+
 			request, err := buildRequest(testCtx, tt.model, newAPIMock(settings))
 			if err != nil {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error building request: %v", err)
 			}
 
@@ -440,6 +448,7 @@ func Test_outputResult(t *testing.T) {
 		instanceId   string
 		resp         *rabbitmq.CreateInstanceResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -466,6 +475,7 @@ func Test_outputResult(t *testing.T) {
 		},
 	}
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, &tt.args.model, tt.args.projectLabel, tt.args.instanceId, tt.args.resp); (err != nil) != tt.wantErr {

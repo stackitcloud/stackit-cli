@@ -157,13 +157,19 @@ func TestAuthenticationConfig(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			t.Setenv(EnvUseOIDC, "") // ensure OIDC mode is off for these tests
 			keyring.MockInit()
+
 			timestamp := time.Now().Add(24 * time.Hour)
 			authFields := make(map[authFieldKey]string)
-			var accessToken string
-			var err error
+
+			var (
+				accessToken string
+				err         error
+			)
+
 			if tt.accessTokenSet {
 				accessTokenJWT := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
 					ExpiresAt: jwt.NewNumericDate(timestamp)})
+
 				accessToken, err = accessTokenJWT.SignedString(testSigningKey)
 				if err != nil {
 					t.Fatalf("Get test access token as string: %s", err)
@@ -175,8 +181,10 @@ func TestAuthenticationConfig(t *testing.T) {
 				if err != nil {
 					t.Fatalf("Generate private key: %s", err)
 				}
+
 				authFields[PRIVATE_KEY] = string(privateKey)
 			}
+
 			authFields[SESSION_EXPIRES_AT_UNIX] = strconv.FormatInt(tt.sessionExpiresAt.Unix(), 10)
 			authFields[ACCESS_TOKEN] = accessToken
 			authFields[REFRESH_TOKEN] = tt.refreshToken
@@ -187,6 +195,7 @@ func TestAuthenticationConfig(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Failed to set auth flow: %s", err)
 			}
+
 			err = SetAuthFieldMap(authFields)
 			if err != nil {
 				t.Fatalf("Failed to set in auth storage: %v", err)
@@ -197,7 +206,9 @@ func TestAuthenticationConfig(t *testing.T) {
 				if reauthorizeUserCalled {
 					t.Errorf("user reauthorized more than once")
 				}
+
 				reauthorizeUserCalled = true
+
 				return nil
 			}
 
@@ -221,13 +232,16 @@ func TestAuthenticationConfig(t *testing.T) {
 				}
 
 				baseCfg := &sdkConfig.Configuration{}
+
 				err := authCfgOption(baseCfg)
 				if err != nil {
 					t.Fatalf("Applying returned auth config option: %v", err)
 				}
+
 				if tt.expectedCustomAuthSet && baseCfg.CustomAuth == nil {
 					t.Fatalf("The returned auth configuration option should set the CustomAuth field but it is nil")
 				}
+
 				if tt.expectedTokenSet && baseCfg.Token == "" {
 					t.Fatalf("The returned auth configuration option should set the Token field but it is empty")
 				}
@@ -266,44 +280,57 @@ func TestInitKeyFlow(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			keyring.MockInit()
+
 			timestamp := time.Now().Add(24 * time.Hour)
 			authFields := make(map[authFieldKey]string)
-			var accessToken string
-			var err error
+
+			var (
+				accessToken string
+				err         error
+			)
+
 			accessTokenJWT := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
 				ExpiresAt: jwt.NewNumericDate(timestamp)})
+
 			accessToken, err = accessTokenJWT.SignedString(testSigningKey)
 			if err != nil {
 				t.Fatalf("Get test access token as string: %s", err)
 			}
+
 			if tt.privateKeySet {
 				privateKey, err := generatePrivateKey()
 				if err != nil {
 					t.Fatalf("Generate private key: %s", err)
 				}
+
 				authFields[PRIVATE_KEY] = string(privateKey)
 			}
+
 			authFields[ACCESS_TOKEN] = accessToken
 			authFields[SERVICE_ACCOUNT_KEY] = tt.saKey
 
 			// Mock server to avoid HTTP calls
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
+
 				resp := clients.TokenResponseBody{
 					AccessToken: accessToken,
 					ExpiresIn:   3600,
 					TokenType:   "Bearer",
 				}
+
 				jsonResp, err := json.Marshal(resp) //nolint:gosec // not a real access token, just a testcase
 				if err != nil {
 					t.Fatalf("Failed to marshal json: %v", err)
 				}
+
 				_, err = w.Write(jsonResp)
 				if err != nil {
 					t.Fatalf("Failed to write response: %v", err)
 				}
 			}))
 			defer server.Close()
+
 			authFields[TOKEN_CUSTOM_ENDPOINT] = server.URL
 
 			err = SetAuthFieldMap(authFields)
@@ -316,6 +343,7 @@ func TestInitKeyFlow(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("Expected no error but error was returned: %v", err)
 			}
 
@@ -328,6 +356,7 @@ func TestInitKeyFlow(t *testing.T) {
 				if err != nil {
 					t.Fatalf("Expected no error but error was returned: %v", err)
 				}
+
 				if !cmp.Equal(accessToken, getAccessToken) {
 					t.Errorf("The returned result is wrong. Expected %+v, got %+v", accessToken, getAccessToken)
 				}
@@ -337,8 +366,10 @@ func TestInitKeyFlow(t *testing.T) {
 }
 
 func TestGetAccessToken_EnvVar(t *testing.T) {
-	const envValue = "token-from-env"
-	const storedValue = "stored-token"
+	const (
+		envValue    = "token-from-env"
+		storedValue = "stored-token"
+	)
 
 	tests := []struct {
 		description   string
@@ -375,13 +406,16 @@ func TestGetAccessToken_EnvVar(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			keyring.MockInit()
+
 			if tt.envToken != "" {
 				t.Setenv(envAccessTokenName, tt.envToken)
 			}
+
 			if tt.storedToken != "" {
 				if err := SetAuthField(ACCESS_TOKEN, tt.storedToken); err != nil {
 					t.Fatalf("Failed to set stored token: %v", err)
 				}
+
 				if err := SetAuthFlow(AUTH_FLOW_SERVICE_ACCOUNT_TOKEN); err != nil {
 					t.Fatalf("Failed to set auth flow: %v", err)
 				}
@@ -392,8 +426,10 @@ func TestGetAccessToken_EnvVar(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("unexpected error: %v", err)
 			}
+
 			if tt.expectedToken != got {
 				t.Errorf("expected token %q, got %q", tt.expectedToken, got)
 			}

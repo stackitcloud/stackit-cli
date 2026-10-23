@@ -62,10 +62,13 @@ func TestGetinstanceName(t *testing.T) {
 				GetInstanceResp:  tt.instanceResp,
 			})
 			got, err := GetInstanceName(context.Background(), client, "", "")
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetInstanceName() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetInstanceName() = %v, want %v", got, tt.want)
 			}

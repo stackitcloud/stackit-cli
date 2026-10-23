@@ -63,6 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -77,10 +78,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			zoneLabel, err := dnsUtils.GetZoneName(ctx, apiClient.DefaultAPI, model.ProjectId, model.ZoneId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get zone name: %v", err)
+
 				zoneLabel = model.ZoneId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a record set for zone %s?", zoneLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -88,10 +91,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create DNS record set: %w", err)
 			}
+
 			recordSetId := resp.Rrset.Id
 
 			// Wait for async operation, if async mode not enabled
@@ -109,6 +114,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -146,6 +152,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 			// Longer strings need to be split into multiple records
 			if len(model.Records[idx]) > 255 {
 				var err error
+
 				model.Records[idx], err = dnsUtils.FormatTxtRecord(model.Records[idx])
 				if err != nil {
 					return nil, err
@@ -155,6 +162,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -165,6 +173,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 	}
 
 	req := apiClient.DefaultAPI.CreateRecordSet(ctx, model.ProjectId, model.ZoneId)
+
 	req = req.CreateRecordSetPayload(dns.CreateRecordSetPayload{
 		Comment: model.Comment,
 		Name:    *model.Name,
@@ -172,6 +181,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 		Ttl:     model.TTL,
 		Type:    model.Type,
 	})
+
 	return req
 }
 
@@ -179,12 +189,15 @@ func outputResult(p *print.Printer, model *inputModel, zoneLabel string, resp *d
 	if resp == nil {
 		return fmt.Errorf("record set response is empty")
 	}
+
 	return p.OutputResult(model.OutputFormat, resp, func() error {
 		operationState := "Created"
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
+
 		p.Outputf("%s record set for zone %s. Record set ID: %s\n", operationState, zoneLabel, resp.Rrset.Id)
+
 		return nil
 	})
 }

@@ -48,6 +48,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -62,6 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get vpc name: %v", err)
 			}
+
 			if vpcLabel == "" {
 				vpcLabel = model.VpcId
 			}
@@ -99,6 +101,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return model, nil
 }
 
@@ -114,6 +117,7 @@ func outputResult(p *print.Printer, outputFormat, vpcLabel string, resp *iaas.Re
 	return p.OutputResult(outputFormat, resp, func() error {
 		if len(resp.Regions) == 0 {
 			p.Outputf("No regions found for VPC %q\n", vpcLabel)
+
 			return nil
 		}
 
@@ -121,9 +125,12 @@ func outputResult(p *print.Printer, outputFormat, vpcLabel string, resp *iaas.Re
 
 		table := tables.NewTable()
 		table.SetHeader("REGION", "STATUS", "DNS NAME SERVERS")
+
 		for _, region := range regionIds {
 			regionConfig := resp.Regions[region]
+
 			var dnsNames string
+
 			if ipv4 := regionConfig.Ipv4; ipv4 != nil {
 				dnsNames = strings.Join(ipv4.DefaultNameservers, ",")
 			}

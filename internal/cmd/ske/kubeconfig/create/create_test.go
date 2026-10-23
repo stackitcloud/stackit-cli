@@ -34,6 +34,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, mod := range mods {
 		mod(argValues)
 	}
+
 	return argValues
 }
 
@@ -45,6 +46,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -60,15 +62,19 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *ske.ApiCreateKubeconfigRequest)) ske.ApiCreateKubeconfigRequest {
 	request := testClient.DefaultAPI.CreateKubeconfig(testCtx, testProjectId, testRegion, testClusterName)
+
 	request = request.CreateKubeconfigPayload(ske.CreateKubeconfigPayload{})
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -264,6 +270,7 @@ func TestBuildRequestCreate(t *testing.T) {
 
 func assertNoDiff(t *testing.T, actual, expected any) {
 	t.Helper()
+
 	diff := cmp.Diff(actual, expected,
 		cmp.AllowUnexported(expected),
 		cmpopts.EquateComparable(testCtx),
@@ -297,6 +304,7 @@ func Test_outputResult(t *testing.T) {
 		respLogin      *ske.LoginKubeconfig
 		respIDP        *ske.IDPKubeconfig
 	}
+
 	tests := []struct {
 		name    string
 		args    args

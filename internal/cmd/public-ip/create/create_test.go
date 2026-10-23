@@ -38,6 +38,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -56,15 +57,19 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreatePublicIPRequest)) iaas.ApiCreatePublicIPRequest {
 	request := testClient.DefaultAPI.CreatePublicIP(testCtx, testProjectId, testRegion)
+
 	request = request.CreatePublicIPPayload(fixturePayload())
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -78,6 +83,7 @@ func fixturePayload(mods ...func(payload *iaas.CreatePublicIPPayload)) iaas.Crea
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
@@ -188,6 +194,7 @@ func Test_outputResult(t *testing.T) {
 		projectLabel string
 		publicIp     iaas.PublicIp
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -200,6 +207,7 @@ func Test_outputResult(t *testing.T) {
 		},
 	}
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.projectLabel, tt.args.publicIp); (err != nil) != tt.wantErr {

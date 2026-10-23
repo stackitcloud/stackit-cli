@@ -47,6 +47,7 @@ func ExtractRouteDetails(route *iaas.Route) RouteDetails {
 		for key, value := range route.Labels {
 			stringMap[key] = fmt.Sprintf("%v", value)
 		}
+
 		routeDetails.Labels = utils.JoinStringMap(stringMap, ": ", "\n")
 	}
 

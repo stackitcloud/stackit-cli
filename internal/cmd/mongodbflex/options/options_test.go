@@ -34,6 +34,7 @@ func newAPIClientMock(c *mockSettings) mongodbflex.DefaultAPI {
 			if c.listFlavorsFails {
 				return nil, fmt.Errorf("list flavors failed")
 			}
+
 			return &mongodbflex.ListFlavorsResponse{
 				Flavors: []mongodbflex.InstanceFlavor{},
 			}, nil
@@ -43,6 +44,7 @@ func newAPIClientMock(c *mockSettings) mongodbflex.DefaultAPI {
 			if c.listVersionsFails {
 				return nil, fmt.Errorf("list versions failed")
 			}
+
 			return &mongodbflex.ListVersionsResponse{
 				Versions: []string{},
 			}, nil
@@ -52,6 +54,7 @@ func newAPIClientMock(c *mockSettings) mongodbflex.DefaultAPI {
 			if c.listStoragesFails {
 				return nil, fmt.Errorf("list storages failed")
 			}
+
 			return &mongodbflex.ListStoragesResponse{
 				StorageClasses: []string{},
 				StorageRange: &mongodbflex.StorageRange{
@@ -73,6 +76,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -86,6 +90,7 @@ func fixtureInputModelAllFalse(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -100,6 +105,7 @@ func fixtureInputModelAllTrue(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -139,6 +145,7 @@ func TestParseInput(t *testing.T) {
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, flavorsFlag)
 				delete(flagValues, versionsFlag)
+
 				flagValues[storagesFlag] = "true"
 				flagValues[flavorIdFlag] = "2.4"
 			}),
@@ -264,9 +271,11 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 			if err != nil && tt.isValid {
 				t.Fatalf("error building and executing request: %v", err)
 			}
+
 			if err == nil && !tt.isValid {
 				t.Fatalf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
@@ -274,9 +283,11 @@ func TestBuildAndExecuteRequest(t *testing.T) {
 			if tt.expectListFlavorsCalled != (tt.mockClientSettings).listFlavorsCalled {
 				t.Fatalf("expected listFlavorsCalled to be %v, got %v", tt.expectListFlavorsCalled, (tt.mockClientSettings).listFlavorsCalled)
 			}
+
 			if tt.expectListVersionsCalled != (tt.mockClientSettings).listVersionsCalled {
 				t.Fatalf("expected listVersionsCalled to be %v, got %v", tt.expectListVersionsCalled, (tt.mockClientSettings).listVersionsCalled)
 			}
+
 			if tt.expectListStoragesCalled != (tt.mockClientSettings).listStoragesCalled {
 				t.Fatalf("expected listStoragesCalled to be %v, got %v", tt.expectListStoragesCalled, (tt.mockClientSettings).listStoragesCalled)
 			}
@@ -291,6 +302,7 @@ func TestOutputResult(t *testing.T) {
 		versions   *mongodbflex.ListVersionsResponse
 		storages   *mongodbflex.ListStoragesResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -367,6 +379,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, tt.args.inputModel, tt.args.flavors, tt.args.versions, tt.args.storages); (err != nil) != tt.wantErr {
@@ -381,6 +394,7 @@ func TestOutputResultAsTable(t *testing.T) {
 		model   *inputModel
 		options *options
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -415,6 +429,7 @@ func TestOutputResultAsTable(t *testing.T) {
 		},
 	}
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResultAsTable(params.Printer, tt.args.model, tt.args.options); (err != nil) != tt.wantErr {

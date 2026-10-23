@@ -45,6 +45,7 @@ func TestEmailFlag(t *testing.T) {
 			if !tt.isValid && err == nil {
 				t.Fatalf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
@@ -52,6 +53,7 @@ func TestEmailFlag(t *testing.T) {
 			if err != nil {
 				t.Fatalf("failed on valid input: %v", err)
 			}
+
 			value := FlagToStringValue(nil, cmd, "test-flag")
 			if value != tt.value {
 				t.Fatalf("flag did not return set value")

@@ -46,6 +46,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -59,6 +60,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			vpcName, err := iaasUtils.GetVPCName(ctx, apiClient.DefaultAPI, model.ProjectId, model.VpcId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get vpc name: %v", err)
+
 				vpcName = ""
 			}
 
@@ -88,6 +90,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
+
 	if globalFlags.Region == "" {
 		return nil, &errors.RegionError{}
 	}
@@ -98,6 +101,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return model, nil
 }
 
@@ -114,13 +118,16 @@ func outputResult(p *print.Printer, outputFormat, region, vpcId, vpcName string,
 		table := tables.NewTable()
 		table.AddRow("ID", vpcId)
 		table.AddSeparator()
+
 		if vpcName != "" {
 			table.AddRow("NAME", vpcName)
 			table.AddSeparator()
 		}
+
 		table.AddRow("REGION", region)
 		table.AddSeparator()
 		table.AddRow("STATUS", utils.PtrString(resp.Status))
+
 		if ipv4 := resp.Ipv4; ipv4 != nil {
 			table.AddSeparator()
 			table.AddRow("DNS NAME SERVERS", strings.Join(ipv4.DefaultNameservers, ","))

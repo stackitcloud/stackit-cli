@@ -74,6 +74,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Deprecated: `Command "stackit postgresflex options" is deprecated and will be removed after 2027-01-31. Please use "stackit postgresflex version list", "stackit postgresflex flavor list" and "stackit postgresflex flavor describe" instead.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -95,6 +96,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -112,6 +114,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
 	}
+
 	flavors := flags.FlagToBoolValue(p, cmd, flavorsFlag)
 	versions := flags.FlagToBoolValue(p, cmd, versionsFlag)
 	storages := flags.FlagToBoolValue(p, cmd, storagesFlag)
@@ -139,6 +142,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -199,9 +203,11 @@ func outputResult(p *print.Printer, model *inputModel, options *options) error {
 		if model.Flavors && len(options.Flavors) != 0 {
 			content = append(content, buildFlavorsTable(options.Flavors))
 		}
+
 		if model.Versions && len(options.Versions) != 0 {
 			content = append(content, buildVersionsTable(options.Versions))
 		}
+
 		if model.Storages && options.Storages != nil && len(options.Storages.Storages) > 0 {
 			content = append(content, buildStoragesTable(options.Storages.Storages))
 		}
@@ -220,6 +226,7 @@ func buildFlavorsTable(flavors []postgresflex.ListFlavors) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Flavors")
 	table.SetHeader("ID", "CPU", "MEMORY", "DESCRIPTION")
+
 	for _, f := range flavors {
 		table.AddRow(
 			f.Id,
@@ -229,6 +236,7 @@ func buildFlavorsTable(flavors []postgresflex.ListFlavors) tables.Table {
 		)
 		table.AddSeparator()
 	}
+
 	return table
 }
 
@@ -242,6 +250,7 @@ func buildVersionsTable(versions []postgresflex.Version) tables.Table {
 		table.AddRow(v.Version, v.Recommend, v.Beta, v.Deprecated)
 		table.AddSeparator()
 	}
+
 	return table
 }
 
@@ -255,5 +264,6 @@ func buildStoragesTable(storageClasses []postgresflex.FlavorStorageClassesStorag
 		table.AddRow(sc.Class, sc.MaxIoPerSec, sc.MaxThroughInMb)
 		table.AddSeparator()
 	}
+
 	return table
 }

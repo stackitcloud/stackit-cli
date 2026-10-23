@@ -57,6 +57,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			params.Printer.Info("Command \"options\" is deprecated, use the subcommands instead.\n")
 
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -70,6 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, apiClient, model)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get SKE provider options: %w", err)
@@ -80,6 +82,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 	configureFlags(cmd)
 	addSubcommands(cmd, params)
+
 	return cmd
 }
 
@@ -132,6 +135,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -188,6 +192,7 @@ func outputResultAsTable(p *print.Printer, options *ske.ProviderOptions) error {
 		if err != nil {
 			return fmt.Errorf("build Kubernetes versions table: %w", err)
 		}
+
 		content = append(content, kubernetesVersionsTable)
 	}
 
@@ -217,10 +222,12 @@ func buildAvailabilityZonesTable(resp *ske.ProviderOptions) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Availability Zones")
 	table.SetHeader("ZONE")
+
 	for i := range zones {
 		z := zones[i]
 		table.AddRow(*z.Name)
 	}
+
 	return table
 }
 
@@ -230,22 +237,27 @@ func buildKubernetesVersionsTable(resp *ske.ProviderOptions) (tables.Table, erro
 	table := tables.NewTable()
 	table.SetTitle("Kubernetes Versions")
 	table.SetHeader("VERSION", "STATE", "EXPIRATION DATE", "FEATURE GATES")
+
 	for i := range versions {
 		v := versions[i]
+
 		featureGate, err := json.Marshal(*v.FeatureGates)
 		if err != nil {
 			return table, fmt.Errorf("marshal featureGates of Kubernetes version %q: %w", *v.Version, err)
 		}
+
 		expirationDate := ""
 		if v.ExpirationDate != nil {
 			expirationDate = v.ExpirationDate.Format(time.RFC3339)
 		}
+
 		table.AddRow(
 			utils.PtrString(v.Version),
 			utils.PtrString(v.State),
 			expirationDate,
 			string(featureGate))
 	}
+
 	return table, nil
 }
 
@@ -255,22 +267,28 @@ func buildMachineImagesTable(resp *ske.ProviderOptions) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Machine Images")
 	table.SetHeader("NAME", "VERSION", "STATE", "EXPIRATION DATE", "SUPPORTED CRI")
+
 	for i := range images {
 		image := images[i]
 		versions := image.Versions
+
 		for j := range versions {
 			version := versions[j]
 			criNames := make([]string, 0)
+
 			for i := range version.Cri {
 				cri := version.Cri[i]
+
 				criNames = append(criNames, string(*cri.Name))
 			}
+
 			criNamesString := strings.Join(criNames, ", ")
 
 			expirationDate := "-"
 			if version.ExpirationDate != nil {
 				expirationDate = version.ExpirationDate.Format(time.RFC3339)
 			}
+
 			table.AddRow(
 				utils.PtrString(image.Name),
 				utils.PtrString(version.Version),
@@ -280,7 +298,9 @@ func buildMachineImagesTable(resp *ske.ProviderOptions) tables.Table {
 			)
 		}
 	}
+
 	table.EnableAutoMergeOnColumns(1)
+
 	return table
 }
 
@@ -290,6 +310,7 @@ func buildMachineTypesTable(resp *ske.ProviderOptions) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Machine Types")
 	table.SetHeader("TYPE", "CPU", "MEMORY")
+
 	for i := range machineTypes {
 		t := machineTypes[i]
 		table.AddRow(
@@ -298,6 +319,7 @@ func buildMachineTypesTable(resp *ske.ProviderOptions) tables.Table {
 			utils.PtrString(t.Memory),
 		)
 	}
+
 	return table
 }
 
@@ -307,9 +329,11 @@ func buildVolumeTypesTable(resp *ske.ProviderOptions) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Volume Types")
 	table.SetHeader("TYPE")
+
 	for i := range volumeTypes {
 		z := volumeTypes[i]
 		table.AddRow(utils.PtrString(z.Name))
 	}
+
 	return table
 }

@@ -46,6 +46,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -59,6 +60,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, apiClient, model)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get SKE provider options: %w", err)
@@ -68,6 +70,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -84,6 +87,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -92,6 +96,7 @@ func buildRequest(ctx context.Context, apiClient *ske.APIClient, model *inputMod
 	if model.Supported {
 		req = req.VersionState("SUPPORTED")
 	}
+
 	return req
 }
 
@@ -110,16 +115,20 @@ func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOpti
 
 		table := tables.NewTable()
 		table.SetHeader("VERSION", "STATE", "EXPIRATION DATE", "FEATURE GATES")
+
 		for i := range versions {
 			v := versions[i]
+
 			featureGate, err := json.Marshal(utils.PtrValue(v.FeatureGates))
 			if err != nil {
 				return fmt.Errorf("marshal featureGates of Kubernetes version %q: %w", utils.PtrValue(v.Version), err)
 			}
+
 			expirationDate := ""
 			if v.ExpirationDate != nil {
 				expirationDate = v.ExpirationDate.Format(time.RFC3339)
 			}
+
 			table.AddRow(
 				utils.PtrString(v.Version),
 				utils.PtrString(v.State),
@@ -131,6 +140,7 @@ func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOpti
 		if err != nil {
 			return fmt.Errorf("display output: %w", err)
 		}
+
 		return nil
 	})
 }

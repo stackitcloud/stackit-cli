@@ -34,10 +34,13 @@ func (rt *clientTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 	if reqURL == rt.requestURL {
 		return rt.roundTripRequest()
 	}
+
 	if fmt.Sprintf("https://%s", reqURL) == testTokenEndpoint {
 		return rt.roundTripRefreshTokens()
 	}
+
 	rt.t.Fatalf("unexpected request to %q", reqURL)
+
 	return nil, fmt.Errorf("unexpected request to %q", reqURL)
 }
 
@@ -45,12 +48,14 @@ func (rt *clientTransport) roundTripRequest() (*http.Response, error) {
 	if *rt.requestSent {
 		rt.t.Errorf("request executed multiple times")
 	}
+
 	*rt.requestSent = true
 
 	resp := &http.Response{
 		Status:     http.StatusText(http.StatusOK),
 		StatusCode: http.StatusOK,
 	}
+
 	return resp, nil
 }
 
@@ -58,23 +63,29 @@ func (rt *clientTransport) roundTripRefreshTokens() (*http.Response, error) {
 	if rt.refreshTokensFails {
 		return nil, fmt.Errorf("failed")
 	}
+
 	if rt.refreshTokensReturnsNonOKStatus {
 		resp := &http.Response{
 			Status:     http.StatusText(http.StatusInternalServerError),
 			StatusCode: http.StatusInternalServerError,
 		}
+
 		return resp, nil
 	}
 
 	if *rt.tokensRefreshed {
 		rt.t.Errorf("tokens refreshed more than once")
 	}
+
 	*rt.tokensRefreshed = true
+
 	expirationTimestamp := time.Now().Add(time.Hour)
+
 	accessToken, refreshToken, err := createTokens(expirationTimestamp, expirationTimestamp)
 	if err != nil {
 		rt.t.Fatalf("refresh token API: failed to create tokens: %v", err)
 	}
+
 	respBody := fmt.Sprintf(
 		`{
 			"access_token": "%s",
@@ -88,6 +99,7 @@ func (rt *clientTransport) roundTripRefreshTokens() (*http.Response, error) {
 		StatusCode: http.StatusOK,
 		Body:       io.NopCloser(bytes.NewReader([]byte(respBody))),
 	}
+
 	return resp, nil
 }
 
@@ -102,6 +114,7 @@ func reauthorizeUser(auCtx *authorizeUserContext) error {
 	if *auCtx.authorizeUserCalled {
 		auCtx.t.Errorf("user authenticated more than once")
 	}
+
 	*auCtx.authorizeUserCalled = true
 
 	if auCtx.authorizeUserFails {
@@ -111,7 +124,9 @@ func reauthorizeUser(auCtx *authorizeUserContext) error {
 	if *auCtx.tokensRefreshed {
 		auCtx.t.Errorf("tokens refreshed more than once")
 	}
+
 	*auCtx.tokensRefreshed = true
+
 	err := setAuthStorage(
 		time.Now().Add(time.Hour),
 		time.Now().Add(time.Hour),
@@ -121,6 +136,7 @@ func reauthorizeUser(auCtx *authorizeUserContext) error {
 	if err != nil {
 		auCtx.t.Fatalf("failed to set auth vars in authorize user: %v", err)
 	}
+
 	return nil
 }
 
@@ -248,6 +264,7 @@ func TestRoundTrip(t *testing.T) {
 				keyring.MockInitWithError(fmt.Errorf("failed"))
 			} else {
 				keyring.MockInit()
+
 				err := setAuthStorage(
 					tt.accessTokenExpiresAt,
 					tt.refreshTokenExpiresAt,
@@ -293,6 +310,7 @@ func TestRoundTrip(t *testing.T) {
 				reauthorizeUserRoutine: authorizeUserRoutine,
 				client:                 client,
 			}
+
 			req, err := http.NewRequest(http.MethodGet, "request/url", http.NoBody)
 			if err != nil {
 				t.Fatalf("failed to create request: %v", err)
@@ -312,23 +330,30 @@ func TestRoundTrip(t *testing.T) {
 				if requestSent {
 					t.Logf("request was sent")
 				}
+
 				t.Errorf("should have failed")
 			}
+
 			if tt.isValid && err != nil {
 				if !requestSent {
 					t.Logf("request wasn't sent")
 				}
+
 				t.Errorf("shouldn't have failed: %v", err)
 			}
+
 			if authorizeUserCalled && !tt.expectedReautorizeUserCalled {
 				t.Errorf("reauthorizeUser was called")
 			}
+
 			if !authorizeUserCalled && tt.expectedReautorizeUserCalled {
 				t.Errorf("reauthorizeUser wasn't called")
 			}
+
 			if tokensRefreshed && !tt.expectedTokensRefreshed {
 				t.Errorf("tokens were refreshed")
 			}
+
 			if !tokensRefreshed && tt.expectedTokensRefreshed {
 				t.Errorf("tokens weren't refreshed")
 			}
@@ -342,9 +367,11 @@ func setAuthStorage(accessTokenExpiresAt, refreshTokenExpiresAt time.Time, acces
 	if err != nil {
 		return fmt.Errorf("create tokens: %w", err)
 	}
+
 	if accessTokenInvalid {
 		accessToken = "foo.bar.baz" //nolint:gosec // Hardcoded bad credentials
 	}
+
 	if refreshTokenInvalid {
 		refreshToken = "foo.bar.baz" //nolint:gosec // Hardcoded bad credentials
 	}
@@ -353,6 +380,7 @@ func setAuthStorage(accessTokenExpiresAt, refreshTokenExpiresAt time.Time, acces
 	if err != nil {
 		return fmt.Errorf("set auth flow type: %w", err)
 	}
+
 	err = SetAuthFieldMap(map[authFieldKey]string{
 		ACCESS_TOKEN:       accessToken,
 		REFRESH_TOKEN:      refreshToken,
@@ -361,6 +389,7 @@ func setAuthStorage(accessTokenExpiresAt, refreshTokenExpiresAt time.Time, acces
 	if err != nil {
 		return fmt.Errorf("set refreshed tokens in auth storage: %w", err)
 	}
+
 	return nil
 }
 

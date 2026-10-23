@@ -53,6 +53,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -67,10 +68,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to add the role %q to %s on project %q?", model.Role, model.Subject, projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -78,16 +81,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			_, err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("add member: %w", err)
 			}
 
 			params.Printer.Info("Added the role %q to %s on project %q\n", model.Role, model.Subject, projectLabel)
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -113,11 +119,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *authorization.APIClient) authorization.ApiAddMembersRequest {
 	req := apiClient.DefaultAPI.AddMembers(ctx, model.ProjectId)
+
 	req = req.AddMembersPayload(authorization.AddMembersPayload{
 		Members: []authorization.Member{
 			{
@@ -127,5 +135,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *authorizati
 		},
 		ResourceType: projectResourceType,
 	})
+
 	return req
 }

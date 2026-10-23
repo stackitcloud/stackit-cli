@@ -54,11 +54,13 @@ users:
 //nolint:gocritic // ptrToRefParam: Required by edge.Kubeconfig API which expects *map[string]interface{}
 func testKubeconfigMap() map[string]interface{} {
 	var kubeconfigMap map[string]interface{}
+
 	err := yaml.Unmarshal([]byte(testKubeconfig), &kubeconfigMap)
 	if err != nil {
 		// This should never happen in tests with valid YAML
 		panic(err)
 	}
+
 	return kubeconfigMap
 }
 
@@ -71,6 +73,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -92,15 +95,19 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *edge.ApiGetKubeconfigByInstanceIdRequest)) edge.ApiGetKubeconfigByInstanceIdRequest {
 	request := testClient.DefaultAPI.GetKubeconfigByInstanceId(testCtx, testProjectId, testRegion, testInstanceId)
+
 	request = request.ExpirationSeconds(int64(testExpiration))
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 

@@ -49,6 +49,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args: args.SingleArg(backupIdArg, nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -62,8 +63,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
-			resp, err := req.Execute()
 
+			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("describe backup for PostgreSQL Flex instance: %w", err)
 			}
@@ -72,6 +73,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 

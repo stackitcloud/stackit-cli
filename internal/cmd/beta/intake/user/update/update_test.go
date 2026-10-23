@@ -38,6 +38,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, mod := range mods {
 		mod(argValues)
 	}
+
 	return argValues
 }
 
@@ -51,6 +52,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -68,6 +70,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -76,10 +79,13 @@ func fixtureRequest(mods ...func(request *intake.ApiUpdateIntakeUserRequest)) in
 	payload := intake.UpdateIntakeUserPayload{
 		DisplayName: utils.Ptr("new-display-name"),
 	}
+
 	request = request.UpdateIntakeUserPayload(payload)
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -177,6 +183,7 @@ func TestBuildRequest(t *testing.T) {
 				payload := intake.UpdateIntakeUserPayload{
 					Description: utils.Ptr("new-desc"),
 				}
+
 				*request = request.UpdateIntakeUserPayload(payload)
 			}),
 		},
@@ -198,6 +205,7 @@ func TestBuildRequest(t *testing.T) {
 					Type:        &userType,
 					Password:    utils.Ptr("Secret123!"),
 				}
+
 				*request = request.UpdateIntakeUserPayload(payload)
 			}),
 		},
@@ -226,6 +234,7 @@ func TestOutputResult(t *testing.T) {
 		intakeId     string
 		resp         *intake.IntakeUserResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -253,6 +262,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, &inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{OutputFormat: tt.args.outputFormat}, IntakeId: tt.args.intakeId}, tt.args.resp); (err != nil) != tt.wantErr {

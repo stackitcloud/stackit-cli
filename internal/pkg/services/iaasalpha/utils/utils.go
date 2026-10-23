@@ -30,9 +30,11 @@ func GetVPCName(ctx context.Context, apiClient iaas.DefaultAPI, projectId, vpcId
 	if err != nil {
 		return "", fmt.Errorf("get vpc: %w", err)
 	}
+
 	if resp == nil {
 		return "", ErrResponseNil
 	}
+
 	return resp.Name, nil
 }
 
@@ -41,9 +43,11 @@ func GetVPCRoutingTableName(ctx context.Context, apiClient iaas.DefaultAPI, proj
 	if err != nil {
 		return "", fmt.Errorf("get vpc routing-table: %w", err)
 	}
+
 	if resp == nil {
 		return "", ErrResponseNil
 	}
+
 	return resp.Name, nil
 }
 
@@ -57,6 +61,7 @@ func GetVPCNetworkRangePrefix(ctx context.Context, apiClient iaas.DefaultAPI, pr
 		if resp.VPCNetworkRangeIPv4 != nil {
 			return resp.VPCNetworkRangeIPv4.Prefix, nil
 		}
+
 		if resp.VPCNetworkRangeIPv6 != nil {
 			return resp.VPCNetworkRangeIPv6.Prefix, nil
 		}
@@ -67,6 +72,7 @@ func GetVPCNetworkRangePrefix(ctx context.Context, apiClient iaas.DefaultAPI, pr
 
 func ExtractRouteDetails(route *iaas.Route) RouteDetails {
 	var routeDetails RouteDetails
+
 	if route == nil {
 		return routeDetails
 	}
@@ -96,6 +102,7 @@ func ExtractRouteDetails(route *iaas.Route) RouteDetails {
 		for key, value := range route.Labels {
 			stringMap[key] = fmt.Sprintf("%v", value)
 		}
+
 		routeDetails.Labels = utils.JoinStringMap(stringMap, ": ", "\n")
 	}
 

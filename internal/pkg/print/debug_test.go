@@ -54,6 +54,7 @@ func fixtureInputModel(mods ...func(model *testInputModel)) *testInputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -62,6 +63,7 @@ func fixtureHTTPRequest(mods ...func(req *http.Request)) *http.Request {
 	if err != nil {
 		return nil
 	}
+
 	request, err := http.NewRequest("GET", "http://example.com", bytes.NewReader(testBody))
 	if err != nil {
 		return nil
@@ -105,6 +107,7 @@ func fixtureHTTPResponse(mods ...func(resp *http.Response)) *http.Response {
 	if err != nil {
 		return nil
 	}
+
 	response := &http.Response{
 		Body:          io.NopCloser(bytes.NewReader(testBody)),
 		StatusCode:    http.StatusOK,
@@ -171,16 +174,20 @@ func TestBuildDebugStrFromInputModel(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			model := tt.model
+
 			actual, err := buildDebugStrFromInputModel(model)
 			if err != nil {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("unexpected error: %v", err)
 			}
+
 			if !tt.isValid {
 				t.Fatalf("expected error, got nil")
 			}
+
 			if actual != tt.expected {
 				t.Fatalf("expected: %s, actual: %s", tt.expected, actual)
 			}
@@ -356,6 +363,7 @@ func TestBuildHeaderMap(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			actual := buildHeaderMap(tt.inputHeader, tt.inputIncludeHeaders)
 			diff := cmp.Diff(actual, tt.expected)
+
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
 			}
@@ -444,11 +452,14 @@ func TestBuildDebugStrFromHTTPRequest(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("unexpected error: %v", err)
 			}
+
 			if !tt.isValid {
 				t.Fatalf("expected error, got nil")
 			}
+
 			diff := cmp.Diff(actual, tt.expected)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -524,21 +535,26 @@ func TestBuildDebugStrFromHTTPResponse(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			var err error
+
 			if tt.inputResp != nil && tt.inputResp.Body != nil {
 				defer func() {
 					err = tt.inputResp.Body.Close()
 				}()
 			}
+
 			actual, err := BuildDebugStrFromHTTPResponse(tt.inputResp)
 			if err != nil {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("unexpected error: %v", err)
 			}
+
 			if !tt.isValid {
 				t.Fatalf("expected error, got nil")
 			}
+
 			diff := cmp.Diff(actual, tt.expected)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

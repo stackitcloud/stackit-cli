@@ -65,6 +65,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -86,6 +87,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -136,6 +138,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -144,12 +147,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient resourceMana
 	if model.ParentId != nil {
 		req = req.ContainerParentId(*model.ParentId)
 	}
+
 	if model.ProjectIdLike != nil {
 		req = req.ContainerIds(model.ProjectIdLike)
 	}
+
 	if model.Member != nil {
 		req = req.Member(*model.Member)
 	}
+
 	if model.CreationTimeAfter != nil {
 		req = req.CreationTimeStart(*model.CreationTimeAfter)
 	}
@@ -159,10 +165,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient resourceMana
 		if err != nil {
 			return req, fmt.Errorf("get email of authenticated user: %w", err)
 		}
+
 		req = req.Member(email)
 	}
+
 	req = req.Limit(float32(model.PageSize))
 	req = req.Offset(float32(offset))
+
 	return req, nil
 }
 
@@ -177,20 +186,24 @@ func fetchProjects(ctx context.Context, model *inputModel, apiClient resourceMan
 
 	offset := 0
 	projects := []resourcemanager.Project{}
+
 	for {
 		// Call API
 		req, err := buildRequest(ctx, model, apiClient, offset)
 		if err != nil {
 			return nil, fmt.Errorf("build list projects request: %w", err)
 		}
+
 		resp, err := req.Execute()
 		if err != nil {
 			return nil, fmt.Errorf("get projects: %w", err)
 		}
+
 		respProjects := resp.GetItems()
 		if len(respProjects) == 0 {
 			break
 		}
+
 		projects = append(projects, respProjects...)
 		// Stop if no more pages
 		if len(respProjects) < int(model.PageSize) {
@@ -202,8 +215,10 @@ func fetchProjects(ctx context.Context, model *inputModel, apiClient resourceMan
 			projects = projects[:*model.Limit]
 			break
 		}
+
 		offset += int(model.PageSize)
 	}
+
 	return projects, nil
 }
 
@@ -211,10 +226,13 @@ func outputResult(p *print.Printer, outputFormat string, projects []resourcemana
 	return p.OutputResult(outputFormat, projects, func() error {
 		if len(projects) == 0 {
 			p.Outputf("No projects found matching the criteria\n")
+
 			return nil
 		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "STATE", "PARENT ID")
+
 		for i := range projects {
 			p := projects[i]
 

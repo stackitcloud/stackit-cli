@@ -77,22 +77,28 @@ func TestStringEnumSliceFlag_Set(t *testing.T) {
 			if tt.ignoreCase {
 				opts = append(opts, IgnoreCase[string]())
 			}
+
 			f := StringEnumSliceFlag("test", tt.options, "docs", opts...)
 
 			err := f.Set(tt.setValue)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Set() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
+
 			if !tt.wantErr {
 				got := f.Get()
 				if len(got) != len(tt.want) {
 					t.Errorf("Set() got = %v, want %v", got, tt.want)
+
 					return
 				}
+
 				for i := range got {
 					if got[i] != tt.want[i] {
 						t.Errorf("Set() got = %v, want %v", got, tt.want)
+
 						break
 					}
 				}
@@ -114,6 +120,7 @@ func TestStringEnumSliceFlag_DefaultValues(t *testing.T) {
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
+
 	got = f.Get()
 	if len(got) != 1 || got[0] != "b" {
 		t.Errorf("Expected value [b] after Set, got %v", got)
@@ -124,6 +131,7 @@ func TestStringEnumSliceFlag_DefaultValues(t *testing.T) {
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
+
 	got = f.Get()
 	if len(got) != 2 || got[0] != "b" || got[1] != "a" {
 		t.Errorf("Expected value [b, a] after second Set, got %v", got)
@@ -133,6 +141,7 @@ func TestStringEnumSliceFlag_DefaultValues(t *testing.T) {
 func TestStringEnumSliceFlag_Usage(t *testing.T) {
 	f := StringEnumSliceFlag("test", []string{"a", "b"}, "docs")
 	usage := f.Usage()
+
 	if usage != "docs (multiple of: [a, b])" {
 		t.Errorf("Expected usage 'docs (possible values: [a, b])', got %q", usage)
 	}
@@ -141,6 +150,7 @@ func TestStringEnumSliceFlag_Usage(t *testing.T) {
 func TestStringEnumSliceFlag_UnknownDefaultOpenAPI(t *testing.T) {
 	f := StringEnumSliceFlag("test", []string{"a", "unknown_default_open_api", "b"}, "docs")
 	usage := f.Usage()
+
 	if usage != "docs (multiple of: [a, b])" {
 		t.Errorf("Expected unknown_default_open_api to be filtered out, got %q", usage)
 	}
@@ -155,6 +165,7 @@ func TestStringEnumSliceFlag_Register(t *testing.T) {
 	if flag == nil {
 		t.Fatalf("Expected flag 'my-flag' to be registered")
 	}
+
 	if flag.Usage != "docs (multiple of: [a, b])" {
 		t.Errorf("Expected flag usage to be set correctly")
 	}

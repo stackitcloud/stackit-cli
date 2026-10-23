@@ -30,9 +30,11 @@ func newServiceEnableClientMock(m mockSettings) serviceenablement.DefaultAPI {
 			if m.getServiceStatusFails {
 				return nil, fmt.Errorf("could not get service status")
 			}
+
 			if m.serviceDisabled {
 				return nil, &oapierror.GenericOpenAPIError{StatusCode: 404}
 			}
+
 			return m.getServiceStatusResp, nil
 		}),
 	}
@@ -103,12 +105,15 @@ func TestProjectEnabled(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %t, got %t", tt.expectedOutput, output)
 			}

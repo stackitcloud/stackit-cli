@@ -59,6 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -71,11 +72,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			var orgLabel string
+
 			rmApiClient, err := rmClient.ConfigureClient(params.Printer, params.CliVersion)
 			if err == nil {
 				orgLabel, err = rmUtils.GetOrganizationName(ctx, rmApiClient.DefaultAPI, model.OrganizationId)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get organization name: %v", err)
+
 					orgLabel = model.OrganizationId
 				} else if orgLabel == "" {
 					orgLabel = model.OrganizationId
@@ -85,6 +88,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a network area for organization %q?", orgLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -92,10 +96,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create network area: %w", err)
 			}
+
 			if resp == nil || resp.Id == nil {
 				return fmt.Errorf("create network area: empty response")
 			}
@@ -108,6 +114,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -131,6 +138,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -152,6 +160,7 @@ func outputResult(p *print.Printer, outputFormat, orgLabel string, responses *Ne
 
 	prettyOutputFunc := func() error {
 		p.Outputf("Created STACKIT Network Area for organization %q.\nNetwork area ID: %s\n", orgLabel, utils.PtrString(responses.NetworkArea.Id))
+
 		return nil
 	}
 	// If RegionalArea is NOT set in the response, then no deprecated Flags were set.
@@ -159,5 +168,6 @@ func outputResult(p *print.Printer, outputFormat, orgLabel string, responses *Ne
 	if responses.RegionalArea == nil {
 		return p.OutputResult(outputFormat, responses.NetworkArea, prettyOutputFunc)
 	}
+
 	return p.OutputResult(outputFormat, responses, prettyOutputFunc)
 }

@@ -95,6 +95,7 @@ func TestParseInput(t *testing.T) {
 			}
 
 			var expected *inputModel
+
 			if tt.valid {
 				expected = &inputModel{
 					GlobalFlagModel: &globalflags.GlobalFlagModel{
@@ -175,6 +176,7 @@ func TestBuildRequest(t *testing.T) {
 
 			want := client.UpdateVPCRegion(ctx, testProjectId, testVpcId, "eu02").UpdateVPCRegionPayload(tt.wantPayload)
 			got := buildRequest(ctx, tt.inputModel, client)
+
 			if diff := cmp.Diff(want, got, cmp.AllowUnexported(want), cmpopts.EquateComparable(ctx, iaas.DefaultAPIService{})); diff != "" {
 				t.Fatalf("request mismatch (-want +got): %s", diff)
 			}

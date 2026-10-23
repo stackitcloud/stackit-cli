@@ -32,6 +32,7 @@ func fixtureFlagValues(mods ...func(map[string]string)) map[string]string {
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -48,6 +49,7 @@ func fixtureInputModel(mods ...func(*inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -217,12 +219,14 @@ func TestOutputResult(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
+
 			output := params.Out.String()
 			for _, want := range tt.want {
 				if !strings.Contains(output, want) {
 					t.Errorf("output %q does not contain %q", output, want)
 				}
 			}
+
 			if tt.format == "" && tt.resp != nil && len(tt.resp.Labels) > 0 && strings.Index(output, "env: dev") > strings.Index(output, "team: network") {
 				t.Errorf("labels are not sorted: %s", output)
 			}

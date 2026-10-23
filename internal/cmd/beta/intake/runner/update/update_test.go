@@ -38,6 +38,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, mod := range mods {
 		mod(argValues)
 	}
+
 	return argValues
 }
 
@@ -50,6 +51,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -66,6 +68,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -74,10 +77,13 @@ func fixtureRequest(mods ...func(request *intake.ApiUpdateIntakeRunnerRequest)) 
 	payload := intake.UpdateIntakeRunnerPayload{
 		DisplayName: utils.Ptr("new-runner-name"),
 	}
+
 	request = request.UpdateIntakeRunnerPayload(payload)
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -168,6 +174,7 @@ func TestBuildRequest(t *testing.T) {
 					Description: utils.Ptr("new-desc"),
 					Labels:      map[string]string{"key": "value"},
 				}
+
 				*request = request.UpdateIntakeRunnerPayload(payload)
 			}),
 		},
@@ -188,6 +195,7 @@ func TestBuildRequest(t *testing.T) {
 					Description:        utils.Ptr("final-desc"),
 					Labels:             map[string]string{"a": "b"},
 				}
+
 				*request = request.UpdateIntakeRunnerPayload(payload)
 			}),
 		},
@@ -215,6 +223,7 @@ func TestOutputResult(t *testing.T) {
 		projectLabel string
 		resp         *intake.IntakeRunnerResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args

@@ -62,16 +62,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				// If project label can't be determined, fall back to project ID
 				projectLabel = model.ProjectId
 			}
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get Edge Cloud plans: %w", err)
 			}
+
 			plans := resp.GetValidPlans()
 
 			// Truncate output
@@ -83,6 +86,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -112,6 +116,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	// Log the parsed model if --verbosity is set to debug
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -124,6 +129,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, plans []e
 		// No plans found for project
 		if len(plans) == 0 {
 			p.Outputf("No plans found for project %q\n", projectLabel)
+
 			return nil
 		}
 
@@ -131,6 +137,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, plans []e
 		table := tables.NewTable()
 		// List: only output the most important fields. Be sure to filter for any non-required fields.
 		table.SetHeader("ID", "NAME", "DESCRIPTION", "MAX EDGE HOSTS")
+
 		for i := range plans {
 			plan := plans[i]
 			table.AddRow(
@@ -139,10 +146,12 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, plans []e
 				utils.PtrString(plan.Description),
 				utils.PtrString(plan.MaxEdgeHosts))
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

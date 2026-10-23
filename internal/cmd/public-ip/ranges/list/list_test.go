@@ -181,6 +181,7 @@ func TestOutputResult(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			params := testparams.NewTestParams()
 			err := outputResult(params.Printer, tt.outputFormat, tt.publicIpRanges)
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}

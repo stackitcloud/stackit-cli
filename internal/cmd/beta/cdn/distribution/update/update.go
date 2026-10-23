@@ -95,6 +95,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, inputArgs []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, inputArgs)
 			if err != nil {
 				return err
@@ -108,16 +109,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update a CDN distribution for project %q?", projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
 			}
 
 			req := buildRequest(ctx, apiClient, model)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update CDN distribution: %w", err)
@@ -127,6 +131,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd, params)
+
 	return cmd
 }
 
@@ -139,6 +144,7 @@ func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.Flags().Bool(flagBucket, false, "Use Object Storage backend")
 	cmd.Flags().String(flagBucketURL, "", "Bucket URL for Object Storage backend")
 	cmd.Flags().String(flagBucketCredentialsAccessKeyID, "", "Access Key ID for Object Storage backend")
+
 	bucketPassword := flags.SecretFlag(flagBucketPassword, params)
 	cmd.Flags().Var(bucketPassword, flagBucketPassword, bucketPassword.Usage())
 	cmd.Flags().String(flagBucketRegion, "", "Region for Object Storage backend")
@@ -147,6 +153,7 @@ func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.Flags().String(flagDefaultCacheDuration, "", "ISO8601 duration string for default cache duration (e.g., 'PT1H30M' for 1 hour and 30 minutes)")
 	cmd.Flags().Bool(flagLoki, false, "Enable Loki log sink for the CDN distribution")
 	cmd.Flags().String(flagLokiUsername, "", "Username for log sink")
+
 	lokiPassword := flags.SecretFlag(flagLokiPassword, params)
 	cmd.Flags().Var(lokiPassword, flagLokiPassword, lokiPassword.Usage())
 	cmd.Flags().String(flagLokiPushURL, "", "Push URL for log sink")
@@ -160,22 +167,28 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
+
 	distributionID := inputArgs[0]
 
 	regions := flagRegions.Get()
 
 	var http *httpInputModel
+
 	if flags.FlagToBoolValue(p, cmd, flagHTTP) {
 		originURL := flags.FlagToStringValue(p, cmd, flagHTTPOriginURL)
 
 		var geofencing *map[string][]string
+
 		geofencingInput := flags.FlagToStringArrayValue(p, cmd, flagHTTPGeofencing)
+
 		if geofencingInput != nil {
 			geofencing = cdnUtils.ParseGeofencing(p, geofencingInput)
 		}
 
 		var originRequestHeaders *map[string]string
+
 		originRequestHeadersInput := flags.FlagToStringSliceValue(p, cmd, flagHTTPOriginRequestHeaders)
+
 		if originRequestHeadersInput != nil {
 			originRequestHeaders = cdnUtils.ParseOriginRequestHeaders(p, originRequestHeadersInput)
 		}
@@ -188,6 +201,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	var bucket *bucketInputModel
+
 	if flags.FlagToBoolValue(p, cmd, flagBucket) {
 		bucketURL := flags.FlagToStringValue(p, cmd, flagBucketURL)
 		accessKeyID := flags.FlagToStringValue(p, cmd, flagBucketCredentialsAccessKeyID)
@@ -208,6 +222,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	monthlyLimit := flags.FlagToInt64Pointer(p, cmd, flagMonthlyLimitBytes)
 
 	var loki *lokiInputModel
+
 	if flags.FlagToBoolValue(p, cmd, flagLoki) {
 		loki = &lokiInputModel{
 			Username: flags.FlagToStringValue(p, cmd, flagLokiUsername),
@@ -217,8 +232,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	var optimizer *bool
+
 	if cmd.Flags().Changed(flagOptimizer) {
 		o := flags.FlagToBoolValue(p, cmd, flagOptimizer)
+
 		optimizer = &o
 	}
 
@@ -237,6 +254,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -244,26 +262,33 @@ func buildRequest(ctx context.Context, apiClient *cdn.APIClient, model *inputMod
 	req := apiClient.DefaultAPI.PatchDistribution(ctx, model.ProjectId, model.DistributionID)
 	payload := cdn.NewPatchDistributionPayload()
 	cfg := &cdn.ConfigPatch{}
+
 	payload.Config = cfg
+
 	if len(model.Regions) > 0 {
 		cfg.Regions = model.Regions
 	}
+
 	if model.Bucket != nil {
 		bucket := &cdn.BucketBackendPatch{
 			Type: "bucket",
 		}
+
 		cfg.Backend = &cdn.ConfigPatchBackend{
 			BucketBackendPatch: bucket,
 		}
+
 		if model.Bucket.URL != "" {
 			bucket.BucketUrl = utils.Ptr(model.Bucket.URL)
 		}
+
 		if model.Bucket.AccessKeyID != "" {
 			bucket.Credentials = cdn.NewBucketCredentials(
 				model.Bucket.AccessKeyID,
 				model.Bucket.Password,
 			)
 		}
+
 		if model.Bucket.Region != "" {
 			bucket.Region = utils.Ptr(model.Bucket.Region)
 		}
@@ -271,38 +296,50 @@ func buildRequest(ctx context.Context, apiClient *cdn.APIClient, model *inputMod
 		http := &cdn.HttpBackendPatch{
 			Type: "http",
 		}
+
 		cfg.Backend = &cdn.ConfigPatchBackend{
 			HttpBackendPatch: http,
 		}
+
 		if model.HTTP.OriginRequestHeaders != nil {
 			http.OriginRequestHeaders = model.HTTP.OriginRequestHeaders
 		}
+
 		if model.HTTP.Geofencing != nil {
 			http.Geofencing = model.HTTP.Geofencing
 		}
+
 		if model.HTTP.OriginURL != "" {
 			http.OriginUrl = utils.Ptr(model.HTTP.OriginURL)
 		}
 	}
+
 	if len(model.BlockedCountries) > 0 {
 		cfg.BlockedCountries = model.BlockedCountries
 	}
+
 	if len(model.BlockedIPs) > 0 {
 		cfg.BlockedIps = model.BlockedIPs
 	}
+
 	if model.DefaultCacheDuration != "" {
 		cfg.DefaultCacheDuration = *cdn.NewNullableString(&model.DefaultCacheDuration)
 	}
+
 	if model.MonthlyLimitBytes != nil && *model.MonthlyLimitBytes > 0 {
 		cfg.MonthlyLimitBytes = *cdn.NewNullableInt64(model.MonthlyLimitBytes)
 	}
+
 	if model.Loki != nil {
 		loki := &cdn.LokiLogSinkPatch{}
 		logSink := cdn.LokiLogSinkPatchAsConfigPatchLogSink(loki)
+
 		cfg.LogSink = *cdn.NewNullableConfigPatchLogSink(&logSink)
+
 		if model.Loki.PushURL != "" {
 			loki.PushUrl = utils.Ptr(model.Loki.PushURL)
 		}
+
 		if model.Loki.Username != "" {
 			loki.Credentials = cdn.NewLokiLogSinkCredentials(
 				model.Loki.Password,
@@ -310,12 +347,15 @@ func buildRequest(ctx context.Context, apiClient *cdn.APIClient, model *inputMod
 			)
 		}
 	}
+
 	if model.Optimizer != nil {
 		cfg.Optimizer = &cdn.OptimizerPatch{
 			Enabled: model.Optimizer,
 		}
 	}
+
 	req = req.PatchDistributionPayload(*payload)
+
 	return req
 }
 
@@ -323,8 +363,10 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *cdn
 	if resp == nil {
 		return fmt.Errorf("update distribution response is empty")
 	}
+
 	return p.OutputResult(outputFormat, resp, func() error {
 		p.Outputf("Updated CDN distribution for %q. ID: %s\n", projectLabel, resp.Distribution.Id)
+
 		return nil
 	})
 }

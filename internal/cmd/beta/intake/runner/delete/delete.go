@@ -50,6 +50,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(p.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -65,6 +66,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			if model.ForceDelete {
 				prompt = fmt.Sprintf("%s This will also remove all Intakes and Intake Users that would stop the removal of the Intake", prompt)
 			}
+
 			err = p.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -91,12 +93,14 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered deletion of"
 			}
+
 			p.Printer.Outputf("%s stackit Intake Runner %s \n", operationState, model.RunnerId)
 
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -120,6 +124,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -129,5 +134,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIC
 	if model.ForceDelete {
 		return req.Force(true)
 	}
+
 	return req
 }

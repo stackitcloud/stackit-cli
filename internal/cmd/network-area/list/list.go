@@ -62,6 +62,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -75,6 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list network areas: %w", err)
@@ -83,11 +85,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			items := resp.GetItems()
 
 			var orgLabel string
+
 			rmApiClient, err := rmClient.ConfigureClient(params.Printer, params.CliVersion)
 			if err == nil {
 				orgLabel, err = rmUtils.GetOrganizationName(ctx, rmApiClient.DefaultAPI, model.OrganizationId)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get organization name: %v", err)
+
 					orgLabel = model.OrganizationId
 				}
 			} else {
@@ -107,6 +111,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -122,6 +127,7 @@ func configureFlags(cmd *cobra.Command) {
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 	limit := flags.FlagToInt64Pointer(p, cmd, limitFlag)
+
 	if limit != nil && *limit < 1 {
 		return nil, &errors.FlagValidationError{
 			Flag:    limitFlag,
@@ -137,6 +143,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -145,6 +152,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
 	}
+
 	return req
 }
 
@@ -152,6 +160,7 @@ func outputResult(p *print.Printer, outputFormat, orgLabel string, networkAreas 
 	return p.OutputResult(outputFormat, networkAreas, func() error {
 		if len(networkAreas) == 0 {
 			p.Outputf("No STACKIT Network Areas found for organization %q\n", orgLabel)
+
 			return nil
 		}
 
@@ -168,6 +177,7 @@ func outputResult(p *print.Printer, outputFormat, orgLabel string, networkAreas 
 		}
 
 		p.Outputln(table.Render())
+
 		return nil
 	})
 }

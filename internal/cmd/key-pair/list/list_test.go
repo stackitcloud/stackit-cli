@@ -30,6 +30,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -44,15 +45,19 @@ func fixtureInputModel(mods ...func(inputModel *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiListKeyPairsRequest)) iaas.ApiListKeyPairsRequest {
 	request := testClient.DefaultAPI.ListKeyPairs(testCtx)
+
 	request = request.LabelSelector(testLabelSelector)
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -155,6 +160,7 @@ func Test_outputResult(t *testing.T) {
 		outputFormat string
 		keyPairs     []iaas.Keypair
 	}
+
 	tests := []struct {
 		name    string
 		args    args

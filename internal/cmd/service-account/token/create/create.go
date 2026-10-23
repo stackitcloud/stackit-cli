@@ -52,6 +52,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -64,6 +65,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create an access token for service account %s?", model.ServiceAccountEmail)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -71,6 +73,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			token, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create access token: %w", err)
@@ -81,6 +84,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -121,14 +125,17 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceaccount.APIClient) serviceaccount.ApiCreateAccessTokenRequest {
 	req := apiClient.DefaultAPI.CreateAccessToken(ctx, model.ProjectId, model.ServiceAccountEmail)
+
 	req = req.CreateAccessTokenPayload(serviceaccount.CreateAccessTokenPayload{
 		TtlDays: model.TTLDays,
 	})
+
 	return req
 }
 
@@ -141,6 +148,7 @@ func outputResult(p *print.Printer, outputFormat, serviceAccountEmail string, to
 		p.Outputf("Created access token for service account %s. Token ID: %s\n\n", serviceAccountEmail, token.Id)
 		p.Outputf("Valid until: %s\n", token.ValidUntil)
 		p.Outputf("Token: %s\n", token.Token)
+
 		return nil
 	})
 }

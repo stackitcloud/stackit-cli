@@ -55,6 +55,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -67,6 +68,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update load balancer %q?", model.LoadBalancerName)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -74,6 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			_, err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("update load balancer: %w", err)
@@ -81,10 +84,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// The API has no status to wait on, so async mode is default
 			params.Printer.Info("Updated load balancer with name %q\n", model.LoadBalancerName)
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -104,7 +109,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	payloadString := flags.FlagToStringValue(p, cmd, payloadFlag)
+
 	var payload loadbalancer.UpdateLoadBalancerPayload
+
 	err := json.Unmarshal([]byte(payloadString), &payload)
 	if err != nil {
 		return nil, fmt.Errorf("encode payload: %w", err)
@@ -117,6 +124,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -124,5 +132,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalance
 	req := apiClient.DefaultAPI.UpdateLoadBalancer(ctx, model.ProjectId, model.Region, model.LoadBalancerName)
 
 	req = req.UpdateLoadBalancerPayload(model.Payload)
+
 	return req
 }

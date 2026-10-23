@@ -36,12 +36,14 @@ func newApiMock(s *rabbitMQClientMockSettings) rabbitmq.DefaultAPI {
 			if s.getInstanceFails {
 				return nil, fmt.Errorf("could not get instance")
 			}
+
 			return s.getInstanceResp, nil
 		}),
 		GetCredentialsExecuteMock: utils.Ptr(func(_ rabbitmq.ApiGetCredentialsRequest) (*rabbitmq.CredentialsResponse, error) {
 			if s.getCredentialsFails {
 				return nil, fmt.Errorf("could not get user")
 			}
+
 			return s.getCredentialsResp, nil
 		}),
 	}
@@ -82,12 +84,15 @@ func TestGetInstanceName(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}
@@ -134,12 +139,15 @@ func TestGetCredentialsUsername(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}

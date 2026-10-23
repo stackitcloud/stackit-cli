@@ -45,10 +45,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
 			}
+
 			// Configure API client
 			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
 			if err != nil {
@@ -57,6 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API to get instance details
 			req := buildGetInstanceRequest(ctx, model, apiClient)
+
 			instance, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read Secrets Manager instance: %w", err)
@@ -64,6 +67,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API to get instance acls
 			listACLsReq := buildListACLsRequest(ctx, model, apiClient)
+
 			aclList, err := listACLsReq.Execute()
 			if err != nil {
 				return fmt.Errorf("read Secrets Manager instance ACLs: %w", err)
@@ -72,6 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, instance, aclList)
 		},
 	}
+
 	return cmd
 }
 
@@ -89,6 +94,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -128,6 +134,7 @@ func outputResult(p *print.Printer, outputFormat string, instance *secretsmanage
 		table.AddSeparator()
 		table.AddRow("CREATION DATE", instance.CreationStartDate)
 		table.AddSeparator()
+
 		kmsKey := instance.KmsKey
 		if kmsKey != nil {
 			table.AddRow("KMS KEY ID", kmsKey.KeyId)
@@ -138,6 +145,7 @@ func outputResult(p *print.Printer, outputFormat string, instance *secretsmanage
 			table.AddSeparator()
 			table.AddRow("KMS SERVICE ACCOUNT EMAIL", kmsKey.ServiceAccountEmail)
 		}
+
 		// Only show ACL if it's present and not empty
 		if len(aclList.Acls) > 0 {
 			var cidrs []string
@@ -149,8 +157,10 @@ func outputResult(p *print.Printer, outputFormat string, instance *secretsmanage
 			if kmsKey != nil {
 				table.AddSeparator()
 			}
+
 			table.AddRow("ACL", strings.Join(cidrs, ","))
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

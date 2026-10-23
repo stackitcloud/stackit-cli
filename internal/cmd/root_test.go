@@ -27,6 +27,7 @@ func setupCmd() {
 	operation = &cobra.Command{
 		Use: "operation",
 	}
+
 	cmd.AddCommand(service)
 	service.AddCommand(resource)
 	resource.AddCommand(operation)
@@ -56,6 +57,7 @@ func TestBeautifyUnknownAndMissingCommandsError(t *testing.T) {
 	}
 
 	setupCmd()
+
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			actualError := beautifyUnknownAndMissingCommandsError(cmd, tt.inputError, []string{"--something"})
@@ -64,6 +66,7 @@ func TestBeautifyUnknownAndMissingCommandsError(t *testing.T) {
 				if actualError.Error() != tt.expectedMsg {
 					t.Fatalf("expected error message to be %s, got %s", tt.expectedMsg, actualError.Error())
 				}
+
 				return
 			}
 

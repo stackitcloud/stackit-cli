@@ -68,6 +68,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -82,10 +83,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			existingInstanceName, err := secretsManagerUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				existingInstanceName = model.InstanceId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update instance %q?", existingInstanceName)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -97,6 +100,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("unable to build update instance request: %w", err)
 				}
+
 				err = req.Execute()
 				if err != nil {
 					return fmt.Errorf("update Secrets Manager instance: %w", err)
@@ -105,6 +109,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			if model.Acls != nil {
 				req := buildUpdateACLsRequest(ctx, model, apiClient)
+
 				err = req.Execute()
 				if err != nil {
 					if model.InstanceName != nil {
@@ -113,15 +118,18 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 If you want to retry configuring the ACLs, you can do it via: 
   $ stackit secrets-manager instance update %s --acl %s`, model.InstanceId, *model.Acls)
 					}
+
 					return fmt.Errorf("update Secrets Manager instance ACLs: %w", err)
 				}
 			}
 
 			params.Printer.Info("Updated instance %q\n", existingInstanceName)
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -162,6 +170,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -169,6 +178,7 @@ func buildUpdateInstanceRequest(ctx context.Context, model *inputModel, apiClien
 	if model.InstanceName == nil {
 		return secretsmanager.ApiUpdateInstanceRequest{}, fmt.Errorf("instanceName must not be null")
 	}
+
 	req := apiClient.DefaultAPI.UpdateInstance(ctx, model.ProjectId, model.InstanceId)
 
 	payload := secretsmanager.UpdateInstancePayload{
@@ -183,6 +193,7 @@ func buildUpdateInstanceRequest(ctx context.Context, model *inputModel, apiClien
 			ServiceAccountEmail: *model.KmsServiceAccountEmail,
 		}
 	}
+
 	req = req.UpdateInstancePayload(payload)
 
 	return req, nil

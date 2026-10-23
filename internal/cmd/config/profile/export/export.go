@@ -63,6 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -83,9 +84,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	// If filePath contains does not contain a file name, then add a default name
 	if model.FilePath == "" {
 		exportFileName := fmt.Sprintf("%s.%s", model.ProfileName, configFileExtension)
+
 		model.FilePath = filepath.Join(model.FilePath, exportFileName)
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }

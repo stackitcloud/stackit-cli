@@ -43,6 +43,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(p.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -57,10 +58,12 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, p.Printer, p.CliVersion, cmd)
 			if err != nil {
 				p.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete VPN connection %q from gateway %q?", model.ConnectionId, *model.GatewayId)
+
 			err = p.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -71,6 +74,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("delete VPN connection: %w", err)
@@ -80,6 +84,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -105,6 +110,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -115,5 +121,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *vpn.APIClie
 
 func outputResult(p *print.Printer, model *inputModel, projectLabel string) error {
 	p.Outputf("deleted VPN connection %q for gateway %q in project %q.\n", model.ConnectionId, *model.GatewayId, projectLabel)
+
 	return nil
 }

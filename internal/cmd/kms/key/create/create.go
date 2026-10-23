@@ -88,6 +88,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
@@ -106,6 +107,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req, _ := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create KMS key: %w", err)
@@ -126,6 +128,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -147,6 +150,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -165,6 +169,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient kmsKeyClient
 		ImportOnly:  &model.ImportOnly,
 		Protection:  model.Protection,
 	})
+
 	return req, nil
 }
 
@@ -178,7 +183,9 @@ func outputResult(p *print.Printer, model *inputModel, resp *kms.Key) error {
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
+
 		p.Outputf("%s the KMS key %q. Key ID: %s\n", operationState, resp.DisplayName, resp.Id)
+
 		return nil
 	})
 }

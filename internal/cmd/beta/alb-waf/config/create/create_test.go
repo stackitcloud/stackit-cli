@@ -44,6 +44,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -62,20 +63,24 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *albwaf.ApiCreateWAFRequest)) albwaf.ApiCreateWAFRequest {
 	request := testClient.DefaultAPI.CreateWAF(testCtx, testProjectId, testRegion)
+
 	request = request.CreateWAFPayload(albwaf.CreateWAFPayload{
 		Name:                testName,
 		ManagedRuleSetName:  utils.Ptr(testManagedRuleSetName),
 		CustomRuleGroupName: utils.Ptr(testCustomRuleGroupName),
 		Labels:              utils.Ptr(map[string]string{testLabelKey: testLabelValue}),
 	})
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -146,6 +151,7 @@ func TestParseInput(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			params := testparams.NewTestParams()
 			cmd := NewCmd(params.CmdParams)
+
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
@@ -157,6 +163,7 @@ func TestParseInput(t *testing.T) {
 					if !tt.isValid {
 						return
 					}
+
 					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
 				}
 			}
@@ -166,6 +173,7 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error validating args: %v", err)
 			}
 
@@ -174,6 +182,7 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error validating flags: %v", err)
 			}
 
@@ -182,12 +191,14 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error parsing input: %v", err)
 			}
 
 			if !tt.isValid {
 				t.Fatalf("did not fail on invalid input")
 			}
+
 			diff := cmp.Diff(model, tt.expectedModel)
 			if diff != "" {
 				t.Fatalf("data does not match: %s", diff)
@@ -230,6 +241,7 @@ func TestOutputResult(t *testing.T) {
 		projectLabel string
 		resp         *albwaf.GetWAFResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -263,6 +275,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.projectLabel, tt.args.resp); (err != nil) != tt.wantErr {

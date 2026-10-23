@@ -61,6 +61,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read distribution: %w", err)
@@ -70,6 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -89,6 +91,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		WithWAF:         flags.FlagToBoolValue(p, cmd, flagWithWaf),
 	}
 	p.DebugInputModel(model)
+
 	return model, nil
 }
 
@@ -100,8 +103,10 @@ func outputResult(p *print.Printer, outputFormat string, distribution *cdn.GetDi
 	if distribution == nil {
 		return fmt.Errorf("distribution response is empty")
 	}
+
 	return p.OutputResult(outputFormat, distribution, func() error {
 		d := distribution.Distribution
+
 		var content []tables.Table
 
 		content = append(content, buildDistributionTable(&d))
@@ -114,6 +119,7 @@ func outputResult(p *print.Printer, outputFormat string, distribution *cdn.GetDi
 		if err != nil {
 			return fmt.Errorf("display table: %w", err)
 		}
+
 		return nil
 	})
 }
@@ -121,21 +127,26 @@ func outputResult(p *print.Printer, outputFormat string, distribution *cdn.GetDi
 func buildDistributionTable(d *cdn.Distribution) tables.Table {
 	regions := strings.Join(sdkUtils.EnumSliceToStringSlice(d.Config.Regions), ", ")
 	defaultCacheDuration := ""
+
 	if d.Config.DefaultCacheDuration.IsSet() && d.Config.DefaultCacheDuration.Get() != nil {
 		defaultCacheDuration = *d.Config.DefaultCacheDuration.Get()
 	}
+
 	logSinkPushUrl := ""
 	if d.Config.LogSink != nil && d.Config.LogSink.LokiLogSink != nil && d.Config.LogSink.LokiLogSink.PushUrl != "" {
 		logSinkPushUrl = d.Config.LogSink.LokiLogSink.PushUrl
 	}
+
 	monthlyLimitBytes := ""
 	if d.Config.MonthlyLimitBytes.IsSet() && d.Config.MonthlyLimitBytes.Get() != nil {
 		monthlyLimitBytes = fmt.Sprintf("%d", *d.Config.MonthlyLimitBytes.Get())
 	}
+
 	optimizerEnabled := ""
 	if d.Config.Optimizer != nil {
 		optimizerEnabled = fmt.Sprintf("%t", d.Config.Optimizer.Enabled)
 	}
+
 	table := tables.NewTable()
 	table.SetTitle("Distribution")
 	table.AddRow("ID", d.Id)
@@ -150,16 +161,21 @@ func buildDistributionTable(d *cdn.Distribution) tables.Table {
 	table.AddSeparator()
 	table.AddRow("PROJECT ID", d.ProjectId)
 	table.AddSeparator()
+
 	if len(d.Errors) > 0 {
 		var errorDescriptions []string
+
 		for _, err := range d.Errors {
 			errorDescriptions = append(errorDescriptions, err.En)
 		}
+
 		table.AddRow("ERRORS", strings.Join(errorDescriptions, "\n"))
 		table.AddSeparator()
 	}
+
 	if d.Config.Backend.BucketBackend != nil {
 		b := d.Config.Backend.BucketBackend
+
 		table.AddRow("BACKEND TYPE", "BUCKET")
 		table.AddSeparator()
 		table.AddRow("BUCKET URL", b.BucketUrl)
@@ -168,24 +184,30 @@ func buildDistributionTable(d *cdn.Distribution) tables.Table {
 		table.AddSeparator()
 	} else if d.Config.Backend.HttpBackend != nil {
 		h := d.Config.Backend.HttpBackend
+
 		var geofencing []string
+
 		if h.Geofencing != nil {
 			for k, v := range h.Geofencing {
 				geofencing = append(geofencing, fmt.Sprintf("%s: %s", k, strings.Join(v, ", ")))
 			}
 		}
+
 		slices.Sort(geofencing)
 		table.AddRow("BACKEND TYPE", "HTTP")
 		table.AddSeparator()
 		table.AddRow("HTTP ORIGIN URL", h.OriginUrl)
 		table.AddSeparator()
+
 		if h.OriginRequestHeaders != nil {
 			table.AddRow("HTTP ORIGIN REQUEST HEADERS", utils.JoinStringMap(h.OriginRequestHeaders, ": ", ", "))
 			table.AddSeparator()
 		}
+
 		table.AddRow("HTTP GEOFENCING PROPERTIES", strings.Join(geofencing, "\n"))
 		table.AddSeparator()
 	}
+
 	table.AddRow("BLOCKED COUNTRIES", strings.Join(d.Config.BlockedCountries, ", "))
 	table.AddSeparator()
 	table.AddRow("BLOCKED IPS", strings.Join(d.Config.BlockedIps, ", "))
@@ -198,23 +220,28 @@ func buildDistributionTable(d *cdn.Distribution) tables.Table {
 	table.AddSeparator()
 	table.AddRow("OPTIMIZER ENABLED", optimizerEnabled)
 	table.AddSeparator()
+
 	return table
 }
 
 func buildWAFTable(d *cdn.Distribution) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("WAF")
+
 	for _, disabled := range d.Waf.DisabledRules {
 		table.AddRow("DISABLED RULE ID", disabled.Id)
 		table.AddSeparator()
 	}
+
 	for _, enabled := range d.Waf.EnabledRules {
 		table.AddRow("ENABLED RULE ID", enabled.Id)
 		table.AddSeparator()
 	}
+
 	for _, logOnly := range d.Waf.LogOnlyRules {
 		table.AddRow("LOG-ONLY RULE ID", logOnly.Id)
 		table.AddSeparator()
 	}
+
 	return table
 }

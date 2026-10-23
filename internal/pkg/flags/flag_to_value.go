@@ -15,11 +15,14 @@ func FlagToStringValue(p *print.Printer, cmd *cobra.Command, flag string) string
 	value, err := cmd.Flags().GetString(flag)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "convert flag to string value: %v", err)
+
 		return ""
 	}
+
 	if cmd.Flag(flag).Changed {
 		return value
 	}
+
 	return ""
 }
 
@@ -29,8 +32,10 @@ func FlagToBoolValue(p *print.Printer, cmd *cobra.Command, flag string) bool {
 	value, err := cmd.Flags().GetBool(flag)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "convert flag to bool value: %v", err)
+
 		return false
 	}
+
 	return value
 }
 
@@ -40,11 +45,14 @@ func FlagToStringSliceValue(p *print.Printer, cmd *cobra.Command, flag string) [
 	value, err := cmd.Flags().GetStringSlice(flag)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "convert flag to string slice value: %v", err)
+
 		return nil
 	}
+
 	if cmd.Flag(flag).Changed {
 		return value
 	}
+
 	return nil
 }
 
@@ -54,11 +62,14 @@ func FlagToStringArrayValue(p *print.Printer, cmd *cobra.Command, flag string) [
 	value, err := cmd.Flags().GetStringArray(flag)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "convert flag to string array value: %v", err)
+
 		return nil
 	}
+
 	if !cmd.Flag(flag).Changed {
 		return nil
 	}
+
 	return value
 }
 
@@ -68,11 +79,14 @@ func FlagToStringToStringPointer(p *print.Printer, cmd *cobra.Command, flag stri
 	value, err := cmd.Flags().GetStringToString(flag)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "convert flag to string to string pointer: %v", err)
+
 		return nil
 	}
+
 	if cmd.Flag(flag).Changed {
 		return &value
 	}
+
 	return nil
 }
 
@@ -82,8 +96,10 @@ func FlagToStringToStringPointerPointer(p *print.Printer, cmd *cobra.Command, fl
 	value, err := cmd.Flags().GetStringToString(flag)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "convert flag to string to string pointer pointer: %v", err)
+
 		return nil
 	}
+
 	if !cmd.Flag(flag).Changed {
 		return nil
 	}
@@ -91,24 +107,31 @@ func FlagToStringToStringPointerPointer(p *print.Printer, cmd *cobra.Command, fl
 	pointerValue := make(map[string]*string, len(value))
 	for key, item := range value {
 		item := item
+
 		pointerValue[key] = &item
 	}
+
 	return &pointerValue
 }
 
 func FlagToStringToAny(p *print.Printer, cmd *cobra.Command, flag string) map[string]any {
 	value, err := cmd.Flags().GetStringToString(flag)
 	r := make(map[string]any, len(value))
+
 	if err != nil {
 		p.Debug(print.ErrorLevel, "convert flag to string to any value: %v", err)
+
 		return r
 	}
+
 	if !cmd.Flag(flag).Changed {
 		return nil
 	}
+
 	for k, v := range value {
 		r[k] = v
 	}
+
 	return r
 }
 
@@ -118,11 +141,14 @@ func FlagToIntPointer(p *print.Printer, cmd *cobra.Command, flag string) *int {
 	value, err := cmd.Flags().GetInt(flag)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "convert flag to Uint64 pointer: %v", err)
+
 		return nil
 	}
+
 	if cmd.Flag(flag).Changed {
 		return &value
 	}
+
 	return nil
 }
 
@@ -132,11 +158,14 @@ func FlagToInt64Pointer(p *print.Printer, cmd *cobra.Command, flag string) *int6
 	value, err := cmd.Flags().GetInt64(flag)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "convert flag to Int64 pointer: %v", err)
+
 		return nil
 	}
+
 	if cmd.Flag(flag).Changed {
 		return &value
 	}
+
 	return nil
 }
 
@@ -146,11 +175,14 @@ func FlagToInt32Pointer(p *print.Printer, cmd *cobra.Command, flag string) *int3
 	value, err := cmd.Flags().GetInt32(flag)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "convert flag to Int pointer: %v", err)
+
 		return nil
 	}
+
 	if cmd.Flag(flag).Changed {
 		return &value
 	}
+
 	return nil
 }
 
@@ -160,11 +192,14 @@ func FlagToStringPointer(p *print.Printer, cmd *cobra.Command, flag string) *str
 	value, err := cmd.Flags().GetString(flag)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "convert flag to string pointer: %v", err)
+
 		return nil
 	}
+
 	if cmd.Flag(flag).Changed {
 		return &value
 	}
+
 	return nil
 }
 
@@ -174,11 +209,14 @@ func FlagToStringSlicePointer(p *print.Printer, cmd *cobra.Command, flag string)
 	value, err := cmd.Flags().GetStringSlice(flag)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "convert flag to string slice pointer: %v", err)
+
 		return nil
 	}
+
 	if cmd.Flag(flag).Changed {
 		return &value
 	}
+
 	return nil
 }
 
@@ -188,11 +226,14 @@ func FlagToBoolPointer(p *print.Printer, cmd *cobra.Command, flag string) *bool 
 	value, err := cmd.Flags().GetBool(flag)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "convert flag to bool pointer: %v", err)
+
 		return nil
 	}
+
 	if cmd.Flag(flag).Changed {
 		return &value
 	}
+
 	return nil
 }
 
@@ -203,6 +244,7 @@ func FlagToDateTimePointer(p *print.Printer, cmd *cobra.Command, flag, format st
 	value, err := cmd.Flags().GetString(flag)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "convert flag to date-time pointer: %v", err)
+
 		return nil, nil
 	}
 
@@ -211,8 +253,10 @@ func FlagToDateTimePointer(p *print.Printer, cmd *cobra.Command, flag, format st
 		if err != nil {
 			return nil, fmt.Errorf("could not convert to date-time with the format %s", format)
 		}
+
 		return &dateTimeValue, nil
 	}
+
 	return nil, nil
 }
 
@@ -222,8 +266,10 @@ func FlagWithDefaultToInt64Value(p *print.Printer, cmd *cobra.Command, flag stri
 	value, err := cmd.Flags().GetInt64(flag)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "convert flag with default to Int64 value: %v", err)
+
 		return 0
 	}
+
 	return value
 }
 
@@ -233,8 +279,10 @@ func FlagWithDefaultToInt32Value(p *print.Printer, cmd *cobra.Command, flag stri
 	value, err := cmd.Flags().GetInt32(flag)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "convert flag with default to Int32 value: %v", err)
+
 		return 0
 	}
+
 	return value
 }
 
@@ -244,8 +292,10 @@ func FlagWithDefaultToStringValue(p *print.Printer, cmd *cobra.Command, flag str
 	value, err := cmd.Flags().GetString(flag)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "convert flag with default to string value: %v", err)
+
 		return ""
 	}
+
 	return value
 }
 
@@ -255,7 +305,9 @@ func FlagWithDefaultToStringSlicePointer(p *print.Printer, cmd *cobra.Command, f
 	value, err := cmd.Flags().GetStringSlice(flag)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "convert flag with default to string slice pointer: %v", err)
+
 		return nil
 	}
+
 	return &value
 }

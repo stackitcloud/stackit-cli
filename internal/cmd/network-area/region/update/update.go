@@ -66,6 +66,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -81,10 +82,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient.DefaultAPI, model.OrganizationId, model.NetworkAreaId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
+
 				networkAreaLabel = model.NetworkAreaId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update the regional configuration %q for STACKIT Network Area (SNA) %q?", model.Region, networkAreaLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -92,6 +95,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update network area region: %w", err)
@@ -105,6 +109,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -140,6 +145,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -154,12 +160,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 			MinPrefixLen:       model.IPv4MinPrefixLength,
 		},
 	}
+
 	return req.UpdateNetworkAreaRegionPayload(payload)
 }
 
 func outputResult(p *print.Printer, outputFormat, region, networkAreaLabel string, regionalArea iaas.RegionalArea) error {
 	return p.OutputResult(outputFormat, regionalArea, func() error {
 		p.Outputf("Updated region configuration for SNA %q.\nRegion: %s\n", networkAreaLabel, region)
+
 		return nil
 	})
 }

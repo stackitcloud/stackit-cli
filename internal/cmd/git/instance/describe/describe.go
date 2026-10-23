@@ -37,6 +37,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -79,6 +80,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 

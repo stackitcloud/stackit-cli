@@ -32,6 +32,7 @@ func newApiMock(s *mockSettings) edge.DefaultAPI {
 			if s.getInstanceFails {
 				return nil, fmt.Errorf("could not get instance")
 			}
+
 			return s.getInstanceResp, nil
 		}),
 	}
@@ -72,12 +73,15 @@ func TestGetInstanceName(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}

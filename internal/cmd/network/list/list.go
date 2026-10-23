@@ -60,6 +60,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -73,6 +74,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list networks: %w", err)
@@ -83,6 +85,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
@@ -95,6 +98,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -124,6 +128,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -132,6 +137,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
 	}
+
 	return req
 }
 
@@ -139,6 +145,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, networks 
 	return p.OutputResult(outputFormat, networks, func() error {
 		if len(networks) == 0 {
 			p.Outputf("No networks found for project %q\n", projectLabel)
+
 			return nil
 		}
 
@@ -147,6 +154,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, networks 
 
 		for _, network := range networks {
 			var publicIp, prefixes string
+
 			if ipv4 := network.Ipv4; ipv4 != nil {
 				publicIp = utils.PtrString(ipv4.PublicIp)
 				prefixes = strings.Join(ipv4.Prefixes, ", ")
@@ -171,6 +179,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, networks 
 		}
 
 		p.Outputln(table.Render())
+
 		return nil
 	})
 }

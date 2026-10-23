@@ -49,6 +49,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -62,6 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list server os-update schedules: %w", err)
@@ -84,10 +86,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.Limit != nil && len(schedules) > int(*model.Limit) {
 				schedules = schedules[:*model.Limit]
 			}
+
 			return outputResult(params.Printer, model.OutputFormat, serverLabel, schedules)
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -120,6 +124,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -132,10 +137,13 @@ func outputResult(p *print.Printer, outputFormat, serverLabel string, schedules 
 	return p.OutputResult(outputFormat, schedules, func() error {
 		if len(schedules) == 0 {
 			p.Outputf("No os-update schedules found for server %s\n", serverLabel)
+
 			return nil
 		}
+
 		table := tables.NewTable()
 		table.SetHeader("SCHEDULE ID", "SCHEDULE NAME", "ENABLED", "RRULE", "MAINTENANCE WINDOW")
+
 		for i := range schedules {
 			s := schedules[i]
 			table.AddRow(
@@ -146,10 +154,12 @@ func outputResult(p *print.Printer, outputFormat, serverLabel string, schedules 
 				s.MaintenanceWindow,
 			)
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

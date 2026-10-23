@@ -59,6 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -71,11 +72,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			var orgLabel string
+
 			rmApiClient, err := rmClient.ConfigureClient(params.Printer, params.CliVersion)
 			if err == nil {
 				orgLabel, err = rmUtils.GetOrganizationName(ctx, rmApiClient.DefaultAPI, *model.OrganizationId)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get organization name: %v", err)
+
 					orgLabel = *model.OrganizationId
 				} else if orgLabel == "" {
 					orgLabel = *model.OrganizationId
@@ -85,6 +88,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update a network area for organization %q?", orgLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -92,6 +96,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update network area: %w", err)
@@ -109,6 +114,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -135,6 +141,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -152,6 +159,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 func outputResult(p *print.Printer, outputFormat, projectLabel string, responses NetworkAreaResponses) error {
 	prettyOutputFunc := func() error {
 		p.Outputf("Updated STACKIT Network Area for project %q.\n", projectLabel)
+
 		return nil
 	}
 
@@ -163,6 +171,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, responses
 
 	return p.OutputResult(outputFormat, responses, func() error {
 		p.Outputf("Updated STACKIT Network Area for project %q.\n", projectLabel)
+
 		return nil
 	})
 }

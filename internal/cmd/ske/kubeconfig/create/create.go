@@ -86,6 +86,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -99,11 +100,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			if !model.DisableWriting {
 				var prompt string
+
 				if model.Overwrite {
 					prompt = fmt.Sprintf("Are you sure you want to create a kubeconfig for SKE cluster %q? This will OVERWRITE your current kubeconfig file, if it exists.", model.ClusterName)
 				} else {
 					prompt = fmt.Sprintf("Are you sure you want to update your kubeconfig for SKE cluster %q? This will update your kubeconfig file. \nIf the kubeconfig file does not exist, it will create a new one.", model.ClusterName)
 				}
+
 				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -123,44 +126,54 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("build login kubeconfig create request: %w", err)
 				}
+
 				respLogin, err = req.Execute()
 				if err != nil {
 					return fmt.Errorf("create login kubeconfig for SKE cluster: %w", err)
 				}
+
 				if respLogin.Kubeconfig == nil {
 					return fmt.Errorf("no login kubeconfig returned from the API")
 				}
+
 				kubeconfig = *respLogin.Kubeconfig
 			} else if model.IDP {
 				req, err := buildRequestIDP(ctx, model, apiClient)
 				if err != nil {
 					return fmt.Errorf("build idp kubeconfig create request: %w", err)
 				}
+
 				respIDP, err = req.Execute()
 				if err != nil {
 					return fmt.Errorf("create idp kubeconfig for SKE cluster: %w", err)
 				}
+
 				if respIDP.Kubeconfig == nil {
 					return fmt.Errorf("no idp kubeconfig returned from the API")
 				}
+
 				kubeconfig = *respIDP.Kubeconfig
 			} else {
 				req, err := buildRequestCreate(ctx, model, apiClient)
 				if err != nil {
 					return fmt.Errorf("build kubeconfig create request: %w", err)
 				}
+
 				respKubeconfig, err = req.Execute()
 				if err != nil {
 					return fmt.Errorf("create kubeconfig for SKE cluster: %w", err)
 				}
+
 				if respKubeconfig.Kubeconfig == nil {
 					return fmt.Errorf("no kubeconfig returned from the API")
 				}
+
 				kubeconfig = *respKubeconfig.Kubeconfig
 			}
 
 			// Create the config file
 			var kubeconfigPath string
+
 			if model.Filepath == nil {
 				kubeconfigPath, err = skeUtils.GetDefaultKubeconfigPath()
 				if err != nil {
@@ -176,9 +189,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				} else {
 					err = skeUtils.MergeKubeConfig(kubeconfigPath, kubeconfig)
 				}
+
 				if err != nil {
 					return fmt.Errorf("write kubeconfig file: %w", err)
 				}
+
 				params.Printer.Outputf("\nSet kubectl context to %s with: kubectl config use-context %s\n", model.ClusterName, model.ClusterName)
 			}
 
@@ -186,6 +201,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -211,6 +227,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	if expTime != nil {
 		var err error
+
 		expTime, err = skeUtils.ConvertToSeconds(*expTime)
 		if err != nil {
 			return nil, &errors.FlagValidationError{
@@ -240,6 +257,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -266,8 +284,11 @@ func buildRequestLogin(ctx context.Context, model *inputModel, apiClient *ske.AP
 func outputResult(p *print.Printer, outputFormat, clusterName, kubeconfigPath string, respKubeconfig *ske.Kubeconfig, respLogin *ske.LoginKubeconfig, respIDP *ske.IDPKubeconfig) error {
 	switch outputFormat {
 	case print.JSONOutputFormat:
-		var err error
-		var details []byte
+		var (
+			err     error
+			details []byte
+		)
+
 		if respKubeconfig != nil {
 			details, err = json.MarshalIndent(respKubeconfig, "", "  ")
 		} else if respLogin != nil {
@@ -275,15 +296,20 @@ func outputResult(p *print.Printer, outputFormat, clusterName, kubeconfigPath st
 		} else if respIDP != nil {
 			details, err = json.MarshalIndent(respIDP, "", "  ")
 		}
+
 		if err != nil {
 			return fmt.Errorf("marshal SKE Kubeconfig: %w", err)
 		}
+
 		p.Outputln(string(details))
 
 		return nil
 	case print.YAMLOutputFormat:
-		var err error
-		var details []byte
+		var (
+			err     error
+			details []byte
+		)
+
 		if respKubeconfig != nil {
 			details, err = yaml.MarshalWithOptions(respKubeconfig, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		} else if respLogin != nil {
@@ -291,17 +317,21 @@ func outputResult(p *print.Printer, outputFormat, clusterName, kubeconfigPath st
 		} else if respIDP != nil {
 			details, err = yaml.MarshalWithOptions(respIDP, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		}
+
 		if err != nil {
 			return fmt.Errorf("marshal SKE Kubeconfig: %w", err)
 		}
+
 		p.Outputln(string(details))
 
 		return nil
 	default:
 		var expiration string
+
 		if respKubeconfig != nil {
 			expiration = fmt.Sprintf(", with expiration date %v (UTC)", utils.ConvertTimePToDateTimeString(respKubeconfig.ExpirationTimestamp))
 		}
+
 		p.Outputf("Updated kubeconfig file for cluster %s in %q%s\n", clusterName, kubeconfigPath, expiration)
 
 		return nil

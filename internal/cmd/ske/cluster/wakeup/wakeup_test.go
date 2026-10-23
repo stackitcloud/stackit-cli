@@ -29,6 +29,7 @@ func fixtureArgValues(mods ...func([]string)) []string {
 	for _, m := range mods {
 		m(argValues)
 	}
+
 	return argValues
 }
 
@@ -40,6 +41,7 @@ func fixtureFlagValues(mods ...func(map[string]string)) map[string]string {
 	for _, m := range mods {
 		m(flags)
 	}
+
 	return flags
 }
 
@@ -55,6 +57,7 @@ func fixtureInputModel(mods ...func(*inputModel)) *inputModel {
 	for _, m := range mods {
 		m(model)
 	}
+
 	return model
 }
 
@@ -63,6 +66,7 @@ func fixtureRequest(mods ...func(*ske.ApiTriggerWakeupRequest)) ske.ApiTriggerWa
 	for _, m := range mods {
 		m(&req)
 	}
+
 	return req
 }
 
@@ -111,6 +115,7 @@ func TestParseInput(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			params := testparams.NewTestParams()
 			cmd := NewCmd(params.CmdParams)
+
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
@@ -122,6 +127,7 @@ func TestParseInput(t *testing.T) {
 					if !tt.isValid {
 						return
 					}
+
 					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
 				}
 			}
@@ -131,6 +137,7 @@ func TestParseInput(t *testing.T) {
 				if err == nil && !tt.isValid {
 					t.Fatalf("expected failure due to missing args")
 				}
+
 				return
 			}
 
@@ -139,6 +146,7 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("unexpected error: %v", err)
 			}
 

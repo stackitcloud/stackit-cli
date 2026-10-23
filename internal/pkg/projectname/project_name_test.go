@@ -40,7 +40,9 @@ func TestGetProjectName(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			viper.Set(config.ProjectNameKey, tt.projectName)
 			viper.Set(config.ProjectIdKey, tt.projectId)
+
 			defer viper.Reset()
+
 			params := testparams.NewTestParams()
 			cmd := &cobra.Command{}
 
@@ -49,8 +51,10 @@ func TestGetProjectName(t *testing.T) {
 				if tt.isValid {
 					t.Fatalf("unexpected error: %v", err)
 				}
+
 				return
 			}
+
 			if !tt.isValid {
 				t.Fatalf("expected error, got project name %q", projectName)
 			}

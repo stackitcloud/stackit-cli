@@ -36,6 +36,7 @@ func (c *observabilityClientMocked) newMock() observability.DefaultAPI {
 			if c.getGrafanaConfigsFails {
 				return nil, fmt.Errorf("get payload failed")
 			}
+
 			return c.getGrafanaConfigsResp, nil
 		}),
 	}
@@ -48,6 +49,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, mod := range mods {
 		mod(argValues)
 	}
+
 	return argValues
 }
 
@@ -58,6 +60,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -72,6 +75,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -96,6 +100,7 @@ func fixtureGrafanaConfigs(mods ...func(gc *observability.GrafanaConfigs)) *obse
 	for _, mod := range mods {
 		mod(&gc)
 	}
+
 	return &gc
 }
 
@@ -108,15 +113,19 @@ func fixturePayload(mods ...func(payload *observability.UpdateGrafanaConfigsPayl
 	for _, mod := range mods {
 		mod(payload)
 	}
+
 	return payload
 }
 
 func fixtureRequest(mods ...func(request *observability.ApiUpdateGrafanaConfigsRequest)) observability.ApiUpdateGrafanaConfigsRequest {
 	request := testClient.DefaultAPI.UpdateGrafanaConfigs(testCtx, testInstanceId, testProjectId)
+
 	request = request.UpdateGrafanaConfigsPayload(*fixturePayload())
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -235,11 +244,13 @@ func TestBuildRequest(t *testing.T) {
 				getGrafanaConfigsFails: tt.getGrafanaConfigsFails,
 				getGrafanaConfigsResp:  tt.getGrafanaConfigsResp,
 			}
+
 			request, err := buildRequest(testCtx, tt.model, client.newMock())
 			if err != nil {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error building request: %v", err)
 			}
 

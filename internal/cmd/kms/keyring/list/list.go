@@ -38,6 +38,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
@@ -51,6 +52,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get KMS key rings: %w", err)
@@ -74,6 +76,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -92,6 +95,7 @@ func outputResult(p *print.Printer, outputFormat, projectId string, resp *kms.Ke
 	return p.OutputResult(outputFormat, keyRings, func() error {
 		if len(keyRings) == 0 {
 			p.Outputf("No key rings found for project %q\n", projectId)
+
 			return nil
 		}
 
@@ -111,6 +115,7 @@ func outputResult(p *print.Printer, outputFormat, projectId string, resp *kms.Ke
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

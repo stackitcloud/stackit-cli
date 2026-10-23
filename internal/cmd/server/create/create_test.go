@@ -56,6 +56,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -89,27 +90,34 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateServerRequest)) iaas.ApiCreateServerRequest {
 	request := testClient.DefaultAPI.CreateServer(testCtx, testProjectId, testRegion)
+
 	request = request.CreateServerPayload(fixturePayload())
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
 func fixtureRequiredRequest(mods ...func(request *iaas.ApiCreateServerRequest)) iaas.ApiCreateServerRequest {
 	request := testClient.DefaultAPI.CreateServer(testCtx, testProjectId, testRegion)
+
 	request = request.CreateServerPayload(iaas.CreateServerPayload{
 		MachineType: "t1.1",
 		Name:        "test-server-name",
 	})
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -145,6 +153,7 @@ func fixturePayload(mods ...func(payload *iaas.CreateServerPayload)) iaas.Create
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
@@ -180,6 +189,7 @@ func TestParseInput(t *testing.T) {
 				delete(flagValues, serviceAccountEmailsFlag)
 				delete(flagValues, userDataFlag)
 				delete(flagValues, volumesFlag)
+
 				flagValues[imageIdFlag] = testImageId
 			}),
 			isValid: true,
@@ -288,6 +298,7 @@ func TestParseInput(t *testing.T) {
 			description: "invalid with boot-volume-source-type is image and without size",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, bootVolumeSizeFlag)
+
 				flagValues[bootVolumeSourceIdFlag] = testImageId
 				flagValues[bootVolumeSourceTypeFlag] = "image"
 			}),
@@ -299,6 +310,7 @@ func TestParseInput(t *testing.T) {
 				delete(flagValues, bootVolumeSourceIdFlag)
 				delete(flagValues, bootVolumeSourceTypeFlag)
 				delete(flagValues, bootVolumeSizeFlag)
+
 				flagValues[imageIdFlag] = testImageId
 			}),
 			isValid: true,
@@ -391,6 +403,7 @@ func TestBuildRequest(t *testing.T) {
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateServerRequest) {
 				payload := fixturePayload()
+
 				payload.Agent = &iaas.ServerAgent{
 					Provisioned: utils.Ptr(true),
 				}
@@ -404,6 +417,7 @@ func TestBuildRequest(t *testing.T) {
 			}),
 			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateServerRequest) {
 				payload := fixturePayload()
+
 				payload.UserData = utils.Ptr("Y2xvdWQtaW5pdCBkYXRh")
 				*request = request.CreateServerPayload(payload)
 			}),
@@ -432,6 +446,7 @@ func TestOutputResult(t *testing.T) {
 		projectLabel string
 		server       *iaas.Server
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -451,6 +466,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.async, tt.args.projectLabel, tt.args.server); (err != nil) != tt.wantErr {

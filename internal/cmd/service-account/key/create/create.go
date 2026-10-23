@@ -58,6 +58,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -73,7 +74,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.ExpiresInDays != nil {
 				validUntilInfo = fmt.Sprintf("The key will be valid for %d days", *model.ExpiresInDays)
 			}
+
 			prompt := fmt.Sprintf("Are you sure you want to create a key for service account %s? %s", model.ServiceAccountEmail, validUntilInfo)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -81,6 +84,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient, time.Now())
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create service account key: %w", err)
@@ -93,13 +97,16 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("marshal key: %w", err)
 				}
+
 				params.Printer.Outputln(string(key))
+
 				return nil
 			})
 		},
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -142,6 +149,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -149,7 +157,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 	req := apiClient.DefaultAPI.CreateServiceAccountKey(ctx, model.ProjectId, model.ServiceAccountEmail)
 
 	var validUntil *time.Time
+
 	validUntil = nil
+
 	if model.ExpiresInDays != nil {
 		validUntil = utils.Ptr(daysFromNow(now, *model.ExpiresInDays))
 	}
@@ -158,6 +168,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serviceacco
 		ValidUntil: validUntil,
 		PublicKey:  model.PublicKey,
 	})
+
 	return req
 }
 

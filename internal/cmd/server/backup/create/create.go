@@ -79,6 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a Backup for server %s?", model.ServerId)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -89,6 +90,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create Server Backup: %w", err)
@@ -98,6 +100,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -126,6 +129,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -136,16 +140,20 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbacku
 		RetentionPeriod: model.BackupRetentionPeriod,
 		VolumeIds:       model.BackupVolumeIds,
 	}
+
 	if model.BackupVolumeIds == nil {
 		payload.VolumeIds = nil
 	}
+
 	req = req.CreateBackupPayload(payload)
+
 	return req, nil
 }
 
 func outputResult(p *print.Printer, outputFormat, serverLabel string, resp serverbackup.BackupJob) error {
 	return p.OutputResult(outputFormat, resp, func() error {
 		p.Outputf("Triggered creation of server backup for server %s. Backup ID: %s\n", serverLabel, resp.Id)
+
 		return nil
 	})
 }

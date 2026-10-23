@@ -35,12 +35,14 @@ func (c *observabilityClientMocked) newMock() observability.DefaultAPI {
 			if c.listPlansError {
 				return nil, fmt.Errorf("list flavors failed")
 			}
+
 			return c.listPlansResponse, nil
 		}),
 		GetInstanceExecuteMock: utils.Ptr(func(_ observability.ApiGetInstanceRequest) (*observability.GetInstanceResponse, error) {
 			if c.getInstanceError {
 				return nil, fmt.Errorf("get instance failed")
 			}
+
 			return c.getInstanceResponse, nil
 		}),
 	}
@@ -64,6 +66,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, mod := range mods {
 		mod(argValues)
 	}
+
 	return argValues
 }
 
@@ -75,6 +78,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -90,18 +94,22 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *observability.ApiUpdateInstanceRequest)) observability.ApiUpdateInstanceRequest {
 	request := testClient.DefaultAPI.UpdateInstance(testCtx, testInstanceId, testProjectId)
+
 	request = request.UpdateInstancePayload(observability.UpdateInstancePayload{
 		PlanId: utils.Ptr(testNewPlanId),
 		Name:   utils.Ptr(testInstanceName),
 	})
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -117,6 +125,7 @@ func fixturePlansResponse(mods ...func(response *observability.PlansResponse)) *
 	for _, mod := range mods {
 		mod(response)
 	}
+
 	return response
 }
 
@@ -128,6 +137,7 @@ func fixtureGetInstanceResponse(mods ...func(response *observability.GetInstance
 	for _, mod := range mods {
 		mod(response)
 	}
+
 	return response
 }
 
@@ -374,11 +384,13 @@ func TestBuildRequest(t *testing.T) {
 				getInstanceError:    tt.getInstanceFails,
 				getInstanceResponse: tt.getInstanceResponse,
 			}
+
 			request, err := buildRequest(testCtx, tt.model, client.newMock())
 			if err != nil {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error building request: %v", err)
 			}
 

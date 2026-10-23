@@ -44,6 +44,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(p.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -57,6 +58,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get Intake: %w", err)
@@ -65,6 +67,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			return outputResult(p.Printer, model.OutputFormat, resp)
 		},
 	}
+
 	return cmd
 }
 
@@ -82,6 +85,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -121,16 +125,21 @@ func outputResult(p *print.Printer, outputFormat string, intk *intake.IntakeResp
 		table.AddRow("Undelivered Messages", intk.GetUndeliveredMessageCount())
 
 		table.AddSeparator()
+
 		catalog := intk.GetCatalog()
 		table.AddRow("Catalog URI", catalog.GetUri())
 		table.AddRow("Catalog Warehouse", catalog.GetWarehouse())
+
 		if namespace := catalog.GetNamespace(); namespace != "" {
 			table.AddRow("Catalog Namespace", namespace)
 		}
+
 		if tableName := catalog.GetTableName(); tableName != "" {
 			table.AddRow("Catalog Table Name", tableName)
 		}
+
 		table.AddRow("Catalog Partitioning", catalog.GetPartitioning())
+
 		if partitionBy := catalog.GetPartitionBy(); len(partitionBy) > 0 {
 			table.AddRow("Catalog Partition By", strings.Join(partitionBy, ", "))
 		}

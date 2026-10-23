@@ -27,11 +27,14 @@ func (f *cidrFlag) Set(value string) error {
 	if value == "" {
 		return fmt.Errorf("value cannot be empty")
 	}
+
 	err := validateCIDR(value)
 	if err != nil {
 		return err
 	}
+
 	f.value = value
+
 	return nil
 }
 
@@ -44,5 +47,6 @@ func validateCIDR(value string) error {
 	if err != nil {
 		return fmt.Errorf("parse %s as CIDR: %w", value, err)
 	}
+
 	return nil
 }

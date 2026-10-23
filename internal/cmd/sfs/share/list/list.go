@@ -49,6 +49,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return fmt.Errorf("unable to parse input: %w", err)
@@ -62,6 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list SFS share: %w", err)
@@ -70,6 +72,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			resourcePoolLabel, err := sfsUtils.GetResourcePoolName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ResourcePoolId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get resource pool name: %v", err)
+
 				resourcePoolLabel = model.ResourcePoolId
 			} else if resourcePoolLabel == "" {
 				resourcePoolLabel = model.ResourcePoolId
@@ -85,6 +88,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -117,6 +121,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -128,6 +133,7 @@ func outputResult(p *print.Printer, outputFormat, resourcePoolLabel string, shar
 	return p.OutputResult(outputFormat, shares, func() error {
 		if len(shares) == 0 {
 			p.Info("No shares found for resource pool %q\n", resourcePoolLabel)
+
 			return nil
 		}
 
@@ -136,6 +142,7 @@ func outputResult(p *print.Printer, outputFormat, resourcePoolLabel string, shar
 
 		for _, share := range shares {
 			var policy string
+
 			if share.ExportPolicy.IsSet() && (share.ExportPolicy.Get().GetId() != "" || share.ExportPolicy.Get().GetName() != "") {
 				if name, ok := share.ExportPolicy.Get().GetNameOk(); ok {
 					policy = *name
@@ -143,6 +150,7 @@ func outputResult(p *print.Printer, outputFormat, resourcePoolLabel string, shar
 					policy = *id
 				}
 			}
+
 			table.AddRow(
 				utils.PtrString(share.Id),
 				utils.PtrString(share.Name),
@@ -153,7 +161,9 @@ func outputResult(p *print.Printer, outputFormat, resourcePoolLabel string, shar
 				utils.ConvertTimePToDateTimeString(share.CreatedAt),
 			)
 		}
+
 		p.Outputln(table.Render())
+
 		return nil
 	})
 }

@@ -84,6 +84,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
@@ -99,6 +100,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -120,12 +122,15 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *automation.
 	if model.Name != nil {
 		payload.Name = *automation.NewNullableString(model.Name)
 	}
+
 	if model.Description != nil {
 		payload.Description = *automation.NewNullableString(model.Description)
 	}
+
 	if model.Input != nil {
 		payload.Input = *automation.NewNullableVolumeAutomationInput(model.Input)
 	}
+
 	if model.DisableTriggerSchedule != nil && *model.DisableTriggerSchedule {
 		payload.Triggers = *automation.NewNullableAutomationTriggers(&automation.AutomationTriggers{
 			Schedule: *automation.NewNullableAutomationScheduleTrigger(nil),
@@ -137,6 +142,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *automation.
 			}),
 		})
 	}
+
 	return apiClient.DefaultAPI.PartialUpdateVolumeAutomation(ctx, model.ProjectId, model.Region, model.AutomationId).PartialUpdateVolumeAutomationPayload(payload)
 }
 
@@ -149,8 +155,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	var inputConfig *automation.VolumeAutomationInput
+
 	if inputJson := flags.FlagToStringPointer(p, cmd, inputFlag); inputJson != nil {
 		inputConfig = &automation.VolumeAutomationInput{}
+
 		err := inputConfig.UnmarshalJSON([]byte(*inputJson))
 		if err != nil {
 			return nil, fmt.Errorf("the input from --%s can not be parsed: %w", inputFlag, err)
@@ -168,6 +176,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -175,8 +184,10 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, item *aut
 	if item == nil {
 		return fmt.Errorf("volume automation response is empty")
 	}
+
 	return p.OutputResult(outputFormat, item, func() error {
 		p.Outputf("Updated volume automation for project %q. Automation ID: %q\n", projectLabel, item.Id)
+
 		return nil
 	})
 }

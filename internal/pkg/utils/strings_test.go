@@ -12,6 +12,7 @@ func TestTruncate(t *testing.T) {
 		s      *string
 		maxLen int
 	}
+
 	tests := []struct {
 		name string
 		args args
@@ -23,6 +24,7 @@ func TestTruncate(t *testing.T) {
 		{"exactly maxlength", args{utils.Ptr("foo"), 3}, "foo"},
 		{"above maxlength", args{utils.Ptr("foobarbaz"), 3}, "foo…"},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := Truncate(tt.args.s, tt.args.maxLen); got != tt.want {

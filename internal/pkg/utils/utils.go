@@ -29,6 +29,7 @@ func PtrString[T any](t *T) string {
 	if t != nil {
 		return fmt.Sprintf("%v", *t)
 	}
+
 	return ""
 }
 
@@ -38,6 +39,7 @@ func PtrValue[T any](t *T) (r T) {
 	if t != nil {
 		return *t
 	}
+
 	return r
 }
 
@@ -65,6 +67,7 @@ func ValidateUUID(value string) error {
 	if err != nil {
 		return fmt.Errorf("parse %s as UUID: %w", value, err)
 	}
+
 	return nil
 }
 
@@ -74,7 +77,9 @@ func ConvertInt64PToFloat64P(i *int64) *float64 {
 	if i == nil {
 		return nil
 	}
+
 	f := float64(*i)
+
 	return &f
 }
 
@@ -85,7 +90,9 @@ func ConvertInt32PToFloat32P(i *int32) *float32 {
 	if i == nil {
 		return nil
 	}
+
 	f := float32(*i)
+
 	return &f
 }
 
@@ -114,9 +121,11 @@ func ValidateURLDomain(value string) error {
 
 	urlHost = strings.ToLower(urlHost)
 	allowedUrlDomain = strings.ToLower(allowedUrlDomain)
+
 	if urlHost != allowedUrlDomain && !strings.HasSuffix(urlHost, "."+allowedUrlDomain) {
 		return fmt.Errorf(`only urls belonging to domain %s are allowed`, allowedUrlDomain)
 	}
+
 	return nil
 }
 
@@ -126,6 +135,7 @@ func ConvertTimePToDateTimeString(t *time.Time) string {
 	if t == nil {
 		return ""
 	}
+
 	return t.Format(time.DateTime)
 }
 
@@ -134,6 +144,7 @@ func PtrStringDefault[T any](v *T, defaultValue string) string {
 	if v == nil {
 		return defaultValue
 	}
+
 	return fmt.Sprintf("%v", *v)
 }
 
@@ -143,6 +154,7 @@ func PtrByteSizeDefault(size *int64, defaultValue string) string {
 	if size == nil {
 		return defaultValue
 	}
+
 	return bytesize.New(float64(*size)).String()
 }
 
@@ -152,6 +164,7 @@ func PtrGigaByteSizeDefault(size *int64, defaultValue string) string {
 	if size == nil {
 		return defaultValue
 	}
+
 	return (bytesize.New(float64(*size)) * bytesize.GB).String()
 }
 
@@ -159,6 +172,7 @@ func PtrGigaByteSizeDefault(size *int64, defaultValue string) string {
 func Base64Encode(message []byte) string {
 	b := make([]byte, base64.StdEncoding.EncodedLen(len(message)))
 	base64.StdEncoding.Encode(b, message)
+
 	return string(b)
 }
 
@@ -174,10 +188,12 @@ func ConvertStringMapToInterfaceMap(m *map[string]string) *map[string]interface{
 	if m == nil || len(*m) == 0 {
 		return nil
 	}
+
 	result := make(map[string]interface{}, len(*m))
 	for k, v := range *m {
 		result[k] = v
 	}
+
 	return &result
 }
 
@@ -187,12 +203,14 @@ func GetSliceFromPointer[T any](s *[]T) []T {
 	if s == nil || *s == nil {
 		return []T{}
 	}
+
 	return *s
 }
 
 // FormatPossibleValues formats a slice into a list for usage in the provider docs
 func FormatPossibleValues(values ...string) []string {
 	var formattedValues []string
+
 	for _, value := range values {
 		if value == "unknown_default_open_api" {
 			continue
@@ -200,6 +218,7 @@ func FormatPossibleValues(values ...string) []string {
 
 		formattedValues = append(formattedValues, value)
 	}
+
 	return formattedValues
 }
 
@@ -209,6 +228,7 @@ func Map[T, U any](input []T, mapFn func(T) U) []U {
 	for i := range input {
 		values[i] = mapFn(input[i])
 	}
+
 	return values
 }
 
@@ -239,13 +259,16 @@ func FlattenMap(inputMap map[string]interface{}) map[string]interface{} {
 	if inputMap == nil {
 		return nil
 	}
+
 	outputMap := make(map[string]interface{})
+
 	for key, value := range inputMap {
 		if valueMap, ok := value.(map[string]interface{}); ok {
 			if len(valueMap) == 0 {
 				outputMap[key] = ""
 				continue
 			}
+
 			for nestedKey, nestedValue := range FlattenMap(valueMap) {
 				outputMap[key+"."+nestedKey] = nestedValue
 			}
@@ -253,5 +276,6 @@ func FlattenMap(inputMap map[string]interface{}) map[string]interface{} {
 			outputMap[key] = value
 		}
 	}
+
 	return outputMap
 }

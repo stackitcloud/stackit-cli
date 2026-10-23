@@ -39,6 +39,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -55,6 +56,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -63,6 +65,7 @@ func fixtureRequestDetach(mods ...func(request *iaas.ApiRemoveNicFromServerReque
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -71,6 +74,7 @@ func fixtureRequestDetachAndDelete(mods ...func(request *iaas.ApiRemoveNetworkFr
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -149,6 +153,7 @@ func TestParseInput(t *testing.T) {
 			description: "provided flags invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, networkInterfaceIdFlag)
+
 				flagValues[networkIdFlag] = testNetworkId
 			}),
 			isValid: false,
@@ -167,6 +172,7 @@ func TestParseInput(t *testing.T) {
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[deleteFlag] = "true"
 				delete(flagValues, networkInterfaceIdFlag)
+
 				flagValues[networkIdFlag] = testNetworkId
 			}),
 			isValid: true,

@@ -39,6 +39,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -52,6 +53,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -64,6 +66,7 @@ func fixtureCreatePayload(mods ...func(payload *git.CreateInstancePayload)) (pay
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
@@ -75,6 +78,7 @@ func fixtureRequest(mods ...func(request *git.ApiCreateInstanceRequest)) git.Api
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -166,6 +170,7 @@ func TestBuildRequest(t *testing.T) {
 				cmpopts.EquateComparable(testCtx),
 				cmp.AllowUnexported(git.NullableString{}, git.DefaultAPIService{}),
 			)
+
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
 			}
@@ -180,6 +185,7 @@ func TestOutputResult(t *testing.T) {
 		instanceName string
 		resp         *git.Instance
 	}
+
 	tests := []struct {
 		name    string
 		args    args

@@ -70,6 +70,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
@@ -79,6 +80,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -106,6 +108,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -119,6 +122,7 @@ func fetchAutomations(ctx context.Context, model *inputModel, apiClient *automat
 	opts := []paginate.Option{
 		paginate.WithPageSize(maxPageSize),
 	}
+
 	if model.Limit != nil {
 		opts = append(opts, paginate.WithLimit(int(*model.Limit)))
 	}
@@ -139,6 +143,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, items []a
 	return p.OutputResult(outputFormat, items, func() error {
 		if len(items) == 0 {
 			p.Outputf("No volume automations found in project %q\n", projectLabel)
+
 			return nil
 		}
 
@@ -159,6 +164,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, items []a
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

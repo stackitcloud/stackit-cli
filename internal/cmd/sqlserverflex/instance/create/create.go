@@ -86,6 +86,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -105,10 +106,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a SQLServer Flex instance for project %q?", projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -119,10 +122,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create SQLServer Flex instance: %w", err)
 			}
+
 			instanceId := resp.Id
 
 			// Wait for async operation, if async mode not enabled
@@ -140,6 +145,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -168,6 +174,7 @@ func configureFlags(cmd *cobra.Command) {
 	// Deprecated: remove after 2027-02-28
 	err = cmd.Flags().MarkDeprecated(cpuFlag, fmt.Sprintf("will be removed after 2027-02-28. Use the --%s flag instead.", flavorIdFlag))
 	cobra.CheckErr(err)
+
 	err = cmd.Flags().MarkDeprecated(ramFlag, fmt.Sprintf("will be removed after 2027-02-28. Use the --%s flag instead.", flavorIdFlag))
 	cobra.CheckErr(err)
 	cmd.MarkFlagsRequiredTogether(cpuFlag, ramFlag)
@@ -191,6 +198,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 			Service: sqlserverflexUtils.ServiceCmd,
 		}
 	}
+
 	if flavorId != nil && (cpu != nil || ram != nil) {
 		return nil, &cliErr.DatabaseInputFlavorError{
 			Cmd:     cmd,
@@ -218,14 +226,17 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient sqlserverflex.DefaultAPI) (sqlserverflex.ApiCreateInstanceRequest, error) {
 	req := apiClient.CreateInstance(ctx, model.ProjectId, model.Region)
 
-	var flavorId string
-	var err error
+	var (
+		flavorId string
+		err      error
+	)
 
 	flavors, err := sqlserverflexUtils.ListAllFlavors(ctx, apiClient, model.ProjectId, model.Region)
 	if err != nil {
@@ -236,9 +247,11 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlserverfle
 		flavorId, err = sqlserverflexUtils.LoadFlavorId(*model.CPU, *model.RAM, flavors)
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
+
 			if !errors.As(err, &dsaInvalidPlanError) {
 				return req, fmt.Errorf("load flavor ID: %w", err)
 			}
+
 			return req, err
 		}
 	} else {
@@ -246,6 +259,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlserverfle
 		if err != nil {
 			return req, err
 		}
+
 		flavorId = *model.FlavorId
 	}
 
@@ -253,12 +267,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlserverfle
 	if err != nil {
 		return req, fmt.Errorf("get SQLServer Flex storages: %w", err)
 	}
+
 	err = sqlserverflexUtils.ValidateStorage(model.StorageClass, model.StorageSize, storages, flavorId)
 	if err != nil {
 		return req, err
 	}
 
 	var encryption *sqlserverflex.InstanceEncryption
+
 	if model.EncryptionKekKeyId != nil && model.EncryptionKekKeyringId != nil && model.EncryptionKekKeyVersion != nil && model.EncryptionServiceAccount != nil {
 		encryption = &sqlserverflex.InstanceEncryption{
 			KekKeyId:       *model.EncryptionKekKeyId,
@@ -286,6 +302,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlserverfle
 		Version:       sqlserverflex.InstanceVersion(model.Version),
 		RetentionDays: model.RetentionDays,
 	})
+
 	return req, nil
 }
 
@@ -293,12 +310,15 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 	if resp == nil {
 		return fmt.Errorf("sqlserverflex response is empty")
 	}
+
 	return p.OutputResult(model.OutputFormat, resp, func() error {
 		operationState := "Created"
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
+
 		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, resp.Id)
+
 		return nil
 	})
 }

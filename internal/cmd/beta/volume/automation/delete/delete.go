@@ -55,6 +55,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
@@ -62,6 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			if !model.AssumeYes {
 				prompt := fmt.Sprintf("Are you sure you want to delete volume automation %q in project %q?", model.AutomationId, projectLabel)
+
 				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
@@ -75,9 +77,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			params.Printer.Outputf("Deleted volume automation %q\n", model.AutomationId)
+
 			return nil
 		},
 	}
+
 	return cmd
 }
 
@@ -99,5 +103,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }

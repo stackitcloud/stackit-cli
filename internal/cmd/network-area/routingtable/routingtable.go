@@ -26,6 +26,7 @@ To request access, please contact your account manager or submit a support ticke
 		Run:  utils.CmdHelp,
 	}
 	addSubcommands(cmd, params)
+
 	return cmd
 }
 

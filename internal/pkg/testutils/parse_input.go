@@ -67,12 +67,14 @@ func RunParseInputCase[T any](t *testing.T, tc ParseInputTestCase[T], opts ...Pa
 	if tc.CmdFactory == nil {
 		t.Fatalf("parse input case %q missing CmdFactory", tc.Name)
 	}
+
 	if tc.ParseInputFunc == nil {
 		t.Fatalf("parse input case %q missing ParseInputFunc", tc.Name)
 	}
 
 	params := testparams.NewTestParams()
 	cmd := tc.CmdFactory(params.CmdParams)
+
 	if cmd == nil {
 		t.Fatalf("parse input case %q produced nil command", tc.Name)
 	}
@@ -80,10 +82,12 @@ func RunParseInputCase[T any](t *testing.T, tc ParseInputTestCase[T], opts ...Pa
 	if err := globalflags.Configure(cmd.Flags()); err != nil {
 		t.Fatalf("configure global flags: %v", err)
 	}
+
 	cmd.Flags().VisitAll(func(flag *pflag.Flag) {
 		if flag.Value == nil {
 			return
 		}
+
 		if r, ok := flag.Value.(Resettable); ok {
 			r.Reset()
 		}
@@ -93,6 +97,7 @@ func RunParseInputCase[T any](t *testing.T, tc ParseInputTestCase[T], opts ...Pa
 	for flag, value := range tc.Flags {
 		if err := cmd.Flags().Set(flag, value); err != nil {
 			AssertError(t, err, tc.WantErr)
+
 			return
 		}
 	}
@@ -102,6 +107,7 @@ func RunParseInputCase[T any](t *testing.T, tc ParseInputTestCase[T], opts ...Pa
 		for _, value := range values {
 			if err := cmd.Flags().Set(flag, value); err != nil {
 				AssertError(t, err, tc.WantErr)
+
 				return
 			}
 		}
@@ -110,18 +116,21 @@ func RunParseInputCase[T any](t *testing.T, tc ParseInputTestCase[T], opts ...Pa
 	// Test cobra argument validation.
 	if err := cmd.ValidateArgs(tc.Args); err != nil {
 		AssertError(t, err, tc.WantErr)
+
 		return
 	}
 
 	// Test cobra required flags validation.
 	if err := cmd.ValidateRequiredFlags(); err != nil {
 		AssertError(t, err, tc.WantErr)
+
 		return
 	}
 
 	// Test cobra flag group validation.
 	if err := cmd.ValidateFlagGroups(); err != nil {
 		AssertError(t, err, tc.WantErr)
+
 		return
 	}
 

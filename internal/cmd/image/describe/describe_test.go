@@ -36,6 +36,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -51,6 +52,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -59,6 +61,7 @@ func fixtureRequest(mods ...func(request *iaas.ApiGetImageRequest)) iaas.ApiGetI
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -131,15 +134,18 @@ func TestParseInput(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			params := testparams.NewTestParams()
 			cmd := NewCmd(params.CmdParams)
+
 			if err := globalflags.Configure(cmd.Flags()); err != nil {
 				t.Errorf("cannot configure global flags: %v", err)
 			}
+
 			for flag, value := range tt.flagValues {
 				err := cmd.Flags().Set(flag, value)
 				if err != nil {
 					if !tt.isValid {
 						return
 					}
+
 					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
 				}
 			}
@@ -148,6 +154,7 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error validating flags: %v", err)
 			}
 
@@ -162,12 +169,14 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error parsing flags: %v", err)
 			}
 
 			if !tt.isValid {
 				t.Fatalf("did not fail on invalid input")
 			}
+
 			diff := cmp.Diff(model, tt.expectedModel)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -196,6 +205,7 @@ func TestBuildRequest(t *testing.T) {
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx, iaas.DefaultAPIService{}),
 			)
+
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
 			}
@@ -208,6 +218,7 @@ func TestOutputResult(t *testing.T) {
 		outputFormat string
 		resp         *iaas.Image
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -254,6 +265,7 @@ func TestOutputResult(t *testing.T) {
 		},
 	}
 	params := testparams.NewTestParams()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.resp); (err != nil) != tt.wantErr {

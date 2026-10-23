@@ -45,6 +45,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -58,6 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read vpc: %w", err)
@@ -66,6 +68,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
+
 	return cmd
 }
 
@@ -83,6 +86,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -94,6 +98,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.VPC) error {
 	if resp == nil {
 		return fmt.Errorf("nil response")
 	}
+
 	return p.OutputResult(outputFormat, resp, func() error {
 		table := tables.NewTable()
 		table.AddRow("ID", resp.Id)
@@ -102,14 +107,18 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.VPC) error {
 		table.AddSeparator()
 		table.AddRow("DESCRIPTION", resp.Description)
 		table.AddSeparator()
+
 		if len(resp.Labels) > 0 {
 			var labels []string
+
 			for key, value := range resp.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
+
 			table.AddRow("LABELS", strings.Join(labels, "\n"))
 			table.AddSeparator()
 		}
+
 		table.AddRow("CREATED AT", resp.CreatedAt.Format(time.DateTime))
 		table.AddSeparator()
 		table.AddRow("UPDATED AT", resp.UpdatedAt.Format(time.DateTime))
@@ -118,6 +127,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.VPC) error {
 		if err := table.Display(p); err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

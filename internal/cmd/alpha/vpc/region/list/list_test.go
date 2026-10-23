@@ -76,6 +76,7 @@ func TestParseInput(t *testing.T) {
 			}
 
 			var expected *inputModel
+
 			if tt.valid {
 				expected = &inputModel{
 					GlobalFlagModel: &globalflags.GlobalFlagModel{

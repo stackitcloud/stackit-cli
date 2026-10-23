@@ -54,6 +54,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -69,11 +70,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			networkAreaLabel, err := iaasUtils.GetNetworkAreaName(ctx, apiClient.DefaultAPI, *model.OrganizationId, *model.NetworkAreaId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network area name: %v", err)
+
 				networkAreaLabel = *model.NetworkAreaId
 			}
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create static route: %w", err)
@@ -83,6 +86,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -114,6 +118,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -123,6 +128,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	payload := iaas.UpdateNetworkAreaRoutePayload{
 		Labels: model.Labels,
 	}
+
 	req = req.UpdateNetworkAreaRoutePayload(payload)
 
 	return req
@@ -131,6 +137,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 func outputResult(p *print.Printer, outputFormat, networkAreaLabel string, route *iaas.Route) error {
 	return p.OutputResult(outputFormat, route, func() error {
 		p.Outputf("Updated static route for SNA %q.\nStatic route ID: %s\n", networkAreaLabel, utils.PtrString(route.Id))
+
 		return nil
 	})
 }

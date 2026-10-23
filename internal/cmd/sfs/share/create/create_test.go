@@ -45,6 +45,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -63,15 +64,19 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *sfs.ApiCreateShareRequest)) sfs.ApiCreateShareRequest {
 	request := testClient.DefaultAPI.CreateShare(testCtx, testProjectId, testRegion, testResourcePoolId)
+
 	request = request.CreateSharePayload(fixturePayload())
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -84,6 +89,7 @@ func fixturePayload(mods ...func(request *sfs.CreateSharePayload)) sfs.CreateSha
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
@@ -168,6 +174,7 @@ func TestOutputResult(t *testing.T) {
 		resourcePoolLabel string
 		item              *sfs.CreateShareResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args

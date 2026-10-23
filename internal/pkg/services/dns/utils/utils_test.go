@@ -91,12 +91,15 @@ func TestGetZoneName(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}
@@ -141,12 +144,15 @@ func TestGetRecordSetName(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}
@@ -191,12 +197,15 @@ func TestGetRecordSetType(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}
@@ -244,24 +253,28 @@ func TestFormatTxtRecord(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			result, err := FormatTxtRecord(tt.input)
-
 			if err != nil {
 				if !tt.isValid {
 					return
 				}
+
 				t.Errorf("failed on valid input, got %v", err)
+
 				return
 			}
 
 			if err == nil && !tt.isValid {
 				t.Errorf("did not fail on invalid input")
+
 				return
 			}
 
 			if !tt.isValid {
 				t.Errorf("did not fail on invalid input")
+
 				return
 			}
+
 			if result != tt.expected {
 				t.Errorf("expected result to be %s, got %s", tt.expected, result)
 			}

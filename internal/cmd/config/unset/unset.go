@@ -138,18 +138,23 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.Async {
 				viper.Set(config.AsyncKey, config.AsyncDefault)
 			}
+
 			if model.OutputFormat {
 				viper.Set(config.OutputFormatKey, "")
 			}
+
 			if model.ProjectId {
 				viper.Set(config.ProjectIdKey, "")
 			}
+
 			if model.Region {
 				viper.Set(config.RegionKey, config.RegionDefault)
 			}
+
 			if model.Verbosity {
 				viper.Set(config.VerbosityKey, globalflags.VerbosityDefault)
 			}
+
 			if model.AssumeYes {
 				viper.Set(config.AssumeYesKey, config.AssumeYesDefault)
 			}
@@ -157,12 +162,15 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.SessionTimeLimit {
 				viper.Set(config.SessionTimeLimitKey, config.SessionTimeLimitDefault)
 			}
+
 			if model.IdentityProviderCustomEndpoint {
 				viper.Set(config.IdentityProviderCustomWellKnownConfigurationKey, "")
 			}
+
 			if model.IdentityProviderCustomClientID {
 				viper.Set(config.IdentityProviderCustomClientIdKey, "")
 			}
+
 			if model.AllowedUrlDomain {
 				viper.Set(config.AllowedUrlDomainKey, config.AllowedUrlDomainDefault)
 			}
@@ -170,99 +178,131 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.ObservabilityCustomEndpoint {
 				viper.Set(config.ObservabilityCustomEndpointKey, "")
 			}
+
 			if model.AuthorizationCustomEndpoint {
 				viper.Set(config.AuthorizationCustomEndpointKey, "")
 			}
+
 			if model.AutomationCustomEndpoint {
 				viper.Set(config.AutomationCustomEndpointKey, "")
 			}
+
 			if model.AlbWafCustomEndpoint {
 				viper.Set(config.AlbWafCustomEndpointKey, "")
 			}
+
 			if model.DNSCustomEndpoint {
 				viper.Set(config.DNSCustomEndpointKey, "")
 			}
+
 			if model.EdgeCustomEndpoint {
 				viper.Set(config.EdgeCustomEndpointKey, "")
 			}
+
 			if model.LoadBalancerCustomEndpoint {
 				viper.Set(config.LoadBalancerCustomEndpointKey, "")
 			}
+
 			if model.LogMeCustomEndpoint {
 				viper.Set(config.LogMeCustomEndpointKey, "")
 			}
+
 			if model.MariaDBCustomEndpoint {
 				viper.Set(config.MariaDBCustomEndpointKey, "")
 			}
+
 			if model.MongoDBFlexCustomEndpoint {
 				viper.Set(config.MongoDBFlexCustomEndpointKey, "")
 			}
+
 			if model.ObjectStorageCustomEndpoint {
 				viper.Set(config.ObjectStorageCustomEndpointKey, "")
 			}
+
 			if model.OpenSearchCustomEndpoint {
 				viper.Set(config.OpenSearchCustomEndpointKey, "")
 			}
+
 			if model.PostgresFlexCustomEndpoint {
 				viper.Set(config.PostgresFlexCustomEndpointKey, "")
 			}
+
 			if model.RabbitMQCustomEndpoint {
 				viper.Set(config.RabbitMQCustomEndpointKey, "")
 			}
+
 			if model.RedisCustomEndpoint {
 				viper.Set(config.RedisCustomEndpointKey, "") //nolint:staticcheck // deprecated but still supported until 2027-08-31
 			}
+
 			if model.ResourceManagerCustomEndpoint {
 				viper.Set(config.ResourceManagerEndpointKey, "")
 			}
+
 			if model.SecretsManagerCustomEndpoint {
 				viper.Set(config.SecretsManagerCustomEndpointKey, "")
 			}
+
 			if model.KMSCustomEndpoint {
 				viper.Set(config.KMSCustomEndpointKey, "")
 			}
+
 			if model.ServiceAccountCustomEndpoint {
 				viper.Set(config.ServiceAccountCustomEndpointKey, "")
 			}
+
 			if model.ServiceEnablementCustomEndpoint {
 				viper.Set(config.ServiceEnablementCustomEndpointKey, "")
 			}
+
 			if model.ServerBackupCustomEndpoint {
 				viper.Set(config.ServerBackupCustomEndpointKey, "")
 			}
+
 			if model.ServerOsUpdateCustomEndpoint {
 				viper.Set(config.ServerOsUpdateCustomEndpointKey, "")
 			}
+
 			if model.RunCommandCustomEndpoint {
 				viper.Set(config.RunCommandCustomEndpointKey, "")
 			}
+
 			if model.SKECustomEndpoint {
 				viper.Set(config.SKECustomEndpointKey, "")
 			}
+
 			if model.SQLServerFlexCustomEndpoint {
 				viper.Set(config.SQLServerFlexCustomEndpointKey, "")
 			}
+
 			if model.IaaSAlphaCustomEndpoint {
 				viper.Set(config.IaaSAlphaCustomEndpointKey, "")
 			}
+
 			if model.IaaSCustomEndpoint {
 				viper.Set(config.IaaSCustomEndpointKey, "")
 			}
+
 			if model.TokenCustomEndpoint {
 				viper.Set(config.TokenCustomEndpointKey, "")
 			}
+
 			if model.IntakeCustomEndpoint {
 				viper.Set(config.IntakeCustomEndpointKey, "")
 			}
+
 			if model.LogsCustomEndpoint {
 				viper.Set(config.LogsCustomEndpointKey, "")
 			}
+
 			if model.SfsCustomEndpoint {
 				viper.Set(config.SfsCustomEndpointKey, "")
 			}
+
 			if model.CDNCustomEndpoint {
 				viper.Set(config.CDNCustomEndpointKey, "")
 			}
+
 			if model.VpnCustomEndpoint {
 				viper.Set(config.VPNCustomEndpointKey, "")
 			}
@@ -271,10 +311,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("write config to file: %w", err)
 			}
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -376,5 +418,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 	}
 
 	p.DebugInputModel(model)
+
 	return &model
 }

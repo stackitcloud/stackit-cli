@@ -41,18 +41,21 @@ func (m *kmsClientMocked) newMock() kms.DefaultAPI {
 			if m.getKeyFails {
 				return nil, fmt.Errorf("could not get key")
 			}
+
 			return m.getKeyResp, nil
 		}),
 		GetKeyRingExecuteMock: utils.Ptr(func(_ kms.ApiGetKeyRingRequest) (*kms.KeyRing, error) {
 			if m.getKeyRingFails {
 				return nil, fmt.Errorf("could not get key ring")
 			}
+
 			return m.getKeyRingResp, nil
 		}),
 		GetWrappingKeyExecuteMock: utils.Ptr(func(_ kms.ApiGetWrappingKeyRequest) (*kms.WrappingKey, error) {
 			if m.getWrappingKeyFails {
 				return nil, fmt.Errorf("could not get wrapping key")
 			}
+
 			return m.getWrappingKeyResp, nil
 		}),
 	}
@@ -95,12 +98,15 @@ func TestGetKeyName(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input: %v", err)
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %q, got %q", tt.expectedOutput, output)
 			}
@@ -146,12 +152,15 @@ func TestGetKeyDeletionDate(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input: %v", err)
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if !output.Equal(tt.expectedOutput) {
 				t.Errorf("expected output to be %v, got %v", tt.expectedOutput, output)
 			}
@@ -197,12 +206,15 @@ func TestGetKeyRingName(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input: %v", err)
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %q, got %q", tt.expectedOutput, output)
 			}
@@ -246,12 +258,15 @@ func TestGetWrappingKeyName(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input: %v", err)
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %q, got %q", tt.expectedOutput, output)
 			}

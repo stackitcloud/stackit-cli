@@ -22,13 +22,16 @@ var instanceTypeToReplicas = map[string]int32{
 func AvailableInstanceTypes() []string {
 	instanceTypes := make([]string, len(instanceTypeToReplicas))
 	i := 0
+
 	for k := range instanceTypeToReplicas {
 		instanceTypes[i] = k
 		i++
 	}
+
 	// Dict keys aren't iterated in a consistent order
 	// So we sort the array to make the output consistent
 	slices.Sort(instanceTypes)
+
 	return instanceTypes
 }
 
@@ -37,6 +40,7 @@ func GetInstanceReplicas(instanceType string) (int32, error) {
 	if !ok {
 		return 0, fmt.Errorf("invalid instance type: %v", instanceType)
 	}
+
 	return numReplicas, nil
 }
 
@@ -47,15 +51,19 @@ func LoadFlavorId(cpu, ram int32, flavors *[]mongodbflex.InstanceFlavor) (*strin
 	}
 
 	availableFlavors := ""
+
 	for _, f := range *flavors {
 		if f.Id == nil || f.Cpu == nil || f.Memory == nil {
 			continue
 		}
+
 		if *f.Cpu == cpu && *f.Memory == ram {
 			return f.Id, nil
 		}
+
 		availableFlavors = fmt.Sprintf("%s\n- %d CPU, %d GB RAM", availableFlavors, *f.Cpu, *f.Cpu)
 	}
+
 	return nil, &errors.DatabaseInvalidFlavorError{
 		Service: "mongodbflex",
 		Details: "You provided an invalid combination for CPU and RAM.",
@@ -73,14 +81,18 @@ func GetLatestMongoDBVersion(ctx context.Context, apiClient mongodbflex.DefaultA
 	for i := range resp.Versions {
 		oldSemVer := fmt.Sprintf("v%s", latestVersion)
 		newSemVer := fmt.Sprintf("v%s", resp.Versions[i])
+
 		if semver.Compare(newSemVer, oldSemVer) != 1 {
 			continue
 		}
+
 		latestVersion = resp.Versions[i]
 	}
+
 	if latestVersion == "0" {
 		return "", fmt.Errorf("no MongoDB versions found")
 	}
+
 	return latestVersion, nil
 }
 
@@ -89,6 +101,7 @@ func GetInstanceName(ctx context.Context, apiClient mongodbflex.DefaultAPI, proj
 	if err != nil {
 		return "", fmt.Errorf("get MongoDB Flex instance: %w", err)
 	}
+
 	return *resp.Item.Name, nil
 }
 
@@ -97,6 +110,7 @@ func GetUserName(ctx context.Context, apiClient mongodbflex.DefaultAPI, projectI
 	if err != nil {
 		return "", fmt.Errorf("get MongoDB Flex user: %w", err)
 	}
+
 	return *resp.Item.Username, nil
 }
 
@@ -120,5 +134,6 @@ func GetRestoreStatus(backupId string, restoreJobs *mongodbflex.ListRestoreJobsR
 			break
 		}
 	}
+
 	return state
 }

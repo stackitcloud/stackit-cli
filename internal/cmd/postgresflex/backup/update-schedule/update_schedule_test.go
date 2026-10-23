@@ -33,6 +33,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -49,6 +50,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -59,15 +61,19 @@ func fixturePayload(mods ...func(payload *postgresflex.UpdateBackupSchedulePaylo
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
 func fixtureRequest(mods ...func(request *postgresflex.ApiUpdateBackupScheduleRequest)) postgresflex.ApiUpdateBackupScheduleRequest {
 	request := testClient.DefaultAPI.UpdateBackupSchedule(testCtx, testProjectId, testRegion, testInstanceId)
+
 	request = request.UpdateBackupSchedulePayload(fixturePayload())
+
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 

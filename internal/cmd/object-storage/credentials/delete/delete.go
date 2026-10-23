@@ -43,6 +43,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -57,16 +58,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			credentialsGroupLabel, err := objectStorageUtils.GetCredentialsGroupName(ctx, apiClient.DefaultAPI, model.ProjectId, model.CredentialsGroupId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get credentials group name: %v", err)
+
 				credentialsGroupLabel = model.CredentialsGroupId
 			}
 
 			credentialsLabel, err := objectStorageUtils.GetCredentialsName(ctx, apiClient.DefaultAPI, model.ProjectId, model.CredentialsGroupId, model.CredentialsId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get credentials name: %v", err)
+
 				credentialsLabel = model.CredentialsId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete credentials %q of credentials group  %q? (This cannot be undone)", credentialsLabel, credentialsGroupLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -74,16 +78,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			_, err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("delete Object Storage credentials: %w", err)
 			}
 
 			params.Printer.Info("Deleted credentials %q of credentials group %q\n", credentialsLabel, credentialsGroupLabel)
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -109,11 +116,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstorage.APIClient) objectstorage.ApiDeleteAccessKeyRequest {
 	req := apiClient.DefaultAPI.DeleteAccessKey(ctx, model.ProjectId, model.Region, model.CredentialsId)
+
 	req = req.CredentialsGroup(model.CredentialsGroupId)
+
 	return req
 }

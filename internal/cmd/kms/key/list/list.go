@@ -45,6 +45,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd)
 			if err != nil {
 				return err
@@ -58,6 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get KMS Keys: %w", err)
@@ -68,6 +70,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -83,6 +86,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -108,8 +112,10 @@ func outputResult(p *print.Printer, outputFormat, projectId, keyRingId string, r
 	return p.OutputResult(outputFormat, keys, func() error {
 		if len(keys) == 0 {
 			p.Outputf("No keys found for project %q under the key ring %q\n", projectId, keyRingId)
+
 			return nil
 		}
+
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "SCOPE", "ALGORITHM", "DELETION DATE", "STATUS")
 
@@ -128,6 +134,7 @@ func outputResult(p *print.Printer, outputFormat, projectId, keyRingId string, r
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

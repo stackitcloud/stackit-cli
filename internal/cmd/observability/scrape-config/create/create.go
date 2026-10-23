@@ -62,6 +62,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -76,19 +77,23 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := observabilityUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.InstanceId, model.ProjectId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
 			// Fill in default payload, if needed
 			if model.Payload == nil {
 				defaultPayload := observabilityUtils.DefaultCreateScrapeConfigPayload
+
 				if err != nil {
 					return fmt.Errorf("get default payload: %w", err)
 				}
+
 				model.Payload = &defaultPayload
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create scrape configuration %q on Observability instance %q?", model.Payload.JobName, instanceLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -96,6 +101,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			_, err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("create scrape configuration: %w", err)
@@ -118,11 +124,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered creation of"
 			}
+
 			params.Printer.Outputf("%s scrape configuration with name %q for Observability instance %q\n", operationState, jobName, instanceLabel)
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -141,9 +150,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	payloadValue := flags.FlagToStringPointer(p, cmd, payloadFlag)
+
 	var payload *observability.CreateScrapeConfigPayload
+
 	if payloadValue != nil {
 		payload = &observability.CreateScrapeConfigPayload{}
+
 		err := json.Unmarshal([]byte(*payloadValue), payload)
 		if err != nil {
 			return nil, fmt.Errorf("encode payload: %w", err)
@@ -161,5 +173,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient observabilit
 	req := apiClient.CreateScrapeConfig(ctx, model.InstanceId, model.ProjectId)
 
 	req = req.CreateScrapeConfigPayload(*model.Payload)
+
 	return req
 }

@@ -53,6 +53,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args: args.SingleArg(userIdArg, nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -67,16 +68,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
 			userLabel, err := postgresflexUtils.GetUserName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId, model.UserId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get user name: %v", err)
+
 				userLabel = strconv.FormatInt(model.UserId, 10)
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update user %q of instance %q?", userLabel, instanceLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -84,17 +88,20 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("update PostgreSQL Flex user: %w", err)
 			}
 
 			params.Printer.Info("Updated user %q of instance %q\n", userLabel, instanceLabel)
+
 			return nil
 		},
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -132,13 +139,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *postgresflex.APIClient) postgresflex.ApiPartialUpdateUserRequest {
 	req := apiClient.DefaultAPI.PartialUpdateUser(ctx, model.ProjectId, model.Region, model.InstanceId, model.UserId)
+
 	req = req.PartialUpdateUserPayload(postgresflex.PartialUpdateUserPayload{
 		Roles: model.Roles,
 	})
+
 	return req
 }

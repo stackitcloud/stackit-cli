@@ -70,6 +70,7 @@ func AuthenticationConfig(p *print.Printer, reauthorizeUserRoutine func(p *print
 	if err != nil {
 		return nil, fmt.Errorf("get authentication flow: %w", err)
 	}
+
 	if flow == "" {
 		return nil, fmt.Errorf("authentication flow not set")
 	}
@@ -82,26 +83,33 @@ func AuthenticationConfig(p *print.Printer, reauthorizeUserRoutine func(p *print
 	switch flow {
 	case AUTH_FLOW_SERVICE_ACCOUNT_TOKEN:
 		p.Debug(print.DebugLevel, "authenticating using service account token")
+
 		if userSessionExpired {
 			return nil, fmt.Errorf("session expired")
 		}
+
 		accessToken, err := GetAccessToken()
 		if err != nil {
 			return nil, fmt.Errorf("get service account access token: %w", err)
 		}
+
 		authCfgOption = sdkConfig.WithToken(accessToken)
 	case AUTH_FLOW_SERVICE_ACCOUNT_KEY:
 		p.Debug(print.DebugLevel, "authenticating using service account key")
+
 		if userSessionExpired {
 			return nil, fmt.Errorf("session expired")
 		}
+
 		keyFlow, err := initKeyFlowWithStorage()
 		if err != nil {
 			return nil, fmt.Errorf("initialize service account key flow: %w", err)
 		}
+
 		authCfgOption = sdkConfig.WithCustomAuth(keyFlow)
 	case AUTH_FLOW_USER_TOKEN:
 		p.Debug(print.DebugLevel, "authenticating using user token")
+
 		if userSessionExpired {
 			err = reauthorizeUserRoutine(p, UserAuthConfig{
 				IsReauthentication: true,
@@ -111,11 +119,14 @@ func AuthenticationConfig(p *print.Printer, reauthorizeUserRoutine func(p *print
 				return nil, fmt.Errorf("user login: %w", err)
 			}
 		}
+
 		userTokenFlow := UserTokenFlow(p)
+
 		authCfgOption = sdkConfig.WithCustomAuth(userTokenFlow)
 	default:
 		return nil, fmt.Errorf("the provided authentication flow (%s) is not supported", flow)
 	}
+
 	return authCfgOption, nil
 }
 
@@ -124,12 +135,15 @@ func UserSessionExpired() (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("get %s: %w", SESSION_EXPIRES_AT_UNIX, err)
 	}
+
 	sessionExpiresAtInt, err := strconv.Atoi(sessionExpiresAtString)
 	if err != nil {
 		return false, fmt.Errorf("parse session expiration value \"%s\": %w", sessionExpiresAtString, err)
 	}
+
 	sessionExpiresAt := time.Unix(int64(sessionExpiresAtInt), 0)
 	now := time.Now()
+
 	return now.After(sessionExpiresAt), nil
 }
 
@@ -137,32 +151,40 @@ func GetAccessToken() (string, error) {
 	if accessToken := os.Getenv(envAccessTokenName); accessToken != "" {
 		return accessToken, nil
 	}
+
 	accessToken, err := GetAuthField(ACCESS_TOKEN)
 	if err != nil {
 		return "", fmt.Errorf("get %s: %w", ACCESS_TOKEN, err)
 	}
+
 	if accessToken == "" {
 		return "", fmt.Errorf("%s not set", ACCESS_TOKEN)
 	}
+
 	return accessToken, nil
 }
 
 func getStartingSessionExpiresAtUnix() (string, error) {
 	sessionStart := time.Now()
+
 	sessionTimeLimit, err := getSessionExpiration()
 	if err != nil {
 		return "", err
 	}
+
 	sessionExpiresAt := sessionStart.Add(sessionTimeLimit)
+
 	return strconv.FormatInt(sessionExpiresAt.Unix(), 10), nil
 }
 
 func getSessionExpiration() (time.Duration, error) {
 	sessionTimeLimitString := viper.GetString(config.SessionTimeLimitKey)
+
 	duration, err := time.ParseDuration(sessionTimeLimitString)
 	if err != nil {
 		return 0, fmt.Errorf("parse session time limit \"%s\": %w", sessionTimeLimitString, err)
 	}
+
 	return duration, nil
 }
 
@@ -173,6 +195,7 @@ func getEmailFromToken(token string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("parse token: %w", err)
 	}
+
 	claims, ok := parsedAccessToken.Claims.(*tokenClaims)
 	if !ok {
 		return "", fmt.Errorf("get claims from parsed token: unknown claims type, please report this issue")
@@ -205,6 +228,7 @@ func GetValidAccessToken(p *print.Printer) (string, error) {
 		REFRESH_TOKEN:      "",
 		IDP_TOKEN_ENDPOINT: "",
 	}
+
 	err = GetAuthFieldMap(authFields)
 	if err != nil {
 		return "", fmt.Errorf("get tokens from auth storage: %w", err)
@@ -217,9 +241,11 @@ func GetValidAccessToken(p *print.Printer) (string, error) {
 	if accessToken == "" {
 		return "", fmt.Errorf("access token not set")
 	}
+
 	if refreshToken == "" {
 		return "", fmt.Errorf("refresh token not set")
 	}
+
 	if tokenEndpoint == "" {
 		return "", fmt.Errorf("token endpoint not set")
 	}
@@ -229,6 +255,7 @@ func GetValidAccessToken(p *print.Printer) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("check if access token has expired: %w", err)
 	}
+
 	if !accessTokenExpired {
 		// Token is still valid, return it
 		return accessToken, nil
@@ -264,9 +291,11 @@ func EnsureIDPTokenEndpoint(p *print.Printer) error {
 	if err != nil {
 		return fmt.Errorf("failed to check idp token endpoint configuration value: %w", err)
 	}
+
 	if idpTokenEndpoint == "" {
 		_, err := retrieveIDPWellKnownConfig(p)
 		return err
 	}
+
 	return nil
 }

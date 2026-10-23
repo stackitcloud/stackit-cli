@@ -47,6 +47,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -61,10 +62,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			wrappingKeyName, err := kmsUtils.GetWrappingKeyName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.KeyRingId, model.WrappingKeyId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get wrapping key name: %v", err)
+
 				wrappingKeyName = model.WrappingKeyId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete the wrapping key %q? (this cannot be undone)", wrappingKeyName)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -72,6 +75,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("delete KMS wrapping key: %w", err)
@@ -81,11 +85,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Don't output anything. It's a deletion.
 			params.Printer.Info("Deleted wrapping key %q\n", wrappingKeyName)
+
 			return nil
 		},
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -104,6 +110,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -114,6 +121,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *kms.APIClie
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), keyRingIdFlag, "ID of the KMS key ring where the wrapping key is stored")
+
 	err := flags.MarkFlagsRequired(cmd, keyRingIdFlag)
 	cobra.CheckErr(err)
 }

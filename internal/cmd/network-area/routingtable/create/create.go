@@ -64,6 +64,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, nil)
 			if err != nil {
 				return err
@@ -75,6 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create the routing-table %q?", model.Name)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -94,6 +96,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -125,6 +128,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return model, nil
 }
 
@@ -156,6 +160,7 @@ func outputResult(p *print.Printer, outputFormat string, routingTable *iaas.Rout
 
 	return p.OutputResult(outputFormat, routingTable, func() error {
 		p.Outputf("Created Routing-Table with ID %q\n", utils.PtrString(routingTable.Id))
+
 		return nil
 	})
 }

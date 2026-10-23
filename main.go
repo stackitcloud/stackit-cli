@@ -32,6 +32,7 @@ func main() {
 		Fs:         utils.OsFS{},
 		Args:       os.Args[1:],
 	}
+
 	if !cmd.Execute(&params) {
 		os.Exit(1)
 	}

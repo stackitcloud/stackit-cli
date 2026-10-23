@@ -37,12 +37,14 @@ func newAPIClient(options apiClientMockOptions) secretsmanager.APIClient {
 				if options.getUserFails {
 					return nil, fmt.Errorf("could not get user")
 				}
+
 				return options.getUserResp, nil
 			}),
 			GetInstanceExecuteMock: utils.Ptr(func(_ secretsmanager.ApiGetInstanceRequest) (*secretsmanager.Instance, error) {
 				if options.getInstanceFails {
 					return nil, fmt.Errorf("could not get instance")
 				}
+
 				return options.getInstanceResp, nil
 			}),
 		},
@@ -84,12 +86,15 @@ func TestGetInstanceName(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}
@@ -164,12 +169,15 @@ func TestGetUserDetails(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if userLabel != tt.expectedOutput {
 				t.Errorf("expected user label to be %s, got %s", tt.expectedOutput, userLabel)
 			}

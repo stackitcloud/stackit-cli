@@ -25,6 +25,7 @@ func fixtureFlagValues(mods ...func(map[string]string)) map[string]string {
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -41,6 +42,7 @@ func fixtureInputModel(mods ...func(*inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 

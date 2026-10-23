@@ -50,6 +50,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -63,6 +64,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list Observability credentials: %w", err)
@@ -73,6 +75,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := observabilityUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.InstanceId, model.ProjectId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
@@ -80,10 +83,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.Limit != nil && len(credentials) > int(*model.Limit) {
 				credentials = credentials[:*model.Limit]
 			}
+
 			return outputResult(params.Printer, model.OutputFormat, instanceLabel, credentials)
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -125,14 +130,18 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, credenti
 	return p.OutputResult(outputFormat, credentials, func() error {
 		if len(credentials) == 0 {
 			p.Outputf("No credentials found for instance %q\n", instanceLabel)
+
 			return nil
 		}
+
 		table := tables.NewTable()
 		table.SetHeader("USERNAME")
+
 		for i := range credentials {
 			c := credentials[i]
 			table.AddRow(c.Name)
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

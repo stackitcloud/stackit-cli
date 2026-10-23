@@ -49,6 +49,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(p.Printer, cmd)
 			if err != nil {
 				return err
@@ -62,10 +63,12 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list Intakes: %w", err)
 			}
+
 			intakes := resp.GetIntakes()
 
 			// Truncate output
@@ -85,6 +88,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -114,6 +118,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -128,11 +133,13 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, intakes [
 	return p.OutputResult(outputFormat, intakes, func() error {
 		if len(intakes) == 0 {
 			p.Outputf("No intakes found for project %q\n", projectLabel)
+
 			return nil
 		}
 
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "STATE", "RUNNER ID")
+
 		for i := range intakes {
 			intakeItem := intakes[i]
 			table.AddRow(
@@ -142,10 +149,12 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, intakes [
 				intakeItem.GetIntakeRunnerId(),
 			)
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

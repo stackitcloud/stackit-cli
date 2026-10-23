@@ -54,6 +54,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args: args.SingleArg(userIdArg, nil),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -67,6 +68,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get SQLServer Flex user: %w", err)
@@ -77,6 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -89,6 +92,7 @@ func configureFlags(cmd *cobra.Command) {
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	userIdStr := inputArgs[0]
+
 	userId, err := strconv.ParseInt(userIdStr, 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("invalid user id %q: %w", userIdStr, err)
@@ -106,6 +110,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -124,18 +129,22 @@ func outputResult(p *print.Printer, outputFormat string, user *sqlserverflex.Get
 		table.AddRow("ID", user.Id)
 		table.AddSeparator()
 		table.AddRow("USERNAME", user.Username)
+
 		if len(user.Roles) != 0 {
 			table.AddSeparator()
 			table.AddRow("ROLES", strings.Join(user.Roles, "\n"))
 		}
+
 		if user.DefaultDatabase != "" {
 			table.AddSeparator()
 			table.AddRow("DATABASE", user.DefaultDatabase)
 		}
+
 		if user.Host != "" {
 			table.AddSeparator()
 			table.AddRow("HOST", user.Host)
 		}
+
 		table.AddSeparator()
 		table.AddRow("PORT", user.Port)
 
