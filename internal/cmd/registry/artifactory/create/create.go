@@ -37,7 +37,7 @@ type inputModel struct {
 	ProxyRegistryType *string
 	ProxyDescription  *string
 	ProxyAccessKey    *string
-	ProxyAccessSecret *string
+	ProxyAccessSecret *string `json:"-"`
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -96,8 +96,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// Wait for async operation, if async mode not enabled
 			if !model.Async {
 				err := spinner.Run(params.Printer, "Creating artifactory", func() error {
-					_, err = wait.CreateArtifactoryWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, artifactoryId).WaitWithContext(ctx)
-					return err
+					waitResp, waitErr := wait.CreateArtifactoryWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, artifactoryId).WaitWithContext(ctx)
+					if waitErr != nil {
+						return waitErr
+					}
+					resp = waitResp
+					return nil
 				})
 				if err != nil {
 					return fmt.Errorf("wait for artifactory creation: %w", err)
@@ -107,17 +111,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model, projectLabel, artifactoryId, resp)
 		},
 	}
-	configureFlags(cmd)
+	configureFlags(cmd, params)
 	return cmd
 }
 
-func configureFlags(cmd *cobra.Command) {
+func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.Flags().StringP(nameFlag, "n", "", "Artifactory name")
 	cmd.Flags().String(proxyUrlFlag, "", "Upstream registry URL to proxy")
 	cmd.Flags().String(proxyRegistryTypeFlag, "", "Registry type of the upstream proxy (e.g., docker-hub, harbor)")
 	cmd.Flags().String(proxyDescriptionFlag, "", "Description of the proxy registry")
 	cmd.Flags().String(proxyAccessKeyFlag, "", "Access key for upstream proxy registry authentication")
-	cmd.Flags().String(proxyAccessSecretFlag, "", "Access secret for upstream proxy registry authentication")
+
+	secret := flags.SecretFlag(proxyAccessSecretFlag, params)
+	cmd.Flags().Var(secret, proxyAccessSecretFlag, secret.Usage())
 
 	err := flags.MarkFlagsRequired(cmd, nameFlag)
 	cobra.CheckErr(err)
@@ -136,7 +142,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	proxyRegistryType := flags.FlagToStringPointer(p, cmd, proxyRegistryTypeFlag)
 	proxyDesc := flags.FlagToStringPointer(p, cmd, proxyDescriptionFlag)
 	proxyKey := flags.FlagToStringPointer(p, cmd, proxyAccessKeyFlag)
-	proxySecret := flags.FlagToStringPointer(p, cmd, proxyAccessSecretFlag)
+	proxySecret := flags.SecretFlagToStringPointer(p, cmd, proxyAccessSecretFlag)
 
 	hasProxyDetails := proxyDesc != nil || proxyKey != nil || proxySecret != nil
 	if hasProxyDetails && (proxyUrl == nil || proxyRegistryType == nil) {

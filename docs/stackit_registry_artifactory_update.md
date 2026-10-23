@@ -22,7 +22,7 @@ stackit registry artifactory update ARTIFACTORY_ID [flags]
 ```
   -h, --help                         Help for "stackit registry artifactory update"
       --proxy-access-key string      Access key for upstream proxy registry authentication
-      --proxy-access-secret string   Access secret for upstream proxy registry authentication
+      --proxy-access-secret string   Proxy-Access-Secret. Can be a string (deprecated) or a file path, if prefixed with '@' (example: @./secret.txt). Will be read from stdin when empty.
       --proxy-description string     Description of the proxy registry
       --proxy-url string             Upstream registry URL to proxy
 ```
