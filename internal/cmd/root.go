@@ -34,6 +34,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/quota"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/rabbitmq"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/redis"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/registry"
 	secretsmanager "github.com/stackitcloud/stackit-cli/internal/cmd/secrets-manager"
 	securitygroup "github.com/stackitcloud/stackit-cli/internal/cmd/security-group"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/server"
@@ -210,6 +211,7 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(kms.NewCmd(params))
 	cmd.AddCommand(sqlserverflex.NewCmd(params))
 	cmd.AddCommand(valkey.NewCmd(params))
+	cmd.AddCommand(registry.NewCmd(params))
 }
 
 // traverseCommands calls f for c and all of its children.

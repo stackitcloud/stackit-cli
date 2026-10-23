@@ -20,6 +20,7 @@
   "project_name": "",
   "rabbitmq_custom_endpoint": "",
   "redis_custom_endpoint": "",
+  "registry_custom_endpoint": "",
   "resource_manager_custom_endpoint": "",
   "runcommand_custom_endpoint": "",
   "secrets_manager_custom_endpoint": "",
