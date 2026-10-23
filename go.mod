@@ -1,6 +1,6 @@
 module github.com/stackitcloud/stackit-cli
 
-go 1.26.0
+go 1.26.10
 
 require (
 	github.com/fatih/color v1.19.0
@@ -22,7 +22,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/automation v0.2.1
 	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.21.0
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.25.0
-	github.com/stackitcloud/stackit-sdk-go/services/edge v0.13.2
+	github.com/stackitcloud/stackit-sdk-go/services/edge v0.14.0
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.14.1
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.15.1
 	github.com/stackitcloud/stackit-sdk-go/services/intake v0.12.0
@@ -30,16 +30,16 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.5.0
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.15.0
-	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.26.1
+	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.27.0
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.11.0
-	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.19.1
+	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.20.0
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.7.3
 	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.6.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.21.1
-	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.7.2
+	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.8.0
 	github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.2
 	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.18.1
-	github.com/stackitcloud/stackit-sdk-go/services/valkey v0.3.1
+	github.com/stackitcloud/stackit-sdk-go/services/valkey v0.4.0
 	github.com/stackitcloud/stackit-sdk-go/services/vpn v0.15.2
 	github.com/zalando/go-keyring v0.2.8
 	golang.org/x/mod v0.41.0
@@ -269,12 +269,12 @@ require (
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/stackitcloud/stackit-sdk-go/services/kms v1.14.0
 	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.16.0
-	github.com/stackitcloud/stackit-sdk-go/services/logme v1.4.0
-	github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.3.1
+	github.com/stackitcloud/stackit-sdk-go/services/logme v1.5.0
+	github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.4.0
 	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/observability v0.25.2
 	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.5.0
-	github.com/stackitcloud/stackit-sdk-go/services/redis v1.5.0
+	github.com/stackitcloud/stackit-sdk-go/services/redis v1.6.0
 	github.com/stackitcloud/stackit-sdk-go/services/sfs v0.11.3
 	github.com/subosito/gotenv v1.6.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect

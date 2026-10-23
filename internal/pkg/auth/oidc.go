@@ -17,6 +17,7 @@ const (
 	EnvGitHubRequestToken           = "ACTIONS_ID_TOKEN_REQUEST_TOKEN" //nolint:gosec // linter false positive
 	EnvAzureOIDCRequestURI          = "SYSTEM_OIDCREQUESTURI"
 	EnvAzureAccessToken             = "SYSTEM_ACCESSTOKEN" //nolint:gosec // linter false positive
+	EnvAzureServiceConnectionID     = "STACKIT_SERVICE_CONNECTION_ID"
 )
 
 func IsOIDCEnabled() bool {
@@ -40,7 +41,8 @@ func OIDCServiceAccountEmail() string {
 // TokenFunc returns the OIDCTokenFunc to use for Workload Identity Federation.
 // It checks the following token sources in order: STACKIT_SERVICE_ACCOUNT_FEDERATED_TOKEN,
 // STACKIT_FEDERATED_TOKEN_FILE, GitHub Actions (ACTIONS_ID_TOKEN_REQUEST_URL +
-// ACTIONS_ID_TOKEN_REQUEST_TOKEN), and Azure DevOps (SYSTEM_OIDCREQUESTURI + SYSTEM_ACCESSTOKEN).
+// ACTIONS_ID_TOKEN_REQUEST_TOKEN), and Azure DevOps (SYSTEM_OIDCREQUESTURI + SYSTEM_ACCESSTOKEN,
+// optionally scoped to the service connection set in STACKIT_SERVICE_CONNECTION_ID).
 // Returns an error if no source is detected.
 func OIDCTokenFunc() (oidcadapters.OIDCTokenFunc, error) {
 	// static token provided directly via env var
@@ -65,7 +67,7 @@ func OIDCTokenFunc() (oidcadapters.OIDCTokenFunc, error) {
 	// Azure DevOps
 	if adoURL := os.Getenv(EnvAzureOIDCRequestURI); adoURL != "" {
 		if adoToken := os.Getenv(EnvAzureAccessToken); adoToken != "" {
-			return oidcadapters.RequestAzureDevOpsOIDCToken(adoURL, adoToken, ""), nil
+			return oidcadapters.RequestAzureDevOpsOIDCToken(adoURL, adoToken, os.Getenv(EnvAzureServiceConnectionID)), nil
 		}
 	}
 
