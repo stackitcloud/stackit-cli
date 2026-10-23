@@ -3,6 +3,7 @@ package describe
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/spf13/cobra"
 	registry "github.com/stackitcloud/stackit-sdk-go/services/registry/v1api"
@@ -105,7 +106,7 @@ func outputResult(p *print.Printer, outputFormat string, artifactory *registry.A
 		table.AddSeparator()
 		table.AddRow("CONSUMED QUOTA BYTES", artifactory.ConsumedQuotaBytes)
 		table.AddSeparator()
-		table.AddRow("CREATED AT", artifactory.CreateTime.String())
+		table.AddRow("CREATED AT", artifactory.CreateTime.Format(time.DateTime))
 		if artifactory.Proxy != nil {
 			table.AddSeparator()
 			table.AddRow("PROXY URL", artifactory.Proxy.Url)
