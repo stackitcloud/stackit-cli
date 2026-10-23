@@ -23,11 +23,14 @@ const (
 type testCtxKey struct{}
 
 var (
-	testCtx           = context.WithValue(context.Background(), testCtxKey{}, "foo")
-	testClient        = &registry.APIClient{DefaultAPI: &registry.DefaultAPIService{}}
-	testProjectId     = uuid.NewString()
-	testArtifactoryId = uuid.NewString()
-	testProxyUrl      = "https://registry-1.docker.io"
+	testCtx               = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient            = &registry.APIClient{DefaultAPI: &registry.DefaultAPIService{}}
+	testProjectId         = uuid.NewString()
+	testArtifactoryId     = uuid.NewString()
+	testProxyUrl          = "https://registry-1.docker.io"
+	testProxyDescription  = "docker hub proxy"
+	testProxyAccessKey    = "my-key"
+	testProxyAccessSecret = "my-secret"
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -87,6 +90,50 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModel(),
 		},
 		{
+			description: "with description",
+			argValues:   []string{testArtifactoryId},
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, proxyUrlFlag)
+				flagValues[proxyDescriptionFlag] = testProxyDescription
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.ProxyUrl = nil
+				model.ProxyDescription = utils.Ptr(testProxyDescription)
+			}),
+		},
+		{
+			description: "with credentials",
+			argValues:   []string{testArtifactoryId},
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, proxyUrlFlag)
+				flagValues[proxyAccessKeyFlag] = testProxyAccessKey
+				flagValues[proxyAccessSecretFlag] = testProxyAccessSecret
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.ProxyUrl = nil
+				model.ProxyAccessKey = utils.Ptr(testProxyAccessKey)
+				model.ProxyAccessSecret = utils.Ptr(testProxyAccessSecret)
+			}),
+		},
+		{
+			description: "proxy access key without secret",
+			argValues:   []string{testArtifactoryId},
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[proxyAccessKeyFlag] = testProxyAccessKey
+			}),
+			isValid: false,
+		},
+		{
+			description: "proxy access secret without key",
+			argValues:   []string{testArtifactoryId},
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[proxyAccessSecretFlag] = testProxyAccessSecret
+			}),
+			isValid: false,
+		},
+		{
 			description: "no flags set",
 			argValues:   []string{testArtifactoryId},
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
@@ -137,6 +184,40 @@ func TestBuildRequest(t *testing.T) {
 			description:     "base",
 			model:           fixtureInputModel(),
 			expectedRequest: fixtureRequest(),
+		},
+		{
+			description: "with description",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.ProxyUrl = nil
+				model.ProxyDescription = utils.Ptr(testProxyDescription)
+			}),
+			expectedRequest: fixtureRequest(func(request *registry.ApiPatchArtifactoryRequest) {
+				*request = testClient.DefaultAPI.PatchArtifactory(testCtx, testProjectId, testRegion, testArtifactoryId).
+					PatchArtifactoryPayload(registry.PatchArtifactoryPayload{
+						Proxy: &registry.UpdateProxyRequest{
+							Description: utils.Ptr(testProxyDescription),
+						},
+					})
+			}),
+		},
+		{
+			description: "with credentials",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.ProxyUrl = nil
+				model.ProxyAccessKey = utils.Ptr(testProxyAccessKey)
+				model.ProxyAccessSecret = utils.Ptr(testProxyAccessSecret)
+			}),
+			expectedRequest: fixtureRequest(func(request *registry.ApiPatchArtifactoryRequest) {
+				*request = testClient.DefaultAPI.PatchArtifactory(testCtx, testProjectId, testRegion, testArtifactoryId).
+					PatchArtifactoryPayload(registry.PatchArtifactoryPayload{
+						Proxy: &registry.UpdateProxyRequest{
+							Credentials: &registry.Credentials{
+								AccessKey:    testProxyAccessKey,
+								AccessSecret: testProxyAccessSecret,
+							},
+						},
+					})
+			}),
 		},
 	}
 
