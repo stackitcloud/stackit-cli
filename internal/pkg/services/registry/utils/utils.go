@@ -12,5 +12,8 @@ func GetArtifactoryName(ctx context.Context, apiClient registry.DefaultAPI, proj
 	if err != nil {
 		return "", fmt.Errorf("get artifactory: %w", err)
 	}
+	if resp == nil {
+		return "", fmt.Errorf("get artifactory: empty response")
+	}
 	return resp.Name, nil
 }

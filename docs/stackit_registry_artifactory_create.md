@@ -29,7 +29,7 @@ stackit registry artifactory create [flags]
   -h, --help                         Help for "stackit registry artifactory create"
   -n, --name string                  Artifactory name
       --proxy-access-key string      Access key for upstream proxy registry authentication
-      --proxy-access-secret string   Access secret for upstream proxy registry authentication
+      --proxy-access-secret string   Proxy-Access-Secret. Can be a string (deprecated) or a file path, if prefixed with '@' (example: @./secret.txt). Will be read from stdin when empty.
       --proxy-description string     Description of the proxy registry
       --proxy-registry-type string   Registry type of the upstream proxy (e.g., docker-hub, harbor)
       --proxy-url string             Upstream registry URL to proxy
