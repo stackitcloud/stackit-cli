@@ -6,7 +6,6 @@ import (
 	getjwks "github.com/stackitcloud/stackit-cli/internal/cmd/service-account/get-jwks"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/service-account/key"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/service-account/list"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/service-account/token"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -33,5 +32,4 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(getjwks.NewCmd(params))
 
 	cmd.AddCommand(key.NewCmd(params))
-	cmd.AddCommand(token.NewCmd(params))
 }
