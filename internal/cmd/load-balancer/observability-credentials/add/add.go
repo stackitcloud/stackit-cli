@@ -44,7 +44,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Add observability credentials to a load balancer with username "xxx" and display name "yyy". The password is entered using the terminal`,
-				"$ stackit load-balancer observability-credentials add --username xxx --display-name yyy"),
+				"$ stackit load-balancer observability-credentials add --username xxx --display-name yyy --password -"),
 			examples.NewExample(
 				`Add observability credentials to a load balancer with username "xxx" and display name "yyy", providing the path to a file with the password as flag`,
 				"$ stackit load-balancer observability-credentials add --username xxx --password @./password.txt --display-name yyy"),
@@ -108,8 +108,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		GlobalFlagModel: globalFlags,
 		DisplayName:     flags.FlagToStringPointer(p, cmd, displayNameFlag),
 		Username:        flags.FlagToStringPointer(p, cmd, usernameFlag),
-		Password:        flags.SecretFlagToStringPointer(p, cmd, passwordFlag),
 	}
+	pw, err := flags.ResolveSecretFlagWithAutoPrompt(p, cmd, passwordFlag) //nolint:staticcheck // preserve existing functionality until deprecation period is over
+	if err != nil {
+		return nil, err
+	}
+	model.Password = pw
 
 	p.DebugInputModel(model)
 	return &model, nil

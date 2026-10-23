@@ -92,8 +92,12 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		GlobalFlagModel: globalFlags,
 		Username:        flags.FlagToStringPointer(p, cmd, usernameFlag),
 		Displayname:     flags.FlagToStringPointer(p, cmd, displaynameFlag),
-		Password:        flags.SecretFlagToStringPointer(p, cmd, passwordFlag),
 	}
+	pw, err := flags.ResolveSecretFlagWithAutoPrompt(p, cmd, passwordFlag) //nolint:staticcheck // preserve existing functionality until deprecation period is over
+	if err != nil {
+		return nil, err
+	}
+	model.Password = pw
 
 	p.DebugInputModel(model)
 	return &model, nil

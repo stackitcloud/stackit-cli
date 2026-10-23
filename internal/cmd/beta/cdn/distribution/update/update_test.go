@@ -3,17 +3,21 @@ package update
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
+	"testing/fstest"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
+	"github.com/spf13/cobra"
 	cdn "github.com/stackitcloud/stackit-sdk-go/services/cdn/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
@@ -26,7 +30,11 @@ var testClient = &cdn.APIClient{DefaultAPI: &cdn.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 var testDistributionID = uuid.NewString()
 
-const testMonthlyLimitBytes int64 = 1048576
+const (
+	testMonthlyLimitBytes int64 = 1048576
+	testPwFile                  = "pw.txt"
+	testPw                      = "file-pw"
+)
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
@@ -71,13 +79,15 @@ func fixturePayload(mods ...func(payload *cdn.PatchDistributionPayload)) *cdn.Pa
 }
 
 func TestParseInput(t *testing.T) {
-	tests := []struct {
+	type testCase struct {
 		description string
 		argValues   []string
 		flagValues  map[string]string
+		stdin       string
 		isValid     bool
 		expected    *inputModel
-	}{
+	}
+	tests := []testCase{
 		{
 			description: "base",
 			argValues:   []string{testDistributionID},
@@ -131,6 +141,7 @@ func TestParseInput(t *testing.T) {
 					flagValues[flagDefaultCacheDuration] = "P1DT12H"
 					flagValues[flagLoki] = "true"
 					flagValues[flagLokiUsername] = "loki-user"
+					flagValues[flagLokiPassword] = "@" + testPwFile
 					flagValues[flagLokiPushURL] = "https://loki.example.com"
 					flagValues[flagMonthlyLimitBytes] = fmt.Sprintf("%d", testMonthlyLimitBytes)
 					flagValues[flagOptimizer] = "true"
@@ -146,11 +157,60 @@ func TestParseInput(t *testing.T) {
 					model.Loki = &lokiInputModel{
 						Username: "loki-user",
 						PushURL:  "https://loki.example.com",
+						Password: testPw,
 					}
 					model.MonthlyLimitBytes = utils.Ptr(testMonthlyLimitBytes)
 					model.Optimizer = utils.Ptr(true)
 				},
 			),
+		},
+		{
+			description: "loki password explicit stdin",
+			argValues:   []string{testDistributionID},
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[flagLoki] = "true"
+				flagValues[flagLokiUsername] = "loki-user"
+				flagValues[flagLokiPassword] = "-"
+				flagValues[flagLokiPushURL] = "https://loki.example.com"
+			}),
+			stdin:   "stdin-pw\n",
+			isValid: true,
+			expected: fixtureInputModel(func(model *inputModel) {
+				model.Loki = &lokiInputModel{
+					Username: "loki-user",
+					PushURL:  "https://loki.example.com",
+					Password: "stdin-pw",
+				}
+			}),
+		},
+		{
+			description: "loki password implicit stdin",
+			argValues:   []string{testDistributionID},
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[flagLoki] = "true"
+				flagValues[flagLokiUsername] = "loki-user"
+				flagValues[flagLokiPushURL] = "https://loki.example.com"
+			}),
+			stdin:   "stdin-pw\n",
+			isValid: true,
+			expected: fixtureInputModel(func(model *inputModel) {
+				model.Loki = &lokiInputModel{
+					Username: "loki-user",
+					PushURL:  "https://loki.example.com",
+					Password: "stdin-pw",
+				}
+			}),
+		},
+		{
+			description: "loki password literal rejected",
+			argValues:   []string{testDistributionID},
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[flagLoki] = "true"
+				flagValues[flagLokiUsername] = "loki-user"
+				flagValues[flagLokiPushURL] = "https://loki.example.com"
+				flagValues[flagLokiPassword] = "top-secret"
+			}),
+			isValid: false,
 		},
 		{
 			description: "max config http backend",
@@ -188,6 +248,7 @@ func TestParseInput(t *testing.T) {
 					flagValues[flagBucketURL] = "https://bucket.example.com"
 					flagValues[flagBucketRegion] = "EU"
 					flagValues[flagBucketCredentialsAccessKeyID] = "access-key-id"
+					flagValues[flagBucketPassword] = "@" + testPwFile
 				},
 			),
 			isValid: true,
@@ -197,14 +258,120 @@ func TestParseInput(t *testing.T) {
 						URL:         "https://bucket.example.com",
 						Region:      "EU",
 						AccessKeyID: "access-key-id",
+						Password:    testPw,
 					}
 				},
 			),
 		},
+		{
+			description: "bucket password explicit stdin",
+			argValues:   []string{testDistributionID},
+			flagValues: fixtureFlagValues(
+				func(flagValues map[string]string) {
+					flagValues[flagBucket] = "true"
+					flagValues[flagBucketURL] = "https://bucket.example.com"
+					flagValues[flagBucketRegion] = "EU"
+					flagValues[flagBucketCredentialsAccessKeyID] = "access-key-id"
+					flagValues[flagBucketPassword] = "-"
+				},
+			),
+			isValid: true,
+			stdin:   "stdin-pw\n",
+			expected: fixtureInputModel(
+				func(model *inputModel) {
+					model.Bucket = &bucketInputModel{
+						URL:         "https://bucket.example.com",
+						Region:      "EU",
+						AccessKeyID: "access-key-id",
+						Password:    "stdin-pw",
+					}
+				},
+			),
+		},
+		{
+			description: "bucket password implicit stdin",
+			argValues:   []string{testDistributionID},
+			flagValues: fixtureFlagValues(
+				func(flagValues map[string]string) {
+					flagValues[flagBucket] = "true"
+					flagValues[flagBucketURL] = "https://bucket.example.com"
+					flagValues[flagBucketRegion] = "EU"
+					flagValues[flagBucketCredentialsAccessKeyID] = "access-key-id"
+				},
+			),
+			isValid: true,
+			stdin:   "stdin-pw\n",
+			expected: fixtureInputModel(
+				func(model *inputModel) {
+					model.Bucket = &bucketInputModel{
+						URL:         "https://bucket.example.com",
+						Region:      "EU",
+						AccessKeyID: "access-key-id",
+						Password:    "stdin-pw",
+					}
+				},
+			),
+		},
+		{
+			description: "bucket password literal rejected",
+			argValues:   []string{testDistributionID},
+			flagValues: fixtureFlagValues(
+				func(flagValues map[string]string) {
+					flagValues[flagBucket] = "true"
+					flagValues[flagBucketURL] = "https://bucket.example.com"
+					flagValues[flagBucketRegion] = "EU"
+					flagValues[flagBucketCredentialsAccessKeyID] = "access-key-id"
+					flagValues[flagBucketPassword] = "top-secret"
+				},
+			),
+			isValid: false,
+		},
+		{
+			description: "bucket region only",
+			argValues:   []string{testDistributionID},
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[flagBucket] = "true"
+				flagValues[flagBucketRegion] = "EU"
+			}),
+			isValid: true,
+			expected: fixtureInputModel(func(model *inputModel) {
+				model.Bucket = &bucketInputModel{Region: "EU"}
+			}),
+		},
+		{
+			description: "bucket URL only",
+			argValues:   []string{testDistributionID},
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[flagBucket] = "true"
+				flagValues[flagBucketURL] = "https://bucket.example.com"
+			}),
+			isValid: true,
+			expected: fixtureInputModel(func(model *inputModel) {
+				model.Bucket = &bucketInputModel{URL: "https://bucket.example.com"}
+			}),
+		},
+		{
+			description: "Loki push URL only",
+			argValues:   []string{testDistributionID},
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[flagLoki] = "true"
+				flagValues[flagLokiPushURL] = "https://loki.example.com"
+			}),
+			isValid: true,
+			expected: fixtureInputModel(func(model *inputModel) {
+				model.Loki = &lokiInputModel{PushURL: "https://loki.example.com"}
+			}),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			testutils.TestParseInput(t, NewCmd, parseInput, tt.expected, tt.argValues, tt.flagValues, tt.isValid)
+			testutils.TestParseInput(t, func(params *types.CmdParams) *cobra.Command {
+				params.Fs = fstest.MapFS{
+					testPwFile: {Data: []byte(testPw)},
+				}
+				params.Printer.StdIn = strings.NewReader(tt.stdin)
+				return NewCmd(params)
+			}, parseInput, tt.expected, tt.argValues, tt.flagValues, tt.isValid)
 		})
 	}
 }
@@ -219,6 +386,38 @@ func TestBuildRequest(t *testing.T) {
 			description: "base",
 			model:       fixtureInputModel(),
 			expected:    fixtureRequest(),
+		},
+		{
+			description: "bucket region only",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Bucket = &bucketInputModel{Region: "EU"}
+			}),
+			expected: fixtureRequest(func(payload *cdn.PatchDistributionPayload) {
+				payload.Config.Backend = &cdn.ConfigPatchBackend{
+					BucketBackendPatch: &cdn.BucketBackendPatch{Type: "bucket", Region: new("EU")},
+				}
+			}),
+		},
+		{
+			description: "bucket URL only",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Bucket = &bucketInputModel{URL: "https://bucket.example.com"}
+			}),
+			expected: fixtureRequest(func(payload *cdn.PatchDistributionPayload) {
+				payload.Config.Backend = &cdn.ConfigPatchBackend{
+					BucketBackendPatch: &cdn.BucketBackendPatch{Type: "bucket", BucketUrl: new("https://bucket.example.com")},
+				}
+			}),
+		},
+		{
+			description: "Loki push URL only",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Loki = &lokiInputModel{PushURL: "https://loki.example.com"}
+			}),
+			expected: fixtureRequest(func(payload *cdn.PatchDistributionPayload) {
+				logSink := cdn.LokiLogSinkPatchAsConfigPatchLogSink(&cdn.LokiLogSinkPatch{PushUrl: new("https://loki.example.com")})
+				payload.Config.LogSink = *cdn.NewNullableConfigPatchLogSink(&logSink)
+			}),
 		},
 		{
 			description: "max without backend",

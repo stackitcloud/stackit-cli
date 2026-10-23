@@ -14,7 +14,7 @@ stackit load-balancer observability-credentials add [flags]
 
 ```
   Add observability credentials to a load balancer with username "xxx" and display name "yyy". The password is entered using the terminal
-  $ stackit load-balancer observability-credentials add --username xxx --display-name yyy
+  $ stackit load-balancer observability-credentials add --username xxx --display-name yyy --password -
 
   Add observability credentials to a load balancer with username "xxx" and display name "yyy", providing the path to a file with the password as flag
   $ stackit load-balancer observability-credentials add --username xxx --password @./password.txt --display-name yyy
@@ -25,7 +25,7 @@ stackit load-balancer observability-credentials add [flags]
 ```
       --display-name string   Credentials display name
   -h, --help                  Help for "stackit load-balancer observability-credentials add"
-      --password string       Password. Can be a string (deprecated) or a file path, if prefixed with '@' (example: @./secret.txt). Will be read from stdin when empty.
+      --password secret       Password. Use @<file> to read from a file (example: @./secret.txt), or - to read from stdin (hidden input on a terminal). Literal values are not supported.
       --username string       Username
 ```
 
