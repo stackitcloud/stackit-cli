@@ -19,7 +19,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 type testCtxKey struct{}
@@ -55,7 +54,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		Limit: utils.Ptr(testLimit),
+		Limit: new(testLimit),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -141,7 +140,7 @@ func TestBuildRequest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient, 1, testLimit)
+			request := buildRequest(testCtx, tt.model, testClient.DefaultAPI, 1, testLimit)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest, scf.DefaultAPIService{}),
@@ -188,13 +187,13 @@ func TestFetchOrganizations(t *testing.T) {
 		},
 		{
 			description:      "stops at totalPages",
-			responses:        []scf.OrganizationsList{fixturePage(100, utils.Ptr(int64(1)))},
+			responses:        []scf.OrganizationsList{fixturePage(100, new(int64(1)))},
 			expectedCount:    100,
 			expectedRequests: []string{"page=1 perPage=100"},
 		},
 		{
 			description:      "limit below page size",
-			limit:            utils.Ptr(int64(10)),
+			limit:            new(int64(10)),
 			responses:        []scf.OrganizationsList{fixturePage(10, nil)},
 			expectedCount:    10,
 			expectedRequests: []string{"page=1 perPage=10"},
@@ -202,7 +201,7 @@ func TestFetchOrganizations(t *testing.T) {
 		{
 			// perPage must not shrink on the last page, the API pages by offset
 			description: "limit across pages",
-			limit:       utils.Ptr(int64(150)),
+			limit:       new(int64(150)),
 			responses: []scf.OrganizationsList{
 				fixturePage(100, nil),
 				fixturePage(100, nil),
@@ -314,9 +313,9 @@ func TestOutputResult(t *testing.T) {
 				organizations: []scf.OrganizationsListItem{
 					{
 						Guid:      testOrganization,
-						Name:      utils.Ptr("my-org"),
+						Name:      new("my-org"),
 						Status:    "active",
-						CreatedAt: utils.Ptr(time.Now()),
+						CreatedAt: new(time.Now()),
 					},
 				},
 			},

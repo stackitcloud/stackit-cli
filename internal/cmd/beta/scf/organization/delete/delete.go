@@ -59,7 +59,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 			if _, err = req.Execute(); err != nil {
 				return fmt.Errorf("delete STACKIT Cloud Foundry organization: %w", err)
 			}
@@ -79,7 +79,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered deletion of"
 			}
-			p.Printer.Outputf("%s STACKIT Cloud Foundry organization %s\n", operationState, model.OrganizationId)
+			p.Printer.Info("%s STACKIT Cloud Foundry organization %s\n", operationState, model.OrganizationId)
 
 			return nil
 		},
@@ -106,6 +106,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 }
 
 // buildRequest creates the API request to delete a STACKIT Cloud Foundry organization
-func buildRequest(ctx context.Context, model *inputModel, apiClient *scf.APIClient) scf.ApiDeleteOrganizationRequest {
-	return apiClient.DefaultAPI.DeleteOrganization(ctx, model.ProjectId, model.Region, model.OrganizationId)
+func buildRequest(ctx context.Context, model *inputModel, apiClient scf.DefaultAPI) scf.ApiDeleteOrganizationRequest {
+	return apiClient.DeleteOrganization(ctx, model.ProjectId, model.Region, model.OrganizationId)
 }

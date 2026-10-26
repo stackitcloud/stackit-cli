@@ -14,7 +14,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 type testCtxKey struct{}
@@ -64,8 +63,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		OrganizationId: testOrganizationId,
-		Name:           utils.Ptr(testName),
-		Suspended:      utils.Ptr(true),
+		Name:           new(testName),
+		Suspended:      new(true),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -75,8 +74,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 
 func fixtureUpdatePayload(mods ...func(payload *scf.UpdateOrganizationPayload)) scf.UpdateOrganizationPayload {
 	payload := scf.UpdateOrganizationPayload{
-		Name:      utils.Ptr(testName),
-		Suspended: utils.Ptr(true),
+		Name:      new(testName),
+		Suspended: new(true),
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -159,7 +158,7 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.Name = nil
-				model.Suspended = utils.Ptr(false)
+				model.Suspended = new(false)
 			}),
 		},
 		{
@@ -217,7 +216,7 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			request := buildRequest(testCtx, tt.model, testClient.DefaultAPI)
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),

@@ -109,8 +109,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *scf.APIClient, page, perPage int64) scf.ApiListOrganizationsRequest {
-	return apiClient.DefaultAPI.ListOrganizations(ctx, model.ProjectId, model.Region).WithDetails(true).Page(page).PerPage(perPage)
+func buildRequest(ctx context.Context, model *inputModel, apiClient scf.DefaultAPI, page, perPage int64) scf.ApiListOrganizationsRequest {
+	return apiClient.ListOrganizations(ctx, model.ProjectId, model.Region).WithDetails(true).Page(page).PerPage(perPage)
 }
 
 // fetchOrganizations pages through the organizations. The API pages by offset (page * perPage),
@@ -124,7 +124,7 @@ func fetchOrganizations(ctx context.Context, model *inputModel, apiClient *scf.A
 
 	organizations := []scf.OrganizationsListItem{}
 	for page := int64(1); ; page++ {
-		resp, err := buildRequest(ctx, model, apiClient, page, perPage).Execute()
+		resp, err := buildRequest(ctx, model, apiClient.DefaultAPI, page, perPage).Execute()
 		if err != nil {
 			return nil, fmt.Errorf("list STACKIT Cloud Foundry organizations: %w", err)
 		}

@@ -15,7 +15,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 type testCtxKey struct{}
@@ -56,8 +55,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		Name:       utils.Ptr(testName),
-		PlatformId: utils.Ptr(testPlatformId),
+		Name:       new(testName),
+		PlatformId: new(testPlatformId),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -69,7 +68,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 func fixtureCreatePayload(mods ...func(payload *scf.CreateOrganizationPayload)) scf.CreateOrganizationPayload {
 	payload := scf.CreateOrganizationPayload{
 		Name:       testName,
-		PlatformId: utils.Ptr(testPlatformId),
+		PlatformId: new(testPlatformId),
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -175,7 +174,7 @@ func TestBuildRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			request := buildRequest(testCtx, tt.model, testClient.DefaultAPI)
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),
 				cmpopts.EquateComparable(testCtx),

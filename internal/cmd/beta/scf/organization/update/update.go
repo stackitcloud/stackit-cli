@@ -74,7 +74,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 				return err
 			}
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update STACKIT Cloud Foundry organization: %w", err)
@@ -115,13 +115,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *scf.APIClient) scf.ApiUpdateOrganizationRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient scf.DefaultAPI) scf.ApiUpdateOrganizationRequest {
 	payload := scf.UpdateOrganizationPayload{
 		Name:      model.Name,
 		Suspended: model.Suspended,
 	}
 
-	req := apiClient.DefaultAPI.UpdateOrganization(ctx, model.ProjectId, model.Region, model.OrganizationId)
+	req := apiClient.UpdateOrganization(ctx, model.ProjectId, model.Region, model.OrganizationId)
 	return req.UpdateOrganizationPayload(payload)
 }
 
