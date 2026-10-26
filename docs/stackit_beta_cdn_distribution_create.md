@@ -24,7 +24,7 @@ stackit beta cdn distribution create [flags]
 
   Create a CDN distribution passing the password via stdin, take care that there's a '\n' at the end of the input'
   $ cat secret.txt | stackit beta cdn distribution create -y --project-id xxx \
---bucket --bucket-url https://bucket.example.com --bucekt-credentials-access-key-id yyyy --bucket-region EU \
+--bucket --bucket-url https://bucket.example.com --bucket-credentials-access-key-id yyyy --bucket-region EU \
 --regions AF,EU
 ```
 
