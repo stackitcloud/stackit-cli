@@ -3,8 +3,10 @@ package update
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
 	"github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi/wait"
 
@@ -53,8 +55,11 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 				`Update the display name of an Intake User`,
 				`$ stackit beta intake user update xxx --intake-id yyy --display-name "new-user-name"`),
 			examples.NewExample(
-				`Update the password and description for an Intake User`,
-				`$ stackit beta intake user update xxx --intake-id yyy --password "NewSecret123\!" --description "Updated description"`),
+				`Update the password interactively for an Intake User`,
+				`$ stackit beta intake user update xxx --intake-id yyy --password`),
+			examples.NewExample(
+				`Update the password and description for an Intake User from a file`,
+				`$ stackit beta intake user update xxx --intake-id yyy --password @./secret.txt --description "Updated description"`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -82,7 +87,6 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 					_, err = wait.UpdateIntakeUserWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.IntakeId, model.UserId).WaitWithContext(ctx)
 					return err
 				})
-
 				if err != nil {
 					return fmt.Errorf("wait for STACKIT Intake User update: %w", err)
 				}
@@ -95,12 +99,24 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 	return cmd
 }
 
-func configureFlags(cmd *cobra.Command, p *types.CmdParams) {
+type updateSecretFlag struct {
+	pflag.Value
+}
+
+func (f *updateSecretFlag) Set(val string) error {
+	if strings.TrimSpace(val) == "" {
+		return nil
+	}
+	return f.Value.Set(val)
+}
+
+func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.Flags().Var(flags.UUIDFlag(), intakeIdFlag, "Intake ID")
 	cmd.Flags().String(displayNameFlag, "", "Display name")
 	cmd.Flags().String(descriptionFlag, "", "Description")
-	password := flags.SecretFlag(passwordFlag, p)
-	cmd.Flags().Var(password, passwordFlag, password.Usage()+" Must contain lower, upper, number, and special characters (min 12 chars)")
+	password := flags.SecretFlag(passwordFlag, params)
+	cmd.Flags().Var(&updateSecretFlag{Value: password}, passwordFlag, password.Usage())
+	cmd.Flag(passwordFlag).NoOptDefVal = " "
 	cmd.Flags().String(userTypeFlag, "", "Type of user. One of 'intake' or 'dead-letter'")
 	cmd.Flags().StringToString(labelsFlag, nil, `Labels in key=value format, separated by commas. Example: --labels "key1=value1,key2=value2".`)
 
@@ -116,13 +132,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		return nil, &cliErr.ProjectIdError{}
 	}
 
+	var password *string
+	if cmd.Flag(passwordFlag).Changed {
+		password = flags.SecretFlagToStringPointer(p, cmd, passwordFlag)
+	}
+
 	model := &inputModel{
 		GlobalFlagModel: globalFlags,
 		IntakeId:        flags.FlagToStringValue(p, cmd, intakeIdFlag),
 		UserId:          userId,
 		DisplayName:     flags.FlagToStringPointer(p, cmd, displayNameFlag),
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
-		Password:        flags.SecretFlagToStringPointer(p, cmd, passwordFlag),
+		Password:        password,
 		UserType:        flags.FlagToStringPointer(p, cmd, userTypeFlag),
 		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelsFlag),
 	}
