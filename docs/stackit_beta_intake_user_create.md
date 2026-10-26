@@ -13,7 +13,7 @@ stackit beta intake user create [flags]
 ### Examples
 
 ```
-  Create a new Intake User with required parameters
+  Create a new Intake User with required parameters, reading the password from stdin
   $ stackit beta intake user create --display-name intake-user --intake-id xxx --password -
 
   Create a new Intake User for the dead-letter queue with labels

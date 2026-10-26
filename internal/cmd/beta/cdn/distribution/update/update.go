@@ -164,6 +164,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	regions := flagRegions.Get()
 
+	// Reject passwords that would otherwise be silently omitted from the API payload,
+	// before resolving secrets or reading stdin.
+	if cmd.Flags().Changed(flagBucketPassword) && (!flags.FlagToBoolValue(p, cmd, flagBucket) || flags.FlagToStringValue(p, cmd, flagBucketCredentialsAccessKeyID) == "") {
+		return nil, fmt.Errorf("--%s requires --%s and a non-empty --%s", flagBucketPassword, flagBucket, flagBucketCredentialsAccessKeyID)
+	}
+	if cmd.Flags().Changed(flagLokiPassword) && (!flags.FlagToBoolValue(p, cmd, flagLoki) || flags.FlagToStringValue(p, cmd, flagLokiUsername) == "") {
+		return nil, fmt.Errorf("--%s requires --%s and a non-empty --%s", flagLokiPassword, flagLoki, flagLokiUsername)
+	}
+
 	var http *httpInputModel
 	if flags.FlagToBoolValue(p, cmd, flagHTTP) {
 		originURL := flags.FlagToStringValue(p, cmd, flagHTTPOriginURL)
@@ -192,22 +201,21 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		bucketURL := flags.FlagToStringValue(p, cmd, flagBucketURL)
 		accessKeyID := flags.FlagToStringValue(p, cmd, flagBucketCredentialsAccessKeyID)
 		region := flags.FlagToStringValue(p, cmd, flagBucketRegion)
-		// Only credential replacements need an implicit password. Other bucket
-		// patches must not read stdin when the password is omitted.
-		resolvePassword := flags.ResolveSecretFlag
-		if accessKeyID != "" {
-			resolvePassword = flags.ResolveSecretFlagWithAutoPrompt //nolint:staticcheck // preserve existing functionality until deprecation period is over
-		}
-		password, err := resolvePassword(p, cmd, flagBucketPassword)
-		if err != nil {
-			return nil, err
-		}
-
 		bucket = &bucketInputModel{
 			URL:         bucketURL,
 			AccessKeyID: accessKeyID,
-			Password:    utils.PtrString(password),
 			Region:      region,
+		}
+		// Only credential replacements need a password. Other bucket patches must not read stdin.
+		if accessKeyID != "" {
+			password, err := flags.ResolveSecretFlagWithAutoPrompt(p, cmd, flagBucketPassword) //nolint:staticcheck // Deprecated: preserve automatic prompting until 2027-04 (STACKITCLI-549).
+			if err != nil {
+				return nil, err
+			}
+			if password == nil || *password == "" {
+				return nil, fmt.Errorf("--%s must not be empty", flagBucketPassword)
+			}
+			bucket.Password = *password
 		}
 	}
 
@@ -223,15 +231,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 			PushURL:  flags.FlagToStringValue(p, cmd, flagLokiPushURL),
 		}
 		// A push URL patch does not replace credentials unless a username is set.
-		resolvePassword := flags.ResolveSecretFlag
 		if loki.Username != "" {
-			resolvePassword = flags.ResolveSecretFlagWithAutoPrompt //nolint:staticcheck // preserve existing functionality until deprecation period is over
+			password, err := flags.ResolveSecretFlagWithAutoPrompt(p, cmd, flagLokiPassword) //nolint:staticcheck // Deprecated: preserve automatic prompting until 2027-04 (STACKITCLI-549).
+			if err != nil {
+				return nil, err
+			}
+			if password == nil || *password == "" {
+				return nil, fmt.Errorf("--%s must not be empty", flagLokiPassword)
+			}
+			loki.Password = *password
 		}
-		password, err := resolvePassword(p, cmd, flagLokiPassword)
-		if err != nil {
-			return nil, err
-		}
-		loki.Password = utils.PtrString(password)
 	}
 
 	var optimizer *bool

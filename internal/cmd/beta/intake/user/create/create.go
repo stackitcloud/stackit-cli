@@ -49,7 +49,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a new Intake User with required parameters`,
+				`Create a new Intake User with required parameters, reading the password from stdin`,
 				`$ stackit beta intake user create --display-name intake-user --intake-id xxx --password -`),
 			examples.NewExample(
 				`Create a new Intake User for the dead-letter queue with labels`,
@@ -132,7 +132,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelsFlag),
 	}
-	pw, err := flags.ResolveSecretFlagWithAutoPrompt(p, cmd, passwordFlag) //nolint:staticcheck // preserve existing functionality until deprecation period is over
+	pw, err := flags.ResolveSecretFlag(p, cmd, passwordFlag)
 	if err != nil {
 		return nil, err
 	}

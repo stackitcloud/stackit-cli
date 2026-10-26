@@ -166,7 +166,7 @@ func TestParseInput(t *testing.T) {
 				globalflags.RegionFlag:    testRegion,
 				displayNameFlag:           testDisplayName,
 				intakeIdFlag:              testIntakeId,
-				passwordFlag:              "@pw.txt",
+				passwordFlag:              "@" + testPwFile,
 				userTypeFlag:              testUserType,
 			},
 			isValid: true,

@@ -207,7 +207,7 @@ func (p *Printer) PromptForPassword(prompt string) (string, error) {
 			return "", fmt.Errorf("stdin file descriptor is too large")
 		}
 		if term.IsTerminal(int(fd)) {
-			mustPrint(fmt.Fprint(p.StdErr, prompt))
+			p.Noticef("%s", prompt)
 			defer p.Noticeln("")
 			bytePassword, err := term.ReadPassword(int(fd))
 			if err != nil {

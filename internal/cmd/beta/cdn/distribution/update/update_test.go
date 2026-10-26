@@ -184,6 +184,7 @@ func TestParseInput(t *testing.T) {
 			}),
 		},
 		{
+			// Deprecated compatibility behavior; remove this case when automatic prompting is removed in 2027-04 (STACKITCLI-549).
 			description: "loki password implicit stdin",
 			argValues:   []string{testDistributionID},
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
@@ -289,6 +290,7 @@ func TestParseInput(t *testing.T) {
 			),
 		},
 		{
+			// Deprecated compatibility behavior; remove this case when automatic prompting is removed in 2027-04 (STACKITCLI-549).
 			description: "bucket password implicit stdin",
 			argValues:   []string{testDistributionID},
 			flagValues: fixtureFlagValues(

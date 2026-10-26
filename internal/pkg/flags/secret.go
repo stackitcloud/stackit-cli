@@ -126,7 +126,8 @@ func ResolveSecretFlag(p *print.Printer, cmd *cobra.Command, name string) (*stri
 // Only omission triggers the warning and prompt, never an explicitly empty file.
 //
 // Deprecated: Use ResolveSecretFlag and require explicit - for stdin. Do not use
-// this helper in new commands. Automatic prompting will be removed 2027-04.
+// this helper in new commands. Automatic prompting will be removed 2027-04
+// (STACKITCLI-549).
 func ResolveSecretFlagWithAutoPrompt(p *print.Printer, cmd *cobra.Command, name string) (*string, error) {
 	value, err := ResolveSecretFlag(p, cmd, name)
 	if err != nil || value != nil {

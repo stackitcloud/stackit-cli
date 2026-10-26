@@ -118,6 +118,7 @@ func TestParseInput(t *testing.T) {
 			}),
 		},
 		{
+			// Deprecated compatibility behavior; remove this case when automatic prompting is removed in 2027-04 (STACKITCLI-549).
 			description: "password from implicit stdin",
 			stdin:       "stdin-pw\n",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {

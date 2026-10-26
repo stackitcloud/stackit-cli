@@ -219,15 +219,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		bucketURL := flags.FlagToStringValue(p, cmd, flagBucketURL)
 		accessKeyID := flags.FlagToStringValue(p, cmd, flagBucketCredentialsAccessKeyID)
 		region := flags.FlagToStringValue(p, cmd, flagBucketRegion)
-		password, err := flags.ResolveSecretFlagWithAutoPrompt(p, cmd, flagBucketPassword) //nolint:staticcheck // preserve existing functionality until deprecation period is over
+		password, err := flags.ResolveSecretFlagWithAutoPrompt(p, cmd, flagBucketPassword) //nolint:staticcheck // Deprecated: preserve automatic prompting until 2027-04 (STACKITCLI-549).
 		if err != nil {
 			return nil, err
+		}
+		if password == nil || *password == "" {
+			return nil, fmt.Errorf("--%s must not be empty", flagBucketPassword)
 		}
 
 		bucket = &bucketInputModel{
 			URL:         bucketURL,
 			AccessKeyID: accessKeyID,
-			Password:    utils.PtrString(password),
+			Password:    *password,
 			Region:      region,
 		}
 	}
@@ -243,11 +246,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 			Username: flags.FlagToStringValue(p, cmd, flagLokiUsername),
 			PushURL:  flags.FlagToStringValue(p, cmd, flagLokiPushURL),
 		}
-		password, err := flags.ResolveSecretFlagWithAutoPrompt(p, cmd, flagLokiPassword) //nolint:staticcheck // preserve existing functionality until deprecation period is over
+		password, err := flags.ResolveSecretFlagWithAutoPrompt(p, cmd, flagLokiPassword) //nolint:staticcheck // Deprecated: preserve automatic prompting until 2027-04 (STACKITCLI-549).
 		if err != nil {
 			return nil, err
 		}
-		loki.Password = utils.PtrString(password)
+		if password == nil || *password == "" {
+			return nil, fmt.Errorf("--%s must not be empty", flagLokiPassword)
+		}
+		loki.Password = *password
 	}
 
 	optimizer := flags.FlagToBoolValue(p, cmd, flagOptimizer)

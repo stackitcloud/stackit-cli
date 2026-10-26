@@ -39,6 +39,7 @@ func newSecretTestCommand(t *testing.T, params *testparams.TestParams, autoPromp
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			var err error
 			if autoPrompt {
+				// Deprecated: test automatic prompting until its removal in 2027-04 (STACKITCLI-549).
 				*got, err = ResolveSecretFlagWithAutoPrompt(params.Printer, cmd, "password")
 			} else {
 				*got, err = ResolveSecretFlag(params.Printer, cmd, "password")
