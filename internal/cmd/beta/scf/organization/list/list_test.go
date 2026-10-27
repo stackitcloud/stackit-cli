@@ -218,7 +218,7 @@ func TestFetchOrganizations(t *testing.T) {
 			model := fixtureInputModel(func(model *inputModel) {
 				model.Limit = tt.limit
 			})
-			got, err := fetchOrganizations(testCtx, model, tt.maxPageSize, client.DefaultAPI)
+			got, err := fetchOrganizations(testCtx, nil, model, tt.maxPageSize, client.DefaultAPI)
 			if tt.wantErr {
 				if err == nil {
 					t.Fatalf("fetchOrganizations() expected error, got none")
