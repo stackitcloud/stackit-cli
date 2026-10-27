@@ -157,6 +157,7 @@ func fixturePayload(mods ...func(payload *iaas.CreateVolumePayload)) iaas.Create
 
 func TestParseInput(t *testing.T) {
 	const secretFile = "secret.txt"
+	// #nosec G101 // test-only secret value.
 	const secret = "c2VjcmV0"
 	tests := []struct {
 		description   string
