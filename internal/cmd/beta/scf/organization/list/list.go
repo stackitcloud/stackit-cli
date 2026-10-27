@@ -23,8 +23,8 @@ import (
 const (
 	limitFlag = "limit"
 
-	// maxPageSize is the maximum number of items the API returns per page.
-	maxPageSize = 100
+	// maxPageSize is the maximum number of items the API returns per page. 5000 is the maximum the API supports.
+	maxPageSize = 5000
 )
 
 type inputModel struct {
@@ -36,7 +36,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all STACKIT Cloud Foundry organizations",
-		Long:  "Lists all STACKIT Cloud Foundry organizations.",
+		Long:  fmt.Sprintf("Lists all STACKIT Cloud Foundry organizations. The number of fetched organizations is limited to %d.", maxPageSize),
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
@@ -61,7 +61,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			resp, err := fetchOrganizations(ctx, model, apiClient)
+			resp, err := fetchOrganizations(ctx, model, maxPageSize, apiClient.DefaultAPI)
 			if err != nil {
 				return fmt.Errorf("fetch STACKIT Cloud Foundry organizations: %w", err)
 			}
@@ -113,38 +113,22 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient scf.DefaultA
 	return apiClient.ListOrganizations(ctx, model.ProjectId, model.Region).WithDetails(true).Page(page).PerPage(perPage)
 }
 
-// fetchOrganizations pages through the organizations. The API pages by offset (page * perPage),
-// so perPage must stay the same for every request, otherwise pages overlap or skip items.
-// This is why we cannot use the pagination utils of the SDK here.
-func fetchOrganizations(ctx context.Context, model *inputModel, apiClient *scf.APIClient) ([]scf.OrganizationsListItem, error) {
-	perPage := int64(maxPageSize)
+// fetchOrganizations fetches the organizations without using the non AIP-compliant pagination.
+func fetchOrganizations(ctx context.Context, model *inputModel, pageSize int, apiClient scf.DefaultAPI) ([]scf.OrganizationsListItem, error) {
+	if pageSize < 1 {
+		return nil, fmt.Errorf("list STACKIT Cloud Foundry organizations: maxPageSize must not be smaller than 1")
+	}
+	perPage := int64(pageSize)
 	if model.Limit != nil && *model.Limit < perPage {
 		perPage = *model.Limit
 	}
-
-	organizations := []scf.OrganizationsListItem{}
-	for page := int64(1); ; page++ {
-		resp, err := buildRequest(ctx, model, apiClient.DefaultAPI, page, perPage).Execute()
-		if err != nil {
-			return nil, fmt.Errorf("list STACKIT Cloud Foundry organizations: %w", err)
-		}
-		if resp == nil || len(resp.Resources) == 0 {
-			break
-		}
-		organizations = append(organizations, resp.Resources...)
-
-		// Stop and truncate if limit is reached
-		if model.Limit != nil && int64(len(organizations)) >= *model.Limit {
-			organizations = organizations[:*model.Limit]
-			break
-		}
-		// Stop if no more pages
-		if int64(len(resp.Resources)) < perPage {
-			break
-		}
-		if totalPages, ok := resp.Pagination.GetTotalPagesOk(); ok && page >= *totalPages {
-			break
-		}
+	resp, err := buildRequest(ctx, model, apiClient, 1, perPage).Execute()
+	if err != nil {
+		return nil, fmt.Errorf("list STACKIT Cloud Foundry organizations: %w", err)
+	}
+	organizations := resp.Resources
+	if model.Limit != nil && int64(len(resp.Resources)) >= *model.Limit {
+		organizations = resp.Resources[:*model.Limit]
 	}
 	return organizations, nil
 }

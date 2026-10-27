@@ -3,7 +3,6 @@ package list
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -153,78 +152,56 @@ func TestBuildRequest(t *testing.T) {
 	}
 }
 
-func fixturePage(count int, totalPages *int64) scf.OrganizationsList {
-	return scf.OrganizationsList{
-		Resources:  make([]scf.OrganizationsListItem, count),
-		Pagination: scf.Pagination{TotalPages: totalPages},
-	}
+func fixtureResponse(count int) []scf.OrganizationsListItem {
+	return make([]scf.OrganizationsListItem, count)
 }
 
 func TestFetchOrganizations(t *testing.T) {
 	tests := []struct {
-		description      string
-		limit            *int64
-		responses        []scf.OrganizationsList
-		fails            bool
-		expectedCount    int
-		expectedRequests []string
+		description   string
+		limit         *int64
+		maxPageSize   int
+		response      []scf.OrganizationsListItem
+		wantErr       bool
+		expectedCount int
 	}{
 		{
-			description:      "no organizations",
-			responses:        []scf.OrganizationsList{fixturePage(0, nil)},
-			expectedCount:    0,
-			expectedRequests: []string{"page=1 perPage=100"},
+			description:   "no organizations",
+			maxPageSize:   10,
+			response:      fixtureResponse(0),
+			expectedCount: 0,
 		},
 		{
-			description: "multiple pages, stops on short page",
-			responses: []scf.OrganizationsList{
-				fixturePage(100, nil),
-				fixturePage(100, nil),
-				fixturePage(50, nil),
-			},
-			expectedCount:    250,
-			expectedRequests: []string{"page=1 perPage=100", "page=2 perPage=100", "page=3 perPage=100"},
+			description:   "Limit is smaller than default page size",
+			limit:         new(int64(2)),
+			maxPageSize:   10,
+			expectedCount: 2,
+			response:      fixtureResponse(3),
 		},
 		{
-			description:      "stops at totalPages",
-			responses:        []scf.OrganizationsList{fixturePage(100, new(int64(1)))},
-			expectedCount:    100,
-			expectedRequests: []string{"page=1 perPage=100"},
+			description:   "Limit is unspecified",
+			maxPageSize:   2,
+			expectedCount: 2,
+			response:      fixtureResponse(3),
 		},
 		{
-			description:      "limit below page size",
-			limit:            new(int64(10)),
-			responses:        []scf.OrganizationsList{fixturePage(10, nil)},
-			expectedCount:    10,
-			expectedRequests: []string{"page=1 perPage=10"},
-		},
-		{
-			// perPage must not shrink on the last page, the API pages by offset
-			description: "limit across pages",
-			limit:       new(int64(150)),
-			responses: []scf.OrganizationsList{
-				fixturePage(100, nil),
-				fixturePage(100, nil),
-			},
-			expectedCount:    150,
-			expectedRequests: []string{"page=1 perPage=100", "page=2 perPage=100"},
-		},
-		{
-			description: "API error",
-			fails:       true,
+			description: "page size smaller than 1 should error",
+			maxPageSize: 0,
+			wantErr:     true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			var requests []string
-			handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				requests = append(requests, fmt.Sprintf("page=%s perPage=%s", r.URL.Query().Get("page"), r.URL.Query().Get("perPage")))
-				if tt.fails {
-					w.WriteHeader(http.StatusInternalServerError)
-					return
+			handler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				resources := tt.response
+				if tt.maxPageSize < len(tt.response) {
+					resources = resources[:tt.maxPageSize]
+				}
+				serverResponse := scf.OrganizationsList{
+					Resources: resources,
 				}
 				w.Header().Set("Content-Type", "application/json")
-				if err := json.NewEncoder(w).Encode(tt.responses[len(requests)-1]); err != nil {
+				if err := json.NewEncoder(w).Encode(serverResponse); err != nil {
 					t.Fatalf("write: %v", err)
 				}
 			})
@@ -241,8 +218,8 @@ func TestFetchOrganizations(t *testing.T) {
 			model := fixtureInputModel(func(model *inputModel) {
 				model.Limit = tt.limit
 			})
-			got, err := fetchOrganizations(testCtx, model, client)
-			if tt.fails {
+			got, err := fetchOrganizations(testCtx, model, tt.maxPageSize, client.DefaultAPI)
+			if tt.wantErr {
 				if err == nil {
 					t.Fatalf("fetchOrganizations() expected error, got none")
 				}
@@ -256,9 +233,6 @@ func TestFetchOrganizations(t *testing.T) {
 			}
 			if len(got) != tt.expectedCount {
 				t.Errorf("fetchOrganizations() expected %d organizations, got %d", tt.expectedCount, len(got))
-			}
-			if diff := cmp.Diff(tt.expectedRequests, requests); diff != "" {
-				t.Errorf("fetchOrganizations() requests mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}

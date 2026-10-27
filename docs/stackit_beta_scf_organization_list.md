@@ -4,7 +4,7 @@ Lists all STACKIT Cloud Foundry organizations
 
 ### Synopsis
 
-Lists all STACKIT Cloud Foundry organizations.
+Lists all STACKIT Cloud Foundry organizations. The number of fetched organizations is limited to 5000.
 
 ```
 stackit beta scf organization list [flags]
