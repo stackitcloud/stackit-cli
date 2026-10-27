@@ -13,11 +13,11 @@ stackit beta intake user create [flags]
 ### Examples
 
 ```
-  Create a new Intake User with required parameters
-  $ stackit beta intake user create --display-name intake-user --intake-id xxx --password "SuperSafepass123\!"
+  Create a new Intake User with required parameters, reading the password from stdin
+  $ stackit beta intake user create --display-name intake-user --intake-id xxx --password -
 
   Create a new Intake User for the dead-letter queue with labels
-  $ stackit beta intake user create --display-name dlq-user --intake-id xxx --password "SuperSafepass123\!" --type dead-letter --labels "env=prod"
+  $ stackit beta intake user create --display-name dlq-user --intake-id xxx --password @./password.txt --type dead-letter --labels "env=prod"
 ```
 
 ### Options
@@ -28,7 +28,7 @@ stackit beta intake user create [flags]
   -h, --help                    Help for "stackit beta intake user create"
       --intake-id string        The UUID of the Intake to associate the user with
       --labels stringToString   Labels in key=value format, separated by commas (default [])
-      --password string         Password. Can be a string (deprecated) or a file path, if prefixed with '@' (example: @./secret.txt). Will be read from stdin when empty. Must contain lower, upper, number, and special characters (min 12 chars)
+      --password secret         Password. Use @<file> to read from a file (example: @./secret.txt), or - to read from stdin (hidden input on a terminal). Literal values are not supported. Must contain lower, upper, number, and special characters (min 12 chars)
       --type string             Type of user. One of 'intake' (default) or 'dead-letter' (default "intake")
 ```
 
