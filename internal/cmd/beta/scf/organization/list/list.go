@@ -61,7 +61,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			resp, err := fetchOrganizations(ctx, params.Printer, model, maxPageSize, apiClient.DefaultAPI)
+			resp, err := buildRequest(ctx, model, apiClient.DefaultAPI, 1, maxPageSize).Execute()
 			if err != nil {
 				return fmt.Errorf("fetch STACKIT Cloud Foundry organizations: %w", err)
 			}
@@ -110,38 +110,21 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient scf.DefaultAPI, page, perPage int64) scf.ApiListOrganizationsRequest {
-	return apiClient.ListOrganizations(ctx, model.ProjectId, model.Region).WithDetails(true).Page(page).PerPage(perPage)
+	pageSize := int64(perPage)
+	if model.Limit != nil && *model.Limit < pageSize {
+		pageSize = *model.Limit
+	}
+	return apiClient.ListOrganizations(ctx, model.ProjectId, model.Region).WithDetails(true).Page(page).PerPage(pageSize)
 }
 
-// fetchOrganizations fetches the organizations without using the non AIP-compliant pagination.
-func fetchOrganizations(ctx context.Context, p *print.Printer, model *inputModel, pageSize int, apiClient scf.DefaultAPI) ([]scf.OrganizationsListItem, error) {
-	if pageSize < 1 {
-		return nil, fmt.Errorf("list STACKIT Cloud Foundry organizations: maxPageSize must not be smaller than 1")
-	}
-	perPage := int64(pageSize)
-	if model.Limit != nil && *model.Limit < perPage {
-		perPage = *model.Limit
-	}
-	resp, err := buildRequest(ctx, model, apiClient, 1, perPage).Execute()
-	if err != nil {
-		return nil, fmt.Errorf("list STACKIT Cloud Foundry organizations: %w", err)
-	}
-	organizations := resp.Resources
-	if model.Limit != nil && int64(len(resp.Resources)) >= *model.Limit {
-		organizations = resp.Resources[:*model.Limit]
-	}
-
-	if resp.Pagination.TotalPages != nil && *resp.Pagination.TotalPages > int64(1) {
-		p.Warn("Server responded with more than 1 page. Output will not show all existing organizations.\n")
-	}
-	return organizations, nil
-}
-
-func outputResult(p *print.Printer, outputFormat, projectLabel string, organizations []scf.OrganizationsListItem) error {
-	return p.OutputResult(outputFormat, organizations, func() error {
-		if len(organizations) == 0 {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *scf.OrganizationsList) error {
+	return p.OutputResult(outputFormat, resp, func() error {
+		if resp == nil || len(resp.Resources) == 0 {
 			p.Outputf("No STACKIT Cloud Foundry organizations found for project %q\n", projectLabel)
 			return nil
+		}
+		if resp.Pagination.TotalPages != nil && *resp.Pagination.TotalPages > int64(1) {
+			p.Warn("Server responded with more than 1 page. Output will not show all existing organizations.\n")
 		}
 
 		table := tables.NewTable()
@@ -149,7 +132,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, organizat
 		table.SetTitle("STACKIT Cloud Foundry organizations")
 		table.SetHeader("ID", "NAME", "STATUS", "PLATFORM ID", "CREATED")
 		table.AddSeparator()
-		for _, organization := range organizations {
+		for _, organization := range resp.Resources {
 			table.AddRow(
 				organization.Guid,
 				utils.PtrString(organization.Name),

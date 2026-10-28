@@ -2,9 +2,6 @@ package list
 
 import (
 	"context"
-	"encoding/json"
-	"net/http"
-	"net/http/httptest"
 	"strconv"
 	"testing"
 	"time"
@@ -12,7 +9,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 	scf "github.com/stackitcloud/stackit-sdk-go/services/scf/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -136,6 +132,16 @@ func TestBuildRequest(t *testing.T) {
 			isValid:         true,
 			expectedRequest: fixtureRequest(),
 		},
+		{
+			description: "no limit set",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Limit = nil
+			}),
+			isValid: true,
+			expectedRequest: fixtureRequest(func(request *scf.ApiListOrganizationsRequest) {
+				request.PerPage(maxPageSize)
+			}),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
@@ -152,97 +158,11 @@ func TestBuildRequest(t *testing.T) {
 	}
 }
 
-func fixtureResponse(count int) []scf.OrganizationsListItem {
-	return make([]scf.OrganizationsListItem, count)
-}
-
-func TestFetchOrganizations(t *testing.T) {
-	tests := []struct {
-		description   string
-		limit         *int64
-		maxPageSize   int
-		response      []scf.OrganizationsListItem
-		wantErr       bool
-		expectedCount int
-	}{
-		{
-			description:   "no organizations",
-			maxPageSize:   10,
-			response:      fixtureResponse(0),
-			expectedCount: 0,
-		},
-		{
-			description:   "Limit is smaller than default page size",
-			limit:         new(int64(2)),
-			maxPageSize:   10,
-			expectedCount: 2,
-			response:      fixtureResponse(3),
-		},
-		{
-			description:   "Limit is unspecified",
-			maxPageSize:   2,
-			expectedCount: 2,
-			response:      fixtureResponse(3),
-		},
-		{
-			description: "page size smaller than 1 should error",
-			maxPageSize: 0,
-			wantErr:     true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.description, func(t *testing.T) {
-			handler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-				resources := tt.response
-				if tt.maxPageSize < len(tt.response) {
-					resources = resources[:tt.maxPageSize]
-				}
-				serverResponse := scf.OrganizationsList{
-					Resources: resources,
-				}
-				w.Header().Set("Content-Type", "application/json")
-				if err := json.NewEncoder(w).Encode(serverResponse); err != nil {
-					t.Fatalf("write: %v", err)
-				}
-			})
-			server := httptest.NewServer(handler)
-			defer server.Close()
-			client, err := scf.NewAPIClient(
-				sdkConfig.WithEndpoint(server.URL),
-				sdkConfig.WithoutAuthentication(),
-			)
-			if err != nil {
-				t.Fatalf("failed to create test client: %v", err)
-			}
-
-			model := fixtureInputModel(func(model *inputModel) {
-				model.Limit = tt.limit
-			})
-			got, err := fetchOrganizations(testCtx, nil, model, tt.maxPageSize, client.DefaultAPI)
-			if tt.wantErr {
-				if err == nil {
-					t.Fatalf("fetchOrganizations() expected error, got none")
-				}
-				return
-			}
-			if err != nil {
-				t.Fatalf("fetchOrganizations() unexpected error: %v", err)
-			}
-			if got == nil {
-				t.Errorf("fetchOrganizations() returned nil slice, expected empty slice")
-			}
-			if len(got) != tt.expectedCount {
-				t.Errorf("fetchOrganizations() expected %d organizations, got %d", tt.expectedCount, len(got))
-			}
-		})
-	}
-}
-
 func TestOutputResult(t *testing.T) {
 	type args struct {
 		outputFormat  string
 		projectLabel  string
-		organizations []scf.OrganizationsListItem
+		organizations *scf.OrganizationsList
 	}
 	tests := []struct {
 		name    string
@@ -265,8 +185,10 @@ func TestOutputResult(t *testing.T) {
 		{
 			name: "empty organizations slice",
 			args: args{
-				projectLabel:  testProjectId,
-				organizations: []scf.OrganizationsListItem{},
+				projectLabel: testProjectId,
+				organizations: &scf.OrganizationsList{
+					Resources: []scf.OrganizationsListItem{},
+				},
 			},
 			wantErr: false,
 		},
@@ -274,8 +196,10 @@ func TestOutputResult(t *testing.T) {
 			name: "empty organization struct",
 			args: args{
 				projectLabel: testProjectId,
-				organizations: []scf.OrganizationsListItem{
-					{},
+				organizations: &scf.OrganizationsList{
+					Resources: []scf.OrganizationsListItem{
+						{},
+					},
 				},
 			},
 			wantErr: false,
@@ -284,12 +208,14 @@ func TestOutputResult(t *testing.T) {
 			name: "valid organizations",
 			args: args{
 				projectLabel: testProjectId,
-				organizations: []scf.OrganizationsListItem{
-					{
-						Guid:      testOrganization,
-						Name:      new("my-org"),
-						Status:    "active",
-						CreatedAt: new(time.Now()),
+				organizations: &scf.OrganizationsList{
+					Resources: []scf.OrganizationsListItem{
+						{
+							Guid:      testOrganization,
+							Name:      new("my-org"),
+							Status:    "active",
+							CreatedAt: new(time.Now()),
+						},
 					},
 				},
 			},
