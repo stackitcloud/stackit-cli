@@ -610,8 +610,8 @@ github.com/ssgreg/nlreturn/v2 v2.2.1 h1:X4XDI7jstt3ySqGU86YGAURbxw3oTDPK9sPEi6YE
 github.com/ssgreg/nlreturn/v2 v2.2.1/go.mod h1:E/iiPB78hV7Szg2YfRgyIrk1AD6JVMTRkkxBiELzh2I=
 github.com/stackitcloud/stackit-sdk-go/core v0.27.1 h1:k7SrqqMoHjkvHbx6n6nV3Lt51itp8nNplht6vGHkPhw=
 github.com/stackitcloud/stackit-sdk-go/core v0.27.1/go.mod h1:WU1hhxnjXw2EV7CYa1nlEvNpMiRY6CvmIOaHuL3pOaA=
-github.com/stackitcloud/stackit-sdk-go/services/alb v0.18.0 h1:xJJS4REIKMn31Agzsb7Tdmr0B/yg1cuetx8lKhzWdw8=
-github.com/stackitcloud/stackit-sdk-go/services/alb v0.18.0/go.mod h1:zEx3JFbwg1VLB9uKa2P4BA2DdypghX1FT8mbJU+msjE=
+github.com/stackitcloud/stackit-sdk-go/services/alb v0.20.0 h1:YT/1o6fRLSjBiOoYqX7j1PpppPuRe2TzaAYhavmoTG4=
+github.com/stackitcloud/stackit-sdk-go/services/alb v0.20.0/go.mod h1:1BEa7Q0enW0oWZ3ibGdcYXOeadp0QUR8/A731mciQwU=
 github.com/stackitcloud/stackit-sdk-go/services/albwaf v0.13.5 h1:/+dqndnOwG6sHYlUWShOfSoDjUX8iU+5DKIeFTKtCLQ=
 github.com/stackitcloud/stackit-sdk-go/services/albwaf v0.13.5/go.mod h1:o6kIPueaI/+9K2XW5ENNkjGyu+euuLKlunr+xhXAS6Y=
 github.com/stackitcloud/stackit-sdk-go/services/authorization v0.16.0 h1:I4NJalm+y2hVk+NhK4nCW86U7i8kTkDqF89eFPReaxw=
