@@ -24,20 +24,31 @@ stackit volume create [flags]
 
   Create a volume with availability zone "eu01-1", performance class "storage_premium_perf1" and size 64 GB
   $ stackit volume create --availability-zone eu01-1 --performance-class storage_premium_perf1 --size 64
+
+  Create an encrypted volume using a STACKIT KMS key
+  $ stackit volume create --availability-zone eu01-1 --size 64 --encryption-kek-key-id xxx --encryption-kek-keyring-id yyy --encryption-kek-key-version 1 --encryption-service-account service-account@example.com
+
+  Create an encrypted volume with a predefined base64-encoded secret read from a file
+  $ stackit volume create --availability-zone eu01-1 --size 64 --encryption-kek-key-id xxx --encryption-kek-keyring-id yyy --encryption-kek-key-version 1 --encryption-service-account service-account@example.com --encryption-key-payload-base64 @./secret.txt
 ```
 
 ### Options
 
 ```
-      --availability-zone string   Availability zone
-      --description string         Volume description
-  -h, --help                       Help for "stackit volume create"
-      --labels stringToString      Labels are key-value string pairs which can be attached to a volume. E.g. '--labels key1=value1,key2=value2,...' (default [])
-  -n, --name string                Volume name
-      --performance-class string   Performance class
-      --size int                   Volume size (GB). Either 'size' or the 'source-id' and 'source-type' flags must be given
-      --source-id string           ID of the source object of volume. Either 'size' or the 'source-id' and 'source-type' flags must be given
-      --source-type string         Type of the source object of volume. Either 'size' or the 'source-id' and 'source-type' flags must be given
+      --availability-zone string               Availability zone
+      --description string                     Volume description
+      --encryption-kek-key-id string           UUID of the STACKIT KMS key used for encryption
+      --encryption-kek-key-version int         Version of the STACKIT KMS key used for encryption
+      --encryption-kek-keyring-id string       UUID of the STACKIT KMS keyring containing the key
+      --encryption-key-payload-base64 secret   Encryption-Key-Payload-Base64. Use @<file> to read from a file (example: @./secret.txt), or - to read from stdin (hidden input on a terminal). Literal values are not supported. Must be base64 encoded. If omitted, the API generates a random secret.
+      --encryption-service-account string      Service account linked to the STACKIT KMS key
+  -h, --help                                   Help for "stackit volume create"
+      --labels stringToString                  Labels are key-value string pairs which can be attached to a volume. E.g. '--labels key1=value1,key2=value2,...' (default [])
+  -n, --name string                            Volume name
+      --performance-class string               Performance class
+      --size int                               Volume size (GB). Either 'size' or the 'source-id' and 'source-type' flags must be given
+      --source-id string                       ID of the source object of volume. Either 'size' or the 'source-id' and 'source-type' flags must be given
+      --source-type string                     Type of the source object of volume. Either 'size' or the 'source-id' and 'source-type' flags must be given
 ```
 
 ### Options inherited from parent commands
