@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/cdn"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/edge"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/intake"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/scf"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/volume"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/vpn"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -47,6 +48,7 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(albwaf.NewCmd(params))
 	cmd.AddCommand(edge.NewCmd(params))
 	cmd.AddCommand(intake.NewCmd(params))
+	cmd.AddCommand(scf.NewCmd(params))
 	cmd.AddCommand(cdn.NewCmd(params))
 	cmd.AddCommand(vpn.NewCmd(params))
 }
