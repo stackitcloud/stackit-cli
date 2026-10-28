@@ -3,7 +3,6 @@ package create
 import (
 	"context"
 	"fmt"
-	"reflect"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
@@ -188,21 +187,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		EncryptionServiceAccount: flags.FlagToStringPointer(p, cmd, encryptionServiceAccountFlag),
 	}
 
-	// encryptionKeyPayloadFlag only valid with other encryption flags set
-	if cmd.Flags().Changed(encryptionKeyPayloadFlag) {
-		flagToValue := map[string]any{
-			encryptionKekKeyIdFlag:       model.EncryptionKekKeyId,
-			encryptionKekKeyringIdFlag:   model.EncryptionKekKeyringId,
-			encryptionKekKeyVersionFlag:  model.EncryptionKekKeyVersion,
-			encryptionServiceAccountFlag: model.EncryptionServiceAccount,
-		}
-		for key, value := range flagToValue {
-			if reflect.ValueOf(value).IsNil() {
-				return nil, &cliErr.FlagValidationError{
-					Flag:    key,
-					Details: fmt.Sprintf("when using flag %q, flag %q is required", encryptionKeyPayloadFlag, key),
-				}
-			}
+	// Cobra requires the encryption parameters together, so checking one is sufficient.
+	if cmd.Flags().Changed(encryptionKeyPayloadFlag) && model.EncryptionKekKeyId == nil {
+		return nil, &cliErr.FlagValidationError{
+			Flag:    encryptionKekKeyIdFlag,
+			Details: fmt.Sprintf("when using flag %q, flag %q is required", encryptionKeyPayloadFlag, encryptionKekKeyIdFlag),
 		}
 	}
 
