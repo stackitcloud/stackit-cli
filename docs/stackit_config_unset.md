@@ -56,6 +56,7 @@ stackit config unset [flags]
       --rabbitmq-custom-endpoint                            RabbitMQ API base URL. If unset, uses the default base URL
       --redis-custom-endpoint                               Redis API base URL. If unset, uses the default base URL
       --region                                              Region
+      --registry-custom-endpoint                            Registry API base URL. If unset, uses the default base URL
       --resource-manager-custom-endpoint                    Resource Manager API base URL. If unset, uses the default base URL
       --runcommand-custom-endpoint                          Server Command base URL. If unset, uses the default base URL
       --scf-custom-endpoint                                 STACKIT Cloud Foundry API base URL. If unset, uses the default base URL

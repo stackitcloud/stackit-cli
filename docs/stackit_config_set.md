@@ -54,6 +54,7 @@ stackit config set [flags]
       --postgresflex-custom-endpoint string                        PostgreSQL Flex API base URL, used in calls to this API
       --rabbitmq-custom-endpoint string                            RabbitMQ API base URL, used in calls to this API
       --redis-custom-endpoint string                               Redis API base URL, used in calls to this API
+      --registry-custom-endpoint string                            Registry API base URL, used in calls to this API
       --resource-manager-custom-endpoint string                    Resource Manager API base URL, used in calls to this API
       --runcommand-custom-endpoint string                          Run Command API base URL, used in calls to this API
       --scf-custom-endpoint string                                 STACKIT Cloud Foundry API base URL, used in calls to this API

@@ -58,6 +58,7 @@ const (
 	scfCustomEndpointFlag               = "scf-custom-endpoint"
 	cdnCustomEndpointFlag               = "cdn-custom-endpoint"
 	vpnCustomEndpointFlag               = "vpn-custom-endpoint"
+	registryCustomEndpointFlag          = "registry-custom-endpoint"
 )
 
 type inputModel struct {
@@ -182,6 +183,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(scfCustomEndpointFlag, "", "STACKIT Cloud Foundry API base URL, used in calls to this API")
 	cmd.Flags().String(cdnCustomEndpointFlag, "", "CDN API base URL, used in calls to this API")
 	cmd.Flags().String(vpnCustomEndpointFlag, "", "VPN API base URL, used in calls to this API")
+	cmd.Flags().String(registryCustomEndpointFlag, "", "Registry API base URL, used in calls to this API")
 
 	err := viper.BindPFlag(config.SessionTimeLimitKey, cmd.Flags().Lookup(sessionTimeLimitFlag))
 	cobra.CheckErr(err)
@@ -259,6 +261,8 @@ func configureFlags(cmd *cobra.Command) {
 	err = viper.BindPFlag(config.CDNCustomEndpointKey, cmd.Flags().Lookup(cdnCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.VPNCustomEndpointKey, cmd.Flags().Lookup(vpnCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.RegistryCustomEndpointKey, cmd.Flags().Lookup(registryCustomEndpointFlag))
 	cobra.CheckErr(err)
 }
 
