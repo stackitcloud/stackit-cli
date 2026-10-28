@@ -34,7 +34,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", volumeIdArg),
 		Short: "Shows details of a volume",
-		Long:  "Shows details of a volume.",
+		Long:  "Shows details of a volume, including its encryption status.",
 		Args:  args.SingleArg(volumeIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
@@ -60,7 +60,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read volume: %w", err)
@@ -89,8 +89,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiGetVolumeRequest {
-	return apiClient.DefaultAPI.GetVolume(ctx, model.ProjectId, model.Region, model.VolumeId)
+func buildRequest(ctx context.Context, model *inputModel, apiClient iaas.DefaultAPI) iaas.ApiGetVolumeRequest {
+	return apiClient.GetVolume(ctx, model.ProjectId, model.Region, model.VolumeId)
 }
 
 func outputResult(p *print.Printer, outputFormat string, volume *iaas.Volume) error {
@@ -110,6 +110,9 @@ func outputResult(p *print.Printer, outputFormat string, volume *iaas.Volume) er
 		table.AddRow("PERFORMANCE CLASS", utils.PtrString(volume.PerformanceClass))
 		table.AddSeparator()
 		table.AddRow("AVAILABILITY ZONE", volume.AvailabilityZone)
+		table.AddSeparator()
+
+		table.AddRow("ENCRYPTED", utils.PtrString(volume.Encrypted))
 		table.AddSeparator()
 
 		if volume.Source != nil {
