@@ -131,3 +131,5 @@ Using this flow is less secure since the token is long-lived. You can provide th
    # Optional: provide a file path containing the OIDC token
    STACKIT_FEDERATED_TOKEN_FILE=/path/to/oidc-token.jwt
    ```
+
+   When running in Azure DevOps with the [STACKIT Service Connection](https://marketplace.visualstudio.com/items?itemName=SchwarzDigits.stackit-service-connection), the CLI reads `STACKIT_SERVICE_CONNECTION_ID` and requests the OIDC token for that service connection.

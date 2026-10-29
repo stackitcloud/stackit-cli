@@ -33,6 +33,8 @@ type mockSettings struct {
 	getZoneResp       *dns.ZoneResponse
 	getRecordSetFails bool
 	getRecordSetResp  *dns.RecordSetResponse
+	listZonesFails    bool
+	listZonesResp     *dns.ListZonesResponse
 }
 
 func newAPIMock(settings *mockSettings) dns.DefaultAPI {
@@ -50,6 +52,13 @@ func newAPIMock(settings *mockSettings) dns.DefaultAPI {
 			}
 
 			return settings.getRecordSetResp, nil
+		}),
+		ListZonesExecuteMock: utils.Ptr(func(_ dns.ApiListZonesRequest) (*dns.ListZonesResponse, error) {
+			if settings.listZonesFails {
+				return nil, fmt.Errorf("could not list zones")
+			}
+
+			return settings.listZonesResp, nil
 		}),
 	}
 }
@@ -87,6 +96,73 @@ func TestGetZoneName(t *testing.T) {
 			})
 
 			output, err := GetZoneName(context.Background(), client, testProjectId, testZoneId)
+
+			if tt.isValid && err != nil {
+				t.Errorf("failed on valid input")
+			}
+			if !tt.isValid && err == nil {
+				t.Errorf("did not fail on invalid input")
+			}
+			if !tt.isValid {
+				return
+			}
+			if output != tt.expectedOutput {
+				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
+			}
+		})
+	}
+}
+
+func TestGetZoneIdByDnsName(t *testing.T) {
+	tests := []struct {
+		description    string
+		listZonesFails bool
+		listZonesResp  *dns.ListZonesResponse
+		isValid        bool
+		expectedOutput string
+	}{
+		{
+			description: "base",
+			listZonesResp: &dns.ListZonesResponse{
+				Zones: []dns.Zone{
+					{Id: testZoneId},
+				},
+			},
+			isValid:        true,
+			expectedOutput: testZoneId,
+		},
+		{
+			description:    "list zones fails",
+			listZonesFails: true,
+			isValid:        false,
+		},
+		{
+			description: "no zone found",
+			listZonesResp: &dns.ListZonesResponse{
+				Zones: []dns.Zone{},
+			},
+			isValid: false,
+		},
+		{
+			description: "multiple zones found",
+			listZonesResp: &dns.ListZonesResponse{
+				Zones: []dns.Zone{
+					{Id: testZoneId},
+					{Id: uuid.NewString()},
+				},
+			},
+			isValid: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			client := newAPIMock(&mockSettings{
+				listZonesFails: tt.listZonesFails,
+				listZonesResp:  tt.listZonesResp,
+			})
+
+			output, err := GetZoneIdByDnsName(context.Background(), client, testProjectId, testZoneName)
 
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")

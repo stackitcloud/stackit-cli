@@ -24,6 +24,7 @@ const (
 	AllowedUrlDomainKey                             = "allowed_url_domain"
 
 	AuthorizationCustomEndpointKey    = "authorization_custom_endpoint"
+	AutomationCustomEndpointKey       = "automation_custom_endpoint"
 	AlbCustomEndpoint                 = "alb_custom _endpoint"
 	AlbWafCustomEndpointKey           = "alb_waf_custom_endpoint"
 	DNSCustomEndpointKey              = "dns_custom_endpoint"
@@ -31,14 +32,14 @@ const (
 	LoadBalancerCustomEndpointKey     = "load_balancer_custom_endpoint"
 	LogMeCustomEndpointKey            = "logme_custom_endpoint"
 	MariaDBCustomEndpointKey          = "mariadb_custom_endpoint"
+  ModelExperimentsCustomEndpointKey = "modelexperiments_custom_endpoint"
 	MongoDBFlexCustomEndpointKey      = "mongodbflex_custom_endpoint"
 	ObjectStorageCustomEndpointKey    = "object_storage_custom_endpoint"
 	ObservabilityCustomEndpointKey    = "observability_custom_endpoint"
 	OpenSearchCustomEndpointKey       = "opensearch_custom_endpoint"
 	PostgresFlexCustomEndpointKey     = "postgresflex_custom_endpoint"
 	RabbitMQCustomEndpointKey         = "rabbitmq_custom_endpoint"
-	ModelExperimentsCustomEndpointKey = "modelexperiments_custom_endpoint"
-	AutomationCustomEndpointKey       = "automation_custom_endpoint"
+	ScfCustomEndpointKey              = "scf_custom_endpoint"
 	// Deprecated: Will be removed after 2027-08-31.
 	RedisCustomEndpointKey             = "redis_custom_endpoint"
 	ResourceManagerEndpointKey         = "resource_manager_custom_endpoint"
@@ -123,6 +124,7 @@ var ConfigKeys = []string{
 	RedisCustomEndpointKey,
 	ResourceManagerEndpointKey,
 	RunCommandCustomEndpointKey,
+	ScfCustomEndpointKey,
 	SKECustomEndpointKey,
 	SQLServerFlexCustomEndpointKey,
 	SecretsManagerCustomEndpointKey,
@@ -217,6 +219,7 @@ func setConfigDefaults() {
 	viper.SetDefault(ServerBackupCustomEndpointKey, "")
 	viper.SetDefault(ServerOsUpdateCustomEndpointKey, "")
 	viper.SetDefault(RunCommandCustomEndpointKey, "")
+	viper.SetDefault(ScfCustomEndpointKey, "")
 	viper.SetDefault(SKECustomEndpointKey, "")
 	viper.SetDefault(SQLServerFlexCustomEndpointKey, "")
 	viper.SetDefault(IaaSAlphaCustomEndpointKey, "")

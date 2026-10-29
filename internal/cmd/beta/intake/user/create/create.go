@@ -49,11 +49,11 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(
-				`Create a new Intake User with required parameters`,
-				`$ stackit beta intake user create --display-name intake-user --intake-id xxx --password "SuperSafepass123\!"`),
+				`Create a new Intake User with required parameters, reading the password from stdin`,
+				`$ stackit beta intake user create --display-name intake-user --intake-id xxx --password -`),
 			examples.NewExample(
 				`Create a new Intake User for the dead-letter queue with labels`,
-				`$ stackit beta intake user create --display-name dlq-user --intake-id xxx --password "SuperSafepass123\!" --type dead-letter --labels "env=prod"`),
+				`$ stackit beta intake user create --display-name dlq-user --intake-id xxx --password @./password.txt --type dead-letter --labels "env=prod"`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
@@ -128,11 +128,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		GlobalFlagModel: globalFlags,
 		DisplayName:     flags.FlagToStringPointer(p, cmd, displayNameFlag),
 		IntakeId:        flags.FlagToStringPointer(p, cmd, intakeIdFlag),
-		Password:        flags.SecretFlagToStringPointer(p, cmd, passwordFlag),
 		UserType:        flags.FlagToStringPointer(p, cmd, userTypeFlag),
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelsFlag),
 	}
+	pw, err := flags.ResolveSecretFlag(p, cmd, passwordFlag)
+	if err != nil {
+		return nil, err
+	}
+	model.Password = pw
 
 	p.DebugInputModel(model)
 	return &model, nil

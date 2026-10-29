@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"testing/fstest"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
+	"github.com/spf13/cobra"
 	sdkUtils "github.com/stackitcloud/stackit-sdk-go/core/utils"
 	cdn "github.com/stackitcloud/stackit-sdk-go/services/cdn/v1api"
 	"k8s.io/utils/ptr"
@@ -17,6 +19,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
@@ -26,7 +29,11 @@ var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
 var testClient = &cdn.APIClient{DefaultAPI: &cdn.DefaultAPIService{}}
 var testProjectId = uuid.NewString()
 
-const testRegions = cdn.REGION_EU
+const (
+	testRegions = cdn.REGION_EU
+	testPwFile  = "pw.txt"
+	testPw      = "file-pw"
+)
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
@@ -55,6 +62,7 @@ func flagsBucketBackend() func(flagValues map[string]string) {
 		flagValues[flagBucketURL] = "https://bucket-backend.example.com"
 		flagValues[flagBucketCredentialsAccessKeyID] = "access-key-id"
 		flagValues[flagBucketRegion] = "eu"
+		flagValues[flagBucketPassword] = "@" + testPwFile
 	}
 }
 
@@ -63,6 +71,7 @@ func flagsLoki() func(flagValues map[string]string) {
 		flagValues[flagLoki] = "true"
 		flagValues[flagLokiPushURL] = "https://loki.example.com"
 		flagValues[flagLokiUsername] = "loki-user"
+		flagValues[flagLokiPassword] = "@" + testPwFile
 	}
 }
 
@@ -114,6 +123,7 @@ func modelBucketBackend() func(model *inputModel) {
 			URL:         "https://bucket-backend.example.com",
 			AccessKeyID: "access-key-id",
 			Region:      "eu",
+			Password:    testPw,
 		}
 	}
 }
@@ -123,6 +133,7 @@ func modelLoki() func(model *inputModel) {
 		model.Loki = &lokiInputModel{
 			PushURL:  "https://loki.example.com",
 			Username: "loki-user",
+			Password: testPw,
 		}
 	}
 }
@@ -158,7 +169,7 @@ func payloadBucketBackend() func(payload *cdn.CreateDistributionPayload) {
 				Region:    "eu",
 				Credentials: *cdn.NewBucketCredentials(
 					"access-key-id",
-					"",
+					testPw,
 				),
 			},
 		}
@@ -171,7 +182,7 @@ func payloadLoki() func(payload *cdn.CreateDistributionPayload) {
 			LokiLogSinkCreate: &cdn.LokiLogSinkCreate{
 				Type:        "loki",
 				PushUrl:     "https://loki.example.com",
-				Credentials: *cdn.NewLokiLogSinkCredentials("", "loki-user"),
+				Credentials: *cdn.NewLokiLogSinkCredentials(testPw, "loki-user"),
 			},
 		}
 	}
@@ -184,13 +195,15 @@ func fixtureRequest(mods ...func(payload *cdn.CreateDistributionPayload)) cdn.Ap
 }
 
 func TestParseInput(t *testing.T) {
-	tests := []struct {
+	type testCase struct {
 		description string
 		argValues   []string
 		flagValues  map[string]string
+		stdin       string
 		isValid     bool
 		expected    *inputModel
-	}{
+	}
+	tests := []testCase{
 		{
 			description: "base",
 			flagValues:  fixtureFlagValues(),
@@ -261,6 +274,51 @@ func TestParseInput(t *testing.T) {
 				flagsBucketBackend(),
 				func(flagValues map[string]string) {
 					delete(flagValues, flagBucketRegion)
+				},
+			),
+			isValid: false,
+		},
+		{
+			description: "bucket backend password explicit stdin",
+			flagValues: fixtureFlagValues(
+				flagsBucketBackend(),
+				func(flagValues map[string]string) {
+					flagValues[flagBucketPassword] = "-"
+				},
+			),
+			isValid: true,
+			stdin:   "stdin-pw\n",
+			expected: fixtureModel(
+				modelBucketBackend(),
+				func(model *inputModel) {
+					model.Bucket.Password = "stdin-pw"
+				},
+			),
+		},
+		{
+			// Deprecated compatibility behavior; remove this case when automatic prompting is removed in 2027-04 (STACKITCLI-549).
+			description: "bucket backend password implicit stdin",
+			flagValues: fixtureFlagValues(
+				flagsBucketBackend(),
+				func(flagValues map[string]string) {
+					delete(flagValues, flagBucketPassword)
+				},
+			),
+			isValid: true,
+			stdin:   "stdin-pw\n",
+			expected: fixtureModel(
+				modelBucketBackend(),
+				func(model *inputModel) {
+					model.Bucket.Password = "stdin-pw"
+				},
+			),
+		},
+		{
+			description: "bucket backend password literal rejected",
+			flagValues: fixtureFlagValues(
+				flagsBucketBackend(),
+				func(flagValues map[string]string) {
+					flagValues[flagBucketPassword] = "top-secret"
 				},
 			),
 			isValid: false,
@@ -387,6 +445,50 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
+			description: "loki password explicit stdin",
+			flagValues: fixtureFlagValues(
+				flagsLoki(),
+				func(flagValues map[string]string) {
+					flagValues[flagLokiPassword] = "-"
+				},
+			),
+			isValid: true,
+			stdin:   "stdin-pw\n",
+			expected: fixtureModel(
+				modelLoki(),
+				func(model *inputModel) {
+					model.Loki.Password = "stdin-pw"
+				},
+			),
+		},
+		{
+			// Deprecated compatibility behavior; remove this case when automatic prompting is removed in 2027-04 (STACKITCLI-549).
+			description: "loki password implicit stdin",
+			flagValues: fixtureFlagValues(
+				flagsLoki(),
+				func(flagValues map[string]string) {
+					delete(flagValues, flagLokiPassword)
+				},
+			),
+			isValid: true,
+			stdin:   "stdin-pw\n",
+			expected: fixtureModel(
+				modelLoki(),
+				func(model *inputModel) {
+					model.Loki.Password = "stdin-pw"
+				},
+			),
+		},
+		{description: "loki password literal rejected",
+			flagValues: fixtureFlagValues(
+				flagsLoki(),
+				func(flagValues map[string]string) {
+					flagValues[flagLokiPassword] = "top-secret"
+				},
+			),
+			isValid: false,
+		},
+		{
 			description: "with monthly limit bytes",
 			flagValues: fixtureFlagValues(
 				func(flagValues map[string]string) {
@@ -401,7 +503,13 @@ func TestParseInput(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			testutils.TestParseInput(t, NewCmd, parseInput, tt.expected, tt.argValues, tt.flagValues, tt.isValid)
+			testutils.TestParseInput(t, func(params *types.CmdParams) *cobra.Command {
+				params.Fs = fstest.MapFS{
+					testPwFile: {Data: []byte(testPw)},
+				}
+				params.Printer.StdIn = strings.NewReader(tt.stdin)
+				return NewCmd(params)
+			}, parseInput, tt.expected, tt.argValues, tt.flagValues, tt.isValid)
 		})
 	}
 }

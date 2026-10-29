@@ -97,6 +97,16 @@ func (p *Printer) Outputln(msg string) {
 	mustPrint(fmt.Fprintln(p.StdOut, msg))
 }
 
+// Noticef prints a formatted notice to StdErr, regardless of verbosity or output format.
+func (p *Printer) Noticef(msg string, args ...any) {
+	mustPrint(fmt.Fprintf(p.StdErr, msg, args...))
+}
+
+// Noticeln prints a notice followed by a newline to StdErr, regardless of verbosity or output format.
+func (p *Printer) Noticeln(msg string) {
+	mustPrint(fmt.Fprintln(p.StdErr, msg))
+}
+
 // Print a Debug level log through the "slog" package.
 // If the verbosity level is not Debug, it does nothing
 func (p *Printer) Debug(level Level, msg string, args ...any) {
@@ -186,21 +196,20 @@ func (p *Printer) PromptForEnter(prompt string) error {
 	return nil
 }
 
-// Prompts the user for a password.
-//
-// Returns the password that was given, otherwise returns error
+// PromptForPassword reads a password regardless of AssumeYes. On a terminal,
+// input is hidden and the prompt and formatting newline are written to stderr.
+// Redirected input is read without prompting or buffering ahead: one line with
+// the terminating LF/CRLF removed, preserving spaces and accepting EOF after data.
 func (p *Printer) PromptForPassword(prompt string) (string, error) {
-	mustPrint(fmt.Fprint(p.StdErr, prompt))
-	defer p.Outputln("")
-
 	if f, ok := p.StdIn.(*os.File); ok {
-		uint_fd := f.Fd()
-		if uint_fd > math.MaxInt {
-			return "", fmt.Errorf("uint_fd is too large")
+		fd := f.Fd()
+		if fd > math.MaxInt {
+			return "", fmt.Errorf("stdin file descriptor is too large")
 		}
-		fd := int(uint_fd)
-		if term.IsTerminal(fd) {
-			bytePassword, err := term.ReadPassword(fd)
+		if term.IsTerminal(int(fd)) {
+			p.Noticef("%s", prompt)
+			defer p.Noticeln("")
+			bytePassword, err := term.ReadPassword(int(fd))
 			if err != nil {
 				return "", fmt.Errorf("read password: %w", err)
 			}
@@ -208,13 +217,23 @@ func (p *Printer) PromptForPassword(prompt string) (string, error) {
 		}
 	}
 
-	// Fallback for non-terminal environments
-	reader := bufio.NewReader(p.StdIn)
-	pw, err := reader.ReadString('\n')
-	if err != nil {
-		return "", fmt.Errorf("read password from non-terminal: %w", err)
+	// Do not buffer ahead: the next line may belong to another password or a
+	// confirmation prompt.
+	var input strings.Builder
+	var buf [1]byte
+	for {
+		_, err := io.ReadFull(p.StdIn, buf[:])
+		if err != nil {
+			if errors.Is(err, io.EOF) && input.Len() > 0 {
+				return input.String(), nil
+			}
+			return "", fmt.Errorf("read password from non-terminal: %w", err)
+		}
+		if buf[0] == '\n' {
+			return strings.TrimSuffix(input.String(), "\r"), nil
+		}
+		input.WriteByte(buf[0])
 	}
-	return pw[:len(pw)-1], nil // remove trailing newline
 }
 
 // Shows the content in the command's stdout using the "less" command

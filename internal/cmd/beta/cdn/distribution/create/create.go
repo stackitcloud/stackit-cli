@@ -94,13 +94,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			examples.NewExample(
 				`Create a CDN distribution with an Object Storage backend`,
 				`$ stackit beta cdn distribution create --bucket --bucket-url https://bucket.example.com \
---bucket-credentials-access-key-id yyyy --bucket-region EU \
+--bucket-credentials-access-key-id yyyy --bucket-password - --bucket-region EU \
 --regions AF,EU`,
 			),
 			examples.NewExample(
-				`Create a CDN distribution passing the password via stdin, take care that there's a '\n' at the end of the input'`,
+				`Create a CDN distribution passing the password via stdin`,
 				`$ cat secret.txt | stackit beta cdn distribution create -y --project-id xxx \
---bucket --bucket-url https://bucket.example.com --bucekt-credentials-access-key-id yyyy --bucket-region EU \
+--bucket --bucket-url https://bucket.example.com --bucket-credentials-access-key-id yyyy --bucket-password - --bucket-region EU \
 --regions AF,EU`,
 			),
 		),
@@ -219,12 +219,18 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		bucketURL := flags.FlagToStringValue(p, cmd, flagBucketURL)
 		accessKeyID := flags.FlagToStringValue(p, cmd, flagBucketCredentialsAccessKeyID)
 		region := flags.FlagToStringValue(p, cmd, flagBucketRegion)
-		password := flags.SecretFlagToString(p, cmd, flagBucketPassword)
+		password, err := flags.ResolveSecretFlagWithAutoPrompt(p, cmd, flagBucketPassword) //nolint:staticcheck // Deprecated: preserve automatic prompting until 2027-04 (STACKITCLI-549).
+		if err != nil {
+			return nil, err
+		}
+		if password == nil || *password == "" {
+			return nil, fmt.Errorf("--%s must not be empty", flagBucketPassword)
+		}
 
 		bucket = &bucketInputModel{
 			URL:         bucketURL,
 			AccessKeyID: accessKeyID,
-			Password:    password,
+			Password:    *password,
 			Region:      region,
 		}
 	}
@@ -239,8 +245,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		loki = &lokiInputModel{
 			Username: flags.FlagToStringValue(p, cmd, flagLokiUsername),
 			PushURL:  flags.FlagToStringValue(p, cmd, flagLokiPushURL),
-			Password: flags.SecretFlagToString(p, cmd, flagLokiPassword),
 		}
+		password, err := flags.ResolveSecretFlagWithAutoPrompt(p, cmd, flagLokiPassword) //nolint:staticcheck // Deprecated: preserve automatic prompting until 2027-04 (STACKITCLI-549).
+		if err != nil {
+			return nil, err
+		}
+		if password == nil || *password == "" {
+			return nil, fmt.Errorf("--%s must not be empty", flagLokiPassword)
+		}
+		loki.Password = *password
 	}
 
 	optimizer := flags.FlagToBoolValue(p, cmd, flagOptimizer)

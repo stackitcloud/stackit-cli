@@ -28,7 +28,7 @@ type inputModel struct {
 }
 
 const (
-	limitFlag   = ""
+	limitFlag   = "limit"
 	maxPageSize = int32(100)
 )
 
