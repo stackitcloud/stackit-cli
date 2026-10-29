@@ -14,15 +14,17 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/modelexperiments/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	modelexperiments "github.com/stackitcloud/stackit-sdk-go/services/modelexperiments/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/modelexperiments/v1api/wait"
 )
 
 const (
 	nameFlag        = "name"
 	descriptionFlag = "description"
-	labelFlag       = "label"
+	labelsFlag      = "labels"
 	retentionFlag   = "deleted-experiment-retention"
 )
 
@@ -47,12 +49,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				`$ stackit model-experiments instance create --name my-tracking`),
 			examples.NewExample(
 				`Create an instance with a description and labels`,
-				`$ stackit model-experiments instance create --name my-tracking --description "team tracking server" --label env=prod`),
+				`$ stackit model-experiments instance create --name my-tracking --description "team tracking server" --labels env=prod,team=ml`),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
 
-			model, err := parseInput(params.Printer, cmd, args)
+			model, err := parseInput(params.Printer, cmd, nil)
 			if err != nil {
 				return err
 			}
@@ -78,8 +80,21 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("create AI Model Experiments instance: %w", err)
 			}
+			if resp == nil {
+				return fmt.Errorf("create AI Model Experiments instance: response instance is nil")
+			}
 
-			return outputResult(params.Printer, model.OutputFormat, projectLabel, resp)
+			if !model.Async {
+				err := spinner.Run(params.Printer, "Creating AI Model Experiments instance", func() error {
+					_, err = wait.CreateInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.Region, model.ProjectId, resp.Instance.Id).WaitWithContext(ctx)
+					return err
+				})
+				if err != nil {
+					return fmt.Errorf("wait for AI Model Experiments instance creation: %w", err)
+				}
+			}
+
+			return outputResult(params.Printer, model.OutputFormat, model.Async, projectLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -89,7 +104,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(nameFlag, "n", "", "Instance name")
 	cmd.Flags().String(descriptionFlag, "", "Instance description")
-	cmd.Flags().StringToString(labelFlag, nil, `Labels as key-value pairs, e.g. "--label env=prod"`)
+	cmd.Flags().StringToString(labelsFlag, nil, `Labels as comma-separated key-value pairs, e.g. "--labels env=prod,team=ml"`)
 	cmd.Flags().String(retentionFlag, "", `Retention period for deleted experiments before permanent purge, e.g. "30d" (min 1d, max 90d)`)
 	err := flags.MarkFlagsRequired(cmd, nameFlag)
 	cobra.CheckErr(err)
@@ -101,20 +116,11 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	labels, err := cmd.Flags().GetStringToString(labelFlag)
-	if err != nil {
-		return nil, fmt.Errorf("parse %q flag: %w", labelFlag, err)
-	}
-	var labelsPtr *map[string]string
-	if len(labels) > 0 {
-		labelsPtr = &labels
-	}
-
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		Name:            flags.FlagToStringValue(p, cmd, nameFlag),
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
-		Labels:          labelsPtr,
+		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelsFlag),
 		Retention:       flags.FlagToStringPointer(p, cmd, retentionFlag),
 	}
 
@@ -141,13 +147,22 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *modelexperi
 	return req.CreateInstancePayload(payload)
 }
 
-func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *modelexperiments.CreateInstanceResponse) error {
-	if resp == nil {
-		return fmt.Errorf("response instance is nil")
+func outputResult(p *print.Printer, outputFormat string, async bool, projectLabel string, resp *modelexperiments.CreateInstanceResponse) error {
+	var instance any
+	if resp != nil {
+		instance = resp.Instance
 	}
 
-	return p.OutputResult(outputFormat, resp.Instance, func() error {
-		p.Outputf("Creating AI Model Experiments instance for project %q. Instance ID: %s\n", projectLabel, resp.Instance.Id)
+	return p.OutputResult(outputFormat, instance, func() error {
+		if resp == nil {
+			return fmt.Errorf("response instance is nil")
+		}
+
+		operationState := "Created"
+		if async {
+			operationState = "Triggered creation of"
+		}
+		p.Outputf("%s AI Model Experiments instance for project %q. Instance ID: %s\n", operationState, projectLabel, resp.Instance.Id)
 		return nil
 	})
 }

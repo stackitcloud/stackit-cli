@@ -41,7 +41,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			),
 			examples.NewExample(
 				`Get details of an AI Model Experiments instance with ID "xxx" in JSON format`,
-				`$ stackit ai-model-experiments instance get xxx --output-format json`,
+				`$ stackit model-experiments instance describe xxx --output-format json`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -71,11 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	return cmd
 }
 
-func parseInput(
-	p *print.Printer,
-	cmd *cobra.Command,
-	inputArgs []string,
-) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
 	if globalFlags.ProjectId == "" {
@@ -92,37 +88,29 @@ func parseInput(
 	return &model, nil
 }
 
-func buildRequest(
-	ctx context.Context,
-	model *inputModel,
-	apiClient *modelexperiments.APIClient,
-) modelexperiments.ApiGetInstanceRequest {
-	return apiClient.DefaultAPI.GetInstance(
-		ctx,
-		model.ProjectId,
-		model.Region,
-		model.InstanceId,
-	)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *modelexperiments.APIClient) modelexperiments.ApiGetInstanceRequest {
+	return apiClient.DefaultAPI.GetInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 }
 
-func outputResult(
-	p *print.Printer,
-	outputFormat string,
-	resp *modelexperiments.GetInstanceResponse,
-) error {
+func outputResult(p *print.Printer, outputFormat string, resp *modelexperiments.GetInstanceResponse) error {
 	if resp == nil {
 		return fmt.Errorf("response instance is nil")
 	}
 
 	return p.OutputResult(outputFormat, resp.Instance, func() error {
 		table := tables.NewTable()
-		table.SetHeader("ID", "NAME", "REGION", "STATUS")
-		table.AddRow(
-			resp.Instance.Id,
-			resp.Instance.Name,
-			utils.PtrString(resp.Instance.Region),
-			resp.Instance.State,
-		)
-		return table.Display(p)
+		table.AddRow("ID", resp.Instance.Id)
+		table.AddSeparator()
+		table.AddRow("NAME", resp.Instance.Name)
+		table.AddSeparator()
+		table.AddRow("REGION", utils.PtrString(resp.Instance.Region))
+		table.AddSeparator()
+		table.AddRow("STATUS", resp.Instance.State)
+		table.AddSeparator()
+		err := table.Display(p)
+		if err != nil {
+			return fmt.Errorf("render table: %w", err)
+		}
+		return nil
 	})
 }

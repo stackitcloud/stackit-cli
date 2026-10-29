@@ -15,41 +15,35 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
-
 type testCtxKey struct{}
 
-var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
+const testRegion = "eu01"
 
-var testClient = &modelexperiments.APIClient{
-	DefaultAPI: modelexperiments.DefaultAPIServiceMock{},
-}
+var (
+	testCtx        = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient     = &modelexperiments.APIClient{DefaultAPI: modelexperiments.DefaultAPIServiceMock{}}
+	testProjectId  = uuid.NewString()
+	testInstanceId = uuid.NewString()
+)
 
-var testProjectId = uuid.NewString()
-var testInstanceId = uuid.NewString()
-
-func fixtureFlagValues(
-	mods ...func(*map[string]string),
-) map[string]string {
+func fixtureFlagValues(mods ...func(map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:          testProjectId,
-		globalflags.RegionFlag: "eu01",
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
 	}
 
 	for _, mod := range mods {
-		mod(&flagValues)
+		mod(flagValues)
 	}
 
 	return flagValues
 }
 
-func fixtureInputModel(
-	mods ...func(*inputModel),
-) *inputModel {
+func fixtureInputModel(mods ...func(*inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
-			Region:    "eu01",
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId: testInstanceId,
@@ -62,13 +56,11 @@ func fixtureInputModel(
 	return model
 }
 
-func fixtureRequest(
-	mods ...func(*modelexperiments.ApiDeleteInstanceRequest),
-) modelexperiments.ApiDeleteInstanceRequest {
+func fixtureRequest(mods ...func(*modelexperiments.ApiDeleteInstanceRequest)) modelexperiments.ApiDeleteInstanceRequest {
 	request := testClient.DefaultAPI.DeleteInstance(
 		testCtx,
 		testProjectId,
-		"eu01",
+		testRegion,
 		testInstanceId,
 	)
 
@@ -97,8 +89,8 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			argValues:   []string{testInstanceId},
-			flagValues: fixtureFlagValues(func(flagValues *map[string]string) {
-				delete(*flagValues, projectIdFlag)
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
@@ -142,9 +134,11 @@ func TestBuildDeleteInstanceRequest(t *testing.T) {
 
 func TestOutputResult(t *testing.T) {
 	tests := []struct {
-		name    string
-		resp    *modelexperiments.DeleteInstanceResponse
-		wantErr bool
+		name       string
+		resp       *modelexperiments.DeleteInstanceResponse
+		async      bool
+		wantErr    bool
+		wantOutput string
 	}{
 		{
 			name:    "nil response",
@@ -152,9 +146,15 @@ func TestOutputResult(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "response",
-			resp:    &modelexperiments.DeleteInstanceResponse{},
-			wantErr: false,
+			name:       "response",
+			resp:       &modelexperiments.DeleteInstanceResponse{},
+			wantOutput: "Deleted AI Model Experiments instance.\n",
+		},
+		{
+			name:       "async response",
+			resp:       &modelexperiments.DeleteInstanceResponse{},
+			async:      true,
+			wantOutput: "Triggered deletion of AI Model Experiments instance.\n",
 		},
 	}
 
@@ -162,9 +162,11 @@ func TestOutputResult(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			params.Out.Reset()
 			if err := outputResult(
 				params.Printer,
 				"",
+				tt.async,
 				tt.resp,
 			); (err != nil) != tt.wantErr {
 				t.Errorf(
@@ -172,6 +174,9 @@ func TestOutputResult(t *testing.T) {
 					err,
 					tt.wantErr,
 				)
+			}
+			if got := params.Out.String(); got != tt.wantOutput {
+				t.Errorf("outputResult() output = %q, want %q", got, tt.wantOutput)
 			}
 		})
 	}

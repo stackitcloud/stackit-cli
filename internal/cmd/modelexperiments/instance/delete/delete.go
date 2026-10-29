@@ -12,10 +12,12 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/modelexperiments/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
 	modelexperiments "github.com/stackitcloud/stackit-sdk-go/services/modelexperiments/v1api"
+	"github.com/stackitcloud/stackit-sdk-go/services/modelexperiments/v1api/wait"
 )
 
 const (
@@ -68,18 +70,24 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("delete AI Model Experiments instance: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, resp)
+			if !model.Async {
+				err := spinner.Run(params.Printer, "Deleting AI Model Experiments instance", func() error {
+					_, err = wait.DeleteInstanceWaitHandler(ctx, apiClient.DefaultAPI, model.Region, model.ProjectId, model.InstanceId).WaitWithContext(ctx)
+					return err
+				})
+				if err != nil {
+					return fmt.Errorf("wait for AI Model Experiments instance deletion: %w", err)
+				}
+			}
+
+			return outputResult(params.Printer, model.OutputFormat, model.Async, resp)
 		},
 	}
 
 	return cmd
 }
 
-func parseInput(
-	p *print.Printer,
-	cmd *cobra.Command,
-	inputArgs []string,
-) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
 	if globalFlags.ProjectId == "" {
@@ -96,32 +104,21 @@ func parseInput(
 	return &model, nil
 }
 
-func buildRequest(
-	ctx context.Context,
-	model *inputModel,
-	apiClient *modelexperiments.APIClient,
-) modelexperiments.ApiDeleteInstanceRequest {
-	return apiClient.DefaultAPI.DeleteInstance(
-		ctx,
-		model.ProjectId,
-		model.Region,
-		model.InstanceId,
-	)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *modelexperiments.APIClient) modelexperiments.ApiDeleteInstanceRequest {
+	return apiClient.DefaultAPI.DeleteInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 }
 
-func outputResult(
-	p *print.Printer,
-	outputFormat string,
-	resp *modelexperiments.DeleteInstanceResponse,
-) error {
+func outputResult(p *print.Printer, outputFormat string, async bool, resp *modelexperiments.DeleteInstanceResponse) error {
 	if resp == nil {
 		return fmt.Errorf("response is nil")
 	}
 
 	return p.OutputResult(outputFormat, resp.Instance, func() error {
-		p.Outputf(
-			"Deleted AI Model Experiments instance.\n",
-		)
+		operationState := "Deleted"
+		if async {
+			operationState = "Triggered deletion of"
+		}
+		p.Outputf("%s AI Model Experiments instance.\n", operationState)
 		return nil
 	})
 }

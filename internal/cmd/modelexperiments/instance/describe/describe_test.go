@@ -15,41 +15,47 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
-
 type testCtxKey struct{}
 
-var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
+const testRegion = "eu01"
 
-var testClient = &modelexperiments.APIClient{
-	DefaultAPI: modelexperiments.DefaultAPIServiceMock{},
-}
+var (
+	testCtx        = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient     = &modelexperiments.APIClient{DefaultAPI: modelexperiments.DefaultAPIServiceMock{}}
+	testProjectId  = uuid.NewString()
+	testInstanceId = uuid.NewString()
+)
 
-var testProjectId = uuid.NewString()
-var testInstanceId = uuid.NewString()
-
-func fixtureFlagValues(
-	mods ...func(*map[string]string),
-) map[string]string {
+func fixtureFlagValues(mods ...func(map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:          testProjectId,
-		globalflags.RegionFlag: "eu01",
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
 	}
 
 	for _, mod := range mods {
-		mod(&flagValues)
+		mod(flagValues)
 	}
 
 	return flagValues
 }
 
-func fixtureInputModel(
-	mods ...func(*inputModel),
-) *inputModel {
+func fixtureArgValues(mods ...func(argValues []string)) []string {
+	argValues := []string{
+		testInstanceId,
+	}
+
+	for _, mod := range mods {
+		mod(argValues)
+	}
+
+	return argValues
+}
+
+func fixtureInputModel(mods ...func(*inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
-			Region:    "eu01",
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId: testInstanceId,
@@ -62,13 +68,11 @@ func fixtureInputModel(
 	return model
 }
 
-func fixtureRequest(
-	mods ...func(*modelexperiments.ApiGetInstanceRequest),
-) modelexperiments.ApiGetInstanceRequest {
+func fixtureRequest(mods ...func(*modelexperiments.ApiGetInstanceRequest)) modelexperiments.ApiGetInstanceRequest {
 	request := testClient.DefaultAPI.GetInstance(
 		testCtx,
 		testProjectId,
-		"eu01",
+		testRegion,
 		testInstanceId,
 	)
 
@@ -89,16 +93,34 @@ func TestParseInput(t *testing.T) {
 	}{
 		{
 			description:   "base",
-			argValues:     []string{testInstanceId},
+			argValues:     fixtureArgValues(),
 			flagValues:    fixtureFlagValues(),
 			isValid:       true,
 			expectedModel: fixtureInputModel(),
 		},
 		{
+			description: "no values",
+			argValues:   []string{},
+			flagValues:  map[string]string{},
+			isValid:     false,
+		},
+		{
+			description: "no arg values",
+			argValues:   []string{},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
+		{
+			description: "no flag values",
+			argValues:   fixtureArgValues(),
+			flagValues:  map[string]string{},
+			isValid:     false,
+		},
+		{
 			description: "project id missing",
-			argValues:   []string{testInstanceId},
-			flagValues: fixtureFlagValues(func(flagValues *map[string]string) {
-				delete(*flagValues, projectIdFlag)
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
@@ -120,23 +142,32 @@ func TestParseInput(t *testing.T) {
 }
 
 func TestBuildDescribeInstanceRequest(t *testing.T) {
-	request := buildRequest(
-		testCtx,
-		fixtureInputModel(),
-		testClient,
-	)
+	tests := []struct {
+		description     string
+		model           *inputModel
+		expectedRequest modelexperiments.ApiGetInstanceRequest
+	}{
+		{
+			description:     "base",
+			model:           fixtureInputModel(),
+			expectedRequest: fixtureRequest(),
+		},
+	}
 
-	expectedRequest := fixtureRequest()
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			request := buildRequest(testCtx, tt.model, testClient)
 
-	diff := cmp.Diff(
-		request,
-		expectedRequest,
-		cmp.AllowUnexported(expectedRequest),
-		cmpopts.EquateComparable(testCtx),
-	)
-
-	if diff != "" {
-		t.Fatalf("Data does not match: %s", diff)
+			diff := cmp.Diff(
+				request,
+				tt.expectedRequest,
+				cmp.AllowUnexported(tt.expectedRequest),
+				cmpopts.EquateComparable(testCtx),
+			)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
 	}
 }
 

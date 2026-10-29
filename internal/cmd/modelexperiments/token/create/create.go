@@ -22,7 +22,7 @@ const (
 	instanceIDFlag  = "instance-id"
 	nameFlag        = "name"
 	descriptionFlag = "description"
-	labelFlag       = "label"
+	labelsFlag      = "labels"
 	ttlDurationFlag = "ttl-duration"
 )
 
@@ -59,7 +59,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIDFlag, "ID of the instance")
 	cmd.Flags().String(nameFlag, "", "Token name")
 	cmd.Flags().String(descriptionFlag, "", "Token description")
-	cmd.Flags().StringToString(labelFlag, nil, `Labels as key-value pairs, e.g. "--label env=prod"`)
+	cmd.Flags().StringToString(labelsFlag, nil, `Labels as comma-separated key-value pairs, e.g. "--labels env=prod,team=ml"`)
 	cmd.Flags().String(ttlDurationFlag, "", "Token time to live duration")
 	_ = flags.MarkFlagsRequired(cmd, instanceIDFlag, nameFlag)
 }
@@ -69,9 +69,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
 	}
-	labels, err := cmd.Flags().GetStringToString(labelFlag)
+	labels, err := cmd.Flags().GetStringToString(labelsFlag)
 	if err != nil {
-		return nil, fmt.Errorf("parse %q flag: %w", labelFlag, err)
+		return nil, fmt.Errorf("parse %q flag: %w", labelsFlag, err)
 	}
 	var labelsPtr *map[string]string
 	if len(labels) > 0 {

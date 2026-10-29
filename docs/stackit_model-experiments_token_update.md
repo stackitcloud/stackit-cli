@@ -20,11 +20,11 @@ stackit model-experiments token update TOKEN_ID [flags]
 ### Options
 
 ```
-      --description string     Token description
-  -h, --help                   Help for "stackit model-experiments token update"
-      --instance-id string     ID of the instance
-      --label stringToString   Labels as key-value pairs, e.g. "--label env=prod" (default [])
-      --name string            Token name
+      --description string      Token description
+  -h, --help                    Help for "stackit model-experiments token update"
+      --instance-id string      ID of the instance
+      --labels stringToString   Labels as comma-separated key-value pairs, e.g. "--labels env=prod,team=ml" (default [])
+      --name string             Token name
 ```
 
 ### Options inherited from parent commands

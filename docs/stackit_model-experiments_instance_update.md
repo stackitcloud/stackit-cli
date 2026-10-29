@@ -20,10 +20,10 @@ stackit model-experiments instance update INSTANCE_ID [flags]
   $ stackit model-experiments instance update xxx --description "team tracking server"
 
   Update labels on an AI Model Experiments instance
-  $ stackit model-experiments instance update xxx --label env=prod
+  $ stackit model-experiments instance update xxx --labels env=prod,team=ml
 
   Update multiple fields of an AI Model Experiments instance
-  $ stackit model-experiments instance update xxx --name my-new-name --description "team tracking server" --label env=prod --deleted-experiment-retention 30d
+  $ stackit model-experiments instance update xxx --name my-new-name --description "team tracking server" --labels env=prod,team=ml --deleted-experiment-retention 30d
 ```
 
 ### Options
@@ -32,7 +32,7 @@ stackit model-experiments instance update INSTANCE_ID [flags]
       --deleted-experiment-retention string   Retention period for deleted experiments before permanent purge, e.g. "30d" (min 1d, max 90d)
       --description string                    Instance description
   -h, --help                                  Help for "stackit model-experiments instance update"
-      --label stringToString                  Labels as key-value pairs, e.g. "--label env=prod" (default [])
+      --labels stringToString                 Labels as comma-separated key-value pairs, e.g. "--labels env=prod,team=ml" (default [])
   -n, --name string                           Instance name
 ```
 
@@ -50,4 +50,3 @@ stackit model-experiments instance update INSTANCE_ID [flags]
 ### SEE ALSO
 
 * [stackit model-experiments instance](./stackit_model-experiments_instance.md)	 - Provides functionality for AI Model Experiments instances
-

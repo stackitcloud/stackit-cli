@@ -15,8 +15,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 )
 
-var projectIDFlag = globalflags.ProjectIdFlag
-
 type testContextKey struct{}
 
 var testContext = context.WithValue(context.Background(), testContextKey{}, "token-list")
@@ -25,7 +23,7 @@ var testProjectID = uuid.NewString()
 var testInstanceID = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(map[string]string)) map[string]string {
-	values := map[string]string{projectIDFlag: testProjectID, instanceIDFlag: testInstanceID, globalflags.RegionFlag: "eu01"}
+	values := map[string]string{globalflags.ProjectIdFlag: testProjectID, instanceIDFlag: testInstanceID, globalflags.RegionFlag: "eu01"}
 	for _, mod := range mods {
 		mod(values)
 	}
@@ -43,7 +41,7 @@ func TestParseInput(t *testing.T) {
 		name  string
 		flags map[string]string
 		valid bool
-	}{{name: "base", flags: fixtureFlagValues(), valid: true}, {name: "project missing", flags: fixtureFlagValues(func(values map[string]string) { delete(values, projectIDFlag) }), valid: false}}
+	}{{name: "base", flags: fixtureFlagValues(), valid: true}, {name: "project missing", flags: fixtureFlagValues(func(values map[string]string) { delete(values, globalflags.ProjectIdFlag) }), valid: false}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var want *inputModel

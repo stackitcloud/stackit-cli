@@ -16,41 +16,35 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
-
 type testCtxKey struct{}
 
-var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
+const testRegion = "eu01"
 
-var testClient = &modelexperiments.APIClient{
-	DefaultAPI: modelexperiments.DefaultAPIServiceMock{},
-}
+var (
+	testCtx        = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient     = &modelexperiments.APIClient{DefaultAPI: modelexperiments.DefaultAPIServiceMock{}}
+	testProjectId  = uuid.NewString()
+	testInstanceId = uuid.NewString()
+)
 
-var testProjectId = uuid.NewString()
-var testInstanceId = uuid.NewString()
-
-func fixtureFlagValues(
-	mods ...func(*map[string]string),
-) map[string]string {
+func fixtureFlagValues(mods ...func(map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:          testProjectId,
-		globalflags.RegionFlag: "eu01",
+		globalflags.ProjectIdFlag: testProjectId,
+		globalflags.RegionFlag:    testRegion,
 	}
 
 	for _, mod := range mods {
-		mod(&flagValues)
+		mod(flagValues)
 	}
 
 	return flagValues
 }
 
-func fixtureInputModel(
-	mods ...func(*inputModel),
-) *inputModel {
+func fixtureInputModel(mods ...func(*inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
-			Region:    "eu01",
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		InstanceId: testInstanceId,
@@ -63,13 +57,11 @@ func fixtureInputModel(
 	return model
 }
 
-func fixtureRequest(
-	mods ...func(*modelexperiments.ApiPartialUpdateInstanceRequest),
-) modelexperiments.ApiPartialUpdateInstanceRequest {
+func fixtureRequest(mods ...func(*modelexperiments.ApiPartialUpdateInstanceRequest)) modelexperiments.ApiPartialUpdateInstanceRequest {
 	request := testClient.DefaultAPI.PartialUpdateInstance(
 		testCtx,
 		testProjectId,
-		"eu01",
+		testRegion,
 		testInstanceId,
 	)
 
@@ -97,8 +89,8 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "name",
 			argValues:   []string{testInstanceId},
-			flagValues: fixtureFlagValues(func(flagValues *map[string]string) {
-				(*flagValues)[nameFlag] = "example"
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[nameFlag] = "example"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -108,8 +100,8 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "description",
 			argValues:   []string{testInstanceId},
-			flagValues: fixtureFlagValues(func(flagValues *map[string]string) {
-				(*flagValues)[descriptionFlag] = "team tracking server"
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[descriptionFlag] = "team tracking server"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -117,10 +109,25 @@ func TestParseInput(t *testing.T) {
 			}),
 		},
 		{
+			description: "labels",
+			argValues:   []string{testInstanceId},
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[labelsFlag] = "env=prod,team=ml"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				labels := map[string]*string{
+					"env":  utils.Ptr("prod"),
+					"team": utils.Ptr("ml"),
+				}
+				model.Labels = &labels
+			}),
+		},
+		{
 			description: "retention",
 			argValues:   []string{testInstanceId},
-			flagValues: fixtureFlagValues(func(flagValues *map[string]string) {
-				(*flagValues)[retentionFlag] = "30d"
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[retentionFlag] = "30d"
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -136,9 +143,9 @@ func TestParseInput(t *testing.T) {
 		{
 			description: "project id missing",
 			argValues:   []string{testInstanceId},
-			flagValues: fixtureFlagValues(func(flagValues *map[string]string) {
-				delete(*flagValues, projectIdFlag)
-				(*flagValues)[nameFlag] = "example"
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, globalflags.ProjectIdFlag)
+				flagValues[nameFlag] = "example"
 			}),
 			isValid: false,
 		},
@@ -181,7 +188,7 @@ func TestBuildUpdateInstanceRequest(t *testing.T) {
 				request := testClient.DefaultAPI.PartialUpdateInstance(
 					testCtx,
 					testProjectId,
-					"eu01",
+					testRegion,
 					testInstanceId,
 				)
 
@@ -195,6 +202,32 @@ func TestBuildUpdateInstanceRequest(t *testing.T) {
 			}(),
 		},
 		{
+			description: "labels",
+			model: fixtureInputModel(func(model *inputModel) {
+				labels := map[string]*string{
+					"env":  utils.Ptr("prod"),
+					"team": utils.Ptr("ml"),
+				}
+				model.Labels = &labels
+			}),
+			expectedRequest: func() modelexperiments.ApiPartialUpdateInstanceRequest {
+				request := testClient.DefaultAPI.PartialUpdateInstance(
+					testCtx,
+					testProjectId,
+					testRegion,
+					testInstanceId,
+				)
+
+				labels := map[string]*string{
+					"env":  utils.Ptr("prod"),
+					"team": utils.Ptr("ml"),
+				}
+				return request.PartialUpdateInstancePayload(
+					modelexperiments.PartialUpdateInstancePayload{Labels: &labels},
+				)
+			}(),
+		},
+		{
 			description: "retention",
 			model: fixtureInputModel(func(model *inputModel) {
 				model.Retention = utils.Ptr("30d")
@@ -203,7 +236,7 @@ func TestBuildUpdateInstanceRequest(t *testing.T) {
 				request := testClient.DefaultAPI.PartialUpdateInstance(
 					testCtx,
 					testProjectId,
-					"eu01",
+					testRegion,
 					testInstanceId,
 				)
 

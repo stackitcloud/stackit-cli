@@ -13,9 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
-func NewCmd(
-	params *types.CmdParams,
-) *cobra.Command {
+func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "token",
 		Short: "Provides functionality for AI Model Experiments instance tokens",

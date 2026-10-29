@@ -1,10 +1,10 @@
 ## stackit model-experiments instance list
 
-Lists AI Model Experiments instances
+Lists all AI Model Experiments instances
 
 ### Synopsis
 
-Lists AI Model Experiments instances in a STACKIT project.
+Lists all AI Model Experiments instances in a STACKIT project.
 
 ```
 stackit model-experiments instance list [flags]
@@ -14,13 +14,23 @@ stackit model-experiments instance list [flags]
 
 ```
   List AI Model Experiments instances in a project
-  $ stackit model-experiments instance list --region eu01
+  $ stackit model-experiments instance list
+
+  List AI Model Experiments instances in a project in region eu02
+  $ stackit model-experiments instance list --region eu02
+
+  List AI Model Experiments instances in JSON format
+  $ stackit model-experiments instance list --output-format json
+
+  List up to 10 AI Model Experiments instances
+  $ stackit model-experiments instance list --limit 10
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit model-experiments instance list"
+  -h, --help        Help for "stackit model-experiments instance list"
+      --limit int   Maximum number of entries to list
 ```
 
 ### Options inherited from parent commands

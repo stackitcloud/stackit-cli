@@ -24,7 +24,7 @@ const (
 
 	nameFlag        = "name"
 	descriptionFlag = "description"
-	labelFlag       = "label"
+	labelsFlag      = "labels"
 	retentionFlag   = "deleted-experiment-retention"
 )
 
@@ -56,11 +56,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			),
 			examples.NewExample(
 				`Update labels on an AI Model Experiments instance`,
-				`$ stackit model-experiments instance update xxx --label env=prod`,
+				`$ stackit model-experiments instance update xxx --labels env=prod,team=ml`,
 			),
 			examples.NewExample(
 				`Update multiple fields of an AI Model Experiments instance`,
-				`$ stackit model-experiments instance update xxx --name my-new-name --description "team tracking server" --label env=prod --deleted-experiment-retention 30d`,
+				`$ stackit model-experiments instance update xxx --name my-new-name --description "team tracking server" --labels env=prod,team=ml --deleted-experiment-retention 30d`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -95,24 +95,20 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(nameFlag, "n", "", "Instance name")
 	cmd.Flags().String(descriptionFlag, "", "Instance description")
-	cmd.Flags().StringToString(labelFlag, nil, `Labels as key-value pairs, e.g. "--label env=prod"`)
+	cmd.Flags().StringToString(labelsFlag, nil, `Labels as comma-separated key-value pairs, e.g. "--labels env=prod,team=ml"`)
 	cmd.Flags().String(retentionFlag, "", `Retention period for deleted experiments before permanent purge, e.g. "30d" (min 1d, max 90d)`)
 }
 
-func parseInput(
-	p *print.Printer,
-	cmd *cobra.Command,
-	inputArgs []string,
-) (*inputModel, error) {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
 
 	if globalFlags.ProjectId == "" {
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	labels, err := cmd.Flags().GetStringToString(labelFlag)
+	labels, err := cmd.Flags().GetStringToString(labelsFlag)
 	if err != nil {
-		return nil, fmt.Errorf("parse %q flag: %w", labelFlag, err)
+		return nil, fmt.Errorf("parse %q flag: %w", labelsFlag, err)
 	}
 
 	var labelsPtr *map[string]*string
@@ -151,17 +147,8 @@ func parseInput(
 	return &model, nil
 }
 
-func buildRequest(
-	ctx context.Context,
-	model *inputModel,
-	apiClient *modelexperiments.APIClient,
-) modelexperiments.ApiPartialUpdateInstanceRequest {
-	req := apiClient.DefaultAPI.PartialUpdateInstance(
-		ctx,
-		model.ProjectId,
-		model.Region,
-		model.InstanceId,
-	)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *modelexperiments.APIClient) modelexperiments.ApiPartialUpdateInstanceRequest {
+	req := apiClient.DefaultAPI.PartialUpdateInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 
 	payload := modelexperiments.PartialUpdateInstancePayload{}
 
@@ -184,11 +171,7 @@ func buildRequest(
 	return req.PartialUpdateInstancePayload(payload)
 }
 
-func outputResult(
-	p *print.Printer,
-	outputFormat string,
-	resp *modelexperiments.PartialUpdateInstanceResponse,
-) error {
+func outputResult(p *print.Printer, outputFormat string, resp *modelexperiments.PartialUpdateInstanceResponse) error {
 	if resp == nil {
 		return fmt.Errorf("response instance is nil")
 	}

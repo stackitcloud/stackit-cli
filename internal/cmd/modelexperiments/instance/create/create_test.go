@@ -16,21 +16,21 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
-var projectIdFlag = globalflags.ProjectIdFlag
-
 type testCtxKey struct{}
 
-var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &modelexperiments.APIClient{
-	DefaultAPI: modelexperiments.DefaultAPIServiceMock{},
-}
-var testProjectId = uuid.NewString()
+const testRegion = "eu01"
+
+var (
+	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
+	testClient    = &modelexperiments.APIClient{DefaultAPI: modelexperiments.DefaultAPIServiceMock{}}
+	testProjectId = uuid.NewString()
+)
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
-		projectIdFlag:          testProjectId,
-		nameFlag:               "example",
-		globalflags.RegionFlag: "eu01",
+		globalflags.ProjectIdFlag: testProjectId,
+		nameFlag:                  "example",
+		globalflags.RegionFlag:    testRegion,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -42,7 +42,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
 			ProjectId: testProjectId,
-			Region:    "eu01",
+			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
 		Name: "example",
@@ -54,7 +54,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *modelexperiments.ApiCreateInstanceRequest)) modelexperiments.ApiCreateInstanceRequest {
-	request := testClient.DefaultAPI.CreateInstance(testCtx, testProjectId, "eu01")
+	request := testClient.DefaultAPI.CreateInstance(testCtx, testProjectId, testRegion)
 	request = request.CreateInstancePayload(modelexperiments.CreateInstancePayload{
 		Name: "example",
 	})
@@ -98,9 +98,19 @@ func TestParseInput(t *testing.T) {
 			}),
 		},
 		{
+			description: "with labels",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[labelsFlag] = "env=prod,team=ml"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Labels = &map[string]string{"env": "prod", "team": "ml"}
+			}),
+		},
+		{
 			description: "project id missing",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, projectIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
@@ -137,6 +147,19 @@ func TestBuildCreateInstanceRequest(t *testing.T) {
 				*request = request.CreateInstancePayload(payload)
 			}),
 		},
+		{
+			description: "with labels",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Labels = &map[string]string{"env": "prod", "team": "ml"}
+			}),
+			expectedRequest: fixtureRequest(func(request *modelexperiments.ApiCreateInstanceRequest) {
+				payload := modelexperiments.CreateInstancePayload{
+					Name:   "example",
+					Labels: &map[string]string{"env": "prod", "team": "ml"},
+				}
+				*request = request.CreateInstancePayload(payload)
+			}),
+		},
 	}
 
 	for _, tt := range tests {
@@ -165,11 +188,16 @@ func TestOutputResult(t *testing.T) {
 			resp:    nil,
 			wantErr: true,
 		},
+		{
+			name:    "empty response",
+			resp:    &modelexperiments.CreateInstanceResponse{},
+			wantErr: false,
+		},
 	}
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, "", "test-project", tt.resp); (err != nil) != tt.wantErr {
+			if err := outputResult(params.Printer, "", false, "test-project", tt.resp); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

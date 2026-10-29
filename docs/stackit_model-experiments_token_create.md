@@ -20,12 +20,12 @@ stackit model-experiments token create [flags]
 ### Options
 
 ```
-      --description string     Token description
-  -h, --help                   Help for "stackit model-experiments token create"
-      --instance-id string     ID of the instance
-      --label stringToString   Labels as key-value pairs, e.g. "--label env=prod" (default [])
-      --name string            Token name
-      --ttl-duration string    Token time to live duration
+      --description string      Token description
+  -h, --help                    Help for "stackit model-experiments token create"
+      --instance-id string      ID of the instance
+      --labels stringToString   Labels as comma-separated key-value pairs, e.g. "--labels env=prod,team=ml" (default [])
+      --name string             Token name
+      --ttl-duration string     Token time to live duration
 ```
 
 ### Options inherited from parent commands

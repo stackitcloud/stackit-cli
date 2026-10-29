@@ -16,8 +16,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
-var projectIDFlag = globalflags.ProjectIdFlag
-
 type testContextKey struct{}
 
 var testContext = context.WithValue(context.Background(), testContextKey{}, "token-patch")
@@ -27,7 +25,7 @@ var testInstanceID = uuid.NewString()
 var testTokenID = uuid.NewString()
 
 func fixtureFlagValues(mods ...func(map[string]string)) map[string]string {
-	values := map[string]string{projectIDFlag: testProjectID, instanceIDFlag: testInstanceID, globalflags.RegionFlag: "eu01"}
+	values := map[string]string{globalflags.ProjectIdFlag: testProjectID, instanceIDFlag: testInstanceID, globalflags.RegionFlag: "eu01"}
 	for _, mod := range mods {
 		mod(values)
 	}
@@ -55,13 +53,13 @@ func TestParseInput(t *testing.T) {
 		{name: "optional fields", flags: fixtureFlagValues(func(values map[string]string) {
 			values[nameFlag] = "updated"
 			values[descriptionFlag] = "updated token"
-			values[labelFlag] = "env=prod"
+			values[labelsFlag] = "env=prod,team=ml"
 		}), valid: true, want: fixtureInputModel(func(model *inputModel) {
 			model.Name = utils.Ptr("updated")
 			model.Description = utils.Ptr("updated token")
-			model.Labels = &map[string]string{"env": "prod"}
+			model.Labels = &map[string]string{"env": "prod", "team": "ml"}
 		})},
-		{name: "project missing", flags: fixtureFlagValues(func(values map[string]string) { delete(values, projectIDFlag) }), valid: false},
+		{name: "project missing", flags: fixtureFlagValues(func(values map[string]string) { delete(values, globalflags.ProjectIdFlag) }), valid: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -74,10 +72,10 @@ func TestBuildUpdateRequest(t *testing.T) {
 	model := fixtureInputModel(func(model *inputModel) {
 		model.Name = utils.Ptr("updated")
 		model.Description = utils.Ptr("updated token")
-		model.Labels = &map[string]string{"env": "prod"}
+		model.Labels = &map[string]string{"env": "prod", "team": "ml"}
 	})
 	got := buildRequest(testContext, model, testClient)
-	labels := map[string]*string{"env": utils.Ptr("prod")}
+	labels := map[string]*string{"env": utils.Ptr("prod"), "team": utils.Ptr("ml")}
 	want := fixtureRequest(modelexperiments.PartialUpdateInstanceTokenPayload{Name: utils.Ptr("updated"), Description: utils.Ptr("updated token"), Labels: &labels})
 	if diff := cmp.Diff(got, want, cmp.AllowUnexported(want), cmpopts.EquateComparable(testContext)); diff != "" {
 		t.Fatalf("request mismatch (-got +want):\n%s", diff)

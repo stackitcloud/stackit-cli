@@ -33,6 +33,6 @@ stackit model-experiments instance [flags]
 * [stackit model-experiments instance create](./stackit_model-experiments_instance_create.md)	 - Creates an AI Model Experiments instance
 * [stackit model-experiments instance delete](./stackit_model-experiments_instance_delete.md)	 - Deletes an AI Model Experiments instance
 * [stackit model-experiments instance describe](./stackit_model-experiments_instance_describe.md)	 - Shows details of an AI Model Experiments instance
-* [stackit model-experiments instance list](./stackit_model-experiments_instance_list.md)	 - Lists AI Model Experiments instances
+* [stackit model-experiments instance list](./stackit_model-experiments_instance_list.md)	 - Lists all AI Model Experiments instances
 * [stackit model-experiments instance update](./stackit_model-experiments_instance_update.md)	 - Updates an AI Model Experiments instance
 
