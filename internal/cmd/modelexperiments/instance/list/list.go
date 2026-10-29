@@ -31,7 +31,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`List AI Model Experiments instances in a project`,
-				`$ stackit ai-model-experiments instance list --region eu01`,
+				`$ stackit model-experiments instance list --region eu01`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -47,7 +47,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			req := buildListInstancesRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient)
 
 			resp, err := req.Execute()
 			if err != nil {
@@ -81,7 +81,7 @@ func parseInput(
 	return &model, nil
 }
 
-func buildListInstancesRequest(
+func buildRequest(
 	ctx context.Context,
 	model *inputModel,
 	apiClient *modelexperiments.APIClient,

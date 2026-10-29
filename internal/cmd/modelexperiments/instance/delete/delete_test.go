@@ -120,7 +120,7 @@ func TestParseInput(t *testing.T) {
 }
 
 func TestBuildDeleteInstanceRequest(t *testing.T) {
-	request := buildDeleteInstanceRequest(
+	request := buildRequest(
 		testCtx,
 		fixtureInputModel(),
 		testClient,

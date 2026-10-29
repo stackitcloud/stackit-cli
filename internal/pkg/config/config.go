@@ -23,22 +23,22 @@ const (
 	IdentityProviderCustomClientIdKey               = "identity_provider_custom_client_id"
 	AllowedUrlDomainKey                             = "allowed_url_domain"
 
-	AuthorizationCustomEndpointKey      = "authorization_custom_endpoint"
-	AlbCustomEndpoint                   = "alb_custom _endpoint"
-	AlbWafCustomEndpointKey             = "alb_waf_custom_endpoint"
-	DNSCustomEndpointKey                = "dns_custom_endpoint"
-	EdgeCustomEndpointKey               = "edge_custom_endpoint"
-	LoadBalancerCustomEndpointKey       = "load_balancer_custom_endpoint"
-	LogMeCustomEndpointKey              = "logme_custom_endpoint"
-	MariaDBCustomEndpointKey            = "mariadb_custom_endpoint"
-	MongoDBFlexCustomEndpointKey        = "mongodbflex_custom_endpoint"
-	ObjectStorageCustomEndpointKey      = "object_storage_custom_endpoint"
-	ObservabilityCustomEndpointKey      = "observability_custom_endpoint"
-	OpenSearchCustomEndpointKey         = "opensearch_custom_endpoint"
-	PostgresFlexCustomEndpointKey       = "postgresflex_custom_endpoint"
-	RabbitMQCustomEndpointKey           = "rabbitmq_custom_endpoint"
-	AIModelExperimentsCustomEndpointKey = "aimodelexperiments_custom_endpoint"
-	AutomationCustomEndpointKey         = "automation_custom_endpoint"
+	AuthorizationCustomEndpointKey    = "authorization_custom_endpoint"
+	AlbCustomEndpoint                 = "alb_custom _endpoint"
+	AlbWafCustomEndpointKey           = "alb_waf_custom_endpoint"
+	DNSCustomEndpointKey              = "dns_custom_endpoint"
+	EdgeCustomEndpointKey             = "edge_custom_endpoint"
+	LoadBalancerCustomEndpointKey     = "load_balancer_custom_endpoint"
+	LogMeCustomEndpointKey            = "logme_custom_endpoint"
+	MariaDBCustomEndpointKey          = "mariadb_custom_endpoint"
+	MongoDBFlexCustomEndpointKey      = "mongodbflex_custom_endpoint"
+	ObjectStorageCustomEndpointKey    = "object_storage_custom_endpoint"
+	ObservabilityCustomEndpointKey    = "observability_custom_endpoint"
+	OpenSearchCustomEndpointKey       = "opensearch_custom_endpoint"
+	PostgresFlexCustomEndpointKey     = "postgresflex_custom_endpoint"
+	RabbitMQCustomEndpointKey         = "rabbitmq_custom_endpoint"
+	ModelExperimentsCustomEndpointKey = "modelexperiments_custom_endpoint"
+	AutomationCustomEndpointKey       = "automation_custom_endpoint"
 	// Deprecated: Will be removed after 2027-08-31.
 	RedisCustomEndpointKey             = "redis_custom_endpoint"
 	ResourceManagerEndpointKey         = "resource_manager_custom_endpoint"
@@ -119,7 +119,7 @@ var ConfigKeys = []string{
 	OpenSearchCustomEndpointKey,
 	PostgresFlexCustomEndpointKey,
 	RabbitMQCustomEndpointKey,
-	AIModelExperimentsCustomEndpointKey,
+	ModelExperimentsCustomEndpointKey,
 	RedisCustomEndpointKey,
 	ResourceManagerEndpointKey,
 	RunCommandCustomEndpointKey,
@@ -230,6 +230,7 @@ func setConfigDefaults() {
 	viper.SetDefault(CDNCustomEndpointKey, "")
 	viper.SetDefault(ValkeyCustomEndpointKey, "")
 	viper.SetDefault(VPNCustomEndpointKey, "")
+	viper.SetDefault(ModelExperimentsCustomEndpointKey, "")
 }
 
 func getConfigFilePath(configFolder string) string {

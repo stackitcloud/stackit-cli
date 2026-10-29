@@ -36,7 +36,7 @@ type inputModel struct {
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
-	cmd := &cobra.Command{Use: "create", Short: "Creates an instance token", Long: "Creates an auth token for an AI Model Experiments instance.", Args: args.NoArgs, Example: examples.Build(examples.NewExample("Create an auth token", "$ stackit ai-model-experiments token create --instance-id xxx --name my-token")), RunE: func(cmd *cobra.Command, _ []string) error {
+	cmd := &cobra.Command{Use: "create", Short: "Creates an instance token", Long: "Creates an auth token for an AI Model Experiments instance.", Args: args.NoArgs, Example: examples.Build(examples.NewExample("Create an auth token", "$ stackit model-experiments token create --instance-id xxx --name my-token")), RunE: func(cmd *cobra.Command, _ []string) error {
 		model, err := parseInput(params.Printer, cmd, nil)
 		if err != nil {
 			return err

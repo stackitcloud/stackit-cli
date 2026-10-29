@@ -1,4 +1,4 @@
-package patch
+package update
 
 import (
 	"context"
@@ -70,7 +70,7 @@ func TestParseInput(t *testing.T) {
 	}
 }
 
-func TestBuildRequest(t *testing.T) {
+func TestBuildUpdateRequest(t *testing.T) {
 	model := fixtureInputModel(func(model *inputModel) {
 		model.Name = utils.Ptr("updated")
 		model.Description = utils.Ptr("updated token")

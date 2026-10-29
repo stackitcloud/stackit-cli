@@ -1,4 +1,4 @@
-## stackit ai-model-experiments instance create
+## stackit model-experiments instance create
 
 Creates an AI Model Experiments instance
 
@@ -7,17 +7,17 @@ Creates an AI Model Experiments instance
 Creates an AI Model Experiments (MLflow) instance in your STACKIT project.
 
 ```
-stackit ai-model-experiments instance create [flags]
+stackit model-experiments instance create [flags]
 ```
 
 ### Examples
 
 ```
   Create an AI Model Experiments instance with name "my-tracking"
-  $ stackit ai-model-experiments instance create --name my-tracking
+  $ stackit model-experiments instance create --name my-tracking
 
   Create an instance with a description and labels
-  $ stackit ai-model-experiments instance create --name my-tracking --description "team tracking server" --label env=prod
+  $ stackit model-experiments instance create --name my-tracking --description "team tracking server" --label env=prod
 ```
 
 ### Options
@@ -25,7 +25,7 @@ stackit ai-model-experiments instance create [flags]
 ```
       --deleted-experiment-retention string   Retention period for deleted experiments before permanent purge, e.g. "30d" (min 1d, max 90d)
       --description string                    Instance description
-  -h, --help                                  Help for "stackit ai-model-experiments instance create"
+  -h, --help                                  Help for "stackit model-experiments instance create"
       --label stringToString                  Labels as key-value pairs, e.g. "--label env=prod" (default [])
   -n, --name string                           Instance name
 ```
@@ -43,5 +43,5 @@ stackit ai-model-experiments instance create [flags]
 
 ### SEE ALSO
 
-* [stackit ai-model-experiments instance](./stackit_ai-model-experiments_instance.md)	 - Provides functionality for AI Model Experiments instances
+* [stackit model-experiments instance](./stackit_model-experiments_instance.md)	 - Provides functionality for AI Model Experiments instances
 

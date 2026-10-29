@@ -1,26 +1,26 @@
-## stackit ai-model-experiments instance get
+## stackit model-experiments instance list
 
-Gets an AI Model Experiments instance
+Lists AI Model Experiments instances
 
 ### Synopsis
 
-Gets an AI Model Experiments instance in a STACKIT project.
+Lists AI Model Experiments instances in a STACKIT project.
 
 ```
-stackit ai-model-experiments instance get INSTANCE_ID [flags]
+stackit model-experiments instance list [flags]
 ```
 
 ### Examples
 
 ```
-  Get an AI Model Experiments instance with ID "xxx"
-  $ stackit ai-model-experiments instance get xxx
+  List AI Model Experiments instances in a project
+  $ stackit model-experiments instance list --region eu01
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit ai-model-experiments instance get"
+  -h, --help   Help for "stackit model-experiments instance list"
 ```
 
 ### Options inherited from parent commands
@@ -36,5 +36,5 @@ stackit ai-model-experiments instance get INSTANCE_ID [flags]
 
 ### SEE ALSO
 
-* [stackit ai-model-experiments instance](./stackit_ai-model-experiments_instance.md)	 - Provides functionality for AI Model Experiments instances
+* [stackit model-experiments instance](./stackit_model-experiments_instance.md)	 - Provides functionality for AI Model Experiments instances
 

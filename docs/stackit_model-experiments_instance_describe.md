@@ -1,26 +1,26 @@
-## stackit ai-model-experiments instance delete
+## stackit model-experiments instance describe
 
-Deletes an AI Model Experiments instance
+Shows details of an AI Model Experiments instance
 
 ### Synopsis
 
-Deletes an AI Model Experiments instance from a STACKIT project.
+Shows details of an AI Model Experiments instance in a STACKIT project.
 
 ```
-stackit ai-model-experiments instance delete INSTANCE_ID [flags]
+stackit model-experiments instance describe INSTANCE_ID [flags]
 ```
 
 ### Examples
 
 ```
-  Delete an AI Model Experiments instance with ID "xxx"
-  $ stackit ai-model-experiments instance delete xxx
+  Show details of an AI Model Experiments instance with ID "xxx"
+  $ stackit model-experiments instance describe xxx
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit ai-model-experiments instance delete"
+  -h, --help   Help for "stackit model-experiments instance describe"
 ```
 
 ### Options inherited from parent commands
@@ -36,5 +36,5 @@ stackit ai-model-experiments instance delete INSTANCE_ID [flags]
 
 ### SEE ALSO
 
-* [stackit ai-model-experiments instance](./stackit_ai-model-experiments_instance.md)	 - Provides functionality for AI Model Experiments instances
+* [stackit model-experiments instance](./stackit_model-experiments_instance.md)	 - Provides functionality for AI Model Experiments instances
 

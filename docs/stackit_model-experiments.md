@@ -1,4 +1,4 @@
-## stackit ai-model-experiments
+## stackit model-experiments
 
 Provides functionality for AI Model Experiments
 
@@ -7,13 +7,13 @@ Provides functionality for AI Model Experiments
 Provides functionality for AI Model Experiments.
 
 ```
-stackit ai-model-experiments [flags]
+stackit model-experiments [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit ai-model-experiments"
+  -h, --help   Help for "stackit model-experiments"
 ```
 
 ### Options inherited from parent commands
@@ -30,6 +30,6 @@ stackit ai-model-experiments [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit ai-model-experiments instance](./stackit_ai-model-experiments_instance.md)	 - Provides functionality for AI Model Experiments instances
-* [stackit ai-model-experiments token](./stackit_ai-model-experiments_token.md)	 - Provides functionality for AI Model Experiments instance tokens
+* [stackit model-experiments instance](./stackit_model-experiments_instance.md)	 - Provides functionality for AI Model Experiments instances
+* [stackit model-experiments token](./stackit_model-experiments_token.md)	 - Provides functionality for AI Model Experiments instance tokens
 

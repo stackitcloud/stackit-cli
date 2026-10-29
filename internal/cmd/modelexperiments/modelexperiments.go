@@ -12,7 +12,7 @@ import (
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "ai-model-experiments",
+		Use:   "model-experiments",
 		Short: "Provides functionality for AI Model Experiments",
 		Long:  "Provides functionality for AI Model Experiments.",
 		Args:  args.NoArgs,

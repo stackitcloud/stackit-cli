@@ -1,26 +1,27 @@
-## stackit ai-model-experiments instance list
+## stackit model-experiments token describe
 
-Lists AI Model Experiments instances
+Shows details of an instance token
 
 ### Synopsis
 
-Lists AI Model Experiments instances in a STACKIT project.
+Shows details of an auth token for an AI Model Experiments instance.
 
 ```
-stackit ai-model-experiments instance list [flags]
+stackit model-experiments token describe TOKEN_ID [flags]
 ```
 
 ### Examples
 
 ```
-  List AI Model Experiments instances in a project
-  $ stackit ai-model-experiments instance list --region eu01
+  Show details of an auth token with ID "xxx"
+  $ stackit model-experiments token describe xxx --instance-id yyy
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit ai-model-experiments instance list"
+  -h, --help                 Help for "stackit model-experiments token describe"
+      --instance-id string   ID of the instance
 ```
 
 ### Options inherited from parent commands
@@ -36,5 +37,5 @@ stackit ai-model-experiments instance list [flags]
 
 ### SEE ALSO
 
-* [stackit ai-model-experiments instance](./stackit_ai-model-experiments_instance.md)	 - Provides functionality for AI Model Experiments instances
+* [stackit model-experiments token](./stackit_model-experiments_token.md)	 - Provides functionality for AI Model Experiments instance tokens
 

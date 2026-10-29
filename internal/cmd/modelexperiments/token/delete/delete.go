@@ -36,7 +36,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Short:   "Deletes an instance token",
 		Long:    "Deletes an auth token from an AI Model Experiments instance.",
 		Args:    args.SingleArg(tokenIDArg, utils.ValidateUUID),
-		Example: examples.Build(examples.NewExample(`Delete an auth token with ID "xxx"`, `$ stackit ai-model-experiments token delete xxx --instance-id yyy`)),
+		Example: examples.Build(examples.NewExample(`Delete an auth token with ID "xxx"`, `$ stackit model-experiments token delete xxx --instance-id yyy`)),
 		RunE: func(cmd *cobra.Command, inputArgs []string) error {
 			model, err := parseInput(params.Printer, cmd, inputArgs)
 			if err != nil {

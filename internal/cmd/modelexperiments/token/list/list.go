@@ -29,7 +29,7 @@ type inputModel struct {
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
-	cmd := &cobra.Command{Use: "list", Short: "Lists instance tokens", Long: "Lists all auth tokens for an AI Model Experiments instance.", Args: args.NoArgs, Example: examples.Build(examples.NewExample("List all tokens for an instance", "$ stackit ai-model-experiments token list --instance-id xxx")), RunE: func(cmd *cobra.Command, _ []string) error {
+	cmd := &cobra.Command{Use: "list", Short: "Lists instance tokens", Long: "Lists all auth tokens for an AI Model Experiments instance.", Args: args.NoArgs, Example: examples.Build(examples.NewExample("List all tokens for an instance", "$ stackit model-experiments token list --instance-id xxx")), RunE: func(cmd *cobra.Command, _ []string) error {
 		model, err := parseInput(params.Printer, cmd, nil)
 		if err != nil {
 			return err

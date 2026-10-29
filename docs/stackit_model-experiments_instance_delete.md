@@ -1,27 +1,26 @@
-## stackit ai-model-experiments token list
+## stackit model-experiments instance delete
 
-Lists instance tokens
+Deletes an AI Model Experiments instance
 
 ### Synopsis
 
-Lists all auth tokens for an AI Model Experiments instance.
+Deletes an AI Model Experiments instance from a STACKIT project.
 
 ```
-stackit ai-model-experiments token list [flags]
+stackit model-experiments instance delete INSTANCE_ID [flags]
 ```
 
 ### Examples
 
 ```
-  List all tokens for an instance
-  $ stackit ai-model-experiments token list --instance-id xxx
+  Delete an AI Model Experiments instance with ID "xxx"
+  $ stackit model-experiments instance delete xxx
 ```
 
 ### Options
 
 ```
-  -h, --help                 Help for "stackit ai-model-experiments token list"
-      --instance-id string   ID of the instance
+  -h, --help   Help for "stackit model-experiments instance delete"
 ```
 
 ### Options inherited from parent commands
@@ -37,5 +36,5 @@ stackit ai-model-experiments token list [flags]
 
 ### SEE ALSO
 
-* [stackit ai-model-experiments token](./stackit_ai-model-experiments_token.md)	 - Provides functionality for AI Model Experiments instance tokens
+* [stackit model-experiments instance](./stackit_model-experiments_instance.md)	 - Provides functionality for AI Model Experiments instances
 

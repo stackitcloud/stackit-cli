@@ -1,4 +1,4 @@
-## stackit ai-model-experiments instance patch
+## stackit model-experiments instance update
 
 Updates an AI Model Experiments instance
 
@@ -7,23 +7,23 @@ Updates an AI Model Experiments instance
 Partially updates an AI Model Experiments instance in a STACKIT project.
 
 ```
-stackit ai-model-experiments instance patch INSTANCE_ID [flags]
+stackit model-experiments instance update INSTANCE_ID [flags]
 ```
 
 ### Examples
 
 ```
   Update the name of an AI Model Experiments instance with ID "xxx"
-  $ stackit ai-model-experiments instance patch xxx --name my-new-name
+  $ stackit model-experiments instance update xxx --name my-new-name
 
   Update the description of an AI Model Experiments instance
-  $ stackit ai-model-experiments instance patch xxx --description "team tracking server"
+  $ stackit model-experiments instance update xxx --description "team tracking server"
 
   Update labels on an AI Model Experiments instance
-  $ stackit ai-model-experiments instance patch xxx --label env=prod
+  $ stackit model-experiments instance update xxx --label env=prod
 
   Update multiple fields of an AI Model Experiments instance
-  $ stackit ai-model-experiments instance patch xxx --name my-new-name --description "team tracking server" --label env=prod --deleted-experiment-retention 30d
+  $ stackit model-experiments instance update xxx --name my-new-name --description "team tracking server" --label env=prod --deleted-experiment-retention 30d
 ```
 
 ### Options
@@ -31,7 +31,7 @@ stackit ai-model-experiments instance patch INSTANCE_ID [flags]
 ```
       --deleted-experiment-retention string   Retention period for deleted experiments before permanent purge, e.g. "30d" (min 1d, max 90d)
       --description string                    Instance description
-  -h, --help                                  Help for "stackit ai-model-experiments instance patch"
+  -h, --help                                  Help for "stackit model-experiments instance update"
       --label stringToString                  Labels as key-value pairs, e.g. "--label env=prod" (default [])
   -n, --name string                           Instance name
 ```
@@ -49,5 +49,5 @@ stackit ai-model-experiments instance patch INSTANCE_ID [flags]
 
 ### SEE ALSO
 
-* [stackit ai-model-experiments instance](./stackit_ai-model-experiments_instance.md)	 - Provides functionality for AI Model Experiments instances
+* [stackit model-experiments instance](./stackit_model-experiments_instance.md)	 - Provides functionality for AI Model Experiments instances
 

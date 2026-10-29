@@ -1,30 +1,31 @@
-## stackit ai-model-experiments token patch
+## stackit model-experiments token create
 
-Updates an instance token
+Creates an instance token
 
 ### Synopsis
 
-Partially updates an auth token for an AI Model Experiments instance.
+Creates an auth token for an AI Model Experiments instance.
 
 ```
-stackit ai-model-experiments token patch TOKEN_ID [flags]
+stackit model-experiments token create [flags]
 ```
 
 ### Examples
 
 ```
-  Update an auth token with ID "xxx"
-  $ stackit ai-model-experiments token patch xxx --instance-id yyy --name updated-token
+  Create an auth token
+  $ stackit model-experiments token create --instance-id xxx --name my-token
 ```
 
 ### Options
 
 ```
       --description string     Token description
-  -h, --help                   Help for "stackit ai-model-experiments token patch"
+  -h, --help                   Help for "stackit model-experiments token create"
       --instance-id string     ID of the instance
       --label stringToString   Labels as key-value pairs, e.g. "--label env=prod" (default [])
       --name string            Token name
+      --ttl-duration string    Token time to live duration
 ```
 
 ### Options inherited from parent commands
@@ -40,5 +41,5 @@ stackit ai-model-experiments token patch TOKEN_ID [flags]
 
 ### SEE ALSO
 
-* [stackit ai-model-experiments token](./stackit_ai-model-experiments_token.md)	 - Provides functionality for AI Model Experiments instance tokens
+* [stackit model-experiments token](./stackit_model-experiments_token.md)	 - Provides functionality for AI Model Experiments instance tokens
 

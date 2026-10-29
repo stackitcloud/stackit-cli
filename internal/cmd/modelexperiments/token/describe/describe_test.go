@@ -1,4 +1,4 @@
-package get
+package describe
 
 import (
 	"context"
@@ -55,7 +55,7 @@ func TestParseInput(t *testing.T) {
 		})
 	}
 }
-func TestBuildRequest(t *testing.T) {
+func TestBuildDescribeRequest(t *testing.T) {
 	got := buildRequest(testContext, fixtureInputModel(), testClient)
 	want := fixtureRequest()
 	if diff := cmp.Diff(got, want, cmp.AllowUnexported(want), cmpopts.EquateComparable(testContext)); diff != "" {

@@ -36,7 +36,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Delete an AI Model Experiments instance with ID "xxx"`,
-				`$ stackit ai-model-experiments instance delete xxx`,
+				`$ stackit model-experiments instance delete xxx`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -61,7 +61,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			req := buildDeleteInstanceRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient)
 
 			resp, err := req.Execute()
 			if err != nil {
@@ -96,7 +96,7 @@ func parseInput(
 	return &model, nil
 }
 
-func buildDeleteInstanceRequest(
+func buildRequest(
 	ctx context.Context,
 	model *inputModel,
 	apiClient *modelexperiments.APIClient,

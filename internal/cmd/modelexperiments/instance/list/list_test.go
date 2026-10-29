@@ -115,7 +115,7 @@ func TestParseInput(t *testing.T) {
 }
 
 func TestBuildListInstancesRequest(t *testing.T) {
-	request := buildListInstancesRequest(
+	request := buildRequest(
 		testCtx,
 		fixtureInputModel(),
 		testClient,

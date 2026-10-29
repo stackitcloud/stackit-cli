@@ -1,4 +1,4 @@
-package get
+package describe
 
 import (
 	"context"
@@ -32,11 +32,11 @@ type inputModel struct {
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     fmt.Sprintf("get %s", tokenIDArg),
-		Short:   "Gets an instance token",
-		Long:    "Gets an auth token for an AI Model Experiments instance.",
+		Use:     fmt.Sprintf("describe %s", tokenIDArg),
+		Short:   "Shows details of an instance token",
+		Long:    "Shows details of an auth token for an AI Model Experiments instance.",
 		Args:    args.SingleArg(tokenIDArg, utils.ValidateUUID),
-		Example: examples.Build(examples.NewExample(`Get an auth token with ID "xxx"`, `$ stackit ai-model-experiments token get xxx --instance-id yyy`)),
+		Example: examples.Build(examples.NewExample(`Show details of an auth token with ID "xxx"`, `$ stackit model-experiments token describe xxx --instance-id yyy`)),
 		RunE: func(cmd *cobra.Command, inputArgs []string) error {
 			model, err := parseInput(params.Printer, cmd, inputArgs)
 			if err != nil {
@@ -48,7 +48,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 			resp, err := buildRequest(context.Background(), model, apiClient).Execute()
 			if err != nil {
-				return fmt.Errorf("get instance token: %w", err)
+				return fmt.Errorf("describe instance token: %w", err)
 			}
 			return outputResult(params.Printer, model.OutputFormat, resp)
 		},

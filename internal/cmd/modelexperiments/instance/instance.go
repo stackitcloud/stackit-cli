@@ -5,9 +5,9 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/modelexperiments/instance/create"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/modelexperiments/instance/delete"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/modelexperiments/instance/get"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/modelexperiments/instance/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/modelexperiments/instance/list"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/modelexperiments/instance/patch"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/modelexperiments/instance/update"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -31,6 +31,6 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(list.NewCmd(params))
 	cmd.AddCommand(create.NewCmd(params))
 	cmd.AddCommand(delete.NewCmd(params))
-	cmd.AddCommand(get.NewCmd(params))
-	cmd.AddCommand(patch.NewCmd(params))
+	cmd.AddCommand(describe.NewCmd(params))
+	cmd.AddCommand(update.NewCmd(params))
 }

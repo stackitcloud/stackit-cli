@@ -1,4 +1,4 @@
-## stackit ai-model-experiments token delete
+## stackit model-experiments token delete
 
 Deletes an instance token
 
@@ -7,20 +7,20 @@ Deletes an instance token
 Deletes an auth token from an AI Model Experiments instance.
 
 ```
-stackit ai-model-experiments token delete TOKEN_ID [flags]
+stackit model-experiments token delete TOKEN_ID [flags]
 ```
 
 ### Examples
 
 ```
   Delete an auth token with ID "xxx"
-  $ stackit ai-model-experiments token delete xxx --instance-id yyy
+  $ stackit model-experiments token delete xxx --instance-id yyy
 ```
 
 ### Options
 
 ```
-  -h, --help                 Help for "stackit ai-model-experiments token delete"
+  -h, --help                 Help for "stackit model-experiments token delete"
       --instance-id string   ID of the instance
 ```
 
@@ -37,5 +37,5 @@ stackit ai-model-experiments token delete TOKEN_ID [flags]
 
 ### SEE ALSO
 
-* [stackit ai-model-experiments token](./stackit_ai-model-experiments_token.md)	 - Provides functionality for AI Model Experiments instance tokens
+* [stackit model-experiments token](./stackit_model-experiments_token.md)	 - Provides functionality for AI Model Experiments instance tokens
 

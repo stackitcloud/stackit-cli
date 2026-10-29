@@ -1,4 +1,4 @@
-package patch
+package update
 
 import (
 	"context"
@@ -159,7 +159,7 @@ func TestParseInput(t *testing.T) {
 	}
 }
 
-func TestBuildPatchInstanceRequest(t *testing.T) {
+func TestBuildUpdateInstanceRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
@@ -220,7 +220,7 @@ func TestBuildPatchInstanceRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildPatchInstanceRequest(
+			request := buildRequest(
 				testCtx,
 				tt.model,
 				testClient,

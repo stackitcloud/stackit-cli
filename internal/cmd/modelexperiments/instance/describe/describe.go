@@ -1,4 +1,4 @@
-package get
+package describe
 
 import (
 	"context"
@@ -30,14 +30,18 @@ type inputModel struct {
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("get %s", instanceIdArg),
-		Short: "Gets an AI Model Experiments instance",
-		Long:  "Gets an AI Model Experiments instance in a STACKIT project.",
+		Use:   fmt.Sprintf("describe %s", instanceIdArg),
+		Short: "Shows details of an AI Model Experiments instance",
+		Long:  "Shows details of an AI Model Experiments instance in a STACKIT project.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Get an AI Model Experiments instance with ID "xxx"`,
-				`$ stackit ai-model-experiments instance get xxx`,
+				`Show details of an AI Model Experiments instance with ID "xxx"`,
+				`$ stackit model-experiments instance describe xxx`,
+			),
+			examples.NewExample(
+				`Get details of an AI Model Experiments instance with ID "xxx" in JSON format`,
+				`$ stackit ai-model-experiments instance get xxx --output-format json`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -53,11 +57,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			req := buildGetInstanceRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient)
 
 			resp, err := req.Execute()
 			if err != nil {
-				return fmt.Errorf("get AI Model Experiments instance: %w", err)
+				return fmt.Errorf("describe AI Model Experiments instance: %w", err)
 			}
 
 			return outputResult(params.Printer, model.OutputFormat, resp)
@@ -88,7 +92,7 @@ func parseInput(
 	return &model, nil
 }
 
-func buildGetInstanceRequest(
+func buildRequest(
 	ctx context.Context,
 	model *inputModel,
 	apiClient *modelexperiments.APIClient,
@@ -116,7 +120,7 @@ func outputResult(
 		table.AddRow(
 			resp.Instance.Id,
 			resp.Instance.Name,
-			resp.Instance.Region,
+			utils.PtrString(resp.Instance.Region),
 			resp.Instance.State,
 		)
 		return table.Display(p)

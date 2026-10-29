@@ -15,10 +15,7 @@ func GetInstanceName(ctx context.Context, apiClient modelexperiments.DefaultAPI,
 	if err != nil {
 		return "", fmt.Errorf("get AI Model Experiments instance: %w", err)
 	}
-	if resp == nil {
-		return "", ErrResponseNil
-	}
-	if resp.Instance.Name == "" {
+	if resp == nil || resp.Instance.Name == "" {
 		return "", ErrResponseNil
 	}
 	return resp.Instance.Name, nil

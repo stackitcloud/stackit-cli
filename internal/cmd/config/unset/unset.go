@@ -35,6 +35,7 @@ const (
 	loadBalancerCustomEndpointFlag      = "load-balancer-custom-endpoint"
 	logMeCustomEndpointFlag             = "logme-custom-endpoint"
 	mariaDBCustomEndpointFlag           = "mariadb-custom-endpoint"
+	modelExperimentsCustomEndpointFlag  = "model-experiments-custom-endpoint"
 	mongoDBFlexCustomEndpointFlag       = "mongodbflex-custom-endpoint"
 	objectStorageCustomEndpointFlag     = "object-storage-custom-endpoint"
 	observabilityCustomEndpointFlag     = "observability-custom-endpoint"
@@ -88,6 +89,7 @@ type inputModel struct {
 	LoadBalancerCustomEndpoint      bool
 	LogMeCustomEndpoint             bool
 	MariaDBCustomEndpoint           bool
+	ModelExperimentsCustomEndpoint  bool
 	MongoDBFlexCustomEndpoint       bool
 	ObjectStorageCustomEndpoint     bool
 	ObservabilityCustomEndpoint     bool
@@ -193,6 +195,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 			if model.MariaDBCustomEndpoint {
 				viper.Set(config.MariaDBCustomEndpointKey, "")
+			}
+			if model.ModelExperimentsCustomEndpoint {
+				viper.Set(config.ModelExperimentsCustomEndpointKey, "")
 			}
 			if model.MongoDBFlexCustomEndpoint {
 				viper.Set(config.MongoDBFlexCustomEndpointKey, "")
@@ -300,6 +305,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(loadBalancerCustomEndpointFlag, false, "Load Balancer API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(logMeCustomEndpointFlag, false, "LogMe API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(mariaDBCustomEndpointFlag, false, "MariaDB API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(modelExperimentsCustomEndpointFlag, false, "Model Experiments API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(mongoDBFlexCustomEndpointFlag, false, "MongoDB Flex API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(objectStorageCustomEndpointFlag, false, "Object Storage API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(openSearchCustomEndpointFlag, false, "OpenSearch API base URL. If unset, uses the default base URL")
@@ -348,6 +354,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		LoadBalancerCustomEndpoint:      flags.FlagToBoolValue(p, cmd, loadBalancerCustomEndpointFlag),
 		LogMeCustomEndpoint:             flags.FlagToBoolValue(p, cmd, logMeCustomEndpointFlag),
 		MariaDBCustomEndpoint:           flags.FlagToBoolValue(p, cmd, mariaDBCustomEndpointFlag),
+		ModelExperimentsCustomEndpoint:  flags.FlagToBoolValue(p, cmd, modelExperimentsCustomEndpointFlag),
 		MongoDBFlexCustomEndpoint:       flags.FlagToBoolValue(p, cmd, mongoDBFlexCustomEndpointFlag),
 		ObjectStorageCustomEndpoint:     flags.FlagToBoolValue(p, cmd, objectStorageCustomEndpointFlag),
 		ObservabilityCustomEndpoint:     flags.FlagToBoolValue(p, cmd, observabilityCustomEndpointFlag),

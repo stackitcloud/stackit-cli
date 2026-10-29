@@ -1,4 +1,4 @@
-package patch
+package update
 
 import (
 	"context"
@@ -38,8 +38,8 @@ type inputModel struct {
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use: fmt.Sprintf("patch %s", tokenIDArg), Short: "Updates an instance token", Long: "Partially updates an auth token for an AI Model Experiments instance.", Args: args.SingleArg(tokenIDArg, utils.ValidateUUID),
-		Example: examples.Build(examples.NewExample(`Update an auth token with ID "xxx"`, `$ stackit ai-model-experiments token patch xxx --instance-id yyy --name updated-token`)),
+		Use: fmt.Sprintf("update %s", tokenIDArg), Short: "Updates an instance token", Long: "Partially updates an auth token for an AI Model Experiments instance.", Args: args.SingleArg(tokenIDArg, utils.ValidateUUID),
+		Example: examples.Build(examples.NewExample(`Update an auth token with ID "xxx"`, `$ stackit model-experiments token update xxx --instance-id yyy --name updated-token`)),
 		RunE: func(cmd *cobra.Command, inputArgs []string) error {
 			model, err := parseInput(params.Printer, cmd, inputArgs)
 			if err != nil {

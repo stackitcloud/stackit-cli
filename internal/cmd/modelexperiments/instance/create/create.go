@@ -44,10 +44,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create an AI Model Experiments instance with name "my-tracking"`,
-				`$ stackit ai-model-experiments instance create --name my-tracking`),
+				`$ stackit model-experiments instance create --name my-tracking`),
 			examples.NewExample(
 				`Create an instance with a description and labels`,
-				`$ stackit ai-model-experiments instance create --name my-tracking --description "team tracking server" --label env=prod`),
+				`$ stackit model-experiments instance create --name my-tracking --description "team tracking server" --label env=prod`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -73,7 +73,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			req := buildCreateInstanceRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create AI Model Experiments instance: %w", err)
@@ -122,7 +122,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func buildCreateInstanceRequest(ctx context.Context, model *inputModel, apiClient *modelexperiments.APIClient) modelexperiments.ApiCreateInstanceRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient *modelexperiments.APIClient) modelexperiments.ApiCreateInstanceRequest {
 	req := apiClient.DefaultAPI.CreateInstance(ctx, model.ProjectId, model.Region)
 
 	payload := modelexperiments.CreateInstancePayload{

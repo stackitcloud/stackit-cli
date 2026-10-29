@@ -27,7 +27,6 @@ stackit [flags]
 ### SEE ALSO
 
 * [stackit affinity-group](./stackit_affinity-group.md)	 - Manage server affinity groups
-* [stackit ai-model-experiments](./stackit_ai-model-experiments.md)	 - Provides functionality for AI Model Experiments
 * [stackit alpha](./stackit_alpha.md)	 - Contains alpha STACKIT CLI commands
 * [stackit auth](./stackit_auth.md)	 - Authenticates the STACKIT CLI
 * [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
@@ -42,6 +41,7 @@ stackit [flags]
 * [stackit logme](./stackit_logme.md)	 - Provides functionality for LogMe
 * [stackit logs](./stackit_logs.md)	 - Provides functionality for Logs
 * [stackit mariadb](./stackit_mariadb.md)	 - Provides functionality for MariaDB
+* [stackit model-experiments](./stackit_model-experiments.md)	 - Provides functionality for AI Model Experiments
 * [stackit mongodbflex](./stackit_mongodbflex.md)	 - Provides functionality for MongoDB Flex
 * [stackit network](./stackit_network.md)	 - Provides functionality for networks
 * [stackit network-area](./stackit_network-area.md)	 - Provides functionality for STACKIT Network Area (SNA)

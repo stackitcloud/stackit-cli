@@ -1,4 +1,4 @@
-package patch
+package update
 
 import (
 	"context"
@@ -41,26 +41,26 @@ type inputModel struct {
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("patch %s", instanceIdArg),
+		Use:   fmt.Sprintf("update %s", instanceIdArg),
 		Short: "Updates an AI Model Experiments instance",
 		Long:  "Partially updates an AI Model Experiments instance in a STACKIT project.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
 				`Update the name of an AI Model Experiments instance with ID "xxx"`,
-				`$ stackit ai-model-experiments instance patch xxx --name my-new-name`,
+				`$ stackit model-experiments instance update xxx --name my-new-name`,
 			),
 			examples.NewExample(
 				`Update the description of an AI Model Experiments instance`,
-				`$ stackit ai-model-experiments instance patch xxx --description "team tracking server"`,
+				`$ stackit model-experiments instance update xxx --description "team tracking server"`,
 			),
 			examples.NewExample(
 				`Update labels on an AI Model Experiments instance`,
-				`$ stackit ai-model-experiments instance patch xxx --label env=prod`,
+				`$ stackit model-experiments instance update xxx --label env=prod`,
 			),
 			examples.NewExample(
 				`Update multiple fields of an AI Model Experiments instance`,
-				`$ stackit ai-model-experiments instance patch xxx --name my-new-name --description "team tracking server" --label env=prod --deleted-experiment-retention 30d`,
+				`$ stackit model-experiments instance update xxx --name my-new-name --description "team tracking server" --label env=prod --deleted-experiment-retention 30d`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -76,7 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			req := buildPatchInstanceRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient)
 
 			resp, err := req.Execute()
 			if err != nil {
@@ -151,7 +151,7 @@ func parseInput(
 	return &model, nil
 }
 
-func buildPatchInstanceRequest(
+func buildRequest(
 	ctx context.Context,
 	model *inputModel,
 	apiClient *modelexperiments.APIClient,

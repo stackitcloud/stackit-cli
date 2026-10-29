@@ -141,7 +141,7 @@ func TestBuildCreateInstanceRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildCreateInstanceRequest(testCtx, tt.model, testClient)
+			request := buildRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest),

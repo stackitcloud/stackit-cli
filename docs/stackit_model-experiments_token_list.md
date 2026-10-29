@@ -1,26 +1,26 @@
-## stackit ai-model-experiments token get
+## stackit model-experiments token list
 
-Gets an instance token
+Lists instance tokens
 
 ### Synopsis
 
-Gets an auth token for an AI Model Experiments instance.
+Lists all auth tokens for an AI Model Experiments instance.
 
 ```
-stackit ai-model-experiments token get TOKEN_ID [flags]
+stackit model-experiments token list [flags]
 ```
 
 ### Examples
 
 ```
-  Get an auth token with ID "xxx"
-  $ stackit ai-model-experiments token get xxx --instance-id yyy
+  List all tokens for an instance
+  $ stackit model-experiments token list --instance-id xxx
 ```
 
 ### Options
 
 ```
-  -h, --help                 Help for "stackit ai-model-experiments token get"
+  -h, --help                 Help for "stackit model-experiments token list"
       --instance-id string   ID of the instance
 ```
 
@@ -37,5 +37,5 @@ stackit ai-model-experiments token get TOKEN_ID [flags]
 
 ### SEE ALSO
 
-* [stackit ai-model-experiments token](./stackit_ai-model-experiments_token.md)	 - Provides functionality for AI Model Experiments instance tokens
+* [stackit model-experiments token](./stackit_model-experiments_token.md)	 - Provides functionality for AI Model Experiments instance tokens
 

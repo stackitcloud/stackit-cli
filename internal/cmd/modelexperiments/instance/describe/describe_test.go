@@ -1,4 +1,4 @@
-package get
+package describe
 
 import (
 	"context"
@@ -119,8 +119,8 @@ func TestParseInput(t *testing.T) {
 	}
 }
 
-func TestBuildGetInstanceRequest(t *testing.T) {
-	request := buildGetInstanceRequest(
+func TestBuildDescribeInstanceRequest(t *testing.T) {
+	request := buildRequest(
 		testCtx,
 		fixtureInputModel(),
 		testClient,
