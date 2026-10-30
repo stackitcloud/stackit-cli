@@ -47,6 +47,7 @@ stackit config set [flags]
       --logme-custom-endpoint string                               LogMe API base URL, used in calls to this API
       --logs-custom-endpoint string                                Logs API base URL, used in calls to this API
       --mariadb-custom-endpoint string                             MariaDB API base URL, used in calls to this API
+      --model-experiments-custom-endpoint string                   Model Experiments API base URL, used in calls to this API
       --mongodbflex-custom-endpoint string                         MongoDB Flex API base URL, used in calls to this API
       --object-storage-custom-endpoint string                      Object Storage API base URL, used in calls to this API
       --observability-custom-endpoint string                       Observability API base URL, used in calls to this API
