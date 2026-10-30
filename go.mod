@@ -23,13 +23,13 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.22.0
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.25.0
 	github.com/stackitcloud/stackit-sdk-go/services/edge v0.14.0
-	github.com/stackitcloud/stackit-sdk-go/services/git v0.14.1
+	github.com/stackitcloud/stackit-sdk-go/services/git v0.15.0
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.15.1
 	github.com/stackitcloud/stackit-sdk-go/services/intake v0.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/logs v0.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.5.0
-	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.15.0
+	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.16.0
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.27.0
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.11.0
 	github.com/stackitcloud/stackit-sdk-go/services/scf v0.11.0
@@ -39,7 +39,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.21.1
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.8.0
 	github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.2
-	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.18.1
+	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.19.0
 	github.com/stackitcloud/stackit-sdk-go/services/valkey v0.4.0
 	github.com/stackitcloud/stackit-sdk-go/services/vpn v0.15.2
 	github.com/zalando/go-keyring v0.2.8
