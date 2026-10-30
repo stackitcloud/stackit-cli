@@ -18,6 +18,20 @@ func GetZoneName(ctx context.Context, apiClient dns.DefaultAPI, projectId, zoneI
 	return resp.Zone.Name, nil
 }
 
+func GetZoneIdByDnsName(ctx context.Context, apiClient dns.DefaultAPI, projectId, dnsName string) (string, error) {
+	resp, err := apiClient.ListZones(ctx, projectId).DnsNameEq(dnsName).Execute()
+	if err != nil {
+		return "", fmt.Errorf("list DNS zones: %w", err)
+	}
+	if resp == nil || len(resp.Zones) == 0 {
+		return "", fmt.Errorf("no DNS zone found with DNS name %q in project %q", dnsName, projectId)
+	}
+	if len(resp.Zones) > 1 {
+		return "", fmt.Errorf("multiple DNS zones found with DNS name %q in project %q", dnsName, projectId)
+	}
+	return resp.Zones[0].Id, nil
+}
+
 func GetRecordSetName(ctx context.Context, apiClient dns.DefaultAPI, projectId, zoneId, recordSetId string) (string, error) {
 	resp, err := apiClient.GetRecordSet(ctx, projectId, zoneId, recordSetId).Execute()
 	if err != nil {
