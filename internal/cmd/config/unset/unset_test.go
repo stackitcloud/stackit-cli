@@ -30,7 +30,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 		loadBalancerCustomEndpointFlag:     true,
 		logMeCustomEndpointFlag:            true,
 		mariaDBCustomEndpointFlag:          true,
-    modelExperimentsCustomEndpointFlag: true,
+		modelExperimentsCustomEndpointFlag: true,
 		objectStorageCustomEndpointFlag:    true,
 		observabilityCustomEndpointFlag:    true,
 		openSearchCustomEndpointFlag:       true,
@@ -82,7 +82,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		LoadBalancerCustomEndpoint:     true,
 		LogMeCustomEndpoint:            true,
 		MariaDBCustomEndpoint:          true,
-    ModelExperimentsCustomEndpoint: true,
+		ModelExperimentsCustomEndpoint: true,
 		ObjectStorageCustomEndpoint:    true,
 		ObservabilityCustomEndpoint:    true,
 		OpenSearchCustomEndpoint:       true,
@@ -314,7 +314,7 @@ func TestParseInput(t *testing.T) {
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.ModelExperimentsCustomEndpoint = false
-      }),
+			}),
 		},
 		{
 			description: "scf custom endpoint empty",

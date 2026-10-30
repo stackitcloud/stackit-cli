@@ -32,7 +32,7 @@ const (
 	LoadBalancerCustomEndpointKey     = "load_balancer_custom_endpoint"
 	LogMeCustomEndpointKey            = "logme_custom_endpoint"
 	MariaDBCustomEndpointKey          = "mariadb_custom_endpoint"
-  ModelExperimentsCustomEndpointKey = "modelexperiments_custom_endpoint"
+	ModelExperimentsCustomEndpointKey = "modelexperiments_custom_endpoint"
 	MongoDBFlexCustomEndpointKey      = "mongodbflex_custom_endpoint"
 	ObjectStorageCustomEndpointKey    = "object_storage_custom_endpoint"
 	ObservabilityCustomEndpointKey    = "observability_custom_endpoint"
