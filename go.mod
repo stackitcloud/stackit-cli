@@ -41,7 +41,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.2
 	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.19.0
 	github.com/stackitcloud/stackit-sdk-go/services/valkey v0.4.0
-	github.com/stackitcloud/stackit-sdk-go/services/vpn v0.15.2
+	github.com/stackitcloud/stackit-sdk-go/services/vpn v0.15.3
 	github.com/zalando/go-keyring v0.2.8
 	golang.org/x/mod v0.42.0
 	golang.org/x/oauth2 v0.37.0
