@@ -50,3 +50,4 @@ stackit model-experiments instance update INSTANCE_ID [flags]
 ### SEE ALSO
 
 * [stackit model-experiments instance](./stackit_model-experiments_instance.md)	 - Provides functionality for AI Model Experiments instances
+
