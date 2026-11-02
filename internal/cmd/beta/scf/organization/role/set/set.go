@@ -14,6 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/scf/client"
+	scfUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/scf/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
@@ -66,7 +67,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			prompt := fmt.Sprintf("Are you sure you want to assign role %q to user %q in STACKIT Cloud Foundry organization %q?", model.Role, userLabel(model), model.OrganizationId)
+			prompt := fmt.Sprintf("Are you sure you want to assign role %q to user %q in STACKIT Cloud Foundry organization %q?", model.Role, scfUtils.UserLabel(model.UserGuid, model.UserName), model.OrganizationId)
 			err = p.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -130,15 +131,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient scf.DefaultA
 
 func outputResult(p *print.Printer, model *inputModel, resp *scf.OrgRoleResponse) error {
 	return p.OutputResult(model.OutputFormat, resp, func() error {
-		p.Outputf("Assigned role %q to user %q in STACKIT Cloud Foundry organization %s\n", model.Role, userLabel(model), model.OrganizationId)
+		p.Outputf("Assigned role %q to user %q in STACKIT Cloud Foundry organization %s\n", model.Role, scfUtils.UserLabel(model.UserGuid, model.UserName), model.OrganizationId)
 		return nil
 	})
-}
-
-// userLabel returns the user identifier given on the command line, either the GUID or the username
-func userLabel(model *inputModel) string {
-	if model.UserGuid != nil {
-		return *model.UserGuid
-	}
-	return utils.PtrString(model.UserName)
 }

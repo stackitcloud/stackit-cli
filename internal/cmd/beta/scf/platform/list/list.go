@@ -74,7 +74,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				projectLabel = model.ProjectId
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, projectLabel, resp)
+			return outputResult(params.Printer, model.OutputFormat, projectLabel, model.Limit, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -117,13 +117,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient scf.DefaultA
 	return apiClient.ListPlatforms(ctx, model.ProjectId, model.Region).Page(1).PerPage(pageSize)
 }
 
-func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *scf.PlatformList) error {
+func outputResult(p *print.Printer, outputFormat, projectLabel string, limit *int64, resp *scf.PlatformList) error {
 	return p.OutputResult(outputFormat, resp, func() error {
 		if resp == nil || len(resp.Resources) == 0 {
 			p.Outputf("No STACKIT Cloud Foundry platforms found for project %q\n", projectLabel)
 			return nil
 		}
-		if resp.Pagination.TotalPages != nil && *resp.Pagination.TotalPages > int64(1) {
+		limitReached := limit != nil && int64(len(resp.Resources)) >= *limit
+		if resp.Pagination.TotalPages != nil && *resp.Pagination.TotalPages > int64(1) && !limitReached {
 			p.Warn("Server responded with more than 1 page. Output will not show all existing platforms.\n")
 		}
 

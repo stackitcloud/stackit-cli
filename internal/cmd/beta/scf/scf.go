@@ -5,6 +5,7 @@ import (
 
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/scf/organization"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/scf/platform"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/scf/space"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -26,4 +27,5 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(organization.NewCmd(params))
 	cmd.AddCommand(platform.NewCmd(params))
+	cmd.AddCommand(space.NewCmd(params))
 }
