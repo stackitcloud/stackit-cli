@@ -60,7 +60,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			resp, err := buildRequest(ctx, model, apiClient.DefaultAPI, 1, maxPageSize).Execute()
+			resp, err := buildRequest(ctx, model, apiClient.DefaultAPI).Execute()
 			if err != nil {
 				return fmt.Errorf("fetch STACKIT Cloud Foundry platforms: %w", err)
 			}
@@ -108,13 +108,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient scf.DefaultAPI, page, perPage int64) scf.ApiListPlatformsRequest {
+func buildRequest(ctx context.Context, model *inputModel, apiClient scf.DefaultAPI) scf.ApiListPlatformsRequest {
 	// the API has non AIP-compliant pagination, which cannot be adapted with out SDK pagination utils.
-	pageSize := int64(perPage)
+	pageSize := int64(maxPageSize)
 	if model.Limit != nil && *model.Limit < pageSize {
 		pageSize = *model.Limit
 	}
-	return apiClient.ListPlatforms(ctx, model.ProjectId, model.Region).Page(page).PerPage(pageSize)
+	return apiClient.ListPlatforms(ctx, model.ProjectId, model.Region).Page(1).PerPage(pageSize)
 }
 
 func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *scf.PlatformList) error {

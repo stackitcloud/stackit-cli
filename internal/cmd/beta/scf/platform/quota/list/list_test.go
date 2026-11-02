@@ -184,6 +184,7 @@ func TestOutputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			tt.model.OutputFormat = tt.outputFormat
 			if err := outputResult(params.Printer, tt.model, tt.quotas); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}

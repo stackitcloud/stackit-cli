@@ -138,13 +138,13 @@ func TestBuildRequest(t *testing.T) {
 			}),
 			isValid: true,
 			expectedRequest: fixtureRequest(func(request *scf.ApiListPlatformsRequest) {
-				request.PerPage(maxPageSize)
+				*request = request.PerPage(maxPageSize)
 			}),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient.DefaultAPI, 1, testLimit)
+			request := buildRequest(testCtx, tt.model, testClient.DefaultAPI)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest, scf.DefaultAPIService{}),
