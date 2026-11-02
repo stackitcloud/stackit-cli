@@ -31,4 +31,5 @@ stackit beta scf [flags]
 
 * [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
 * [stackit beta scf organization](./stackit_beta_scf_organization.md)	 - Provides functionality for STACKIT Cloud Foundry organizations
+* [stackit beta scf platform](./stackit_beta_scf_platform.md)	 - Provides functionality for STACKIT Cloud Foundry platforms
 
