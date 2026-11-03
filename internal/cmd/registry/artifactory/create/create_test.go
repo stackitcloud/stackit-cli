@@ -2,16 +2,20 @@ package create
 
 import (
 	"context"
+	"strings"
 	"testing"
+	"testing/fstest"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
+	"github.com/spf13/cobra"
 	registry "github.com/stackitcloud/stackit-sdk-go/services/registry/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
@@ -32,6 +36,7 @@ var (
 	testProxyDescription  = "Docker Hub proxy cache"
 	testProxyAccessKey    = "my-user"
 	testProxyAccessSecret = "my-secret"
+	testSecretFile        = "secret.txt"
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -74,6 +79,7 @@ func fixtureRequest(mods ...func(request *registry.ApiCreateArtifactoryRequest))
 
 func TestParseInput(t *testing.T) {
 	tests := []struct {
+		stdin         string
 		description   string
 		flagValues    map[string]string
 		isValid       bool
@@ -104,7 +110,7 @@ func TestParseInput(t *testing.T) {
 				flagValues[proxyRegistryTypeFlag] = testProxyRegistryType
 				flagValues[proxyDescriptionFlag] = testProxyDescription
 				flagValues[proxyAccessKeyFlag] = testProxyAccessKey
-				flagValues[proxyAccessSecretFlag] = testProxyAccessSecret
+				flagValues[proxyAccessSecretFlag] = "@" + testSecretFile
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -114,6 +120,36 @@ func TestParseInput(t *testing.T) {
 				model.ProxyAccessKey = utils.Ptr(testProxyAccessKey)
 				model.ProxyAccessSecret = utils.Ptr(testProxyAccessSecret)
 			}),
+		},
+		{
+			description: "with proxy full - secret from stdin",
+			stdin:       testProxyAccessSecret + "\n",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[proxyUrlFlag] = testProxyUrl
+				flagValues[proxyRegistryTypeFlag] = testProxyRegistryType
+				flagValues[proxyDescriptionFlag] = testProxyDescription
+				flagValues[proxyAccessKeyFlag] = testProxyAccessKey
+				flagValues[proxyAccessSecretFlag] = "-"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.ProxyUrl = utils.Ptr(testProxyUrl)
+				model.ProxyRegistryType = utils.Ptr(testProxyRegistryType)
+				model.ProxyDescription = utils.Ptr(testProxyDescription)
+				model.ProxyAccessKey = utils.Ptr(testProxyAccessKey)
+				model.ProxyAccessSecret = utils.Ptr(testProxyAccessSecret)
+			}),
+		},
+		{
+			description: "with proxy full - literal secret rejected",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[proxyUrlFlag] = testProxyUrl
+				flagValues[proxyRegistryTypeFlag] = testProxyRegistryType
+				flagValues[proxyDescriptionFlag] = testProxyDescription
+				flagValues[proxyAccessKeyFlag] = testProxyAccessKey
+				flagValues[proxyAccessSecretFlag] = "literal-secret"
+			}),
+			isValid: false,
 		},
 		{
 			description: "proxy url without registry type",
@@ -177,7 +213,13 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, []string{}, tt.flagValues, tt.isValid)
+			testutils.TestParseInput(t, func(params *types.CmdParams) *cobra.Command {
+				params.Fs = fstest.MapFS{
+					testSecretFile: {Data: []byte(testProxyAccessSecret)},
+				}
+				params.Printer.StdIn = strings.NewReader(tt.stdin)
+				return NewCmd(params)
+			}, parseInput, tt.expectedModel, []string{}, tt.flagValues, tt.isValid)
 		})
 	}
 }

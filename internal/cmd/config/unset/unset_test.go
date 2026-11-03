@@ -297,6 +297,16 @@ func TestParseInput(t *testing.T) {
 			}),
 		},
 		{
+			description: "registry custom endpoint empty",
+			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
+				flagValues[registryCustomEndpointFlag] = false
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.RegistryCustomEndpoint = false
+			}),
+		},
+		{
 			description: "service account custom endpoint empty",
 			flagValues: fixtureFlagValues(func(flagValues map[string]bool) {
 				flagValues[serviceAccountCustomEndpointFlag] = false
