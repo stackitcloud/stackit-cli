@@ -88,6 +88,12 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
+			description: "no project id",
+			argsValues:  fixtureArgValues(),
+			flagValues:  map[string]string{},
+			isValid:     false,
+		},
+		{
 			description: "no arg values",
 			argsValues:  []string{},
 			flagValues:  fixtureFlagValues(),

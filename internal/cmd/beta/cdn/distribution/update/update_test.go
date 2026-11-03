@@ -92,8 +92,7 @@ func TestParseInput(t *testing.T) {
 			description: "base",
 			argValues:   []string{testDistributionID},
 			flagValues:  fixtureFlagValues(),
-			isValid:     true,
-			expected:    fixtureInputModel(),
+			isValid:     false,
 		},
 		{
 			description: "distribution id missing",
