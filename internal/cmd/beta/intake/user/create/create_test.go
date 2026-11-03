@@ -2,7 +2,9 @@ package create
 
 import (
 	"context"
+	"strings"
 	"testing"
+	"testing/fstest"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -15,6 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
@@ -24,7 +27,8 @@ type testCtxKey struct{}
 const (
 	testRegion       = "eu01"
 	testDisplayName  = "testuser"
-	testPassword     = "Secret12345!"
+	testPwFile       = "pw.txt"
+	testPw           = "file-password"
 	testUserType     = "intake"
 	testDescription  = "This is a test user"
 	testLabelsString = "env=test,team=dev"
@@ -50,7 +54,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		globalflags.RegionFlag:    testRegion,
 		displayNameFlag:           testDisplayName,
 		intakeIdFlag:              testIntakeId,
-		passwordFlag:              testPassword,
+		passwordFlag:              "@" + testPwFile,
 		userTypeFlag:              testUserType,
 		descriptionFlag:           testDescription,
 		labelsFlag:                testLabelsString,
@@ -69,12 +73,12 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		DisplayName: utils.Ptr(testDisplayName),
-		IntakeId:    utils.Ptr(testIntakeId),
-		Password:    utils.Ptr(testPassword),
-		UserType:    utils.Ptr(testUserType),
-		Description: utils.Ptr(testDescription),
-		Labels:      utils.Ptr(testLabels),
+		DisplayName: new(testDisplayName),
+		IntakeId:    new(testIntakeId),
+		Password:    new(testPw),
+		UserType:    new(testUserType),
+		Description: new(testDescription),
+		Labels:      new(testLabels),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -87,7 +91,7 @@ func fixtureCreatePayload(mods ...func(payload *intake.CreateIntakeUserPayload))
 	userType := intake.UserType(testUserType)
 	payload := intake.CreateIntakeUserPayload{
 		DisplayName: testDisplayName,
-		Password:    testPassword,
+		Password:    testPw,
 		Type:        &userType,
 		Description: utils.Ptr(testDescription),
 		Labels:      testLabels,
@@ -110,6 +114,7 @@ func fixtureRequest(mods ...func(request *intake.ApiCreateIntakeUserRequest)) in
 
 func TestParseInput(t *testing.T) {
 	tests := []struct {
+		stdin         string
 		description   string
 		flagValues    map[string]string
 		isValid       bool
@@ -161,7 +166,7 @@ func TestParseInput(t *testing.T) {
 				globalflags.RegionFlag:    testRegion,
 				displayNameFlag:           testDisplayName,
 				intakeIdFlag:              testIntakeId,
-				passwordFlag:              testPassword,
+				passwordFlag:              "@" + testPwFile,
 				userTypeFlag:              testUserType,
 			},
 			isValid: true,
@@ -172,11 +177,35 @@ func TestParseInput(t *testing.T) {
 				model.UserType = utils.Ptr(string(intake.USERTYPE_INTAKE))
 			}),
 		},
+		{
+			description: "password from explicit stdin",
+			stdin:       "stdin-pw\n",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[passwordFlag] = "-"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Password = new("stdin-pw")
+			}),
+		},
+		{
+			description: "literal password rejected",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[passwordFlag] = "top-secret"
+			}),
+			isValid: false,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			testutils.TestParseInput(t, NewCmd, func(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
+			testutils.TestParseInput(t, func(params *types.CmdParams) *cobra.Command {
+				params.Fs = fstest.MapFS{
+					testPwFile: {Data: []byte(testPw)},
+				}
+				params.Printer.StdIn = strings.NewReader(tt.stdin)
+				return NewCmd(params)
+			}, func(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
 				return parseInput(p, cmd)
 			}, tt.expectedModel, nil, tt.flagValues, tt.isValid)
 		})

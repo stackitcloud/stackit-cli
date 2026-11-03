@@ -54,7 +54,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 				`$ stackit beta intake user update xxx --intake-id yyy --display-name "new-user-name"`),
 			examples.NewExample(
 				`Update the password and description for an Intake User`,
-				`$ stackit beta intake user update xxx --intake-id yyy --password "NewSecret123\!" --description "Updated description"`),
+				`$ stackit beta intake user update xxx --intake-id yyy --password - --description "Updated description"`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -122,10 +122,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		UserId:          userId,
 		DisplayName:     flags.FlagToStringPointer(p, cmd, displayNameFlag),
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
-		Password:        flags.SecretFlagToStringPointer(p, cmd, passwordFlag),
 		UserType:        flags.FlagToStringPointer(p, cmd, userTypeFlag),
 		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelsFlag),
 	}
+	pw, err := flags.ResolveSecretFlag(p, cmd, passwordFlag)
+	if err != nil {
+		return nil, err
+	}
+	model.Password = pw
 
 	if model.DisplayName == nil && model.Description == nil && model.Password == nil && model.UserType == nil && model.Labels == nil {
 		return nil, &cliErr.EmptyUpdateError{}

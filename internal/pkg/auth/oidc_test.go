@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
@@ -166,6 +167,62 @@ func TestTokenFunc_AzureDevOps(t *testing.T) {
 	}
 	if got != "ado-oidc-token" {
 		t.Errorf("fn() = %q, want %q", got, "ado-oidc-token")
+	}
+}
+
+func TestTokenFunc_AzureDevOps_ServiceConnectionID(t *testing.T) {
+	tests := []struct {
+		description         string
+		serviceConnectionID string
+	}{
+		{
+			description:         "service connection id set",
+			serviceConnectionID: "my-service-connection-id",
+		},
+		{
+			description:         "service connection id unset",
+			serviceConnectionID: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			var gotQuery url.Values
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				gotQuery = r.URL.Query()
+				w.Header().Set("Content-Type", "application/json")
+				tok := "ado-oidc-token"
+				_ = json.NewEncoder(w).Encode(map[string]*string{"oidcToken": &tok})
+			}))
+			defer srv.Close()
+
+			t.Setenv(auth.EnvServiceAccountFederatedToken, "")
+			t.Setenv(auth.EnvFederatedTokenFile, "")
+			t.Setenv(auth.EnvGitHubRequestURL, "")
+			t.Setenv(auth.EnvGitHubRequestToken, "")
+			t.Setenv(auth.EnvAzureOIDCRequestURI, srv.URL)
+			t.Setenv(auth.EnvAzureAccessToken, "ado-access-token")
+			t.Setenv(auth.EnvAzureServiceConnectionID, tt.serviceConnectionID)
+
+			fn, err := auth.OIDCTokenFunc()
+			if err != nil {
+				t.Fatalf("OIDCTokenFunc() unexpected error: %v", err)
+			}
+			if _, err := fn(context.Background()); err != nil {
+				t.Fatalf("fn() unexpected error: %v", err)
+			}
+
+			got, ok := gotQuery["serviceConnectionId"]
+			if tt.serviceConnectionID == "" {
+				if ok {
+					t.Errorf("serviceConnectionId query param = %q, want it absent", got)
+				}
+				return
+			}
+			if !ok || len(got) != 1 || got[0] != tt.serviceConnectionID {
+				t.Errorf("serviceConnectionId query param = %q, want %q", got, tt.serviceConnectionID)
+			}
+		})
 	}
 }
 

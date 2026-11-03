@@ -23,8 +23,8 @@ stackit beta cdn distribution list [flags]
 ### Options
 
 ```
-      -- int             Limit the output to the first n elements
   -h, --help             Help for "stackit beta cdn distribution list"
+      --limit int        Limit the output to the first n elements
       --sort-by string   Sort entries by a specific field, (one of: [id, updatedAt, createdAt, originUrl, status, originUrlRelated]) (default "createdAt")
 ```
 

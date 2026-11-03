@@ -35,5 +35,4 @@ stackit service-account [flags]
 * [stackit service-account get-jwks](./stackit_service-account_get-jwks.md)	 - Shows the JWKS for a service account
 * [stackit service-account key](./stackit_service-account_key.md)	 - Provides functionality for service account keys
 * [stackit service-account list](./stackit_service-account_list.md)	 - Lists all service accounts
-* [stackit service-account token](./stackit_service-account_token.md)	 - Provides functionality for service account tokens
 
