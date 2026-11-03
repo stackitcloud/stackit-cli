@@ -31,4 +31,5 @@ stackit registry [flags]
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
 * [stackit registry artifactory](./stackit_registry_artifactory.md)	 - Provides functionality for Container Registry artifactories
+* [stackit registry replication-adapter](./stackit_registry_replication-adapter.md)	 - Provides functionality for Container Registry replication adapters
 
