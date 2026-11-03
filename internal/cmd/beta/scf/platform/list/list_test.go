@@ -3,6 +3,7 @@ package list
 import (
 	"context"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -11,6 +12,7 @@ import (
 	scf "github.com/stackitcloud/stackit-sdk-go/services/scf/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 )
@@ -158,64 +160,64 @@ func TestBuildRequest(t *testing.T) {
 }
 
 func TestOutputResult(t *testing.T) {
-	type args struct {
-		outputFormat string
-		projectLabel string
-		platforms    *scf.PlatformList
+	resp := &scf.PlatformList{
+		Pagination: scf.Pagination{TotalPages: new(int64(2))},
+		Resources: []scf.Platforms{
+			{
+				Guid:        testPlatformId,
+				DisplayName: "my-platform",
+				Region:      testRegion,
+				SystemId:    "my-system",
+				ApiUrl:      "https://api.example.com",
+			},
+		},
 	}
 	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
+		name         string
+		outputFormat string
+		limit        *int64
+		resp         *scf.PlatformList
+		expectWarn   bool
 	}{
 		{
-			name:    "empty",
-			args:    args{},
-			wantErr: false,
+			name:       "default output",
+			resp:       resp,
+			expectWarn: true,
 		},
 		{
-			name: "nil platforms slice",
-			args: args{
-				projectLabel: testProjectId,
-				platforms:    nil,
-			},
-			wantErr: false,
+			name:         "json output",
+			outputFormat: print.JSONOutputFormat,
+			resp:         resp,
 		},
 		{
-			name: "empty platforms slice",
-			args: args{
-				projectLabel: testProjectId,
-				platforms: &scf.PlatformList{
-					Resources: []scf.Platforms{},
-				},
-			},
-			wantErr: false,
+			name:  "limit reached",
+			limit: new(int64(1)),
+			resp:  resp,
 		},
 		{
-			name: "valid platforms",
-			args: args{
-				projectLabel: testProjectId,
-				platforms: &scf.PlatformList{
-					Resources: []scf.Platforms{
-						{
-							Guid:        testPlatformId,
-							DisplayName: "my-platform",
-							Region:      testRegion,
-							SystemId:    "my-system",
-							ApiUrl:      "https://api.example.com",
-						},
-					},
-				},
-			},
-			wantErr: false,
+			name:       "limit above page size",
+			limit:      new(int64(maxPageSize + 1)),
+			resp:       resp,
+			expectWarn: true,
+		},
+		{
+			name: "empty",
+			resp: &scf.PlatformList{},
+		},
+		{
+			name: "nil response",
+			resp: nil,
 		},
 	}
-	params := testparams.NewTestParams()
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.projectLabel, tt.args.platforms); (err != nil) != tt.wantErr {
-				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
+			params := testparams.NewTestParams()
+			if err := outputResult(params.Printer, tt.outputFormat, testProjectId, tt.limit, tt.resp); err != nil {
+				t.Errorf("outputResult() error = %v", err)
+			}
+			warned := strings.Contains(params.Err.String(), "more than 1 page")
+			if warned != tt.expectWarn {
+				t.Errorf("expected warning = %t, got %t (stderr: %q)", tt.expectWarn, warned, params.Err.String())
 			}
 		})
 	}
