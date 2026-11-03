@@ -30,13 +30,13 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.5.0
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.16.0
-	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.27.0
+	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.28.0
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.11.0
 	github.com/stackitcloud/stackit-sdk-go/services/scf v0.11.0
 	github.com/stackitcloud/stackit-sdk-go/services/secretsmanager v0.20.0
 	github.com/stackitcloud/stackit-sdk-go/services/serverbackup v1.8.0
 	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.6.0
-	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.21.1
+	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.22.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.8.0
 	github.com/stackitcloud/stackit-sdk-go/services/ske v1.21.2
 	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.19.0
@@ -45,7 +45,7 @@ require (
 	github.com/zalando/go-keyring v0.2.8
 	golang.org/x/mod v0.42.0
 	golang.org/x/oauth2 v0.37.0
-	golang.org/x/term v0.46.0
+	golang.org/x/term v0.47.0
 	golang.org/x/text v0.43.0
 	k8s.io/apimachinery v0.37.1
 	k8s.io/client-go v0.37.1
@@ -272,13 +272,13 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/loadbalancer v1.16.0
 	github.com/stackitcloud/stackit-sdk-go/services/logme v1.6.0
 	github.com/stackitcloud/stackit-sdk-go/services/mariadb v1.4.0
-	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.12.0
-	github.com/stackitcloud/stackit-sdk-go/services/observability v0.25.2
+	github.com/stackitcloud/stackit-sdk-go/services/objectstorage v1.13.0
+	github.com/stackitcloud/stackit-sdk-go/services/observability v0.26.0
 	github.com/stackitcloud/stackit-sdk-go/services/rabbitmq v1.5.0
 	github.com/stackitcloud/stackit-sdk-go/services/redis v1.6.0
 	github.com/stackitcloud/stackit-sdk-go/services/sfs v0.13.1
 	github.com/subosito/gotenv v1.6.0 // indirect
-	golang.org/x/sys v0.48.0 // indirect
+	golang.org/x/sys v0.49.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/api v0.37.1 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
