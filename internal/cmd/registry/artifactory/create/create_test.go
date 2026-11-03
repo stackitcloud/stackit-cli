@@ -175,6 +175,20 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
+			description: "proxy access secret without key",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[proxyUrlFlag] = testProxyUrl
+				flagValues[proxyRegistryTypeFlag] = testProxyRegistryType
+				flagValues[proxyAccessSecretFlag] = "@" + testSecretFile
+			}),
+			isValid: false,
+		},
+		{
+			description: "no values",
+			flagValues:  map[string]string{},
+			isValid:     false,
+		},
+		{
 			description: "proxy description without proxy url",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[proxyDescriptionFlag] = testProxyDescription
@@ -236,6 +250,21 @@ func TestBuildRequest(t *testing.T) {
 			expectedRequest: fixtureRequest(),
 		},
 		{
+			description: "with proxy minimal",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.ProxyUrl = utils.Ptr(testProxyUrl)
+				model.ProxyRegistryType = utils.Ptr(testProxyRegistryType)
+			}),
+			expectedRequest: testClient.DefaultAPI.CreateArtifactory(testCtx, testProjectId, testRegion).
+				CreateArtifactoryPayload(registry.CreateArtifactoryPayload{
+					Name: testName,
+					Proxy: &registry.CreateProxyRequest{
+						Url:          testProxyUrl,
+						RegistryType: testProxyRegistryType,
+					},
+				}),
+		},
+		{
 			description: "with proxy full",
 			model: fixtureInputModel(func(model *inputModel) {
 				model.ProxyUrl = utils.Ptr(testProxyUrl)
@@ -287,6 +316,14 @@ func TestOutputResult(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
+		{
+			name: "nil model",
+			args: args{
+				model: nil,
+				resp:  &registry.Artifactory{Id: "xxx"},
+			},
+			wantErr: true,
+		},
 		{
 			name: "empty response",
 			args: args{

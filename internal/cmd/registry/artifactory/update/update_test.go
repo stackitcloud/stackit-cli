@@ -316,6 +316,15 @@ func TestOutputResult(t *testing.T) {
 		wantErr bool
 	}{
 		{
+			name: "nil model",
+			args: args{
+				model:            nil,
+				artifactoryLabel: "my-artifactory",
+				resp:             &registry.Artifactory{Id: testArtifactoryId},
+			},
+			wantErr: true,
+		},
+		{
 			name: "updated successfully sync",
 			args: args{
 				model:            fixtureInputModel(),

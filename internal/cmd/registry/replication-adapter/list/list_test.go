@@ -10,6 +10,7 @@ import (
 	registry "github.com/stackitcloud/stackit-sdk-go/services/registry/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -163,6 +164,7 @@ func TestBuildRequest(t *testing.T) {
 
 func TestOutputResult(t *testing.T) {
 	type args struct {
+		outputFormat string
 		projectLabel string
 		adapters     []registry.ReplicationAdapter
 	}
@@ -212,13 +214,28 @@ func TestOutputResult(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "json output format",
+			args: args{
+				outputFormat: print.JSONOutputFormat,
+				projectLabel: "my-project",
+				adapters: []registry.ReplicationAdapter{
+					{
+						RegistryType:   "docker-hub",
+						DisplayName:    "Docker Hub",
+						CredentialType: registry.REPLICATIONADAPTERCREDENTIALTYPE_BASIC,
+					},
+				},
+			},
+			wantErr: false,
+		},
 	}
 
 	params := testparams.NewTestParams()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := outputResult(params.Printer, "", tt.args.projectLabel, tt.args.adapters)
+			err := outputResult(params.Printer, tt.args.outputFormat, tt.args.projectLabel, tt.args.adapters)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}

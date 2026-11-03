@@ -2,6 +2,7 @@ package list
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -212,6 +213,111 @@ func TestOutputResult(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := outputResult(params.Printer, "", tt.args.projectLabel, tt.args.artifactories); (err != nil) != tt.wantErr {
 				t.Errorf("TestOutputResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestFetchArtifactories(t *testing.T) {
+	tests := []struct {
+		description   string
+		model         *inputModel
+		mockResponses []*registry.ArtifactoryList
+		mockErrors    []error
+		expectedItems int
+		wantErr       bool
+	}{
+		{
+			description: "single page, no limit",
+			model:       fixtureInputModel(),
+			mockResponses: []*registry.ArtifactoryList{
+				{
+					Artifactories: []registry.Artifactory{
+						{Id: "1", Name: "reg-1"},
+						{Id: "2", Name: "reg-2"},
+					},
+				},
+			},
+			expectedItems: 2,
+			wantErr:       false,
+		},
+		{
+			description: "multi page with pagination",
+			model:       fixtureInputModel(),
+			mockResponses: []*registry.ArtifactoryList{
+				{
+					Artifactories: []registry.Artifactory{
+						{Id: "1", Name: "reg-1"},
+					},
+					NextPageToken: utils.Ptr("token-1"),
+				},
+				{
+					Artifactories: []registry.Artifactory{
+						{Id: "2", Name: "reg-2"},
+					},
+				},
+			},
+			expectedItems: 2,
+			wantErr:       false,
+		},
+		{
+			description: "with limit smaller than available",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Limit = utils.Ptr(int64(1))
+			}),
+			mockResponses: []*registry.ArtifactoryList{
+				{
+					Artifactories: []registry.Artifactory{
+						{Id: "1", Name: "reg-1"},
+						{Id: "2", Name: "reg-2"},
+					},
+				},
+			},
+			expectedItems: 1,
+			wantErr:       false,
+		},
+		{
+			description: "api call fails",
+			model:       fixtureInputModel(),
+			mockErrors: []error{
+				fmt.Errorf("server error"),
+			},
+			wantErr: true,
+		},
+		{
+			description: "nil response",
+			model:       fixtureInputModel(),
+			mockResponses: []*registry.ArtifactoryList{
+				nil,
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			callIndex := 0
+			mock := registry.DefaultAPIServiceMock{
+				ListArtifactoriesExecuteMock: utils.Ptr(func(_ registry.ApiListArtifactoriesRequest) (*registry.ArtifactoryList, error) {
+					idx := callIndex
+					callIndex++
+					if idx < len(tt.mockErrors) && tt.mockErrors[idx] != nil {
+						return nil, tt.mockErrors[idx]
+					}
+					if idx < len(tt.mockResponses) {
+						return tt.mockResponses[idx], nil
+					}
+					return &registry.ArtifactoryList{}, nil
+				}),
+			}
+			client := &registry.APIClient{DefaultAPI: mock}
+
+			got, err := fetchArtifactories(testCtx, tt.model, client)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("fetchArtifactories() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if !tt.wantErr && len(got) != tt.expectedItems {
+				t.Errorf("fetchArtifactories() returned %d items, want %d", len(got), tt.expectedItems)
 			}
 		})
 	}

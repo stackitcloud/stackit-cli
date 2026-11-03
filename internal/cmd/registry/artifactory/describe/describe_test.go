@@ -213,6 +213,25 @@ func TestOutputResult(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "with proxy without description",
+			args: args{
+				artifactory: &registry.Artifactory{
+					Id:                 testArtifactoryId,
+					Name:               "my-artifactory",
+					State:              registry.ARTIFACTORYSTATE_ACTIVE,
+					Url:                "https://example.com",
+					ConsumedQuotaBytes: 1024,
+					CreateTime:         time.Now(),
+					Proxy: &registry.Proxy{
+						Url:          "https://registry-1.docker.io",
+						Description:  nil,
+						RegistryType: "docker-hub",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
 			name: "nil artifactory",
 			args: args{
 				artifactory: nil,
