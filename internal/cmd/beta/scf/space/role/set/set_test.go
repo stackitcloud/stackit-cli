@@ -10,7 +10,6 @@ import (
 	scf "github.com/stackitcloud/stackit-sdk-go/services/scf/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 )
@@ -180,11 +179,10 @@ func TestBuildRequest(t *testing.T) {
 
 func TestOutputResult(t *testing.T) {
 	tests := []struct {
-		name         string
-		model        *inputModel
-		resp         *scf.SpaceRoleCreateResponse
-		outputFormat string
-		wantErr      bool
+		name    string
+		model   *inputModel
+		resp    *scf.SpaceRoleCreateResponse
+		wantErr bool
 	}{
 		{
 			name:    "default output",
@@ -193,11 +191,10 @@ func TestOutputResult(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:         "json output",
-			model:        fixtureInputModel(),
-			resp:         &scf.SpaceRoleCreateResponse{},
-			outputFormat: print.JSONOutputFormat,
-			wantErr:      false,
+			name:    "json output",
+			model:   fixtureInputModel(),
+			resp:    &scf.SpaceRoleCreateResponse{},
+			wantErr: false,
 		},
 	}
 	params := testparams.NewTestParams()
