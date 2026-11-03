@@ -102,6 +102,36 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: false,
 		},
+		{
+			description: "no values",
+			argValues:   []string{},
+			flagValues:  map[string]string{},
+			isValid:     false,
+		},
+		{
+			description: "no arg values",
+			argValues:   []string{},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
+		{
+			description: "no flag values",
+			argValues:   []string{testArtifactoryId},
+			flagValues:  map[string]string{},
+			isValid:     false,
+		},
+		{
+			description: "artifactory id invalid 1",
+			argValues:   []string{""},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
+		{
+			description: "artifactory id invalid 2",
+			argValues:   []string{"invalid-uuid"},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -176,6 +206,25 @@ func TestOutputResult(t *testing.T) {
 					Proxy: &registry.Proxy{
 						Url:          "https://registry-1.docker.io",
 						Description:  &desc,
+						RegistryType: "docker-hub",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "with proxy without description",
+			args: args{
+				artifactory: &registry.Artifactory{
+					Id:                 testArtifactoryId,
+					Name:               "my-artifactory",
+					State:              registry.ARTIFACTORYSTATE_ACTIVE,
+					Url:                "https://example.com",
+					ConsumedQuotaBytes: 1024,
+					CreateTime:         time.Now(),
+					Proxy: &registry.Proxy{
+						Url:          "https://registry-1.docker.io",
+						Description:  nil,
 						RegistryType: "docker-hub",
 					},
 				},

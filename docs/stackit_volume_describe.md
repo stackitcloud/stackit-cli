@@ -4,7 +4,7 @@ Shows details of a volume
 
 ### Synopsis
 
-Shows details of a volume.
+Shows details of a volume, including its encryption status.
 
 ```
 stackit volume describe VOLUME_ID [flags]

@@ -2,16 +2,20 @@ package update
 
 import (
 	"context"
+	"strings"
 	"testing"
+	"testing/fstest"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
+	"github.com/spf13/cobra"
 	registry "github.com/stackitcloud/stackit-sdk-go/services/registry/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
@@ -31,6 +35,7 @@ var (
 	testProxyDescription  = "docker hub proxy"
 	testProxyAccessKey    = "my-key"
 	testProxyAccessSecret = "my-secret"
+	testSecretFile        = "secret.txt"
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -76,6 +81,7 @@ func fixtureRequest(mods ...func(request *registry.ApiPatchArtifactoryRequest)) 
 
 func TestParseInput(t *testing.T) {
 	tests := []struct {
+		stdin         string
 		description   string
 		argValues     []string
 		flagValues    map[string]string
@@ -108,7 +114,7 @@ func TestParseInput(t *testing.T) {
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, proxyUrlFlag)
 				flagValues[proxyAccessKeyFlag] = testProxyAccessKey
-				flagValues[proxyAccessSecretFlag] = testProxyAccessSecret
+				flagValues[proxyAccessSecretFlag] = "@" + testSecretFile
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -116,6 +122,32 @@ func TestParseInput(t *testing.T) {
 				model.ProxyAccessKey = utils.Ptr(testProxyAccessKey)
 				model.ProxyAccessSecret = utils.Ptr(testProxyAccessSecret)
 			}),
+		},
+		{
+			description: "with credentials - secret from stdin",
+			stdin:       testProxyAccessSecret + "\n",
+			argValues:   []string{testArtifactoryId},
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, proxyUrlFlag)
+				flagValues[proxyAccessKeyFlag] = testProxyAccessKey
+				flagValues[proxyAccessSecretFlag] = "-"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.ProxyUrl = nil
+				model.ProxyAccessKey = utils.Ptr(testProxyAccessKey)
+				model.ProxyAccessSecret = utils.Ptr(testProxyAccessSecret)
+			}),
+		},
+		{
+			description: "with credentials - literal secret rejected",
+			argValues:   []string{testArtifactoryId},
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, proxyUrlFlag)
+				flagValues[proxyAccessKeyFlag] = testProxyAccessKey
+				flagValues[proxyAccessSecretFlag] = "literal-secret"
+			}),
+			isValid: false,
 		},
 		{
 			description: "proxy access key without secret",
@@ -129,7 +161,7 @@ func TestParseInput(t *testing.T) {
 			description: "proxy access secret without key",
 			argValues:   []string{testArtifactoryId},
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[proxyAccessSecretFlag] = testProxyAccessSecret
+				flagValues[proxyAccessSecretFlag] = "@" + testSecretFile
 			}),
 			isValid: false,
 		},
@@ -165,11 +197,47 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: false,
 		},
+		{
+			description: "no values",
+			argValues:   []string{},
+			flagValues:  map[string]string{},
+			isValid:     false,
+		},
+		{
+			description: "no arg values",
+			argValues:   []string{},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
+		{
+			description: "no flag values",
+			argValues:   []string{testArtifactoryId},
+			flagValues:  map[string]string{},
+			isValid:     false,
+		},
+		{
+			description: "artifactory id invalid 1",
+			argValues:   []string{""},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
+		{
+			description: "artifactory id invalid 2",
+			argValues:   []string{"invalid-uuid"},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
+			testutils.TestParseInput(t, func(params *types.CmdParams) *cobra.Command {
+				params.Fs = fstest.MapFS{
+					testSecretFile: {Data: []byte(testProxyAccessSecret)},
+				}
+				params.Printer.StdIn = strings.NewReader(tt.stdin)
+				return NewCmd(params)
+			}, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
 	}
 }
@@ -247,6 +315,15 @@ func TestOutputResult(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
+		{
+			name: "nil model",
+			args: args{
+				model:            nil,
+				artifactoryLabel: "my-artifactory",
+				resp:             &registry.Artifactory{Id: testArtifactoryId},
+			},
+			wantErr: true,
+		},
 		{
 			name: "updated successfully sync",
 			args: args{

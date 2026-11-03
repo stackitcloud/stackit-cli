@@ -126,7 +126,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	proxyUrl := flags.FlagToStringPointer(p, cmd, proxyUrlFlag)
 	proxyDesc := flags.FlagToStringPointer(p, cmd, proxyDescriptionFlag)
 	proxyKey := flags.FlagToStringPointer(p, cmd, proxyAccessKeyFlag)
-	proxySecret := flags.SecretFlagToStringPointer(p, cmd, proxyAccessSecretFlag)
+	proxySecret, err := flags.ResolveSecretFlag(p, cmd, proxyAccessSecretFlag)
+	if err != nil {
+		return nil, err
+	}
 
 	if proxyUrl == nil && proxyDesc == nil && proxyKey == nil && proxySecret == nil {
 		return nil, &cliErr.EmptyUpdateError{}

@@ -56,8 +56,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				"$ stackit registry artifactory create --name docker-proxy --proxy-url https://registry-1.docker.io --proxy-registry-type docker-hub",
 			),
 			examples.NewExample(
-				`Create a proxy-cache artifactory with credentials`,
-				"$ stackit registry artifactory create --name my-proxy --proxy-url https://custom-registry.com --proxy-registry-type harbor --proxy-access-key my-user --proxy-access-secret my-secret",
+				`Create a proxy-cache artifactory with credentials, reading secret from stdin`,
+				"$ stackit registry artifactory create --name my-proxy --proxy-url https://custom-registry.com --proxy-registry-type harbor --proxy-access-key my-user --proxy-access-secret -",
+			),
+			examples.NewExample(
+				`Create a proxy-cache artifactory with credentials, providing the path to a file with the secret`,
+				"$ stackit registry artifactory create --name my-proxy --proxy-url https://custom-registry.com --proxy-registry-type harbor --proxy-access-key my-user --proxy-access-secret @./secret.txt",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -142,7 +146,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	proxyRegistryType := flags.FlagToStringPointer(p, cmd, proxyRegistryTypeFlag)
 	proxyDesc := flags.FlagToStringPointer(p, cmd, proxyDescriptionFlag)
 	proxyKey := flags.FlagToStringPointer(p, cmd, proxyAccessKeyFlag)
-	proxySecret := flags.SecretFlagToStringPointer(p, cmd, proxyAccessSecretFlag)
+	proxySecret, err := flags.ResolveSecretFlag(p, cmd, proxyAccessSecretFlag)
+	if err != nil {
+		return nil, err
+	}
 
 	hasProxyDetails := proxyDesc != nil || proxyKey != nil || proxySecret != nil
 	if hasProxyDetails && (proxyUrl == nil || proxyRegistryType == nil) {

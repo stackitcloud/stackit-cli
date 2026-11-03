@@ -65,7 +65,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			req := buildRequest(ctx, model, apiClient)
 			_, err = req.Execute()
 			if err != nil {
-				return fmt.Errorf("delete loadbalancer: %w", err)
+				return fmt.Errorf("delete CDN distribution: %w", err)
 			}
 
 			params.Printer.Outputf("CDN distribution %q deleted.\n", model.DistributionID)

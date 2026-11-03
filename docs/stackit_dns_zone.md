@@ -33,7 +33,11 @@ stackit dns zone [flags]
 * [stackit dns zone clone](./stackit_dns_zone_clone.md)	 - Clones a DNS zone
 * [stackit dns zone create](./stackit_dns_zone_create.md)	 - Creates a DNS zone
 * [stackit dns zone delete](./stackit_dns_zone_delete.md)	 - Deletes a DNS zone
+* [stackit dns zone delete-move-code](./stackit_dns_zone_delete-move-code.md)	 - Deletes the move code of a DNS zone
 * [stackit dns zone describe](./stackit_dns_zone_describe.md)	 - Shows details of a DNS zone
+* [stackit dns zone generate-move-code](./stackit_dns_zone_generate-move-code.md)	 - Generates a move code for a DNS zone
 * [stackit dns zone list](./stackit_dns_zone_list.md)	 - Lists DNS zones
+* [stackit dns zone move](./stackit_dns_zone_move.md)	 - Moves a DNS zone to another project
 * [stackit dns zone update](./stackit_dns_zone_update.md)	 - Updates a DNS zone
+* [stackit dns zone validate-move-code](./stackit_dns_zone_validate-move-code.md)	 - Validates the move code of a DNS zone
 

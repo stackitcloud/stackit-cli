@@ -14,7 +14,7 @@ stackit load-balancer observability-credentials update CREDENTIALS_REF [flags]
 
 ```
   Update the password and username of observability credentials of Load Balancer with credentials reference "credentials-xxx". The password is entered using the terminal
-  $ stackit load-balancer observability-credentials update credentials-xxx --username new-username
+  $ stackit load-balancer observability-credentials update credentials-xxx --username new-username --password -
 
   Update the password of observability credentials of Load Balancer with credentials reference "credentials-xxx", by providing the path to a file with the new password as flag
   $ stackit load-balancer observability-credentials update credentials-xxx --password @./new-password.txt
@@ -25,7 +25,7 @@ stackit load-balancer observability-credentials update CREDENTIALS_REF [flags]
 ```
       --display-name string   Credentials name
   -h, --help                  Help for "stackit load-balancer observability-credentials update"
-      --password string       Password. Can be a string (deprecated) or a file path, if prefixed with '@' (example: @./secret.txt). Will be read from stdin when empty.
+      --password secret       Password. Use @<file> to read from a file (example: @./secret.txt), or - to read from stdin (hidden input on a terminal). Literal values are not supported.
       --username string       Username
 ```
 

@@ -22,7 +22,7 @@ stackit beta alb observability-credentials update CREDENTIAL_REF_ARG [flags]
 ```
   -d, --displayname string   Displayname for the credentials
   -h, --help                 Help for "stackit beta alb observability-credentials update"
-      --password string      Password. Can be a string (deprecated) or a file path, if prefixed with '@' (example: @./secret.txt). Will be read from stdin when empty.
+      --password secret      Password. Use @<file> to read from a file (example: @./secret.txt), or - to read from stdin (hidden input on a terminal). Literal values are not supported.
   -u, --username string      Username for the credentials
 ```
 

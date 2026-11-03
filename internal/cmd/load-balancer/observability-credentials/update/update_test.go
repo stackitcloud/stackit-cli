@@ -3,21 +3,27 @@ package update
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
+	"testing/fstest"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
+	"github.com/spf13/cobra"
 	loadbalancer "github.com/stackitcloud/stackit-sdk-go/services/loadbalancer/v2api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
 const (
 	testRegion         = "eu02"
 	testCredentialsRef = "credentials-test"
+	testPwFile         = "pw.txt"
+	testPw             = "file-pw"
 )
 
 type testCtxKey struct{}
@@ -60,7 +66,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		globalflags.RegionFlag:    testRegion,
 		displayNameFlag:           "name",
 		usernameFlag:              "username",
-		passwordFlag:              "pwd",
+		passwordFlag:              "@" + testPwFile,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -75,9 +81,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		DisplayName:    utils.Ptr("name"),
-		Username:       utils.Ptr("username"),
-		Password:       utils.Ptr("pwd"),
+		DisplayName:    new("name"),
+		Username:       new("username"),
+		Password:       new(testPw),
 		CredentialsRef: testCredentialsRef,
 	}
 	for _, mod := range mods {
@@ -89,9 +95,9 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 func fixtureRequest(mods ...func(request *loadbalancer.ApiUpdateCredentialsRequest)) loadbalancer.ApiUpdateCredentialsRequest {
 	request := testClient.DefaultAPI.UpdateCredentials(testCtx, testProjectId, testRegion, testCredentialsRef)
 	request = request.UpdateCredentialsPayload(loadbalancer.UpdateCredentialsPayload{
-		DisplayName: utils.Ptr("name"),
-		Username:    utils.Ptr("username"),
-		Password:    utils.Ptr("pwd"),
+		DisplayName: new("name"),
+		Username:    new("username"),
+		Password:    new(testPw),
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -102,8 +108,8 @@ func fixtureRequest(mods ...func(request *loadbalancer.ApiUpdateCredentialsReque
 func fixtureGetCredentialsResponse(mods ...func(response *loadbalancer.GetCredentialsResponse)) *loadbalancer.GetCredentialsResponse {
 	response := &loadbalancer.GetCredentialsResponse{
 		Credential: &loadbalancer.CredentialsResponse{
-			DisplayName: utils.Ptr("name"),
-			Username:    utils.Ptr("username"),
+			DisplayName: new("name"),
+			Username:    new("username"),
 		},
 	}
 	for _, mod := range mods {
@@ -114,6 +120,7 @@ func fixtureGetCredentialsResponse(mods ...func(response *loadbalancer.GetCreden
 
 func TestParseInput(t *testing.T) {
 	tests := []struct {
+		stdin         string
 		description   string
 		argValues     []string
 		flagValues    map[string]string
@@ -175,11 +182,48 @@ func TestParseInput(t *testing.T) {
 			flagValues:  fixtureFlagValues(),
 			isValid:     false,
 		},
+		{
+			description: "password from explicit stdin",
+			argValues:   fixtureArgValues(),
+			stdin:       "stdin-pw\n",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[passwordFlag] = "-"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Password = new("stdin-pw")
+			}),
+		},
+		{
+			description: "omitted password is not updated",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, passwordFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Password = nil
+			}),
+		},
+		{
+			description: "literal password rejected",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[passwordFlag] = "top-secret"
+			}),
+			isValid: false,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
+			testutils.TestParseInput(t, func(params *types.CmdParams) *cobra.Command {
+				params.Fs = fstest.MapFS{
+					testPwFile: {Data: []byte(testPw)},
+				}
+				params.Printer.StdIn = strings.NewReader(tt.stdin)
+				return NewCmd(params)
+			}, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
 	}
 }
