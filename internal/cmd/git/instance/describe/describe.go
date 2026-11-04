@@ -3,6 +3,7 @@ package describe
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
@@ -29,11 +30,16 @@ const instanceIdArg = "INSTANCE_ID"
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("describe %s", instanceIdArg),
-		Short: "Describes STACKIT Git instance",
-		Long:  "Describes a STACKIT Git instance by its internal ID.",
+		Short: "Shows details of a STACKIT Git instance",
+		Long:  "Shows details of a STACKIT Git instance.",
 		Args:  args.SingleArg(instanceIdArg, utils.ValidateUUID),
 		Example: examples.Build(
-			examples.NewExample(`Describe instance "xxx"`, `$ stackit git describe xxx`),
+			examples.NewExample(
+				`Get details of a STACKIT Git instance with ID "xxx"`,
+				`$ stackit git instance describe xxx`),
+			examples.NewExample(
+				`Get details of a STACKIT Git instance with ID "xxx" in JSON format`,
+				`$ stackit git instance describe xxx --output-format json`),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -102,10 +108,16 @@ func outputResult(p *print.Printer, outputFormat string, resp *git.Instance) err
 		table.AddSeparator()
 		table.AddRow("VERSION", resp.Version)
 		table.AddSeparator()
+		table.AddRow("FLAVOR", resp.Flavor)
+		table.AddSeparator()
 		table.AddRow("STATE", resp.State)
 		table.AddSeparator()
 		table.AddRow("CREATED", resp.Created)
 		table.AddSeparator()
+		if len(resp.Acl) > 0 {
+			table.AddRow("ACL", strings.Join(resp.Acl, ","))
+			table.AddSeparator()
+		}
 
 		if err := table.Display(p); err != nil {
 			return fmt.Errorf("render table: %w", err)

@@ -1,10 +1,10 @@
 ## stackit git instance describe
 
-Describes STACKIT Git instance
+Shows details of a STACKIT Git instance
 
 ### Synopsis
 
-Describes a STACKIT Git instance by its internal ID.
+Shows details of a STACKIT Git instance.
 
 ```
 stackit git instance describe INSTANCE_ID [flags]
@@ -13,8 +13,11 @@ stackit git instance describe INSTANCE_ID [flags]
 ### Examples
 
 ```
-  Describe instance "xxx"
-  $ stackit git describe xxx
+  Get details of a STACKIT Git instance with ID "xxx"
+  $ stackit git instance describe xxx
+
+  Get details of a STACKIT Git instance with ID "xxx" in JSON format
+  $ stackit git instance describe xxx --output-format json
 ```
 
 ### Options
