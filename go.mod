@@ -23,7 +23,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.22.0
 	github.com/stackitcloud/stackit-sdk-go/services/dns v0.25.0
 	github.com/stackitcloud/stackit-sdk-go/services/edge v0.14.0
-	github.com/stackitcloud/stackit-sdk-go/services/git v0.15.0
+	github.com/stackitcloud/stackit-sdk-go/services/git v0.16.0
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.15.1
 	github.com/stackitcloud/stackit-sdk-go/services/intake v0.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/logs v0.12.0
