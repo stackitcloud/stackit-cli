@@ -115,6 +115,8 @@ func outputResult(p *print.Printer, outputFormat string, zone *dns.Zone) error {
 		table.AddSeparator()
 		table.AddRow("CONTACT EMAIL", utils.PtrString(zone.ContactEmail))
 		table.AddSeparator()
+		table.AddRow("ACL", zone.Acl)
+		table.AddSeparator()
 		table.AddRow("DEFAULT TTL", zone.DefaultTTL)
 		table.AddSeparator()
 		table.AddRow("SERIAL NUMBER", zone.SerialNumber)
