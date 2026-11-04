@@ -152,14 +152,14 @@ func outputResult(p *print.Printer, outputFormat, networkAreaLabel string, route
 			routeNexthop := route.Nexthop
 			if routeNexthop.NexthopIPv4 != nil {
 				nextHop = routeNexthop.NexthopIPv4.Value
-				nextHopType = routeNexthop.NexthopIPv4.Type
+				nextHopType = string(routeNexthop.NexthopIPv4.Type)
 			} else if routeNexthop.NexthopIPv6 != nil {
 				nextHop = routeNexthop.NexthopIPv6.Value
-				nextHopType = routeNexthop.NexthopIPv6.Type
+				nextHopType = string(routeNexthop.NexthopIPv6.Type)
 			} else if routeNexthop.NexthopBlackhole != nil {
-				nextHopType = routeNexthop.NexthopBlackhole.Type
+				nextHopType = string(routeNexthop.NexthopBlackhole.Type)
 			} else if routeNexthop.NexthopInternet != nil {
-				nextHopType = routeNexthop.NexthopInternet.Type
+				nextHopType = string(routeNexthop.NexthopInternet.Type)
 			}
 
 			table.AddRow(

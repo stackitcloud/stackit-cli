@@ -4,7 +4,7 @@ Manages routes of a routing-table
 
 ### Synopsis
 
-Manages routes of a routing-table
+Manages routes of a routing-table within a STACKIT Network Area (SNA).
 
 ```
 stackit network-area routing-table route [flags]

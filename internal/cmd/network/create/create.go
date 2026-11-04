@@ -25,6 +25,7 @@ import (
 
 const (
 	nameFlag               = "name"
+	descriptionFlag        = "description"
 	ipv4DnsNameServersFlag = "ipv4-dns-name-servers"
 	ipv4PrefixLengthFlag   = "ipv4-prefix-length"
 	ipv4PrefixFlag         = "ipv4-prefix"
@@ -43,6 +44,7 @@ const (
 type inputModel struct {
 	*globalflags.GlobalFlagModel
 	Name               string
+	Description        *string
 	IPv4DnsNameServers []string
 	IPv4PrefixLength   *int64
 	IPv4Prefix         *string
@@ -68,6 +70,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			examples.NewExample(
 				`Create a network with name "network-1"`,
 				`$ stackit network create --name network-1`,
+			),
+			examples.NewExample(
+				`Create a network with name "network-1" and a description`,
+				`$ stackit network create --name network-1 --description "My network"`,
 			),
 			examples.NewExample(
 				`Create a non-routed network with name "network-1"`,
@@ -122,7 +128,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create network : %w", err)
@@ -152,6 +158,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(nameFlag, "n", "", "Network name")
+	cmd.Flags().String(descriptionFlag, "", "Description of the network (up to 255 characters)")
 	cmd.Flags().StringSlice(ipv4DnsNameServersFlag, []string{}, "List of DNS name servers for IPv4. Nameservers cannot be defined for routed networks")
 	cmd.Flags().Int64(ipv4PrefixLengthFlag, 0, "The prefix length of the IPv4 network")
 	cmd.Flags().String(ipv4PrefixFlag, "", "The IPv4 prefix of the network (CIDR)")
@@ -190,6 +197,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	model := inputModel{
 		GlobalFlagModel:    globalFlags,
 		Name:               flags.FlagToStringValue(p, cmd, nameFlag),
+		Description:        flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		IPv4DnsNameServers: flags.FlagToStringSliceValue(p, cmd, ipv4DnsNameServersFlag),
 		IPv4PrefixLength:   flags.FlagToInt64Pointer(p, cmd, ipv4PrefixLengthFlag),
 		IPv4Prefix:         flags.FlagToStringPointer(p, cmd, ipv4PrefixFlag),
@@ -246,8 +254,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateNetworkRequest {
-	req := apiClient.DefaultAPI.CreateNetwork(ctx, model.ProjectId, model.Region)
+func buildRequest(ctx context.Context, model *inputModel, apiClient iaas.DefaultAPI) iaas.ApiCreateNetworkRequest {
+	req := apiClient.CreateNetwork(ctx, model.ProjectId, model.Region)
 	var ipv4Network *iaas.CreateNetworkIPv4
 	var ipv6Network *iaas.CreateNetworkIPv6
 
@@ -297,6 +305,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 
 	payload := iaas.CreateNetworkPayload{
 		Name:           model.Name,
+		Description:    model.Description,
 		Labels:         model.Labels,
 		Routed:         utils.Ptr(!model.NonRouted),
 		Ipv4:           ipv4Network,

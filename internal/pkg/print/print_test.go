@@ -152,6 +152,153 @@ func TestOutputln(t *testing.T) {
 	}
 }
 
+func TestNoticef(t *testing.T) {
+	tests := []struct {
+		description      string
+		message          string
+		args             []any
+		verbosity        Level
+		outputFormatNone bool
+		expectedOutput   string
+	}{
+		{
+			description:    "debug verbosity",
+			message:        "Test message",
+			verbosity:      DebugLevel,
+			expectedOutput: "Test message",
+		},
+		{
+			description:    "info verbosity",
+			message:        "Test message",
+			verbosity:      InfoLevel,
+			expectedOutput: "Test message",
+		},
+		{
+			description:    "with args",
+			message:        "Test message with args: %s, %d\n",
+			args:           []any{"arg1", 2},
+			verbosity:      InfoLevel,
+			expectedOutput: "Test message with args: arg1, 2\n",
+		},
+		{
+			description:    "warning verbosity",
+			message:        "Test message",
+			verbosity:      WarningLevel,
+			expectedOutput: "Test message",
+		},
+		{
+			description:    "error verbosity",
+			message:        "Test message",
+			verbosity:      ErrorLevel,
+			expectedOutput: "Test message",
+		},
+		{
+			description:      "output format none",
+			message:          "Test message: %s",
+			args:             []any{"arg1"},
+			verbosity:        ErrorLevel,
+			outputFormatNone: true,
+			expectedOutput:   "Test message: arg1",
+		},
+		{
+			description: "empty message",
+			verbosity:   InfoLevel,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			var stdout, stderr bytes.Buffer
+			p := &Printer{
+				StdOut:    &stdout,
+				StdErr:    &stderr,
+				Verbosity: tt.verbosity,
+			}
+			viper.Reset()
+			if tt.outputFormatNone {
+				viper.Set(outputFormatKey, NoneOutputFormat)
+			}
+
+			p.Noticef(tt.message, tt.args...)
+
+			if output := stderr.String(); output != tt.expectedOutput {
+				t.Errorf("unexpected stderr: got %q, want %q", output, tt.expectedOutput)
+			}
+			if output := stdout.String(); output != "" {
+				t.Errorf("unexpected stdout: got %q, want %q", output, "")
+			}
+		})
+	}
+}
+
+func TestNoticeln(t *testing.T) {
+	tests := []struct {
+		description      string
+		message          string
+		verbosity        Level
+		outputFormatNone bool
+	}{
+		{
+			description: "debug verbosity",
+			message:     "Test message",
+			verbosity:   DebugLevel,
+		},
+		{
+			description: "info verbosity",
+			message:     "Test message",
+			verbosity:   InfoLevel,
+		},
+		{
+			description: "warning verbosity",
+			message:     "Test message",
+			verbosity:   WarningLevel,
+		},
+		{
+			description: "error verbosity",
+			message:     "Test message",
+			verbosity:   ErrorLevel,
+		},
+		{
+			description:      "output format none",
+			message:          "Test message",
+			verbosity:        ErrorLevel,
+			outputFormatNone: true,
+		},
+		{
+			description: "empty message",
+			verbosity:   InfoLevel,
+		},
+		{
+			description: "literal format specifier",
+			message:     "Test message: %s",
+			verbosity:   InfoLevel,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			var stdout, stderr bytes.Buffer
+			p := &Printer{
+				StdOut:    &stdout,
+				StdErr:    &stderr,
+				Verbosity: tt.verbosity,
+			}
+			viper.Reset()
+			if tt.outputFormatNone {
+				viper.Set(outputFormatKey, NoneOutputFormat)
+			}
+
+			p.Noticeln(tt.message)
+
+			expectedOutput := tt.message + "\n"
+			if output := stderr.String(); output != expectedOutput {
+				t.Errorf("unexpected stderr: got %q, want %q", output, expectedOutput)
+			}
+			if output := stdout.String(); output != "" {
+				t.Errorf("unexpected stdout: got %q, want %q", output, "")
+			}
+		})
+	}
+}
+
 func TestPagerDisplay(t *testing.T) {
 	tests := []struct {
 		description      string

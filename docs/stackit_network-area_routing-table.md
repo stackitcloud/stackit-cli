@@ -4,7 +4,7 @@ Manage routing-tables and its according routes
 
 ### Synopsis
 
-Manage routing-tables and their associated routes.
+Manage routing-tables and their associated routes within STACKIT Network Areas (SNAs).
 
 This API is currently available only to selected customers.  
 To request access, please contact your account manager or submit a support ticket.

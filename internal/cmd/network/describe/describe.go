@@ -136,6 +136,8 @@ func outputResult(p *print.Printer, outputFormat string, network *iaas.Network) 
 		table.AddSeparator()
 		table.AddRow("NAME", network.Name)
 		table.AddSeparator()
+		table.AddRow("DESCRIPTION", utils.PtrString(network.Description))
+		table.AddSeparator()
 		table.AddRow("STATE", network.Status)
 		table.AddSeparator()
 

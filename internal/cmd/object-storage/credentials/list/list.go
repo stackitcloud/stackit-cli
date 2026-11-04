@@ -147,8 +147,8 @@ func outputResult(p *print.Printer, outputFormat, credentialsGroupLabel string, 
 			c := credentials[i]
 
 			expiresAt := "Never"
-			if c.Expires != "" {
-				expiresAt = c.Expires
+			if c.Expires.Get() != nil && *c.Expires.Get() != "" {
+				expiresAt = *c.Expires.Get()
 			}
 			table.AddRow(c.KeyId, c.DisplayName, expiresAt)
 		}

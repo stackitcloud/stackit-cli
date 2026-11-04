@@ -76,6 +76,26 @@ func FlagToStringToStringPointer(p *print.Printer, cmd *cobra.Command, flag stri
 	return nil
 }
 
+// FlagToStringToStringPointerPointer returns a pointer to the flag's value as a map of string pointers.
+// Returns nil if the flag is not set, cannot be converted, or does not exist.
+func FlagToStringToStringPointerPointer(p *print.Printer, cmd *cobra.Command, flag string) *map[string]*string { //nolint:gocritic //convenient for setting the SDK payload
+	value, err := cmd.Flags().GetStringToString(flag)
+	if err != nil {
+		p.Debug(print.ErrorLevel, "convert flag to string to string pointer pointer: %v", err)
+		return nil
+	}
+	if !cmd.Flag(flag).Changed {
+		return nil
+	}
+
+	pointerValue := make(map[string]*string, len(value))
+	for key, item := range value {
+		item := item
+		pointerValue[key] = &item
+	}
+	return &pointerValue
+}
+
 func FlagToStringToAny(p *print.Printer, cmd *cobra.Command, flag string) map[string]any {
 	value, err := cmd.Flags().GetStringToString(flag)
 	r := make(map[string]any, len(value))

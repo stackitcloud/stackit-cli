@@ -34,7 +34,7 @@ type inputModel struct {
 	*globalflags.GlobalFlagModel
 	ParentId *string
 	Name     *string
-	Labels   *map[string]string
+	Labels   *map[string]*string
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -107,7 +107,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		return nil, &errors.ProjectIdError{}
 	}
 
-	labels := flags.FlagToStringToStringPointer(p, cmd, labelFlag)
+	labels := flags.FlagToStringToStringPointerPointer(p, cmd, labelFlag)
 	parentId := flags.FlagToStringPointer(p, cmd, parentIdFlag)
 	name := flags.FlagToStringPointer(p, cmd, nameFlag)
 
@@ -126,10 +126,10 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 				}
 			}
 
-			if !labelValueRegex.MatchString(value) {
+			if value == nil || !labelValueRegex.MatchString(*value) {
 				return nil, &errors.FlagValidationError{
 					Flag:    labelFlag,
-					Details: fmt.Sprintf("label value %s for key %s didn't match the required regex expression %s", value, key, labelValueRegex),
+					Details: fmt.Sprintf("label value %v for key %s didn't match the required regex expression %s", value, key, labelValueRegex),
 				}
 			}
 		}

@@ -16,6 +16,9 @@ stackit network create [flags]
   Create a network with name "network-1"
   $ stackit network create --name network-1
 
+  Create a network with name "network-1" and a description
+  $ stackit network create --name network-1 --description "My network"
+
   Create a non-routed network with name "network-1"
   $ stackit network create --name network-1 --non-routed
 
@@ -38,6 +41,7 @@ stackit network create [flags]
 ### Options
 
 ```
+      --description string              Description of the network (up to 255 characters)
   -h, --help                            Help for "stackit network create"
       --ipv4-dns-name-servers strings   List of DNS name servers for IPv4. Nameservers cannot be defined for routed networks
       --ipv4-gateway string             The IPv4 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway

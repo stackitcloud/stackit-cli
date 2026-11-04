@@ -1,0 +1,45 @@
+## stackit sfs export-policy update
+
+Updates an export policy
+
+### Synopsis
+
+Updates an export policy.
+
+```
+stackit sfs export-policy update EXPORT_POLICY_ID [flags]
+```
+
+### Examples
+
+```
+  Update an export policy with ID "xxx" and with rules from file "./rules.json"
+  $ stackit sfs export-policy update xxx --rules @./rules.json
+
+  Update an export policy with ID "xxx" and remove the rules
+  $ stackit sfs export-policy update XXX --remove-rules
+```
+
+### Options
+
+```
+  -h, --help           Help for "stackit sfs export-policy update"
+      --remove-rules   Remove the export policy rules
+      --rules string   Rules of the export policy
+```
+
+### Options inherited from parent commands
+
+```
+  -y, --assume-yes             If set, skips all confirmation prompts
+      --async                  If set, runs the command asynchronously
+  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string      Project ID
+      --region string          Target region for region-specific requests
+      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+```
+
+### SEE ALSO
+
+* [stackit sfs export-policy](./stackit_sfs_export-policy.md)	 - Provides functionality for SFS export policies
+

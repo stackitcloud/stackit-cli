@@ -70,7 +70,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list volumes: %w", err)
@@ -125,8 +125,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiListVolumesRequest {
-	req := apiClient.DefaultAPI.ListVolumes(ctx, model.ProjectId, model.Region)
+func buildRequest(ctx context.Context, model *inputModel, apiClient iaas.DefaultAPI) iaas.ApiListVolumesRequest {
+	req := apiClient.ListVolumes(ctx, model.ProjectId, model.Region)
 	if model.LabelSelector != nil {
 		req = req.LabelSelector(*model.LabelSelector)
 	}
@@ -141,7 +141,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, volumes [
 			return nil
 		}
 		table := tables.NewTable()
-		table.SetHeader("ID", "Name", "Status", "Server", "Availability Zone", "Size (GB)")
+		table.SetHeader("ID", "Name", "Status", "Server", "Availability Zone", "Size (GB)", "Encrypted")
 
 		for i := range volumes {
 			volume := volumes[i]
@@ -152,6 +152,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, volumes [
 				utils.PtrString(volume.ServerId),
 				volume.AvailabilityZone,
 				utils.PtrString(volume.Size),
+				utils.PtrString(volume.Encrypted),
 			)
 			table.AddSeparator()
 		}

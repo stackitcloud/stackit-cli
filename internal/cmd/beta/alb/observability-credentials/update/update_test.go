@@ -3,6 +3,7 @@ package update
 import (
 	"context"
 	"testing"
+	"testing/fstest"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -24,7 +25,11 @@ var (
 	testCredentialRef = "credential-12345"
 	testDisplayname   = "displayname"
 	testUsername      = "testuser"
-	testPassword      = "testpassword"
+)
+
+const (
+	testPwFile = "pw.txt"
+	testPw     = "file-pw"
 )
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
@@ -33,7 +38,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		globalflags.RegionFlag:    testRegion,
 		usernameFlag:              testUsername,
 		displaynameFlag:           testDisplayname,
-		passwordFlag:              testPassword,
+		passwordFlag:              "@" + testPwFile,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -51,7 +56,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) inputModel {
 		Username:       &testUsername,
 		Displayname:    &testDisplayname,
 		CredentialsRef: &testCredentialRef,
-		Password:       &testPassword,
+		Password:       new(testPw),
 	}
 	for _, mod := range mods {
 		mod(&model)
@@ -71,7 +76,7 @@ func fixtureRequest(mods ...func(request *alb.ApiUpdateCredentialsRequest)) alb.
 func fixturePayload(mods ...func(payload *alb.UpdateCredentialsPayload)) alb.UpdateCredentialsPayload {
 	payload := alb.UpdateCredentialsPayload{
 		DisplayName: &testDisplayname,
-		Password:    &testPassword,
+		Password:    new(testPw),
 		Username:    &testUsername,
 	}
 	for _, mod := range mods {
@@ -82,6 +87,7 @@ func fixturePayload(mods ...func(payload *alb.UpdateCredentialsPayload)) alb.Upd
 
 func TestParseInput(t *testing.T) {
 	tests := []struct {
+		stdin         string
 		description   string
 		argValues     []string
 		flagValues    map[string]string
@@ -117,16 +123,51 @@ func TestParseInput(t *testing.T) {
 				globalflags.RegionFlag:    testRegion,
 				usernameFlag:              testUsername,
 				displaynameFlag:           testDisplayname,
-				passwordFlag:              testPassword,
+				passwordFlag:              "@pw.txt",
 			},
 			isValid:       true,
 			expectedModel: fixtureInputModel(),
+		},
+		{
+			description: "password from explicit stdin",
+			args:        []string{testCredentialRef},
+			stdin:       "stdin-pw\n",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[passwordFlag] = "-"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Password = new("stdin-pw")
+			}),
+		},
+		{
+			description: "omitted password is not updated",
+			args:        []string{testCredentialRef},
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, passwordFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Password = nil
+			}),
+		},
+		{
+			description: "literal password rejected",
+			args:        []string{testCredentialRef},
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[passwordFlag] = "top-secret"
+			}),
+			isValid: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			params := testparams.NewTestParams()
+			params.Fs = fstest.MapFS{
+				testPwFile: {Data: []byte(testPw)},
+			}
+			params.In.WriteString(tt.stdin)
 			cmd := NewCmd(params.CmdParams)
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
@@ -151,7 +192,13 @@ func TestParseInput(t *testing.T) {
 				t.Fatalf("error validating flags: %v", err)
 			}
 
-			model := parseInput(params.Printer, cmd, tt.args)
+			model, err := parseInput(params.Printer, cmd, tt.args)
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("parse input: %v", err)
+			}
 
 			if !tt.isValid {
 				t.Fatalf("did not fail on invalid input")

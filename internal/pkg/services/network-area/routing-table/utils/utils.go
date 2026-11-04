@@ -23,23 +23,23 @@ func ExtractRouteDetails(route *iaas.Route) RouteDetails {
 	var routeDetails RouteDetails
 
 	if route.Destination.DestinationCIDRv4 != nil {
-		routeDetails.DestType = route.Destination.DestinationCIDRv4.Type
+		routeDetails.DestType = string(route.Destination.DestinationCIDRv4.Type)
 		routeDetails.DestValue = route.Destination.DestinationCIDRv4.Value
 	} else if route.Destination.DestinationCIDRv6 != nil {
-		routeDetails.DestType = route.Destination.DestinationCIDRv6.Type
+		routeDetails.DestType = string(route.Destination.DestinationCIDRv6.Type)
 		routeDetails.DestValue = route.Destination.DestinationCIDRv6.Value
 	}
 
 	if route.Nexthop.NexthopIPv4 != nil {
-		routeDetails.HopType = route.Nexthop.NexthopIPv4.Type
+		routeDetails.HopType = string(route.Nexthop.NexthopIPv4.Type)
 		routeDetails.HopValue = route.Nexthop.NexthopIPv4.Value
 	} else if route.Nexthop.NexthopIPv6 != nil {
-		routeDetails.HopType = route.Nexthop.NexthopIPv6.Type
+		routeDetails.HopType = string(route.Nexthop.NexthopIPv6.Type)
 		routeDetails.HopValue = route.Nexthop.NexthopIPv6.Value
 	} else if route.Nexthop.NexthopInternet != nil {
-		routeDetails.HopType = route.Nexthop.NexthopInternet.Type
+		routeDetails.HopType = string(route.Nexthop.NexthopInternet.Type)
 	} else if route.Nexthop.NexthopBlackhole != nil {
-		routeDetails.HopType = route.Nexthop.NexthopBlackhole.Type
+		routeDetails.HopType = string(route.Nexthop.NexthopBlackhole.Type)
 	}
 
 	if len(route.Labels) > 0 {

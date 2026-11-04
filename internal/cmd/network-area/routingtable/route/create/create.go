@@ -70,7 +70,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Creates a route in a routing-table",
-		Long:  "Creates a route in a routing-table.",
+		Long:  "Creates a route in a routing-table within a STACKIT Network Area (SNA).",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample("Create a route with CIDRv4 destination and IPv4 nexthop",
@@ -210,14 +210,14 @@ func buildDestination(model *inputModel) *iaas.RouteDestination {
 	case destTypeCIDRv4:
 		return &iaas.RouteDestination{
 			DestinationCIDRv4: &iaas.DestinationCIDRv4{
-				Type:  model.DestinationType,
+				Type:  iaas.DestinationCIDRv4Type(model.DestinationType),
 				Value: *model.DestinationValue,
 			},
 		}
 	case destTypeCIDRv6:
 		return &iaas.RouteDestination{
 			DestinationCIDRv6: &iaas.DestinationCIDRv6{
-				Type:  model.DestinationType,
+				Type:  iaas.DestinationCIDRv6Type(model.DestinationType),
 				Value: *model.DestinationValue,
 			},
 		}
@@ -232,27 +232,27 @@ func buildNextHop(model *inputModel) *iaas.RouteNexthop {
 	case nextHopTypeIPv4:
 		return &iaas.RouteNexthop{
 			NexthopIPv4: &iaas.NexthopIPv4{
-				Type:  model.NextHopType,
+				Type:  iaas.NexthopIPv4Type(model.NextHopType),
 				Value: *model.NextHopValue,
 			},
 		}
 	case nextHopTypeIPv6:
 		return &iaas.RouteNexthop{
 			NexthopIPv6: &iaas.NexthopIPv6{
-				Type:  model.NextHopType,
+				Type:  iaas.NexthopIPv6Type(model.NextHopType),
 				Value: *model.NextHopValue,
 			},
 		}
 	case nextHopTypeInternet:
 		return &iaas.RouteNexthop{
 			NexthopInternet: &iaas.NexthopInternet{
-				Type: model.NextHopType,
+				Type: iaas.NexthopInternetType(model.NextHopType),
 			},
 		}
 	case nextHopTypeBlackhole:
 		return &iaas.RouteNexthop{
 			NexthopBlackhole: &iaas.NexthopBlackhole{
-				Type: model.NextHopType,
+				Type: iaas.NexthopBlackholeType(model.NextHopType),
 			},
 		}
 	default:

@@ -68,7 +68,7 @@ func fixturePayload(mods ...func(payload *objectstorage.CreateAccessKeyPayload))
 		return objectstorage.CreateAccessKeyPayload{}
 	}
 	payload := objectstorage.CreateAccessKeyPayload{
-		Expires: utils.Ptr(testExpirationDate),
+		Expires: *objectstorage.NewNullableTime(utils.Ptr(testExpirationDate)),
 	}
 	for _, mod := range mods {
 		mod(&payload)
@@ -207,6 +207,7 @@ func TestBuildRequest(t *testing.T) {
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest, objectstorage.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
+				cmp.AllowUnexported(objectstorage.NullableTime{}),
 			)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

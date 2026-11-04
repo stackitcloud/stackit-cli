@@ -45,7 +45,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   fmt.Sprintf("update %s", routingTableIdArg),
 		Short: "Updates a routing-table",
-		Long:  "Updates a routing-table.",
+		Long:  "Updates a routing-table within a STACKIT Network Area (SNA).",
 		Args:  args.SingleArg(routingTableIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(

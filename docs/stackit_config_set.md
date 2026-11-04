@@ -37,6 +37,7 @@ stackit config set [flags]
       --dns-custom-endpoint string                                 DNS API base URL, used in calls to this API
       --edge-custom-endpoint string                                Edge API base URL, used in calls to this API
   -h, --help                                                       Help for "stackit config set"
+      --iaas-alpha-custom-endpoint string                          IaaS Alpha API base URL, used in calls to this API
       --iaas-custom-endpoint string                                IaaS API base URL, used in calls to this API
       --identity-provider-custom-client-id string                  Identity Provider client ID, used for user authentication
       --identity-provider-custom-well-known-configuration string   Identity Provider well-known OpenID configuration URL, used for user authentication
@@ -55,6 +56,7 @@ stackit config set [flags]
       --redis-custom-endpoint string                               Redis API base URL, used in calls to this API
       --resource-manager-custom-endpoint string                    Resource Manager API base URL, used in calls to this API
       --runcommand-custom-endpoint string                          Run Command API base URL, used in calls to this API
+      --scf-custom-endpoint string                                 STACKIT Cloud Foundry API base URL, used in calls to this API
       --secrets-manager-custom-endpoint string                     Secrets Manager API base URL, used in calls to this API
       --server-osupdate-custom-endpoint string                     Server Update Management API base URL, used in calls to this API
       --serverbackup-custom-endpoint string                        Server Backup API base URL, used in calls to this API

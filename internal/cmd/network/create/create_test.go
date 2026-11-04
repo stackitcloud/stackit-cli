@@ -235,6 +235,26 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModel(),
 		},
 		{
+			description: "description set",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[descriptionFlag] = "My network"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Description = new("My network")
+			}),
+		},
+		{
+			description: "description empty",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[descriptionFlag] = ""
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Description = new("")
+			}),
+		},
+		{
 			description: "required only",
 			flagValues: map[string]string{
 				globalflags.ProjectIdFlag: testProjectId,
@@ -510,6 +530,28 @@ func TestBuildRequest(t *testing.T) {
 			expectedRequest: fixtureRequest(),
 		},
 		{
+			description: "description set",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Description = new("My network")
+			}),
+			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateNetworkRequest) {
+				*request = request.CreateNetworkPayload(fixturePayload(func(payload *iaas.CreateNetworkPayload) {
+					payload.Description = new("My network")
+				}))
+			}),
+		},
+		{
+			description: "description empty",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Description = new("")
+			}),
+			expectedRequest: fixtureRequest(func(request *iaas.ApiCreateNetworkRequest) {
+				*request = request.CreateNetworkPayload(fixturePayload(func(payload *iaas.CreateNetworkPayload) {
+					payload.Description = new("")
+				}))
+			}),
+		},
+		{
 			description: "only name in payload",
 			model: &inputModel{
 				GlobalFlagModel: &globalflags.GlobalFlagModel{
@@ -632,7 +674,7 @@ func TestBuildRequest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient)
+			request := buildRequest(testCtx, tt.model, testClient.DefaultAPI)
 
 			diff := cmp.Diff(tt.expectedRequest, request,
 				cmp.AllowUnexported(tt.expectedRequest),

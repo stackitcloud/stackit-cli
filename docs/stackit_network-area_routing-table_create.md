@@ -4,7 +4,7 @@ Creates a routing-table
 
 ### Synopsis
 
-Creates a routing-table.
+Creates a routing-table within a STACKIT Network Area (SNA).
 
 ```
 stackit network-area routing-table create [flags]

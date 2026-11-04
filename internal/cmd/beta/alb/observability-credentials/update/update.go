@@ -47,7 +47,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			model := parseInput(params.Printer, cmd, args)
+			model, err := parseInput(params.Printer, cmd, args)
+			if err != nil {
+				return fmt.Errorf("parse input: %w", err)
+			}
 
 			// Configure API client
 			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)
@@ -111,17 +114,21 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClie
 	return req.UpdateCredentialsPayload(payload), nil
 }
 
-func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) inputModel {
+func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (inputModel, error) {
 	model := inputModel{
 		GlobalFlagModel: globalflags.Parse(p, cmd),
 		Username:        flags.FlagToStringPointer(p, cmd, usernameFlag),
 		Displayname:     flags.FlagToStringPointer(p, cmd, displaynameFlag),
 		CredentialsRef:  &inputArgs[0],
-		Password:        flags.SecretFlagToStringPointer(p, cmd, passwordFlag),
 	}
+	pw, err := flags.ResolveSecretFlag(p, cmd, passwordFlag)
+	if err != nil {
+		return model, err
+	}
+	model.Password = pw
 
 	p.DebugInputModel(model)
-	return model
+	return model, nil
 }
 
 func outputResult(p *print.Printer, model inputModel, response *alb.UpdateCredentialsResponse) error {

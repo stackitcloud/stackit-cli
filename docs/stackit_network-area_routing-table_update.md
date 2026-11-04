@@ -4,7 +4,7 @@ Updates a routing-table
 
 ### Synopsis
 
-Updates a routing-table.
+Updates a routing-table within a STACKIT Network Area (SNA).
 
 ```
 stackit network-area routing-table update ROUTING_TABLE_ID [flags]

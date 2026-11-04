@@ -4,7 +4,7 @@ Deletes a route within a routing-table
 
 ### Synopsis
 
-Deletes a route within a routing-table
+Deletes a route within a routing-table within a STACKIT Network Area (SNA).
 
 ```
 stackit network-area routing-table route delete routing-table-id [flags]

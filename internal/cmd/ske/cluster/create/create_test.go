@@ -70,12 +70,12 @@ var testPayload = &ske.CreateOrUpdateClusterPayload{
 		AdditionalProperties: map[string]any{},
 	},
 	Maintenance: &ske.Maintenance{
-		AutoUpdate: ske.MaintenanceAutoUpdate{
+		AutoUpdate: &ske.MaintenanceAutoUpdate{
 			KubernetesVersion:    utils.Ptr(true),
 			MachineImageVersion:  utils.Ptr(true),
 			AdditionalProperties: map[string]any{},
 		},
-		TimeWindow: ske.TimeWindow{
+		TimeWindow: &ske.TimeWindow{
 			End:                  time.Date(0, 1, 1, 5, 0, 0, 0, time.FixedZone("test-zone", 2*60*60)),
 			Start:                time.Date(0, 1, 1, 3, 0, 0, 0, time.FixedZone("test-zone", 2*60*60)),
 			AdditionalProperties: map[string]any{},

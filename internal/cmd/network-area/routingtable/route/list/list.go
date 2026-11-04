@@ -41,7 +41,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all routes within a routing-table",
-		Long:  "Lists all routes within a routing-table",
+		Long:  "Lists all routes within a routing-table within a STACKIT Network Area (SNA).",
 		Args:  args.NoArgs,
 		Example: examples.Build(
 			examples.NewExample(

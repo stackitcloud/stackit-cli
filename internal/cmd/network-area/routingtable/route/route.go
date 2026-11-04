@@ -17,7 +17,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "route",
 		Short: "Manages routes of a routing-table",
-		Long:  "Manages routes of a routing-table",
+		Long:  "Manages routes of a routing-table within a STACKIT Network Area (SNA).",
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}

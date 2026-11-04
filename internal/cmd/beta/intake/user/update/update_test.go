@@ -2,11 +2,14 @@ package update
 
 import (
 	"context"
+	"strings"
 	"testing"
+	"testing/fstest"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
+	"github.com/spf13/cobra"
 	intake "github.com/stackitcloud/stackit-sdk-go/services/intake/v1betaapi"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
@@ -14,6 +17,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
 
@@ -21,6 +25,8 @@ type testCtxKey struct{}
 
 const (
 	testRegion = "eu01"
+	testPwFile = "pw.txt"
+	testPw     = "file-pw"
 )
 
 var (
@@ -47,6 +53,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		globalflags.RegionFlag:    testRegion,
 		intakeIdFlag:              testIntakeId,
 		displayNameFlag:           "new-display-name",
+		passwordFlag:              "@" + testPwFile,
 	}
 	for _, mod := range mods {
 		mod(flagValues)
@@ -63,7 +70,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 		},
 		IntakeId:    testIntakeId,
 		UserId:      testUserId,
-		DisplayName: utils.Ptr("new-display-name"),
+		DisplayName: new("new-display-name"),
+		Password:    new(testPw),
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -74,7 +82,8 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 func fixtureRequest(mods ...func(request *intake.ApiUpdateIntakeUserRequest)) intake.ApiUpdateIntakeUserRequest {
 	request := testClient.DefaultAPI.UpdateIntakeUser(testCtx, testProjectId, testRegion, testIntakeId, testUserId)
 	payload := intake.UpdateIntakeUserPayload{
-		DisplayName: utils.Ptr("new-display-name"),
+		DisplayName: new("new-display-name"),
+		Password:    new(testPw),
 	}
 	request = request.UpdateIntakeUserPayload(payload)
 	for _, mod := range mods {
@@ -85,6 +94,7 @@ func fixtureRequest(mods ...func(request *intake.ApiUpdateIntakeUserRequest)) in
 
 func TestParseInput(t *testing.T) {
 	tests := []struct {
+		stdin         string
 		description   string
 		argValues     []string
 		flagValues    map[string]string
@@ -115,14 +125,14 @@ func TestParseInput(t *testing.T) {
 				flagValues[descriptionFlag] = "new description"
 				flagValues[labelsFlag] = "env=prod,team=sre"
 				flagValues[userTypeFlag] = "dead-letter"
-				flagValues[passwordFlag] = "NewSecret123!"
+				flagValues[passwordFlag] = "@" + testPwFile
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Description = utils.Ptr("new description")
-				model.Labels = utils.Ptr(map[string]string{"env": "prod", "team": "sre"})
-				model.UserType = utils.Ptr("dead-letter")
-				model.Password = utils.Ptr("NewSecret123!")
+				model.Description = new("new description")
+				model.Labels = new(map[string]string{"env": "prod", "team": "sre"})
+				model.UserType = new("dead-letter")
+				model.Password = new(testPw)
 			}),
 		},
 		{
@@ -147,11 +157,48 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: false,
 		},
+		{
+			description: "password from explicit stdin",
+			argValues:   fixtureArgValues(),
+			stdin:       "stdin-pw\n",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[passwordFlag] = "-"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Password = new("stdin-pw")
+			}),
+		},
+		{
+			description: "omitted password is not updated",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, passwordFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Password = nil
+			}),
+		},
+		{
+			description: "literal password rejected",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[passwordFlag] = "top-secret"
+			}),
+			isValid: false,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
+			testutils.TestParseInput(t, func(params *types.CmdParams) *cobra.Command {
+				params.Fs = fstest.MapFS{
+					testPwFile: {Data: []byte(testPw)},
+				}
+				params.Printer.StdIn = strings.NewReader(tt.stdin)
+				return NewCmd(params)
+			}, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
 	}
 }
@@ -171,6 +218,7 @@ func TestBuildRequest(t *testing.T) {
 			description: "update description",
 			model: fixtureInputModel(func(model *inputModel) {
 				model.DisplayName = nil
+				model.Password = nil
 				model.Description = utils.Ptr("new-desc")
 			}),
 			expectedReq: fixtureRequest(func(request *intake.ApiUpdateIntakeUserRequest) {

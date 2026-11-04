@@ -38,6 +38,7 @@ const (
 	OpenSearchCustomEndpointKey    = "opensearch_custom_endpoint"
 	PostgresFlexCustomEndpointKey  = "postgresflex_custom_endpoint"
 	RabbitMQCustomEndpointKey      = "rabbitmq_custom_endpoint"
+	ScfCustomEndpointKey           = "scf_custom_endpoint"
 	// Deprecated: Will be removed after 2027-08-31.
 	RedisCustomEndpointKey             = "redis_custom_endpoint"
 	ResourceManagerEndpointKey         = "resource_manager_custom_endpoint"
@@ -51,6 +52,7 @@ const (
 	SfsCustomEndpointKey               = "sfs_custom_endpoint"
 	SKECustomEndpointKey               = "ske_custom_endpoint"
 	SQLServerFlexCustomEndpointKey     = "sqlserverflex_custom_endpoint"
+	IaaSAlphaCustomEndpointKey         = "iaas_alpha_custom_endpoint"
 	IaaSCustomEndpointKey              = "iaas_custom_endpoint"
 	TokenCustomEndpointKey             = "token_custom_endpoint"
 	GitCustomEndpointKey               = "git_custom_endpoint"
@@ -104,6 +106,7 @@ var ConfigKeys = []string{
 	DNSCustomEndpointKey,
 	EdgeCustomEndpointKey,
 	GitCustomEndpointKey,
+	IaaSAlphaCustomEndpointKey,
 	IaaSCustomEndpointKey,
 	IntakeCustomEndpointKey,
 	KMSCustomEndpointKey,
@@ -120,6 +123,7 @@ var ConfigKeys = []string{
 	RedisCustomEndpointKey,
 	ResourceManagerEndpointKey,
 	RunCommandCustomEndpointKey,
+	ScfCustomEndpointKey,
 	SKECustomEndpointKey,
 	SQLServerFlexCustomEndpointKey,
 	SecretsManagerCustomEndpointKey,
@@ -215,8 +219,10 @@ func setConfigDefaults() {
 	viper.SetDefault(ServerBackupCustomEndpointKey, "")
 	viper.SetDefault(ServerOsUpdateCustomEndpointKey, "")
 	viper.SetDefault(RunCommandCustomEndpointKey, "")
+	viper.SetDefault(ScfCustomEndpointKey, "")
 	viper.SetDefault(SKECustomEndpointKey, "")
 	viper.SetDefault(SQLServerFlexCustomEndpointKey, "")
+	viper.SetDefault(IaaSAlphaCustomEndpointKey, "")
 	viper.SetDefault(IaaSCustomEndpointKey, "")
 	viper.SetDefault(TokenCustomEndpointKey, "")
 	viper.SetDefault(GitCustomEndpointKey, "")

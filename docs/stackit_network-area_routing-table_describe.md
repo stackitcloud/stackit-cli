@@ -4,7 +4,7 @@ Describes a routing-table
 
 ### Synopsis
 
-Describes a routing-table
+Describes a routing-table within a STACKIT Network Area (SNA).
 
 ```
 stackit network-area routing-table describe ROUTING_TABLE_ID [flags]

@@ -83,9 +83,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				}
 				payload = &ske.CreateOrUpdateClusterPayload{
 					Access:      resp.Access,
+					Audit:       resp.Audit,
 					Extensions:  resp.Extensions,
 					Hibernation: resp.Hibernation,
 					Kubernetes:  resp.Kubernetes,
+					Labels:      resp.Labels,
 					Maintenance: resp.Maintenance,
 					Network:     resp.Network,
 					Nodepools:   resp.Nodepools,

@@ -32,6 +32,12 @@ const (
 	sizeFlag             = "size"
 	sourceIdFlag         = "source-id"
 	sourceTypeFlag       = "source-type"
+
+	encryptionKekKeyIdFlag       = "encryption-kek-key-id"
+	encryptionKekKeyringIdFlag   = "encryption-kek-keyring-id"
+	encryptionKekKeyVersionFlag  = "encryption-kek-key-version"
+	encryptionServiceAccountFlag = "encryption-service-account"
+	encryptionKeyPayloadFlag     = "encryption-key-payload-base64"
 )
 
 type inputModel struct {
@@ -44,6 +50,12 @@ type inputModel struct {
 	Size             *int64
 	SourceId         *string
 	SourceType       *string
+
+	EncryptionKekKeyId       *string
+	EncryptionKekKeyringId   *string
+	EncryptionKekKeyVersion  *int64
+	EncryptionServiceAccount *string
+	EncryptionKeyPayload     *string `json:"-"`
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -68,6 +80,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			examples.NewExample(
 				`Create a volume with availability zone "eu01-1", performance class "storage_premium_perf1" and size 64 GB`,
 				`$ stackit volume create --availability-zone eu01-1 --performance-class storage_premium_perf1 --size 64`,
+			),
+			examples.NewExample(
+				`Create an encrypted volume using a STACKIT KMS key`,
+				`$ stackit volume create --availability-zone eu01-1 --size 64 --encryption-kek-key-id xxx --encryption-kek-keyring-id yyy --encryption-kek-key-version 1 --encryption-service-account service-account@example.com`,
+			),
+			examples.NewExample(
+				`Create an encrypted volume with a predefined base64-encoded secret read from a file`,
+				`$ stackit volume create --availability-zone eu01-1 --size 64 --encryption-kek-key-id xxx --encryption-kek-keyring-id yyy --encryption-kek-key-version 1 --encryption-service-account service-account@example.com --encryption-key-payload-base64 @./secret.txt`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -96,7 +116,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
+			req := buildRequest(ctx, model, apiClient.DefaultAPI)
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create volume : %w", err)
@@ -117,11 +137,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model, projectLabel, resp)
 		},
 	}
-	configureFlags(cmd)
+	configureFlags(cmd, params)
 	return cmd
 }
 
-func configureFlags(cmd *cobra.Command) {
+func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.Flags().String(availabilityZoneFlag, "", "Availability zone")
 	cmd.Flags().StringP(nameFlag, "n", "", "Volume name")
 	cmd.Flags().String(descriptionFlag, "", "Volume description")
@@ -131,6 +151,15 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(sourceIdFlag, "", "ID of the source object of volume. Either 'size' or the 'source-id' and 'source-type' flags must be given")
 	cmd.Flags().String(sourceTypeFlag, "", "Type of the source object of volume. Either 'size' or the 'source-id' and 'source-type' flags must be given")
 
+	cmd.Flags().Var(flags.UUIDFlag(), encryptionKekKeyIdFlag, "UUID of the STACKIT KMS key used for encryption")
+	cmd.Flags().Var(flags.UUIDFlag(), encryptionKekKeyringIdFlag, "UUID of the STACKIT KMS keyring containing the key")
+	cmd.Flags().Int64(encryptionKekKeyVersionFlag, 0, "Version of the STACKIT KMS key used for encryption")
+	cmd.Flags().String(encryptionServiceAccountFlag, "", "Service account linked to the STACKIT KMS key")
+
+	keyPayload := flags.SecretFlag(encryptionKeyPayloadFlag, params)
+	cmd.Flags().Var(keyPayload, encryptionKeyPayloadFlag, keyPayload.Usage()+" Must be base64 encoded. If omitted, the API generates a random secret.")
+
+	cmd.MarkFlagsRequiredTogether(encryptionKekKeyIdFlag, encryptionKekKeyringIdFlag, encryptionKekKeyVersionFlag, encryptionServiceAccountFlag)
 	err := flags.MarkFlagsRequired(cmd, availabilityZoneFlag)
 	cobra.CheckErr(err)
 }
@@ -151,14 +180,33 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		Size:             flags.FlagToInt64Pointer(p, cmd, sizeFlag),
 		SourceId:         flags.FlagToStringPointer(p, cmd, sourceIdFlag),
 		SourceType:       flags.FlagToStringPointer(p, cmd, sourceTypeFlag),
+
+		EncryptionKekKeyId:       flags.FlagToStringPointer(p, cmd, encryptionKekKeyIdFlag),
+		EncryptionKekKeyringId:   flags.FlagToStringPointer(p, cmd, encryptionKekKeyringIdFlag),
+		EncryptionKekKeyVersion:  flags.FlagToInt64Pointer(p, cmd, encryptionKekKeyVersionFlag),
+		EncryptionServiceAccount: flags.FlagToStringPointer(p, cmd, encryptionServiceAccountFlag),
 	}
+
+	// Cobra requires the encryption parameters together, so checking one is sufficient.
+	if cmd.Flags().Changed(encryptionKeyPayloadFlag) && model.EncryptionKekKeyId == nil {
+		return nil, &cliErr.FlagValidationError{
+			Flag:    encryptionKekKeyIdFlag,
+			Details: fmt.Sprintf("when using flag %q, flag %q is required", encryptionKeyPayloadFlag, encryptionKekKeyIdFlag),
+		}
+	}
+
+	keyPayload, err := flags.ResolveSecretFlag(p, cmd, encryptionKeyPayloadFlag)
+	if err != nil {
+		return nil, err
+	}
+	model.EncryptionKeyPayload = keyPayload
 
 	p.DebugInputModel(model)
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APIClient) iaas.ApiCreateVolumeRequest {
-	req := apiClient.DefaultAPI.CreateVolume(ctx, model.ProjectId, model.Region)
+func buildRequest(ctx context.Context, model *inputModel, apiClient iaas.DefaultAPI) iaas.ApiCreateVolumeRequest {
+	req := apiClient.CreateVolume(ctx, model.ProjectId, model.Region)
 
 	payload := iaas.CreateVolumePayload{
 		AvailabilityZone: model.AvailabilityZone,
@@ -173,6 +221,16 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		payload.Source = &iaas.VolumeSource{
 			Id:   *model.SourceId,
 			Type: *model.SourceType,
+		}
+	}
+
+	if model.EncryptionKekKeyId != nil && model.EncryptionKekKeyringId != nil && model.EncryptionKekKeyVersion != nil && model.EncryptionServiceAccount != nil {
+		payload.EncryptionParameters = &iaas.VolumeEncryptionParameter{
+			KekKeyId:       *model.EncryptionKekKeyId,
+			KekKeyringId:   *model.EncryptionKekKeyringId,
+			KekKeyVersion:  *model.EncryptionKekKeyVersion,
+			ServiceAccount: *model.EncryptionServiceAccount,
+			KeyPayload:     model.EncryptionKeyPayload,
 		}
 	}
 
