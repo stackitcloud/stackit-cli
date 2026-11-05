@@ -14,8 +14,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/registry/client"
-	registryUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/registry/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/containerregistry/client"
+	containerRegistryUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/containerregistry/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -48,7 +48,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Update the proxy configuration for an artifactory with ID "xxx"`,
-				"$ stackit registry artifactory update xxx --proxy-url https://registry-1.docker.io"),
+				"$ stackit containerregistry artifactory update xxx --proxy-url https://registry-1.docker.io"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -63,7 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			artifactoryLabel, err := registryUtils.GetArtifactoryName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ArtifactoryId)
+			artifactoryLabel, err := containerRegistryUtils.GetArtifactoryName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ArtifactoryId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get artifactory name: %v", err)
 				artifactoryLabel = model.ArtifactoryId

@@ -1,4 +1,4 @@
-## stackit registry artifactory list
+## stackit containerregistry artifactory list
 
 Lists all Container Registry artifactories
 
@@ -7,26 +7,26 @@ Lists all Container Registry artifactories
 Lists all Container Registry artifactories.
 
 ```
-stackit registry artifactory list [flags]
+stackit containerregistry artifactory list [flags]
 ```
 
 ### Examples
 
 ```
   List all artifactories
-  $ stackit registry artifactory list
+  $ stackit containerregistry artifactory list
 
   List all artifactories in JSON format
-  $ stackit registry artifactory list --output-format json
+  $ stackit containerregistry artifactory list --output-format json
 
   List up to 10 artifactories
-  $ stackit registry artifactory list --limit 10
+  $ stackit containerregistry artifactory list --limit 10
 ```
 
 ### Options
 
 ```
-  -h, --help        Help for "stackit registry artifactory list"
+  -h, --help        Help for "stackit containerregistry artifactory list"
       --limit int   Maximum number of entries to list
 ```
 
@@ -43,5 +43,5 @@ stackit registry artifactory list [flags]
 
 ### SEE ALSO
 
-* [stackit registry artifactory](./stackit_registry_artifactory.md)	 - Provides functionality for Container Registry artifactories
+* [stackit containerregistry artifactory](./stackit_containerregistry_artifactory.md)	 - Provides functionality for Container Registry artifactories
 

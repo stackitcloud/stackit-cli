@@ -1,4 +1,4 @@
-## stackit registry replication-adapter
+## stackit containerregistry replication-adapter
 
 Provides functionality for Container Registry replication adapters
 
@@ -7,13 +7,13 @@ Provides functionality for Container Registry replication adapters
 Provides functionality for Container Registry replication adapters.
 
 ```
-stackit registry replication-adapter [flags]
+stackit containerregistry replication-adapter [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit registry replication-adapter"
+  -h, --help   Help for "stackit containerregistry replication-adapter"
 ```
 
 ### Options inherited from parent commands
@@ -29,6 +29,6 @@ stackit registry replication-adapter [flags]
 
 ### SEE ALSO
 
-* [stackit registry](./stackit_registry.md)	 - Provides functionality for Container Registry
-* [stackit registry replication-adapter list](./stackit_registry_replication-adapter_list.md)	 - Lists all Container Registry replication adapters
+* [stackit containerregistry](./stackit_containerregistry.md)	 - Provides functionality for Container Registry
+* [stackit containerregistry replication-adapter list](./stackit_containerregistry_replication-adapter_list.md)	 - Lists all Container Registry replication adapters
 

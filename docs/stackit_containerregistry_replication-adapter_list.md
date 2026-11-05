@@ -1,4 +1,4 @@
-## stackit registry replication-adapter list
+## stackit containerregistry replication-adapter list
 
 Lists all Container Registry replication adapters
 
@@ -7,26 +7,26 @@ Lists all Container Registry replication adapters
 Lists all available adapters for replication to/from other registries.
 
 ```
-stackit registry replication-adapter list [flags]
+stackit containerregistry replication-adapter list [flags]
 ```
 
 ### Examples
 
 ```
   List all replication adapters
-  $ stackit registry replication-adapter list
+  $ stackit containerregistry replication-adapter list
 
   List all replication adapters in JSON format
-  $ stackit registry replication-adapter list --output-format json
+  $ stackit containerregistry replication-adapter list --output-format json
 
   List up to 10 replication adapters
-  $ stackit registry replication-adapter list --limit 10
+  $ stackit containerregistry replication-adapter list --limit 10
 ```
 
 ### Options
 
 ```
-  -h, --help        Help for "stackit registry replication-adapter list"
+  -h, --help        Help for "stackit containerregistry replication-adapter list"
       --limit int   Maximum number of entries to list
 ```
 
@@ -43,5 +43,5 @@ stackit registry replication-adapter list [flags]
 
 ### SEE ALSO
 
-* [stackit registry replication-adapter](./stackit_registry_replication-adapter.md)	 - Provides functionality for Container Registry replication adapters
+* [stackit containerregistry replication-adapter](./stackit_containerregistry_replication-adapter.md)	 - Provides functionality for Container Registry replication adapters
 

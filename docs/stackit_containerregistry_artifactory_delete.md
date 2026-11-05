@@ -1,4 +1,4 @@
-## stackit registry artifactory delete
+## stackit containerregistry artifactory delete
 
 Deletes a Container Registry artifactory
 
@@ -7,20 +7,20 @@ Deletes a Container Registry artifactory
 Deletes a Container Registry artifactory.
 
 ```
-stackit registry artifactory delete ARTIFACTORY_ID [flags]
+stackit containerregistry artifactory delete ARTIFACTORY_ID [flags]
 ```
 
 ### Examples
 
 ```
   Delete an artifactory with ID "xxx"
-  $ stackit registry artifactory delete xxx
+  $ stackit containerregistry artifactory delete xxx
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit registry artifactory delete"
+  -h, --help   Help for "stackit containerregistry artifactory delete"
 ```
 
 ### Options inherited from parent commands
@@ -36,5 +36,5 @@ stackit registry artifactory delete ARTIFACTORY_ID [flags]
 
 ### SEE ALSO
 
-* [stackit registry artifactory](./stackit_registry_artifactory.md)	 - Provides functionality for Container Registry artifactories
+* [stackit containerregistry artifactory](./stackit_containerregistry_artifactory.md)	 - Provides functionality for Container Registry artifactories
 

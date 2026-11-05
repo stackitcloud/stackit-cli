@@ -3,7 +3,7 @@ package replicationadapter
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/registry/replication-adapter/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/containerregistry/replication-adapter/list"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"

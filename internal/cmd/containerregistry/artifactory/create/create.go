@@ -15,7 +15,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/registry/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/containerregistry/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 )
@@ -49,19 +49,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Create an artifactory with name "my-registry"`,
-				"$ stackit registry artifactory create --name my-registry",
+				"$ stackit containerregistry artifactory create --name my-registry",
 			),
 			examples.NewExample(
 				`Create a proxy-cache artifactory for Docker Hub`,
-				"$ stackit registry artifactory create --name docker-proxy --proxy-url https://registry-1.docker.io --proxy-registry-type docker-hub",
+				"$ stackit containerregistry artifactory create --name docker-proxy --proxy-url https://registry-1.docker.io --proxy-registry-type docker-hub",
 			),
 			examples.NewExample(
 				`Create a proxy-cache artifactory with credentials, reading secret from stdin`,
-				"$ stackit registry artifactory create --name my-proxy --proxy-url https://custom-registry.com --proxy-registry-type harbor --proxy-access-key my-user --proxy-access-secret -",
+				"$ stackit containerregistry artifactory create --name my-proxy --proxy-url https://custom-registry.com --proxy-registry-type harbor --proxy-access-key my-user --proxy-access-secret -",
 			),
 			examples.NewExample(
 				`Create a proxy-cache artifactory with credentials, providing the path to a file with the secret`,
-				"$ stackit registry artifactory create --name my-proxy --proxy-url https://custom-registry.com --proxy-registry-type harbor --proxy-access-key my-user --proxy-access-secret @./secret.txt",
+				"$ stackit containerregistry artifactory create --name my-proxy --proxy-url https://custom-registry.com --proxy-registry-type harbor --proxy-access-key my-user --proxy-access-secret @./secret.txt",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
