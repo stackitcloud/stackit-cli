@@ -1,6 +1,7 @@
 package dns
 
 import (
+	"github.com/stackitcloud/stackit-cli/internal/cmd/dns/lookup"
 	recordset "github.com/stackitcloud/stackit-cli/internal/cmd/dns/record-set"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/dns/zone"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -25,4 +26,5 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(zone.NewCmd(params))
 	cmd.AddCommand(recordset.NewCmd(params))
+	cmd.AddCommand(lookup.NewCmd(params))
 }
