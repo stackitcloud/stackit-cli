@@ -10,5 +10,5 @@ import (
 )
 
 func ConfigureClient(p *print.Printer, cliVersion string) (*registry.APIClient, error) {
-	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.RegistryCustomEndpointKey), false, genericclient.CreateApiClient[*registry.APIClient](registry.NewAPIClient))
+	return genericclient.ConfigureClientGeneric(p, cliVersion, viper.GetString(config.ContainerRegistryCustomEndpointKey), false, genericclient.CreateApiClient[*registry.APIClient](registry.NewAPIClient))
 }

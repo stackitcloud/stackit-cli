@@ -61,7 +61,7 @@ const (
 	logsCustomEndpointFlag              = "logs-custom-endpoint"
 	cdnCustomEndpointFlag               = "cdn-custom-endpoint"
 	vpnCustomEndpointFlag               = "vpn-custom-endpoint"
-	registryCustomEndpointFlag          = "registry-custom-endpoint"
+	containerRegistryCustomEndpointFlag = "containerregistry-custom-endpoint"
 )
 
 var (
@@ -116,7 +116,7 @@ type inputModel struct {
 	LogsCustomEndpoint              bool
 	CDNCustomEndpoint               bool
 	VpnCustomEndpoint               bool
-	RegistryCustomEndpoint          bool
+	ContainerRegistryCustomEndpoint bool
 }
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
@@ -273,8 +273,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.VpnCustomEndpoint {
 				viper.Set(config.VPNCustomEndpointKey, "")
 			}
-			if model.RegistryCustomEndpoint {
-				viper.Set(config.RegistryCustomEndpointKey, "")
+			if model.ContainerRegistryCustomEndpoint {
+				viper.Set(config.ContainerRegistryCustomEndpointKey, "")
 			}
 
 			err := config.Write()
@@ -335,7 +335,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Bool(sfsCustomEndpointFlag, false, "SFS API base URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(cdnCustomEndpointFlag, false, "Custom CDN endpoint URL. If unset, uses the default base URL")
 	cmd.Flags().Bool(vpnCustomEndpointFlag, false, "VPN API base URL. If unset, uses the default base URL")
-	cmd.Flags().Bool(registryCustomEndpointFlag, false, "Registry API base URL. If unset, uses the default base URL")
+	cmd.Flags().Bool(containerRegistryCustomEndpointFlag, false, "Container Registry API base URL. If unset, uses the default base URL")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
@@ -386,7 +386,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) *inputModel {
 		LogsCustomEndpoint:              flags.FlagToBoolValue(p, cmd, logsCustomEndpointFlag),
 		CDNCustomEndpoint:               flags.FlagToBoolValue(p, cmd, cdnCustomEndpointFlag),
 		VpnCustomEndpoint:               flags.FlagToBoolValue(p, cmd, vpnCustomEndpointFlag),
-		RegistryCustomEndpoint:          flags.FlagToBoolValue(p, cmd, registryCustomEndpointFlag),
+		ContainerRegistryCustomEndpoint: flags.FlagToBoolValue(p, cmd, containerRegistryCustomEndpointFlag),
 	}
 
 	p.DebugInputModel(model)

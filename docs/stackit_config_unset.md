@@ -33,6 +33,7 @@ stackit config unset [flags]
       --authorization-custom-endpoint                       Authorization API base URL. If unset, uses the default base URL
       --automation-custom-endpoint                          Automation API base URL. If unset, uses the default base URL
       --cdn-custom-endpoint                                 Custom CDN endpoint URL. If unset, uses the default base URL
+      --containerregistry-custom-endpoint                   Container Registry API base URL. If unset, uses the default base URL
       --dns-custom-endpoint                                 DNS API base URL. If unset, uses the default base URL
       --edge-custom-endpoint                                Edge API base URL. If unset, uses the default base URL
   -h, --help                                                Help for "stackit config unset"
@@ -56,7 +57,6 @@ stackit config unset [flags]
       --rabbitmq-custom-endpoint                            RabbitMQ API base URL. If unset, uses the default base URL
       --redis-custom-endpoint                               Redis API base URL. If unset, uses the default base URL
       --region                                              Region
-      --registry-custom-endpoint                            Registry API base URL. If unset, uses the default base URL
       --resource-manager-custom-endpoint                    Resource Manager API base URL. If unset, uses the default base URL
       --runcommand-custom-endpoint                          Server Command base URL. If unset, uses the default base URL
       --scf-custom-endpoint                                 STACKIT Cloud Foundry API base URL. If unset, uses the default base URL

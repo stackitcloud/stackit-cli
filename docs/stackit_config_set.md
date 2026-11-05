@@ -34,6 +34,7 @@ stackit config set [flags]
       --authorization-custom-endpoint string                       Authorization API base URL, used in calls to this API
       --automation-custom-endpoint string                          Automation API base URL, used in calls to this API
       --cdn-custom-endpoint string                                 CDN API base URL, used in calls to this API
+      --containerregistry-custom-endpoint string                   Container Registry API base URL, used in calls to this API
       --dns-custom-endpoint string                                 DNS API base URL, used in calls to this API
       --edge-custom-endpoint string                                Edge API base URL, used in calls to this API
   -h, --help                                                       Help for "stackit config set"
@@ -54,7 +55,6 @@ stackit config set [flags]
       --postgresflex-custom-endpoint string                        PostgreSQL Flex API base URL, used in calls to this API
       --rabbitmq-custom-endpoint string                            RabbitMQ API base URL, used in calls to this API
       --redis-custom-endpoint string                               Redis API base URL, used in calls to this API
-      --registry-custom-endpoint string                            Registry API base URL, used in calls to this API
       --resource-manager-custom-endpoint string                    Resource Manager API base URL, used in calls to this API
       --runcommand-custom-endpoint string                          Run Command API base URL, used in calls to this API
       --scf-custom-endpoint string                                 STACKIT Cloud Foundry API base URL, used in calls to this API
