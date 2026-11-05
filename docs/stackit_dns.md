@@ -30,6 +30,7 @@ stackit dns [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
+* [stackit dns flush](./stackit_dns_flush.md)	 - Flushes the cache for a domain on the STACKIT DNS resolvers
 * [stackit dns record-set](./stackit_dns_record-set.md)	 - Provides functionality for DNS record set
 * [stackit dns zone](./stackit_dns_zone.md)	 - Provides functionality for DNS zones
 
