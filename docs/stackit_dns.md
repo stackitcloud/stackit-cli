@@ -30,6 +30,7 @@ stackit dns [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
+* [stackit dns lookup](./stackit_dns_lookup.md)	 - Looks up a domain on the STACKIT DNS resolvers
 * [stackit dns record-set](./stackit_dns_record-set.md)	 - Provides functionality for DNS record set
 * [stackit dns zone](./stackit_dns_zone.md)	 - Provides functionality for DNS zones
 
