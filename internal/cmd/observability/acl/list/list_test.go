@@ -1,0 +1,233 @@
+package list
+
+import (
+	"context"
+	"testing"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+
+	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
+
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/google/uuid"
+	observability "github.com/stackitcloud/stackit-sdk-go/services/observability/v1api"
+)
+
+var projectIdFlag = globalflags.ProjectIdFlag
+
+type testCtxKey struct{}
+
+var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
+var testClient = &observability.APIClient{DefaultAPI: &observability.DefaultAPIService{}}
+var testProjectId = uuid.NewString()
+var testInstanceId = uuid.NewString()
+
+func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
+	flagValues := map[string]string{
+		projectIdFlag:  testProjectId,
+		limitFlag:      "10",
+		instanceIdFlag: testInstanceId,
+	}
+	for _, mod := range mods {
+		mod(flagValues)
+	}
+	return flagValues
+}
+
+func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
+	model := &inputModel{
+		GlobalFlagModel: &globalflags.GlobalFlagModel{
+			ProjectId: testProjectId,
+			Verbosity: globalflags.VerbosityDefault,
+		},
+		Limit:      utils.Ptr(int64(10)),
+		InstanceId: testInstanceId,
+	}
+	for _, mod := range mods {
+		mod(model)
+	}
+	return model
+}
+
+func fixtureRequest(mods ...func(request *observability.ApiListACLRequest)) observability.ApiListACLRequest {
+	request := testClient.DefaultAPI.ListACL(testCtx, testInstanceId, testProjectId)
+	for _, mod := range mods {
+		mod(&request)
+	}
+	return request
+}
+
+func TestParseInput(t *testing.T) {
+	tests := []struct {
+		description   string
+		argValues     []string
+		flagValues    map[string]string
+		isValid       bool
+		expectedModel *inputModel
+	}{
+		{
+			description:   "base",
+			flagValues:    fixtureFlagValues(),
+			isValid:       true,
+			expectedModel: fixtureInputModel(),
+		},
+		{
+			description: "no limit",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, limitFlag)
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Limit = nil
+			}),
+		},
+		{
+			description: "no values",
+			flagValues:  map[string]string{},
+			isValid:     false,
+		},
+		{
+			description: "project id missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, projectIdFlag)
+			}),
+			isValid: false,
+		},
+		{
+			description: "project id invalid 1",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[projectIdFlag] = ""
+			}),
+			isValid: false,
+		},
+		{
+			description: "project id invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[projectIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "instance id missing",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, instanceIdFlag)
+			}),
+			isValid: false,
+		},
+		{
+			description: "instance id invalid 1",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[instanceIdFlag] = ""
+			}),
+			isValid: false,
+		},
+		{
+			description: "instance id invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[instanceIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "limit invalid",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "invalid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "limit invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "0"
+			}),
+			isValid: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
+		})
+	}
+}
+
+func TestBuildRequest(t *testing.T) {
+	tests := []struct {
+		description     string
+		model           *inputModel
+		expectedRequest observability.ApiListACLRequest
+	}{
+		{
+			description:     "base",
+			model:           fixtureInputModel(),
+			expectedRequest: fixtureRequest(),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			request := buildRequest(testCtx, tt.model, testClient.DefaultAPI)
+
+			diff := cmp.Diff(request, tt.expectedRequest,
+				cmp.AllowUnexported(tt.expectedRequest, observability.DefaultAPIService{}),
+				cmpopts.EquateComparable(testCtx),
+			)
+			if diff != "" {
+				t.Fatalf("Data does not match: %s", diff)
+			}
+		})
+	}
+}
+
+func TestOutputResult(t *testing.T) {
+	type args struct {
+		outputFormat  string
+		instanceLabel string
+		acls          []string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: false,
+		},
+		{
+			name: "empty acls slice",
+			args: args{
+				acls: []string{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "multiple acls",
+			args: args{
+				acls: []string{"1.2.3.0/24", "5.6.7.8/32"},
+			},
+			wantErr: false,
+		},
+		{
+			name: "multiple acls json output",
+			args: args{
+				outputFormat: print.JSONOutputFormat,
+				acls:         []string{"1.2.3.0/24", "5.6.7.8/32"},
+			},
+			wantErr: false,
+		},
+	}
+	params := testparams.NewTestParams()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(params.Printer, tt.args.outputFormat, tt.args.instanceLabel, tt.args.acls); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
