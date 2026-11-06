@@ -34,6 +34,7 @@ stackit config set [flags]
       --authorization-custom-endpoint string                       Authorization API base URL, used in calls to this API
       --automation-custom-endpoint string                          Automation API base URL, used in calls to this API
       --cdn-custom-endpoint string                                 CDN API base URL, used in calls to this API
+      --containerregistry-custom-endpoint string                   Container Registry API base URL, used in calls to this API
       --dns-custom-endpoint string                                 DNS API base URL, used in calls to this API
       --edge-custom-endpoint string                                Edge API base URL, used in calls to this API
   -h, --help                                                       Help for "stackit config set"

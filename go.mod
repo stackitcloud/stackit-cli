@@ -30,6 +30,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.13.0
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.5.0
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.16.0
+	github.com/stackitcloud/stackit-sdk-go/services/registry v0.1.0
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.28.0
 	github.com/stackitcloud/stackit-sdk-go/services/runcommand v1.11.0
 	github.com/stackitcloud/stackit-sdk-go/services/scf v0.11.0

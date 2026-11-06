@@ -60,6 +60,7 @@ const (
 	IntakeCustomEndpointKey            = "intake_custom_endpoint"
 	LogsCustomEndpointKey              = "logs_custom_endpoint"
 	ValkeyCustomEndpointKey            = "valkey_custom_endpoint"
+	ContainerRegistryCustomEndpointKey = "containerregistry_custom_endpoint"
 	VPNCustomEndpointKey               = "vpn_custom_endpoint"
 
 	ProjectNameKey     = "project_name"
@@ -133,6 +134,7 @@ var ConfigKeys = []string{
 	SfsCustomEndpointKey,
 	TokenCustomEndpointKey,
 	ValkeyCustomEndpointKey,
+	ContainerRegistryCustomEndpointKey,
 	VPNCustomEndpointKey,
 }
 
@@ -230,6 +232,7 @@ func setConfigDefaults() {
 	viper.SetDefault(LogsCustomEndpointKey, "")
 	viper.SetDefault(CDNCustomEndpointKey, "")
 	viper.SetDefault(ValkeyCustomEndpointKey, "")
+	viper.SetDefault(ContainerRegistryCustomEndpointKey, "")
 	viper.SetDefault(VPNCustomEndpointKey, "")
 }
 
