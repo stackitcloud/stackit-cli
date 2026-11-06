@@ -133,8 +133,16 @@ homebrew_casks:
   - name: stackit
     directory: Casks
     repository:
-      owner: stackitcloud
-      name: homebrew-tap
+      owner: stackit-pipeline
+      name: homebrew-tap-fork
+      token: "{{ .Env.HOMEBREW_RELEASE_TOKEN }}"
+      branch: "{{.ProjectName}}-{{.Version}}"
+      pull_request:
+        enabled: true
+        base:
+          owner: stackitcloud
+          name: homebrew-tap
+          branch: main
     commit_author:
       name: CLI Release Bot
       email: noreply@stackit.de

@@ -72,17 +72,56 @@ jobs:
           AUTHKEY_BASE64: ${{ secrets.APPLE_API_KEY }}
       - name: Install Snapcraft
         uses: samuelmeuli/action-snapcraft@v3
-      
+
+      - name: Ensure tap fork exists
+        run: |
+          gh repo fork stackitcloud/homebrew-tap \
+            --fork-name homebrew-tap-fork \
+            --clone=false || true
+        env:
+          GH_TOKEN: ${{ secrets.CLI_RELEASE }}
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v7.3.0
         with:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOMEBREW_RELEASE_TOKEN: ${{ secrets.CLI_RELEASE }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
           GPG_KEY_PATH: ${{ env.GPG_KEY_PATH }}
           # nfpm-rpm signing needs this env to be set.
           NFPM_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Create issue tracking upstream Homebrew PR
+        run: |
+          # Wait a moment for GitHub's search index to catch up
+          sleep 5
+
+          # Find the open PR authored by your account in the upstream repository
+          PR_URL=$(gh pr list \
+            --repo stackitcloud/homebrew-tap \
+            --author "@me" \
+            --state open \
+            --search "${{ github.ref_name }}" \
+            --limit 1 \
+            --json url \
+            --jq '.[0].url')
+
+          if [ -n "$PR_URL" ] && [ "$PR_URL" != "null" ]; then
+            gh issue create \
+              --repo "${{ github.repository }}" \
+              --title "Homebrew Cask PR opened for ${{ github.ref_name }}" \
+              --body "A pull request has been automatically created for release **${{ github.ref_name }}**:
+
+            - **PR:** $PR_URL
+            - **Upstream:** \`stackitcloud/homebrew-tap:main\`
+            - **Branch:** \`${{ github.ref_name }}\`"
+          else
+            echo "Warning: Could not find an open PR in stackitcloud/homebrew-tap matching release ${{ github.ref_name }}."
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.CLI_RELEASE }}
 
       - name: Clean up GPG key file
         if: always()
