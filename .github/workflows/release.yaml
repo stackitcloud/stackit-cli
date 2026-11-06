@@ -76,7 +76,7 @@ jobs:
 
       - name: Ensure tap fork exists
         run: |
-          # Create fork with suffix `-fork` to indicate that the repo in the technical user are just a fork
+          # Create fork with suffix `-fork` to indicate that the repo in the technical users account is just a fork
           gh repo fork stackitcloud/homebrew-tap \
             --fork-name homebrew-tap-fork \
             --clone=false || true
@@ -88,7 +88,11 @@ jobs:
         with:
           args: release --clean
         env:
+          # GITHUB_TOKEN is used to create the GitHub release in this repository.
+          # It uses the workflow-level permissions defined above.
           GITHUB_TOKEN: ${{ github.token }}
+          # HOMEBREW_RELEASE_TOKEN is a PAT belonging to the `stackit-pipeline` user.
+          # It is used by GoReleaser to push to the tap fork and open the upstream Homebrew PR.
           HOMEBREW_RELEASE_TOKEN: ${{ secrets.CLI_RELEASE }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
           GPG_KEY_PATH: ${{ env.GPG_KEY_PATH }}
