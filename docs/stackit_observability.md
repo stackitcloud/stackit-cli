@@ -30,6 +30,7 @@ stackit observability [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
+* [stackit observability acl](./stackit_observability_acl.md)	 - Provides functionality for ACLs of Observability instances
 * [stackit observability credentials](./stackit_observability_credentials.md)	 - Provides functionality for Observability credentials
 * [stackit observability grafana](./stackit_observability_grafana.md)	 - Provides functionality for the Grafana configuration of Observability instances
 * [stackit observability instance](./stackit_observability_instance.md)	 - Provides functionality for Observability instances
