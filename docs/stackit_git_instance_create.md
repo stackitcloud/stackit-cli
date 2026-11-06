@@ -26,7 +26,7 @@ stackit git instance create [flags]
 ### Options
 
 ```
-      --acl strings     Acl for the instance.
+      --acl strings     List of IP networks in CIDR notation which are allowed to access this instance (default [])
       --flavor string   Flavor of the instance.
   -h, --help            Help for "stackit git instance create"
       --name string     The name of the instance.
