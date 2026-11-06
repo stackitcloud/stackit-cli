@@ -25,3 +25,13 @@ func GetProjectName(ctx context.Context, apiClient resourcemanager.DefaultAPI, p
 
 	return resp.Name, nil
 }
+
+// GetFolderName returns the name of a folder by its ID.
+func GetFolderName(ctx context.Context, apiClient resourcemanager.DefaultAPI, folderId string) (string, error) {
+	resp, err := apiClient.GetFolderDetails(ctx, folderId).Execute()
+	if err != nil {
+		return "", fmt.Errorf("get folder details: %w", err)
+	}
+
+	return resp.Name, nil
+}
