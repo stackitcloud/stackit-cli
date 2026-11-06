@@ -133,6 +133,7 @@ homebrew_casks:
   - name: stackit
     directory: Casks
     repository:
+      # Update of the homebrew cask is created via a fork of the homebrew tap
       owner: stackit-pipeline
       name: homebrew-tap-fork
       token: "{{ .Env.HOMEBREW_RELEASE_TOKEN }}"
