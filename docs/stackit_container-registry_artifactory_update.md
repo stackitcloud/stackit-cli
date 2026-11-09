@@ -1,0 +1,44 @@
+## stackit container-registry artifactory update
+
+Updates a Container Registry artifactory
+
+### Synopsis
+
+Updates a Container Registry artifactory.
+
+```
+stackit container-registry artifactory update ARTIFACTORY_ID [flags]
+```
+
+### Examples
+
+```
+  Update the proxy configuration for an artifactory with ID "xxx"
+  $ stackit container-registry artifactory update xxx --proxy-url https://registry-1.docker.io
+```
+
+### Options
+
+```
+  -h, --help                         Help for "stackit container-registry artifactory update"
+      --proxy-access-key string      Access key for upstream proxy registry authentication
+      --proxy-access-secret secret   Proxy-Access-Secret. Use @<file> to read from a file (example: @./secret.txt), or - to read from stdin (hidden input on a terminal). Literal values are not supported.
+      --proxy-description string     Description of the proxy registry
+      --proxy-url string             Upstream registry URL to proxy
+```
+
+### Options inherited from parent commands
+
+```
+  -y, --assume-yes             If set, skips all confirmation prompts
+      --async                  If set, runs the command asynchronously
+  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string      Project ID
+      --region string          Target region for region-specific requests
+      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+```
+
+### SEE ALSO
+
+* [stackit container-registry artifactory](./stackit_container-registry_artifactory.md)	 - Provides functionality for Container Registry artifactories
+

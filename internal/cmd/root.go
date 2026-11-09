@@ -10,6 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/auth"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta"
 	configCmd "github.com/stackitcloud/stackit-cli/internal/cmd/config"
+	containerregistry "github.com/stackitcloud/stackit-cli/internal/cmd/container-registry"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/curl"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/dns"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/git"
@@ -210,6 +211,7 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(kms.NewCmd(params))
 	cmd.AddCommand(sqlserverflex.NewCmd(params))
 	cmd.AddCommand(valkey.NewCmd(params))
+	cmd.AddCommand(containerregistry.NewCmd(params))
 }
 
 // traverseCommands calls f for c and all of its children.
