@@ -64,7 +64,7 @@ func TestRunParseInputCase(t *testing.T) {
 				cmd.Flags().Int("count", 0, "")
 			},
 			flags:   map[string]string{"count": "invalid"},
-			wantErr: "invalid syntax",
+			wantErr: "invalid argument",
 			parseFunc: func(_ *print.Printer, _ *cobra.Command, _ []string) (*parseInputTestModel, error) {
 				return &parseInputTestModel{}, nil
 			},
