@@ -58,7 +58,7 @@ const (
 	scfCustomEndpointFlag               = "scf-custom-endpoint"
 	cdnCustomEndpointFlag               = "cdn-custom-endpoint"
 	vpnCustomEndpointFlag               = "vpn-custom-endpoint"
-	containerRegistryCustomEndpointFlag = "containerregistry-custom-endpoint"
+	containerRegistryCustomEndpointFlag = "container-registry-custom-endpoint"
 )
 
 type inputModel struct {

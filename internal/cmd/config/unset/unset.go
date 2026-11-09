@@ -61,7 +61,7 @@ const (
 	logsCustomEndpointFlag              = "logs-custom-endpoint"
 	cdnCustomEndpointFlag               = "cdn-custom-endpoint"
 	vpnCustomEndpointFlag               = "vpn-custom-endpoint"
-	containerRegistryCustomEndpointFlag = "containerregistry-custom-endpoint"
+	containerRegistryCustomEndpointFlag = "container-registry-custom-endpoint"
 )
 
 var (

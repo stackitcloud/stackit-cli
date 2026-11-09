@@ -60,7 +60,7 @@ const (
 	IntakeCustomEndpointKey            = "intake_custom_endpoint"
 	LogsCustomEndpointKey              = "logs_custom_endpoint"
 	ValkeyCustomEndpointKey            = "valkey_custom_endpoint"
-	ContainerRegistryCustomEndpointKey = "containerregistry_custom_endpoint"
+	ContainerRegistryCustomEndpointKey = "container_registry_custom_endpoint"
 	VPNCustomEndpointKey               = "vpn_custom_endpoint"
 
 	ProjectNameKey     = "project_name"
