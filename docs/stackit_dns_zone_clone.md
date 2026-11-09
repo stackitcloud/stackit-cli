@@ -26,22 +26,22 @@ stackit dns zone clone ZONE_ID [flags]
 ### Options
 
 ```
-      --adjust-records       Sets content and replaces the DNS name of the original zone with the new DNS name of the cloned zone
-      --description string   New description for the cloned zone
-      --dns-name string      Fully qualified domain name of the new DNS zone to clone
-  -h, --help                 Help for "stackit dns zone clone"
-      --name string          User given new name for the cloned zone
+      --adjust-records[=true|false]   Sets content and replaces the DNS name of the original zone with the new DNS name of the cloned zone
+      --description string            New description for the cloned zone
+      --dns-name string               Fully qualified domain name of the new DNS zone to clone
+  -h, --help[=true|false]             Help for "stackit dns zone clone"
+      --name string                   User given new name for the cloned zone
 ```
 
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

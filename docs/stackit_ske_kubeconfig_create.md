@@ -48,24 +48,24 @@ stackit ske kubeconfig create CLUSTER_NAME [flags]
 ### Options
 
 ```
-      --disable-writing     Disable the writing of kubeconfig. Set the output format to json or yaml using the -- flag to display the kubeconfig.
-  -e, --expiration string   Expiration time for the kubeconfig in seconds(s), minutes(m), hours(h), days(d) or months(M). Example: 30d. By default, expiration time is 1h
-      --filepath string     Path to create the kubeconfig file. Will fall back to KUBECONFIG env variable if not set. In case both aren't set, the kubeconfig is created as file named 'config' in the .kube folder in the user's home directory.
-  -h, --help                Help for "stackit ske kubeconfig create"
-      --idp                 Create a non-admin kubeconfig that uses the STACKIT IDP to obtain credentials.
-  -l, --login               Create a short-lived admin kubeconfig that obtains valid credentials via the STACKIT CLI. This flag is mutually exclusive with the expiration flag.
-      --overwrite           Overwrite the kubeconfig file.
+      --disable-writing[=true|false]   Disable the writing of kubeconfig. Set the output format to json or yaml using the -- flag to display the kubeconfig.
+  -e, --expiration string              Expiration time for the kubeconfig in seconds(s), minutes(m), hours(h), days(d) or months(M). Example: 30d. By default, expiration time is 1h
+      --filepath string                Path to create the kubeconfig file. Will fall back to KUBECONFIG env variable if not set. In case both aren't set, the kubeconfig is created as file named 'config' in the .kube folder in the user's home directory.
+  -h, --help[=true|false]              Help for "stackit ske kubeconfig create"
+      --idp[=true|false]               Create a non-admin kubeconfig that uses the STACKIT IDP to obtain credentials.
+  -l, --login[=true|false]             Create a short-lived admin kubeconfig that obtains valid credentials via the STACKIT CLI. This flag is mutually exclusive with the expiration flag.
+      --overwrite[=true|false]         Overwrite the kubeconfig file.
 ```
 
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

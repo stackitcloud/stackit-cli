@@ -25,7 +25,7 @@ stackit dns zone update ZONE_ID [flags]
       --default-ttl int32      Default time to live (default 1000)
       --description string     Description of the zone
       --expire-time int32      Expire time
-  -h, --help                   Help for "stackit dns zone update"
+  -h, --help[=true|false]      Help for "stackit dns zone update"
       --name string            User given name of the zone
       --negative-cache int32   Negative cache
       --primary strings        Primary name server for secondary zone
@@ -36,12 +36,12 @@ stackit dns zone update ZONE_ID [flags]
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

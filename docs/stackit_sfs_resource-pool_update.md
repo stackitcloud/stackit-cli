@@ -35,23 +35,23 @@ stackit sfs resource-pool update [flags]
 ### Options
 
 ```
-  -h, --help                        Help for "stackit sfs resource-pool update"
-      --ip-acl strings              List of network addresses in the form <address/prefix>, e.g. 192.168.10.0/24 that can mount the resource pool readonly (default [])
-      --performance-class string    Performance class
-      --size int32                  Size of the pool in Gigabytes
-      --snapshot-policy-id string   Set snapshot policy ID
-      --snapshots-visible           Set snapshots visible and accessible to users
+  -h, --help[=true|false]                Help for "stackit sfs resource-pool update"
+      --ip-acl strings                   List of network addresses in the form <address/prefix>, e.g. 192.168.10.0/24 that can mount the resource pool readonly (default [])
+      --performance-class string         Performance class
+      --size int32                       Size of the pool in Gigabytes
+      --snapshot-policy-id string        Set snapshot policy ID
+      --snapshots-visible[=true|false]   Set snapshots visible and accessible to users
 ```
 
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

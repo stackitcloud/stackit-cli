@@ -30,7 +30,7 @@ stackit beta volume automation create [flags]
 
 ```
       --description string              Description of the automation
-  -h, --help                            Help for "stackit beta volume automation create"
+  -h, --help[=true|false]               Help for "stackit beta volume automation create"
       --input string                    Input for the automation (JSON). Can be a string or a file path, if prefixed with "@" (example: @./payload.json).
       --name string                     Name of the automation
       --template-id string              Template ID which should be used for the automation
@@ -40,12 +40,12 @@ stackit beta volume automation create [flags]
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

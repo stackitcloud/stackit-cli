@@ -26,51 +26,51 @@ stackit config unset [flags]
 ### Options
 
 ```
-      --alb-waf-custom-endpoint                             ALB WAF API base URL. If unset, uses the default base URL
-      --allowed-url-domain                                  Domain name, used for the verification of the URLs that are given in the IDP endpoint and curl commands. If unset, defaults to stackit.cloud
-      --assume-yes                                          If set, skips all confirmation prompts
-      --async                                               Configuration option to run commands asynchronously
-      --authorization-custom-endpoint                       Authorization API base URL. If unset, uses the default base URL
-      --automation-custom-endpoint                          Automation API base URL. If unset, uses the default base URL
-      --cdn-custom-endpoint                                 Custom CDN endpoint URL. If unset, uses the default base URL
-      --dns-custom-endpoint                                 DNS API base URL. If unset, uses the default base URL
-      --edge-custom-endpoint                                Edge API base URL. If unset, uses the default base URL
-  -h, --help                                                Help for "stackit config unset"
-      --iaas-alpha-custom-endpoint                          IaaS Alpha API base URL. If unset, uses the default base URL
-      --iaas-custom-endpoint                                IaaS API base URL. If unset, uses the default base URL
-      --identity-provider-custom-client-id                  Identity Provider client ID, used for user authentication
-      --identity-provider-custom-well-known-configuration   Identity Provider well-known OpenID configuration URL. If unset, uses the default identity provider
-      --intake-custom-endpoint                              Intake API base URL. If unset, uses the default base URL
-      --kms-custom-endpoint                                 KMS API base URL. If unset, uses the default base URL
-      --load-balancer-custom-endpoint                       Load Balancer API base URL. If unset, uses the default base URL
-      --logme-custom-endpoint                               LogMe API base URL. If unset, uses the default base URL
-      --logs-custom-endpoint                                Logs API base URL. If unset, uses the default base URL
-      --mariadb-custom-endpoint                             MariaDB API base URL. If unset, uses the default base URL
-      --mongodbflex-custom-endpoint                         MongoDB Flex API base URL. If unset, uses the default base URL
-      --object-storage-custom-endpoint                      Object Storage API base URL. If unset, uses the default base URL
-      --observability-custom-endpoint                       Observability API base URL. If unset, uses the default base URL
-      --opensearch-custom-endpoint                          OpenSearch API base URL. If unset, uses the default base URL
-      --output-format                                       Output format
-      --postgresflex-custom-endpoint                        PostgreSQL Flex API base URL. If unset, uses the default base URL
-      --project-id                                          Project ID
-      --rabbitmq-custom-endpoint                            RabbitMQ API base URL. If unset, uses the default base URL
-      --redis-custom-endpoint                               Redis API base URL. If unset, uses the default base URL
-      --region                                              Region
-      --resource-manager-custom-endpoint                    Resource Manager API base URL. If unset, uses the default base URL
-      --runcommand-custom-endpoint                          Server Command base URL. If unset, uses the default base URL
-      --scf-custom-endpoint                                 STACKIT Cloud Foundry API base URL. If unset, uses the default base URL
-      --secrets-manager-custom-endpoint                     Secrets Manager API base URL. If unset, uses the default base URL
-      --server-osupdate-custom-endpoint                     Server Update Management base URL. If unset, uses the default base URL
-      --serverbackup-custom-endpoint                        Server Backup base URL. If unset, uses the default base URL
-      --service-account-custom-endpoint                     Service Account API base URL. If unset, uses the default base URL
-      --service-enablement-custom-endpoint                  Service Enablement API base URL. If unset, uses the default base URL
-      --session-time-limit                                  Maximum time before authentication is required again. If unset, defaults to 12h
-      --sfs-custom-endpoint                                 SFS API base URL. If unset, uses the default base URL
-      --ske-custom-endpoint                                 SKE API base URL. If unset, uses the default base URL
-      --sqlserverflex-custom-endpoint                       SQLServer Flex API base URL. If unset, uses the default base URL
-      --token-custom-endpoint                               Custom token endpoint of the Service Account API, which is used to request access tokens when the service account authentication is activated. Not relevant for user authentication.
-      --verbosity                                           Verbosity of the CLI
-      --vpn-custom-endpoint                                 VPN API base URL. If unset, uses the default base URL
+      --alb-waf-custom-endpoint[=true|false]                             ALB WAF API base URL. If unset, uses the default base URL
+      --allowed-url-domain[=true|false]                                  Domain name, used for the verification of the URLs that are given in the IDP endpoint and curl commands. If unset, defaults to stackit.cloud
+      --assume-yes[=true|false]                                          If set, skips all confirmation prompts
+      --async[=true|false]                                               Configuration option to run commands asynchronously
+      --authorization-custom-endpoint[=true|false]                       Authorization API base URL. If unset, uses the default base URL
+      --automation-custom-endpoint[=true|false]                          Automation API base URL. If unset, uses the default base URL
+      --cdn-custom-endpoint[=true|false]                                 Custom CDN endpoint URL. If unset, uses the default base URL
+      --dns-custom-endpoint[=true|false]                                 DNS API base URL. If unset, uses the default base URL
+      --edge-custom-endpoint[=true|false]                                Edge API base URL. If unset, uses the default base URL
+  -h, --help[=true|false]                                                Help for "stackit config unset"
+      --iaas-alpha-custom-endpoint[=true|false]                          IaaS Alpha API base URL. If unset, uses the default base URL
+      --iaas-custom-endpoint[=true|false]                                IaaS API base URL. If unset, uses the default base URL
+      --identity-provider-custom-client-id[=true|false]                  Identity Provider client ID, used for user authentication
+      --identity-provider-custom-well-known-configuration[=true|false]   Identity Provider well-known OpenID configuration URL. If unset, uses the default identity provider
+      --intake-custom-endpoint[=true|false]                              Intake API base URL. If unset, uses the default base URL
+      --kms-custom-endpoint[=true|false]                                 KMS API base URL. If unset, uses the default base URL
+      --load-balancer-custom-endpoint[=true|false]                       Load Balancer API base URL. If unset, uses the default base URL
+      --logme-custom-endpoint[=true|false]                               LogMe API base URL. If unset, uses the default base URL
+      --logs-custom-endpoint[=true|false]                                Logs API base URL. If unset, uses the default base URL
+      --mariadb-custom-endpoint[=true|false]                             MariaDB API base URL. If unset, uses the default base URL
+      --mongodbflex-custom-endpoint[=true|false]                         MongoDB Flex API base URL. If unset, uses the default base URL
+      --object-storage-custom-endpoint[=true|false]                      Object Storage API base URL. If unset, uses the default base URL
+      --observability-custom-endpoint[=true|false]                       Observability API base URL. If unset, uses the default base URL
+      --opensearch-custom-endpoint[=true|false]                          OpenSearch API base URL. If unset, uses the default base URL
+      --output-format[=true|false]                                       Output format
+      --postgresflex-custom-endpoint[=true|false]                        PostgreSQL Flex API base URL. If unset, uses the default base URL
+      --project-id[=true|false]                                          Project ID
+      --rabbitmq-custom-endpoint[=true|false]                            RabbitMQ API base URL. If unset, uses the default base URL
+      --redis-custom-endpoint[=true|false]                               Redis API base URL. If unset, uses the default base URL
+      --region[=true|false]                                              Region
+      --resource-manager-custom-endpoint[=true|false]                    Resource Manager API base URL. If unset, uses the default base URL
+      --runcommand-custom-endpoint[=true|false]                          Server Command base URL. If unset, uses the default base URL
+      --scf-custom-endpoint[=true|false]                                 STACKIT Cloud Foundry API base URL. If unset, uses the default base URL
+      --secrets-manager-custom-endpoint[=true|false]                     Secrets Manager API base URL. If unset, uses the default base URL
+      --server-osupdate-custom-endpoint[=true|false]                     Server Update Management base URL. If unset, uses the default base URL
+      --serverbackup-custom-endpoint[=true|false]                        Server Backup base URL. If unset, uses the default base URL
+      --service-account-custom-endpoint[=true|false]                     Service Account API base URL. If unset, uses the default base URL
+      --service-enablement-custom-endpoint[=true|false]                  Service Enablement API base URL. If unset, uses the default base URL
+      --session-time-limit[=true|false]                                  Maximum time before authentication is required again. If unset, defaults to 12h
+      --sfs-custom-endpoint[=true|false]                                 SFS API base URL. If unset, uses the default base URL
+      --ske-custom-endpoint[=true|false]                                 SKE API base URL. If unset, uses the default base URL
+      --sqlserverflex-custom-endpoint[=true|false]                       SQLServer Flex API base URL. If unset, uses the default base URL
+      --token-custom-endpoint[=true|false]                               Custom token endpoint of the Service Account API, which is used to request access tokens when the service account authentication is activated. Not relevant for user authentication.
+      --verbosity[=true|false]                                           Verbosity of the CLI
+      --vpn-custom-endpoint[=true|false]                                 VPN API base URL. If unset, uses the default base URL
 ```
 
 ### SEE ALSO

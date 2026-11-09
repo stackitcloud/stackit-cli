@@ -20,7 +20,7 @@ stackit postgresflex instance clone INSTANCE_ID [flags]
 ### Options
 
 ```
-  -h, --help                        Help for "stackit postgresflex instance clone"
+  -h, --help[=true|false]           Help for "stackit postgresflex instance clone"
       --recovery-timestamp string   Recovery timestamp for the instance, in a date-time with the layout format YYYY-MM-DDTHH:mm:ss±HH:mm, e.g. 2006-01-02T15:04:05-07:00
       --storage-class string        Storage class. If not specified, storage class from the existing instance will be used. This flag will be required after 2027-01-31.
       --storage-size int            Storage size (in GB). If not specified, storage size from the existing instance will be used. This flag will be required after 2027-01-31.
@@ -29,12 +29,12 @@ stackit postgresflex instance clone INSTANCE_ID [flags]
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

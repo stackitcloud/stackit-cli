@@ -26,7 +26,7 @@ stackit mongodbflex instance create [flags]
       --acl strings              The access control list (ACL). Must contain at least one valid subnet, for instance '0.0.0.0/0' for open access (discouraged), '1.2.3.0/24 for a public IP range of an organization, '1.2.3.4/32' for a single IP range, etc. (default [])
       --backup-schedule string   Backup schedule. This flag will be required after 2027-03-07. (default "0 0/6 * * *")
       --flavor-id string         ID of the flavor. This flag will be required after 2027-03-07.
-  -h, --help                     Help for "stackit mongodbflex instance create"
+  -h, --help[=true|false]        Help for "stackit mongodbflex instance create"
   -n, --name string              Instance name
       --storage-class string     Storage class. This flag will be required after 2027-03-07. (default "premium-perf2-mongodb")
       --storage-size int         Storage size (in GB). This flag will be required after 2027-03-07. (default 10)
@@ -37,12 +37,12 @@ stackit mongodbflex instance create [flags]
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO
