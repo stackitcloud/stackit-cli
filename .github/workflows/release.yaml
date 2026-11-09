@@ -14,6 +14,7 @@ on:
 # GitHub considers creating releases and uploading assets as writing contents.
 permissions:
   contents: write
+  issues: write
 
 jobs:
   goreleaser:
@@ -72,17 +73,31 @@ jobs:
           AUTHKEY_BASE64: ${{ secrets.APPLE_API_KEY }}
       - name: Install Snapcraft
         uses: samuelmeuli/action-snapcraft@v3
-      
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v7.3.0
         with:
           args: release --clean
         env:
-          GITHUB_TOKEN: ${{ secrets.CLI_RELEASE }}
+          # GITHUB_TOKEN is used to create the GitHub release in this repository.
+          # It uses the workflow-level permissions defined above.
+          GITHUB_TOKEN: ${{ github.token }}
+          # HOMEBREW_RELEASE_TOKEN is a PAT belonging to the `stackit-pipeline` user.
+          # It is used by GoReleaser to push to the tap fork and open the upstream Homebrew PR.
+          HOMEBREW_RELEASE_TOKEN: ${{ secrets.CLI_RELEASE }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
           GPG_KEY_PATH: ${{ env.GPG_KEY_PATH }}
           # nfpm-rpm signing needs this env to be set.
           NFPM_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Create issue to inform about Homebrew PR
+        run: |
+          gh issue create \
+            --repo "${{ github.repository }}" \
+            --title "Homebrew Cask PR opened for ${{ github.ref_name }}" \
+            --body "A pull request has been automatically created for release **${{ github.ref_name }}**"
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Clean up GPG key file
         if: always()
