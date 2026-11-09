@@ -74,15 +74,6 @@ jobs:
       - name: Install Snapcraft
         uses: samuelmeuli/action-snapcraft@v3
 
-      - name: Ensure tap fork exists
-        run: |
-          # Create fork with suffix `-fork` to indicate that the repo in the technical users account is just a fork
-          gh repo fork stackitcloud/homebrew-tap \
-            --fork-name homebrew-tap-fork \
-            --clone=false || true
-        env:
-          GH_TOKEN: ${{ secrets.CLI_RELEASE }}
-
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v7.3.0
         with:
