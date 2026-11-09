@@ -8,6 +8,7 @@ import (
 	cdn "github.com/stackitcloud/stackit-sdk-go/services/cdn/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/errors"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -77,6 +78,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
 	globalFlags := globalflags.Parse(p, cmd)
+	if globalFlags.ProjectId == "" {
+		return nil, &errors.ProjectIdError{}
+	}
 
 	distributionID := inputArgs[0]
 	model := inputModel{

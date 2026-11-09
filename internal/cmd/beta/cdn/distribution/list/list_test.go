@@ -168,6 +168,22 @@ func TestParseInput(t *testing.T) {
 				model.SortBy = "createdAt"
 			}),
 		},
+		{
+			description: "limit",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "25"
+			}),
+			isValid: true,
+			expected: fixtureInputModel(func(model *inputModel) {
+				model.Limit = utils.Ptr(int32(25))
+			}),
+		},
+		{
+			description: "zero limit",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "0"
+			}),
+		},
 	}
 
 	for _, tt := range tests {
@@ -364,6 +380,24 @@ func TestFetchDistributions(t *testing.T) {
 				),
 			},
 			expected: slices.Concat(fixtureDistributions(100), fixtureDistributions(10)),
+		},
+		{
+			description: "limit counts results across short pages",
+			limit:       110,
+			responses: []testResponse{
+				fixtureTestResponse(func(resp *testResponse) {
+					resp.body.NextPageIdentifier = utils.Ptr(testNextPageID)
+					resp.body.Distributions = fixtureDistributions(1)
+				}),
+				fixtureTestResponse(func(resp *testResponse) {
+					resp.body.NextPageIdentifier = utils.Ptr("third-page")
+					resp.body.Distributions = fixtureDistributions(2)[1:]
+				}),
+				fixtureTestResponse(func(resp *testResponse) {
+					resp.body.Distributions = fixtureDistributions(3)[2:]
+				}),
+			},
+			expected: fixtureDistributions(3),
 		},
 	}
 	for _, tt := range tests {

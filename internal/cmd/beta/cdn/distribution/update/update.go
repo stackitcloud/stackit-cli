@@ -160,6 +160,22 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
+	hasUpdates := false
+	for _, flag := range []string{
+		flagRegions.Name(), flagHTTPOriginURL, flagHTTPGeofencing, flagHTTPOriginRequestHeaders,
+		flagBucketURL, flagBucketCredentialsAccessKeyID, flagBucketPassword, flagBucketRegion,
+		flagBlockedCountries, flagBlockedIPs, flagDefaultCacheDuration,
+		flagLokiUsername, flagLokiPassword, flagLokiPushURL, flagMonthlyLimitBytes, flagOptimizer,
+	} {
+		if cmd.Flags().Changed(flag) {
+			hasUpdates = true
+			break
+		}
+	}
+	if !hasUpdates {
+		return nil, &errors.EmptyUpdateError{}
+	}
+
 	distributionID := inputArgs[0]
 
 	regions := flagRegions.Get()

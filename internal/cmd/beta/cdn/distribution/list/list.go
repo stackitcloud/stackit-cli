@@ -84,7 +84,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	// same default as apiClient
 	sortByFlag.Register(cmd.Flags())
-	cmd.Flags().Int64(limitFlag, 0, "Limit the output to the first n elements")
+	cmd.Flags().Int32(limitFlag, 0, "Limit the output to the first n elements")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
@@ -104,6 +104,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	model := inputModel{
 		GlobalFlagModel: globalFlags,
 		SortBy:          sortByFlag.Get(),
+		Limit:           limit,
 	}
 
 	p.DebugInputModel(model)
@@ -173,7 +174,7 @@ func fetchDistributions(ctx context.Context, model *inputModel, apiClient *cdn.A
 		if response.NextPageIdentifier != nil {
 			nextPageID = *response.NextPageIdentifier
 		}
-		received += want
+		received += int32(len(response.Distributions)) //nolint:gosec //is safe since this is limited by the in32 limit flag
 		if nextPageID == "" || received >= limit {
 			break
 		}
