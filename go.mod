@@ -13,7 +13,7 @@ require (
 	github.com/lmittmann/tint v1.2.1
 	github.com/mattn/go-colorable v0.1.16
 	github.com/spf13/cobra v1.10.2
-	github.com/spf13/pflag v1.0.10
+	github.com/spf13/pflag v1.1.0
 	github.com/spf13/viper v1.21.0
 	github.com/stackitcloud/stackit-sdk-go/core v0.27.1
 	github.com/stackitcloud/stackit-sdk-go/services/alb v0.20.0
