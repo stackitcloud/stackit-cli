@@ -21,7 +21,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.16.0
 	github.com/stackitcloud/stackit-sdk-go/services/automation v0.2.1
 	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.22.0
-	github.com/stackitcloud/stackit-sdk-go/services/dns v0.25.0
+	github.com/stackitcloud/stackit-sdk-go/services/dns v0.26.0
 	github.com/stackitcloud/stackit-sdk-go/services/edge v0.14.0
 	github.com/stackitcloud/stackit-sdk-go/services/git v0.16.0
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.15.1
@@ -39,7 +39,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.22.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.8.0
 	github.com/stackitcloud/stackit-sdk-go/services/ske v1.22.0
-	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.19.0
+	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.20.0
 	github.com/stackitcloud/stackit-sdk-go/services/valkey v0.4.0
 	github.com/stackitcloud/stackit-sdk-go/services/vpn v0.15.3
 	github.com/zalando/go-keyring v0.2.8
@@ -48,7 +48,7 @@ require (
 	golang.org/x/term v0.47.0
 	golang.org/x/text v0.43.0
 	k8s.io/apimachinery v0.37.2
-	k8s.io/client-go v0.37.1
+	k8s.io/client-go v0.37.2
 )
 
 require (
@@ -280,7 +280,7 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.37.1 // indirect
+	k8s.io/api v0.37.2 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/utils v0.0.0-20260626114624-be93311217bd
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
