@@ -10,7 +10,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/auth"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta"
 	configCmd "github.com/stackitcloud/stackit-cli/internal/cmd/config"
-	"github.com/stackitcloud/stackit-cli/internal/cmd/containerregistry"
+	containerregistry "github.com/stackitcloud/stackit-cli/internal/cmd/container-registry"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/curl"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/dns"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/git"

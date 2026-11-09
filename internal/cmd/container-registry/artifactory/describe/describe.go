@@ -13,7 +13,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/containerregistry/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/container-registry/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -37,10 +37,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Get details of an artifactory with ID "xxx"`,
-				"$ stackit containerregistry artifactory describe xxx"),
+				"$ stackit container-registry artifactory describe xxx"),
 			examples.NewExample(
 				`Get details of an artifactory with ID "xxx" in JSON format`,
-				"$ stackit containerregistry artifactory describe xxx --output-format json"),
+				"$ stackit container-registry artifactory describe xxx --output-format json"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

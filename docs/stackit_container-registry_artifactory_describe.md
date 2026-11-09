@@ -1,4 +1,4 @@
-## stackit containerregistry artifactory describe
+## stackit container-registry artifactory describe
 
 Shows details of a Container Registry artifactory
 
@@ -7,23 +7,23 @@ Shows details of a Container Registry artifactory
 Shows details of a Container Registry artifactory.
 
 ```
-stackit containerregistry artifactory describe ARTIFACTORY_ID [flags]
+stackit container-registry artifactory describe ARTIFACTORY_ID [flags]
 ```
 
 ### Examples
 
 ```
   Get details of an artifactory with ID "xxx"
-  $ stackit containerregistry artifactory describe xxx
+  $ stackit container-registry artifactory describe xxx
 
   Get details of an artifactory with ID "xxx" in JSON format
-  $ stackit containerregistry artifactory describe xxx --output-format json
+  $ stackit container-registry artifactory describe xxx --output-format json
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit containerregistry artifactory describe"
+  -h, --help   Help for "stackit container-registry artifactory describe"
 ```
 
 ### Options inherited from parent commands
@@ -39,5 +39,5 @@ stackit containerregistry artifactory describe ARTIFACTORY_ID [flags]
 
 ### SEE ALSO
 
-* [stackit containerregistry artifactory](./stackit_containerregistry_artifactory.md)	 - Provides functionality for Container Registry artifactories
+* [stackit container-registry artifactory](./stackit_container-registry_artifactory.md)	 - Provides functionality for Container Registry artifactories
 

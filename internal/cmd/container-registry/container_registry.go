@@ -3,8 +3,8 @@ package containerregistry
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/stackitcloud/stackit-cli/internal/cmd/containerregistry/artifactory"
-	replicationadapter "github.com/stackitcloud/stackit-cli/internal/cmd/containerregistry/replication-adapter"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/container-registry/artifactory"
+	replicationadapter "github.com/stackitcloud/stackit-cli/internal/cmd/container-registry/replication-adapter"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -12,7 +12,7 @@ import (
 
 func NewCmd(params *types.CmdParams) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "containerregistry",
+		Use:   "container-registry",
 		Short: "Provides functionality for Container Registry",
 		Long:  "Provides functionality for Container Registry.",
 		Args:  args.NoArgs,

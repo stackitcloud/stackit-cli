@@ -14,7 +14,7 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/containerregistry/client"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/container-registry/client"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/tables"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 )
@@ -37,15 +37,15 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`List all replication adapters`,
-				"$ stackit containerregistry replication-adapter list",
+				"$ stackit container-registry replication-adapter list",
 			),
 			examples.NewExample(
 				`List all replication adapters in JSON format`,
-				"$ stackit containerregistry replication-adapter list --output-format json",
+				"$ stackit container-registry replication-adapter list --output-format json",
 			),
 			examples.NewExample(
 				`List up to 10 replication adapters`,
-				"$ stackit containerregistry replication-adapter list --limit 10",
+				"$ stackit container-registry replication-adapter list --limit 10",
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

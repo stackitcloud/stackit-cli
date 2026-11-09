@@ -1,4 +1,4 @@
-## stackit containerregistry artifactory update
+## stackit container-registry artifactory update
 
 Updates a Container Registry artifactory
 
@@ -7,20 +7,20 @@ Updates a Container Registry artifactory
 Updates a Container Registry artifactory.
 
 ```
-stackit containerregistry artifactory update ARTIFACTORY_ID [flags]
+stackit container-registry artifactory update ARTIFACTORY_ID [flags]
 ```
 
 ### Examples
 
 ```
   Update the proxy configuration for an artifactory with ID "xxx"
-  $ stackit containerregistry artifactory update xxx --proxy-url https://registry-1.docker.io
+  $ stackit container-registry artifactory update xxx --proxy-url https://registry-1.docker.io
 ```
 
 ### Options
 
 ```
-  -h, --help                         Help for "stackit containerregistry artifactory update"
+  -h, --help                         Help for "stackit container-registry artifactory update"
       --proxy-access-key string      Access key for upstream proxy registry authentication
       --proxy-access-secret secret   Proxy-Access-Secret. Use @<file> to read from a file (example: @./secret.txt), or - to read from stdin (hidden input on a terminal). Literal values are not supported.
       --proxy-description string     Description of the proxy registry
@@ -40,5 +40,5 @@ stackit containerregistry artifactory update ARTIFACTORY_ID [flags]
 
 ### SEE ALSO
 
-* [stackit containerregistry artifactory](./stackit_containerregistry_artifactory.md)	 - Provides functionality for Container Registry artifactories
+* [stackit container-registry artifactory](./stackit_container-registry_artifactory.md)	 - Provides functionality for Container Registry artifactories
 

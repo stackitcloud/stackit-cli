@@ -1,4 +1,4 @@
-## stackit containerregistry artifactory create
+## stackit container-registry artifactory create
 
 Creates a Container Registry artifactory
 
@@ -7,29 +7,29 @@ Creates a Container Registry artifactory
 Creates a Container Registry artifactory.
 
 ```
-stackit containerregistry artifactory create [flags]
+stackit container-registry artifactory create [flags]
 ```
 
 ### Examples
 
 ```
   Create an artifactory with name "my-registry"
-  $ stackit containerregistry artifactory create --name my-registry
+  $ stackit container-registry artifactory create --name my-registry
 
   Create a proxy-cache artifactory for Docker Hub
-  $ stackit containerregistry artifactory create --name docker-proxy --proxy-url https://registry-1.docker.io --proxy-registry-type docker-hub
+  $ stackit container-registry artifactory create --name docker-proxy --proxy-url https://registry-1.docker.io --proxy-registry-type docker-hub
 
   Create a proxy-cache artifactory with credentials, reading secret from stdin
-  $ stackit containerregistry artifactory create --name my-proxy --proxy-url https://custom-registry.com --proxy-registry-type harbor --proxy-access-key my-user --proxy-access-secret -
+  $ stackit container-registry artifactory create --name my-proxy --proxy-url https://custom-registry.com --proxy-registry-type harbor --proxy-access-key my-user --proxy-access-secret -
 
   Create a proxy-cache artifactory with credentials, providing the path to a file with the secret
-  $ stackit containerregistry artifactory create --name my-proxy --proxy-url https://custom-registry.com --proxy-registry-type harbor --proxy-access-key my-user --proxy-access-secret @./secret.txt
+  $ stackit container-registry artifactory create --name my-proxy --proxy-url https://custom-registry.com --proxy-registry-type harbor --proxy-access-key my-user --proxy-access-secret @./secret.txt
 ```
 
 ### Options
 
 ```
-  -h, --help                         Help for "stackit containerregistry artifactory create"
+  -h, --help                         Help for "stackit container-registry artifactory create"
   -n, --name string                  Artifactory name
       --proxy-access-key string      Access key for upstream proxy registry authentication
       --proxy-access-secret secret   Proxy-Access-Secret. Use @<file> to read from a file (example: @./secret.txt), or - to read from stdin (hidden input on a terminal). Literal values are not supported.
@@ -51,5 +51,5 @@ stackit containerregistry artifactory create [flags]
 
 ### SEE ALSO
 
-* [stackit containerregistry artifactory](./stackit_containerregistry_artifactory.md)	 - Provides functionality for Container Registry artifactories
+* [stackit container-registry artifactory](./stackit_container-registry_artifactory.md)	 - Provides functionality for Container Registry artifactories
 

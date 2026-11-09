@@ -13,8 +13,8 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/services/containerregistry/client"
-	containerRegistryUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/containerregistry/utils"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/services/container-registry/client"
+	containerRegistryUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/container-registry/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -38,7 +38,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Example: examples.Build(
 			examples.NewExample(
 				`Delete an artifactory with ID "xxx"`,
-				"$ stackit containerregistry artifactory delete xxx"),
+				"$ stackit container-registry artifactory delete xxx"),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()

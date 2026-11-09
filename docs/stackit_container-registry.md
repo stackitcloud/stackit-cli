@@ -1,4 +1,4 @@
-## stackit containerregistry
+## stackit container-registry
 
 Provides functionality for Container Registry
 
@@ -7,13 +7,13 @@ Provides functionality for Container Registry
 Provides functionality for Container Registry.
 
 ```
-stackit containerregistry [flags]
+stackit container-registry [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   Help for "stackit containerregistry"
+  -h, --help   Help for "stackit container-registry"
 ```
 
 ### Options inherited from parent commands
@@ -30,6 +30,6 @@ stackit containerregistry [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
-* [stackit containerregistry artifactory](./stackit_containerregistry_artifactory.md)	 - Provides functionality for Container Registry artifactories
-* [stackit containerregistry replication-adapter](./stackit_containerregistry_replication-adapter.md)	 - Provides functionality for Container Registry replication adapters
+* [stackit container-registry artifactory](./stackit_container-registry_artifactory.md)	 - Provides functionality for Container Registry artifactories
+* [stackit container-registry replication-adapter](./stackit_container-registry_replication-adapter.md)	 - Provides functionality for Container Registry replication adapters
 
