@@ -23,21 +23,21 @@ stackit secrets-manager user update USER_ID [flags]
 ### Options
 
 ```
-      --disable-write        Set the user to have read-only access.
-      --enable-write         Set the user to have write access.
-  -h, --help                 Help for "stackit secrets-manager user update"
-      --instance-id string   ID of the instance
+      --disable-write[=true|false]   Set the user to have read-only access.
+      --enable-write[=true|false]    Set the user to have write access.
+  -h, --help[=true|false]            Help for "stackit secrets-manager user update"
+      --instance-id string           ID of the instance
 ```
 
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

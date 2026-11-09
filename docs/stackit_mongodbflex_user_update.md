@@ -21,7 +21,7 @@ stackit mongodbflex user update USER_ID [flags]
 
 ```
       --database string      The database inside the MongoDB instance that the user has access to. If it does not exist, it will be created once the user writes to it
-  -h, --help                 Help for "stackit mongodbflex user update"
+  -h, --help[=true|false]    Help for "stackit mongodbflex user update"
       --instance-id string   ID of the instance
       --role strings         Roles of the user. The "readAnyDatabase", "readWriteAnyDatabase" and "stackitAdmin" roles will always be created in the admin database. (multiple of: [read, readWrite, readAnyDatabase, readWriteAnyDatabase, stackitAdmin]) (default [])
 ```
@@ -29,12 +29,12 @@ stackit mongodbflex user update USER_ID [flags]
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

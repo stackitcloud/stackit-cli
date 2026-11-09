@@ -23,27 +23,27 @@ stackit logme instance create [flags]
 ### Options
 
 ```
-      --acl strings                     List of IP networks in CIDR notation which are allowed to access this instance (default [])
-      --enable-monitoring               Enable monitoring
-      --graphite string                 Graphite host
-  -h, --help                            Help for "stackit logme instance create"
-      --metrics-frequency int32         Metrics frequency
-      --metrics-prefix string           Metrics prefix
-      --monitoring-instance-id string   Monitoring instance ID
-  -n, --name string                     Instance name
-      --plan-id string                  Plan ID
-      --syslog strings                  Syslog
+      --acl strings                      List of IP networks in CIDR notation which are allowed to access this instance (default [])
+      --enable-monitoring[=true|false]   Enable monitoring
+      --graphite string                  Graphite host
+  -h, --help[=true|false]                Help for "stackit logme instance create"
+      --metrics-frequency int32          Metrics frequency
+      --metrics-prefix string            Metrics prefix
+      --monitoring-instance-id string    Monitoring instance ID
+  -n, --name string                      Instance name
+      --plan-id string                   Plan ID
+      --syslog strings                   Syslog
 ```
 
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

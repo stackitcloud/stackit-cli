@@ -34,23 +34,23 @@ stackit auth activate-service-account [flags]
 ### Options
 
 ```
-  -h, --help                              Help for "stackit auth activate-service-account"
-      --only-print-access-token           If this is set to true the credentials are not stored in either the keyring or a file
-      --private-key-path string           RSA private key path. It takes precedence over the private key included in the service account key, if present
-      --service-account-key-path string   Service account key path
-      --service-account-token string      Service account long-lived access token
-      --use-oidc                          Use Workload Identity Federation (OIDC). If set, this takes precedence over STACKIT_USE_OIDC
+  -h, --help[=true|false]                      Help for "stackit auth activate-service-account"
+      --only-print-access-token[=true|false]   If this is set to true the credentials are not stored in either the keyring or a file
+      --private-key-path string                RSA private key path. It takes precedence over the private key included in the service account key, if present
+      --service-account-key-path string        Service account key path
+      --service-account-token string           Service account long-lived access token
+      --use-oidc[=true|false]                  Use Workload Identity Federation (OIDC). If set, this takes precedence over STACKIT_USE_OIDC
 ```
 
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

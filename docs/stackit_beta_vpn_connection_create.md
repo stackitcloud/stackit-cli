@@ -21,9 +21,9 @@ stackit beta vpn connection create [flags]
 
 ```
       --display-name string                            Required: A user friendly name for the connection.
-      --enabled                                        Enable the connection (default true)
+      --enabled[=true|false]                           Enable the connection (default true)
       --gateway-id string                              Required: Gateway ID
-  -h, --help                                           Help for "stackit beta vpn connection create"
+  -h, --help[=true|false]                              Help for "stackit beta vpn connection create"
       --labels stringToString                          Map of custom labels. Key and values must be a string with max 63 chars, start/end with alphanumeric. The key of a label follows the same rules as the LabelValue except that it cannot be empty. (example: foo=bar) (default [])
       --local-subnets strings                          Defaults to 0.0.0.0/0 for Route-based VPN configurations. Mandatory for Policy-based.
       --remote-subnets strings                         Defaults to 0.0.0.0/0 for Route-based VPN configurations. Mandatory for Policy-based.
@@ -80,12 +80,12 @@ stackit beta vpn connection create [flags]
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

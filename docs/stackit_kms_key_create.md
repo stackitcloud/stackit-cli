@@ -35,25 +35,25 @@ stackit kms key create [flags]
 ### Options
 
 ```
-      --algorithm string     En-/Decryption / signing algorithm. (one of: [aes_256_gcm, rsa_2048_oaep_sha256, rsa_3072_oaep_sha256, rsa_4096_oaep_sha256, rsa_4096_oaep_sha512, hmac_sha256, hmac_sha384, hmac_sha512, ecdsa_p256_sha256, ecdsa_p384_sha384, ecdsa_p521_sha512])
-      --description string   Optional description of the key
-  -h, --help                 Help for "stackit kms key create"
-      --import-only          States whether versions can be created or only imported
-      --keyring-id string    ID of the KMS key ring
-      --name string          The display name to distinguish multiple keys
-      --protection string    The underlying system that is responsible for protecting the key material. (one of: [software, hsm])
-      --purpose string       Purpose of the key. (one of: [symmetric_encrypt_decrypt, asymmetric_encrypt_decrypt, message_authentication_code, asymmetric_sign_verify])
+      --algorithm string           En-/Decryption / signing algorithm. (one of: [aes_256_gcm, rsa_2048_oaep_sha256, rsa_3072_oaep_sha256, rsa_4096_oaep_sha256, rsa_4096_oaep_sha512, hmac_sha256, hmac_sha384, hmac_sha512, ecdsa_p256_sha256, ecdsa_p384_sha384, ecdsa_p521_sha512])
+      --description string         Optional description of the key
+  -h, --help[=true|false]          Help for "stackit kms key create"
+      --import-only[=true|false]   States whether versions can be created or only imported
+      --keyring-id string          ID of the KMS key ring
+      --name string                The display name to distinguish multiple keys
+      --protection string          The underlying system that is responsible for protecting the key material. (one of: [software, hsm])
+      --purpose string             Purpose of the key. (one of: [symmetric_encrypt_decrypt, asymmetric_encrypt_decrypt, message_authentication_code, asymmetric_sign_verify])
 ```
 
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

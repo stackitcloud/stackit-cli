@@ -23,31 +23,31 @@ stackit dns zone create [flags]
 ### Options
 
 ```
-      --acl string             Access control list
-      --contact-email string   Contact email for the zone
-      --default-ttl int32      Default time to live (default 1000)
-      --description string     Description of the zone
-      --dns-name string        Fully qualified domain name of the DNS zone
-      --expire-time int32      Expire time
-  -h, --help                   Help for "stackit dns zone create"
-      --is-reverse-zone        Is reverse zone
-      --name string            User given name of the zone
-      --negative-cache int32   Negative cache
-      --primary strings        Primary name server for secondary zone
-      --refresh-time int32     Refresh time
-      --retry-time int32       Retry time
-      --type string            Zone type, (one of: [primary, secondary, ])
+      --acl string                     Access control list
+      --contact-email string           Contact email for the zone
+      --default-ttl int32              Default time to live (default 1000)
+      --description string             Description of the zone
+      --dns-name string                Fully qualified domain name of the DNS zone
+      --expire-time int32              Expire time
+  -h, --help[=true|false]              Help for "stackit dns zone create"
+      --is-reverse-zone[=true|false]   Is reverse zone
+      --name string                    User given name of the zone
+      --negative-cache int32           Negative cache
+      --primary strings                Primary name server for secondary zone
+      --refresh-time int32             Refresh time
+      --retry-time int32               Retry time
+      --type string                    Zone type, (one of: [primary, secondary, ])
 ```
 
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

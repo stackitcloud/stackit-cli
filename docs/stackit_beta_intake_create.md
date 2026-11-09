@@ -37,7 +37,7 @@ stackit beta intake create [flags]
       --display-name string            Display name
       --dremio-pat string              Dremio personal access token. Required if auth-type is 'dremio'
       --dremio-token-endpoint string   Dremio OAuth 2.0 token endpoint URL. Required if auth-type is 'dremio'
-  -h, --help                           Help for "stackit beta intake create"
+  -h, --help[=true|false]              Help for "stackit beta intake create"
       --labels stringToString          Labels in key=value format, separated by commas. Example: --labels "key1=value1,key2=value2" (default [])
       --runner-id string               The UUID of the Intake Runner to use
 ```
@@ -45,12 +45,12 @@ stackit beta intake create [flags]
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO
