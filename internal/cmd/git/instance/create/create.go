@@ -78,7 +78,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			result, err := request.Execute()
 			if err != nil {
-				return fmt.Errorf("create stackit git instance: %w", err)
+				return fmt.Errorf("create STACKIT Git instance: %w", err)
 			}
 
 			// Wait for async operation, if async mode not enabled
@@ -88,7 +88,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 					return err
 				})
 				if err != nil {
-					return fmt.Errorf("wait for stackit git Instance creation: %w", err)
+					return fmt.Errorf("wait for STACKIT Git instance creation: %w", err)
 				}
 			}
 
@@ -103,7 +103,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(nameFlag, "", "The name of the instance.")
 	cmd.Flags().String(flavorFlag, "", "Flavor of the instance.")
-	cmd.Flags().StringSlice(aclFlag, []string{}, "Acl for the instance.")
+	cmd.Flags().Var(flags.CIDRSliceFlag(), aclFlag, "List of IP networks in CIDR notation which are allowed to access this instance")
 	if err := flags.MarkFlagsRequired(cmd, nameFlag); err != nil {
 		cobra.CheckErr(err)
 	}

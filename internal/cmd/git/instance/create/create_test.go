@@ -125,6 +125,23 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: false,
 		},
+		{
+			description: "multiple acl entries",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[aclFlag] = "1.2.3.0/24,4.5.6.0/24"
+			}),
+			isValid: true,
+			expectedModel: fixtureInputModel(func(model *inputModel) {
+				model.Acl = []string{"1.2.3.0/24", "4.5.6.0/24"}
+			}),
+		},
+		{
+			description: "invalid acl",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[aclFlag] = "invalid-cidr"
+			}),
+			isValid: false,
+		},
 	}
 
 	for _, tt := range tests {

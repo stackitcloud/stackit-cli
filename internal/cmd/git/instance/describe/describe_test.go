@@ -211,6 +211,15 @@ func TestOutputResult(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "with acl",
+			args: args{
+				resp: &git.Instance{
+					Acl: []string{"1.2.3.0/24", "4.5.6.0/24"},
+				},
+			},
+			wantErr: false,
+		},
+		{
 			name:    "nil",
 			args:    args{},
 			wantErr: true,
