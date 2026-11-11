@@ -86,7 +86,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().Var(flags.UUIDFlag(), instanceIdFlag, "Instance ID")
-	cmd.Flags().Var(flags.CIDRSliceFlag(), aclFlag, "List of IP networks in CIDR notation which are allowed to access the instance. Replaces all existing ACLs, an empty value removes all ACLs")
+	cmd.Flags().Var(flags.CIDRSliceFlag(), aclFlag, "List of IP networks in CIDR notation which are allowed to access the instance. Replaces all existing ACLs and an empty value removes all ACLs")
 
 	err := flags.MarkFlagsRequired(cmd, instanceIdFlag, aclFlag)
 	cobra.CheckErr(err)
