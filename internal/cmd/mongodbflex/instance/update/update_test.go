@@ -3,6 +3,7 @@ package update
 import (
 	"context"
 	"fmt"
+	"math"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -416,7 +417,7 @@ func TestBuildRequest(t *testing.T) {
 			},
 			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testInstanceId, testRegion).
 				PartialUpdateInstancePayload(mongodbflex.PartialUpdateInstancePayload{
-					Storage: &mongodbflex.Storage{
+					Storage: &mongodbflex.StorageUpdate{
 						Class: new("class"),
 					},
 				}),
@@ -439,11 +440,18 @@ func TestBuildRequest(t *testing.T) {
 			},
 			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testInstanceId, testRegion).
 				PartialUpdateInstancePayload(mongodbflex.PartialUpdateInstancePayload{
-					Storage: &mongodbflex.Storage{
+					Storage: &mongodbflex.StorageUpdate{
 						Class: new("class"),
-						Size:  new(int64(10)),
+						Size:  new(int32(10)),
 					},
 				}),
+		},
+		{
+			description: "storage size out of range",
+			model: fixtureRequiredInputModel(func(model *inputModel) {
+				model.StorageSize = new(int64(math.MaxInt32) + 1)
+			}),
+			isValid: false,
 		},
 		{
 			description: "get flavors fails",
