@@ -2,24 +2,20 @@ package list
 
 import (
 	"context"
-	"encoding/json"
-	"net/http"
-	"net/http/httptest"
-	"strconv"
+	"fmt"
 	"testing"
 	"time"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
+	"github.com/zalando/go-keyring"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 	resourcemanager "github.com/stackitcloud/stackit-sdk-go/services/resourcemanager/v0api"
-	"github.com/zalando/go-keyring"
 
-	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 )
@@ -27,10 +23,11 @@ import (
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
-var testClient = &resourcemanager.APIClient{DefaultAPI: &resourcemanager.DefaultAPIService{}}
+var testClient = &resourcemanager.APIClient{DefaultAPI: &resourcemanager.DefaultAPIServiceMock{}}
 var testParentId = uuid.NewString()
 var testProjectIdLike = uuid.NewString()
-var testCreationTimeAfter = "2023-01-01T00:00:00Z"
+
+const testCreationTimeAfter = "2023-01-01T00:00:00Z"
 
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
@@ -64,13 +61,11 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *resourcemanager.ApiListFoldersRequest)) resourcemanager.ApiListFoldersRequest {
-	request := testClient.DefaultAPI.ListFolders(testCtx)
-	request = request.ContainerParentId(testParentId)
-
 	testCreationTimeAfter, err := time.Parse(creationTimeAfterFormat, testCreationTimeAfter)
 	if err != nil {
 		return resourcemanager.ApiListFoldersRequest{}
 	}
+	request := testClient.DefaultAPI.ListFolders(testCtx)
 	request = request.CreationTimeStart(testCreationTimeAfter)
 	request = request.Member("member")
 	request = request.Limit(pageSizeDefault)
@@ -234,35 +229,42 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		projectIdLike   []string
-		offset          int
 		expectedRequest resourcemanager.ApiListFoldersRequest
 	}{
 		{
-			description:     "base",
-			model:           fixtureInputModel(),
-			offset:          1,
-			expectedRequest: fixtureRequest().Offset(1),
+			description: "base",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.PageSize = 1
+			}),
+			expectedRequest: fixtureRequest().Limit(1).ContainerParentId(testParentId),
 		},
 		{
-			description:     "base 2",
-			model:           fixtureInputModel(),
-			offset:          10,
-			expectedRequest: fixtureRequest().Offset(10),
+			description: "base 2",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.PageSize = 10
+			}),
+			expectedRequest: fixtureRequest().Limit(10).ContainerParentId(testParentId),
 		},
 		{
 			description: "fetch email from auth user",
-			model: &inputModel{
-				PageSize: pageSizeDefault,
-			},
-			offset:          1,
-			expectedRequest: testClient.DefaultAPI.ListFolders(testCtx).Offset(1).Limit(pageSizeDefault).Member(authUserEmail),
+			model: fixtureInputModel(func(model *inputModel) {
+				model.ParentId = nil
+				model.Member = nil
+			}),
+			expectedRequest: fixtureRequest().Limit(pageSizeDefault).Member(authUserEmail),
+		},
+		{
+			description: "projectIdLike set",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.ProjectIdLike = []string{testProjectIdLike}
+			}),
+			expectedRequest: fixtureRequest().ContainerIds([]string{testProjectIdLike}).ContainerParentId(testParentId),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request, err := buildRequest(testCtx, tt.model, testClient.DefaultAPI, tt.offset)
+			request, err := buildRequest(testCtx, tt.model, resourcemanager.DefaultAPIServiceMock{})
 			if err != nil {
 				t.Fatalf("Failed to build request: %v", err)
 			}
@@ -278,170 +280,137 @@ func TestBuildRequest(t *testing.T) {
 	}
 }
 
+type mockSettings struct {
+	listFolderFails bool
+	totalItems      int
+	served          int // items returned so far (simulated server-side offset)
+	numApiCalls     int
+}
+
+// newApiMock simulates an offset/limit API that returns pages of
+// pageSizeDefault items, and an empty page once all items are served.
+func newApiMock(s *mockSettings) resourcemanager.DefaultAPI {
+	return resourcemanager.DefaultAPIServiceMock{
+		ListFoldersExecuteMock: utils.Ptr(func(_ resourcemanager.ApiListFoldersRequest) (*resourcemanager.ListFoldersResponse, error) {
+			s.numApiCalls++
+			if s.listFolderFails {
+				return nil, fmt.Errorf("failed to list folders")
+			}
+
+			n := max(0, min(int(pageSizeDefault), s.totalItems-s.served))
+			s.served += n
+
+			return &resourcemanager.ListFoldersResponse{
+				Items: make([]resourcemanager.ListFoldersResponseItemsInner, n),
+			}, nil
+		}),
+	}
+}
+
 func TestFetchFolders(t *testing.T) {
+	withLimit := func(limit int64) *inputModel {
+		return fixtureInputModel(func(model *inputModel) {
+			model.Limit = utils.Ptr(limit)
+		})
+	}
+
 	tests := []struct {
 		description         string
 		model               *inputModel
-		totalItems          int
-		apiCallFails        bool
+		testSettings        mockSettings
 		expectedNumAPICalls int
 		expectedNumItems    int
 	}{
 		{
-			description:         "no limit and pageSize>totalItems",
+			description:         "no limit, totalItems<pageSize",
 			model:               fixtureInputModel(),
-			totalItems:          10,
+			testSettings:        mockSettings{totalItems: 10},
 			expectedNumAPICalls: 1,
-			apiCallFails:        false,
 			expectedNumItems:    10,
 		},
 		{
-			description:         "no limit and pageSize<totalItems",
+			description:         "no limit, totalItems>pageSize",
 			model:               fixtureInputModel(),
-			totalItems:          170,
-			expectedNumAPICalls: 4,
-			apiCallFails:        false,
+			testSettings:        mockSettings{totalItems: 170},
+			expectedNumAPICalls: 4, // 50 + 50 + 50 + 20
 			expectedNumItems:    170,
 		},
 		{
-			description:         "no limit and pageSize<totalItems 2",
+			description:         "no limit, totalItems multiple of pageSize",
 			model:               fixtureInputModel(),
-			totalItems:          100,
-			expectedNumAPICalls: 3, // Last call will return no items
-			apiCallFails:        false,
+			testSettings:        mockSettings{totalItems: 100},
+			expectedNumAPICalls: 3, // last call returns no items
 			expectedNumItems:    100,
 		},
 		{
-			description:         "no limit and pageSize=totalItems",
+			description:         "no limit, totalItems=pageSize",
 			model:               fixtureInputModel(),
-			totalItems:          50,
-			expectedNumAPICalls: 2, // Last call will return no items
-			apiCallFails:        false,
+			testSettings:        mockSettings{totalItems: 50},
+			expectedNumAPICalls: 2, // last call returns no items
 			expectedNumItems:    50,
 		},
 		{
-			description: "limit<pageSize",
-			model: fixtureInputModel(func(model *inputModel) {
-				model.Limit = utils.Ptr(int64(10))
-			}),
-			totalItems:          50,
+			description:         "limit<pageSize",
+			model:               withLimit(10),
+			testSettings:        mockSettings{totalItems: 50},
 			expectedNumAPICalls: 1,
-			apiCallFails:        false,
 			expectedNumItems:    10,
 		},
 		{
-			description: "limit>totalItems and pageSize>totalItems",
-			model: fixtureInputModel(func(model *inputModel) {
-				model.Limit = utils.Ptr(int64(200))
-				model.PageSize = 300
-			}),
-			totalItems:          50,
-			expectedNumAPICalls: 1,
-			apiCallFails:        false,
+			description:         "limit=totalItems=pageSize",
+			model:               withLimit(50),
+			testSettings:        mockSettings{totalItems: 50},
+			expectedNumAPICalls: 1, // limit reached, no extra empty call
 			expectedNumItems:    50,
 		},
 		{
-			description: "limit>totalItems and pageSize<totalItems",
-			model: fixtureInputModel(func(model *inputModel) {
-				model.Limit = utils.Ptr(int64(200))
-				model.PageSize = 30
-			}),
-			totalItems:          50,
-			expectedNumAPICalls: 2,
-			apiCallFails:        false,
-			expectedNumItems:    50,
+			description:         "limit spans pages",
+			model:               withLimit(70),
+			testSettings:        mockSettings{totalItems: 170},
+			expectedNumAPICalls: 2, // 50 + 20
+			expectedNumItems:    70,
+		},
+		{
+			description:         "limit>totalItems, totalItems<pageSize",
+			model:               withLimit(200),
+			testSettings:        mockSettings{totalItems: 30},
+			expectedNumAPICalls: 1,
+			expectedNumItems:    30,
+		},
+		{
+			description:         "limit>totalItems, totalItems>pageSize",
+			model:               withLimit(200),
+			testSettings:        mockSettings{totalItems: 120},
+			expectedNumAPICalls: 3, // 50 + 50 + 20
+			expectedNumItems:    120,
 		},
 		{
 			description:  "request fails",
 			model:        fixtureInputModel(),
-			totalItems:   100,
-			apiCallFails: true,
+			testSettings: mockSettings{listFolderFails: true},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			numAPICalls := 0
-			handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				numAPICalls++
+			settings := tt.testSettings
 
-				w.Header().Set("Content-Type", "application/json")
-				if tt.apiCallFails {
-					w.WriteHeader(http.StatusInternalServerError)
-					_, err := w.Write([]byte("{\"message\": \"Something bad happened\""))
-					if err != nil {
-						t.Errorf("Failed to write bad response: %v", err)
-					}
-					return
-				}
+			folders, err := fetchFolders(testCtx, tt.model, newApiMock(&settings))
 
-				query := r.URL.Query()
-				offsetStr := query.Get("offset")
-				if offsetStr == "" {
-					t.Errorf("Expected offset param page to be set")
-				}
-				offset, err := strconv.Atoi(offsetStr)
-				if err != nil {
-					t.Errorf("Failed to parse query param offset: %v", err)
-				}
-				limitStr := query.Get("limit")
-				if limitStr == "" {
-					t.Errorf("Expected query param limit to be set")
-				}
-				limit, err := strconv.Atoi(limitStr)
-				if err != nil {
-					t.Errorf("Failed to parse query param limit: %v", err)
-				}
-
-				var numItemsToReturn int
-				if offset >= tt.totalItems {
-					numItemsToReturn = 0 // Total items reached
-				} else if offset+limit < tt.totalItems {
-					numItemsToReturn = limit // Full intermediate page
-				} else {
-					numItemsToReturn = tt.totalItems - offset // Last page
-				}
-
-				folders := make([]resourcemanager.ListFoldersResponseItemsInner, numItemsToReturn)
-				mockedResp := resourcemanager.ListFoldersResponse{
-					Items: folders,
-				}
-
-				mockedRespBytes, err := json.Marshal(mockedResp)
-				if err != nil {
-					t.Fatalf("Failed to marshal mocked response: %v", err)
-				}
-
-				_, err = w.Write(mockedRespBytes)
-				if err != nil {
-					t.Errorf("Failed to write response: %v", err)
-				}
-			})
-			mockedServer := httptest.NewServer(handler)
-			defer mockedServer.Close()
-			client, err := resourcemanager.NewAPIClient(
-				sdkConfig.WithEndpoint(mockedServer.URL),
-				sdkConfig.WithoutAuthentication(),
-			)
-			if err != nil {
-				t.Fatalf("Failed to initialize client: %v", err)
-			}
-
-			folders, err := fetchFolders(testCtx, tt.model, client.DefaultAPI)
-			if err != nil {
-				if !tt.apiCallFails {
-					t.Fatalf("did not fail on invalid input")
+			if settings.listFolderFails {
+				if err == nil {
+					t.Fatalf("expected an error, got none")
 				}
 				return
 			}
-			if tt.apiCallFails {
-				t.Fatalf("did not fail on invalid input")
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
 			}
-			if numAPICalls != tt.expectedNumAPICalls {
-				t.Fatalf("Expected %d API calls, got %d", tt.expectedNumAPICalls, numAPICalls)
+			if settings.numApiCalls != tt.expectedNumAPICalls {
+				t.Fatalf("expected %d API calls, got %d", tt.expectedNumAPICalls, settings.numApiCalls)
 			}
 			if len(folders) != tt.expectedNumItems {
-				t.Fatalf("Expected %d projects, got %d", tt.totalItems, len(folders))
+				t.Fatalf("expected %d folders, got %d", tt.expectedNumItems, len(folders))
 			}
 		})
 	}
@@ -457,32 +426,46 @@ func Test_outputResult(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{"empty", args{}, false},
-		{"base", args{"", []resourcemanager.ListFoldersResponseItemsInner{{}}}, false},
-		{"complete", args{"", []resourcemanager.ListFoldersResponseItemsInner{
-			{
-				ContainerId:  "container-id1",
-				CreationTime: time.Now(),
-				UpdateTime:   time.Now(),
-				Labels:       &map[string]string{"foo": "bar"},
-				Name:         "some name",
-				Parent: resourcemanager.Parent{
-					Id: "parent-id",
-				},
-				FolderId: "folder-id1",
+		{
+			name:    "empty",
+			args:    args{},
+			wantErr: false,
+		},
+		{
+			name: "base",
+			args: args{
+				"",
+				[]resourcemanager.ListFoldersResponseItemsInner{{}},
 			},
-			{
-				ContainerId:  "container-id2",
-				CreationTime: time.Now(),
-				UpdateTime:   time.Now(),
-				Labels:       &map[string]string{"foo": "bar"},
-				Name:         "some name",
-				Parent: resourcemanager.Parent{
-					Id: "parent-id",
+			wantErr: false,
+		},
+		{
+			name: "complete",
+			args: args{"", []resourcemanager.ListFoldersResponseItemsInner{
+				{
+					ContainerId:  "container-id1",
+					CreationTime: time.Now(),
+					UpdateTime:   time.Now(),
+					Labels:       &map[string]string{"foo": "bar"},
+					Name:         "some name",
+					Parent: resourcemanager.Parent{
+						Id: "parent-id",
+					},
+					FolderId: "folder-id1",
 				},
-				FolderId: "folder-id2",
-			},
-		}}, false},
+				{
+					ContainerId:  "container-id2",
+					CreationTime: time.Now(),
+					UpdateTime:   time.Now(),
+					Labels:       &map[string]string{"foo": "bar"},
+					Name:         "some name",
+					Parent: resourcemanager.Parent{
+						Id: "parent-id",
+					},
+					FolderId: "folder-id2",
+				},
+			}},
+			wantErr: false},
 	}
 
 	params := testparams.NewTestParams()

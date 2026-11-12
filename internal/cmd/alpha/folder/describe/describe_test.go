@@ -15,8 +15,6 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 )
 
-var containerIdFlag = globalflags.ProjectIdFlag
-
 type testCtxKey struct{}
 
 var testCtx = context.WithValue(context.Background(), testCtxKey{}, "foo")
@@ -93,7 +91,7 @@ func TestParseInput(t *testing.T) {
 			description: "container id arg takes precedence",
 			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[containerIdFlag] = testFolderId2
+				flagValues[globalflags.ProjectIdFlag] = testFolderId2
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -104,7 +102,7 @@ func TestParseInput(t *testing.T) {
 			description: "container id arg missing",
 			argValues:   []string{},
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[containerIdFlag] = testFolderId
+				flagValues[globalflags.ProjectIdFlag] = testFolderId
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
@@ -115,21 +113,21 @@ func TestParseInput(t *testing.T) {
 			description: "project id missing",
 			argValues:   []string{},
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				delete(flagValues, containerIdFlag)
+				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
 		{
 			description: "container id invalid 1",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[containerIdFlag] = ""
+				flagValues[globalflags.ProjectIdFlag] = ""
 			}),
 			isValid: false,
 		},
 		{
 			description: "container id invalid 2",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[containerIdFlag] = "invalid-uuid"
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
 			}),
 			isValid: false,
 		},
