@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
@@ -263,11 +264,18 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient mongodbflex.
 		payloadAcl = &mongodbflex.ACL{Items: *model.ACL}
 	}
 
-	var payloadStorage *mongodbflex.Storage
+	var payloadStorage *mongodbflex.StorageUpdate
 	if model.StorageClass != nil || model.StorageSize != nil {
-		payloadStorage = &mongodbflex.Storage{
+		var storageSize *int32
+		if model.StorageSize != nil {
+			if *model.StorageSize > math.MaxInt32 || *model.StorageSize < math.MinInt32 {
+				return req, fmt.Errorf("storage size %d is out of range", *model.StorageSize)
+			}
+			storageSize = new(int32(*model.StorageSize))
+		}
+		payloadStorage = &mongodbflex.StorageUpdate{
 			Class: model.StorageClass,
-			Size:  model.StorageSize,
+			Size:  storageSize,
 		}
 	}
 
