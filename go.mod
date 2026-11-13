@@ -27,7 +27,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.15.1
 	github.com/stackitcloud/stackit-sdk-go/services/intake v0.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/logs v0.12.0
-	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.13.0
+	github.com/stackitcloud/stackit-sdk-go/services/mongodbflex v1.14.0
 	github.com/stackitcloud/stackit-sdk-go/services/opensearch v1.5.0
 	github.com/stackitcloud/stackit-sdk-go/services/postgresflex v1.16.0
 	github.com/stackitcloud/stackit-sdk-go/services/resourcemanager v0.28.0
@@ -38,10 +38,10 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/serverupdate v1.6.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.22.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.8.0
-	github.com/stackitcloud/stackit-sdk-go/services/ske v1.22.0
+	github.com/stackitcloud/stackit-sdk-go/services/ske v1.23.0
 	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.20.0
 	github.com/stackitcloud/stackit-sdk-go/services/valkey v0.4.0
-	github.com/stackitcloud/stackit-sdk-go/services/vpn v0.15.3
+	github.com/stackitcloud/stackit-sdk-go/services/vpn v0.16.0
 	github.com/zalando/go-keyring v0.2.8
 	golang.org/x/mod v0.42.0
 	golang.org/x/oauth2 v0.37.0
