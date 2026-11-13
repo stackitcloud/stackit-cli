@@ -10,33 +10,33 @@ on:
       - "v[0-9]+.[0-9]+.[0-9]+-*"
   workflow_dispatch:
 
-# Releases need permissions to read and write the repository contents.
-# GitHub considers creating releases and uploading assets as writing contents.
-permissions:
-  contents: write
-  issues: write
+permissions: {}
 
 jobs:
   goreleaser:
     name: Release
     runs-on: macOS-latest
+    permissions:
+      contents: write # Create releases and upload assets.
+      issues: write # Notify maintainers about the Homebrew PR.
     env:
       SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           # Allow goreleaser to access older tag information.
           fetch-depth: 0
       
       - name: Install go
-        uses: actions/setup-go@v7.0.0
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: "go.mod"
-          cache: true
+          cache: false # Do not consume CI caches when building release artifacts.
       
       - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v7
+        uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7.0.0
         id: import_gpg
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
@@ -72,15 +72,15 @@ jobs:
           SIGNING_CERTIFICATE_BASE64: ${{ secrets.APPLICATION_ID_CERT }}
           AUTHKEY_BASE64: ${{ secrets.APPLE_API_KEY }}
       - name: Install Snapcraft
-        uses: samuelmeuli/action-snapcraft@v3
+        uses: samuelmeuli/action-snapcraft@fceeb3c308e76f3487e72ef608618de625fb7fe8 # v3.0.1
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v7.3.0
+        uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
         with:
           args: release --clean
         env:
           # GITHUB_TOKEN is used to create the GitHub release in this repository.
-          # It uses the workflow-level permissions defined above.
+          # It uses the job-level contents: write permission.
           GITHUB_TOKEN: ${{ github.token }}
           # HOMEBREW_RELEASE_TOKEN is a PAT belonging to the `stackit-pipeline` user.
           # It is used by GoReleaser to push to the tap fork and open the upstream Homebrew PR.
@@ -105,7 +105,7 @@ jobs:
           rm -f "$GPG_KEY_PATH"
       
       - name: Upload artifacts to workflow
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: goreleaser-dist-temp
           path: dist
@@ -121,11 +121,13 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.OBJECT_STORAGE_SECRET_ACCESS_KEY }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       # use the artifacts from the "goreleaser" job
       - name: Download artifacts from workflow
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: goreleaser-dist-temp
           path: dist
@@ -134,7 +136,7 @@ jobs:
         run: brew install aptly
       
       - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v7
+        uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7.0.0
         id: import_gpg
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
@@ -159,10 +161,12 @@ jobs:
       AWS_ENDPOINT_URL: https://object.storage.eu01.onstackit.cloud
     steps:
       - name: Checkout
-        uses: actions/checkout@v7.0.1
-      
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
       - name: Download artifacts from workflow
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: goreleaser-dist-temp
           path: dist
@@ -173,7 +177,7 @@ jobs:
           sudo apt-get install -y createrepo-c
 
       - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v7
+        uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7.0.0
         id: import_gpg
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
