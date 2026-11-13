@@ -16,10 +16,12 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
+	"github.com/spf13/viper"
 	"github.com/stackitcloud/stackit-sdk-go/core/clients"
 	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 	"github.com/zalando/go-keyring"
 
+	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
@@ -399,4 +401,140 @@ func TestGetAccessToken_EnvVar(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestUserSessionExpired(t *testing.T) {
+	const emptyExpiresAt = "<empty>"
+
+	tests := []struct {
+		description string
+		envToken    string
+		useOIDC     string
+		expiresAt   string
+		expected    bool
+		isValid     bool
+	}{
+		{
+			description: "stored session not expired",
+			expiresAt:   strconv.FormatInt(time.Now().Add(time.Hour).Unix(), 10),
+			isValid:     true,
+		},
+		{
+			description: "stored session expired",
+			expiresAt:   strconv.FormatInt(time.Now().Add(-time.Hour).Unix(), 10),
+			expected:    true,
+			isValid:     true,
+		},
+		{
+			description: "stored session invalid",
+			expiresAt:   "not-a-number",
+		},
+		{
+			description: "no stored session",
+		},
+		{
+			description: "empty stored session expiration",
+			expiresAt:   emptyExpiresAt,
+			isValid:     true,
+		},
+		{
+			description: "access token from env ignores expired session",
+			envToken:    "token",
+			expiresAt:   strconv.FormatInt(time.Now().Add(-time.Hour).Unix(), 10),
+			isValid:     true,
+		},
+		{
+			description: "oidc ignores invalid session",
+			useOIDC:     "1",
+			expiresAt:   "not-a-number",
+			isValid:     true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			keyring.MockInit()
+			t.Setenv("XDG_CONFIG_HOME", t.TempDir()) // avoid reading the real auth storage file
+			t.Setenv(envAccessTokenName, tt.envToken)
+			t.Setenv(EnvUseOIDC, tt.useOIDC)
+			if tt.expiresAt != "" {
+				expiresAt := tt.expiresAt
+				if expiresAt == emptyExpiresAt {
+					expiresAt = ""
+				}
+				if err := SetAuthField(SESSION_EXPIRES_AT_UNIX, expiresAt); err != nil {
+					t.Fatalf("Failed to set session expiration: %v", err)
+				}
+			}
+
+			got, err := UserSessionExpired()
+			if err != nil {
+				if !tt.isValid {
+					return
+				}
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if !tt.isValid {
+				t.Fatalf("expected error, got none")
+			}
+			if got != tt.expected {
+				t.Errorf("expected %v, got %v", tt.expected, got)
+			}
+		})
+	}
+}
+
+func TestGetValidAccessToken_Env(t *testing.T) {
+	t.Run("access token from env", func(t *testing.T) {
+		keyring.MockInit()
+		t.Setenv(EnvUseOIDC, "")
+		t.Setenv(envAccessTokenName, "env-token")
+
+		got, err := GetValidAccessToken(testparams.NewTestParams().Printer)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if got != "env-token" {
+			t.Errorf("expected %q, got %q", "env-token", got)
+		}
+	})
+
+	t.Run("oidc without service account email", func(t *testing.T) {
+		keyring.MockInit()
+		t.Setenv(envAccessTokenName, "")
+		t.Setenv(EnvUseOIDC, "1")
+		t.Setenv(EnvServiceAccountEmail, "")
+
+		if _, err := GetValidAccessToken(testparams.NewTestParams().Printer); err == nil {
+			t.Fatalf("expected error, got none")
+		}
+	})
+
+	t.Run("oidc", func(t *testing.T) {
+		keyring.MockInit()
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"access_token": "wif-token",
+				"token_type":   "Bearer",
+				"expires_in":   3600,
+			})
+		}))
+		defer server.Close()
+
+		viper.Set(config.TokenCustomEndpointKey, server.URL)
+		defer viper.Set(config.TokenCustomEndpointKey, "")
+		t.Setenv(envAccessTokenName, "")
+		t.Setenv(EnvUseOIDC, "1")
+		t.Setenv(EnvServiceAccountEmail, "sa@sa.stackit.cloud")
+		t.Setenv(EnvServiceAccountFederatedToken, "federated-token")
+
+		got, err := GetValidAccessToken(testparams.NewTestParams().Printer)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if got != "wif-token" {
+			t.Errorf("expected %q, got %q", "wif-token", got)
+		}
+	})
 }

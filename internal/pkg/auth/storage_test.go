@@ -1216,3 +1216,18 @@ func TestAuthorizeDeauthorizeUserProfileAuth(t *testing.T) {
 		})
 	}
 }
+
+func TestGetAuthEmail_OIDC(t *testing.T) {
+	keyring.MockInit()
+	t.Setenv(envAccessTokenName, "")
+	t.Setenv(EnvUseOIDC, "1")
+	t.Setenv(EnvServiceAccountEmail, "sa@sa.stackit.cloud")
+
+	got, err := GetAuthEmail()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got != "sa@sa.stackit.cloud" {
+		t.Errorf("expected %q, got %q", "sa@sa.stackit.cloud", got)
+	}
+}
