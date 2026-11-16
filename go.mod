@@ -44,7 +44,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/vpn v0.15.3
 	github.com/zalando/go-keyring v0.2.8
 	golang.org/x/mod v0.42.0
-	golang.org/x/oauth2 v0.37.0
+	golang.org/x/oauth2 v0.38.0
 	golang.org/x/term v0.47.0
 	golang.org/x/text v0.43.0
 	k8s.io/apimachinery v0.37.2
