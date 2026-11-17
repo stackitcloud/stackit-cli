@@ -66,37 +66,18 @@ Help is available for any command by specifying the special flag `--help` (or si
 
 ## Available services
 
-Below you can find a list of the STACKIT services already available in the CLI (along with their respective command names) and the ones that are currently planned to be integrated.
+Using the commands below you can get an overview which services are supported by your installed STACKIT CLI version:
 
-| Service                            | CLI Commands                                                                                                                                                                                        | Status                    |
-|------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------|
-| Application Load Balancer          | `beta alb`                                                                                                                                                                                          | :white_check_mark: (beta) |
-| Authorization                      | `project`, `organization`                                                                                                                                                                           | :white_check_mark:        |
-| DNS                                | `dns`                                                                                                                                                                                               | :white_check_mark:        |
-| Edge Cloud                         | `beta edge-cloud`                                                                                                                                                                                   | :white_check_mark: (beta) |
-| File Storage (SFS)                 | `sfs`                                                                                                                                                                                               | :white_check_mark:        |
-| Git                                | `git`                                                                                                                                                                                               | :white_check_mark:        |
-| Infrastructure as a Service (IaaS) | `affinity-group` <br/> `image` <br/> `key-pair` <br/> `network` <br/> `network-area` <br/> `network-interface` <br/> `public-ip` <br/> `quota` <br/> `security-group` <br/> `server` <br/> `volume` | :white_check_mark:        |
-| Intake                             | `beta intake`                                                                                                                                                                                       | :white_check_mark: (beta) |
-| Key Management Service (KMS)       | `beta kms`                                                                                                                                                                                          | :white_check_mark: (beta) |
-| Kubernetes Engine (SKE)            | `ske`                                                                                                                                                                                               | :white_check_mark:        |
-| Load Balancer                      | `load-balancer`                                                                                                                                                                                     | :white_check_mark:        |
-| LogMe                              | `logme`                                                                                                                                                                                             | :white_check_mark:        |
-| MariaDB                            | `mariadb`                                                                                                                                                                                           | :white_check_mark:        |
-| MongoDB Flex                       | `mongodbflex`                                                                                                                                                                                       | :white_check_mark:        |
-| Observability                      | `observability`                                                                                                                                                                                     | :white_check_mark:        |
-| Object Storage                     | `object-storage`                                                                                                                                                                                    | :white_check_mark:        |
-| OpenSearch                         | `opensearch`                                                                                                                                                                                        | :white_check_mark:        |
-| PostgreSQL Flex                    | `postgresflex`                                                                                                                                                                                      | :white_check_mark:        |
-| RabbitMQ                           | `rabbitmq`                                                                                                                                                                                          | :white_check_mark:        |
-| Redis                              | `redis`                                                                                                                                                                                             | :white_check_mark:        |
-| Resource Manager                   | `project`                                                                                                                                                                                           | :white_check_mark:        |
-| STACKIT Cloud Foundry              | `beta scf`                                                                                                                                                                                         | :white_check_mark: (beta)        |
-| Secrets Manager                    | `secrets-manager`                                                                                                                                                                                   | :white_check_mark:        |
-| Server Backup Management           | `server backup`                                                                                                                                                                                     | :white_check_mark:        |
-| Server Command (Run Command)       | `server command`                                                                                                                                                                                    | :white_check_mark:        |
-| Service Account                    | `service-account`                                                                                                                                                                                   | :white_check_mark:        |
-| SQLServer Flex                     | `sqlserverflex`                                                                                                                                                                                     | :white_check_mark:        |
+```bash
+# show list of available services / commands
+stackit --help
+
+# show list of available services in alpha stage
+stackit alpha --help
+
+# show list of available services in beta stage
+stackit beta --help
+```
 
 ## Authentication
 
