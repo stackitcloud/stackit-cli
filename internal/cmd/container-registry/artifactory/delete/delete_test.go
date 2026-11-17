@@ -2,6 +2,7 @@ package delete
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -10,6 +11,8 @@ import (
 	registry "github.com/stackitcloud/stackit-sdk-go/services/registry/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 )
 
@@ -164,5 +167,55 @@ func TestBuildRequest(t *testing.T) {
 				t.Fatalf("Data does not match: %s", diff)
 			}
 		})
+	}
+}
+
+func TestPrintWarning(t *testing.T) {
+	tests := []struct {
+		name       string
+		verbosity  print.Level
+		expectWarn bool
+	}{
+		{
+			name:       "default verbosity (info)",
+			verbosity:  print.InfoLevel,
+			expectWarn: true,
+		},
+		{
+			name:       "warning verbosity",
+			verbosity:  print.WarningLevel,
+			expectWarn: true,
+		},
+		{
+			name:       "debug verbosity",
+			verbosity:  print.DebugLevel,
+			expectWarn: true,
+		},
+		{
+			name:       "error verbosity",
+			verbosity:  print.ErrorLevel,
+			expectWarn: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			params := testparams.NewTestParams()
+			params.Printer.Verbosity = tt.verbosity
+
+			printWarning(params.Printer)
+
+			warned := strings.Contains(params.Err.String(), warningMessage)
+			if warned != tt.expectWarn {
+				t.Errorf("expected warning = %t, got %t (stderr: %q)", tt.expectWarn, warned, params.Err.String())
+			}
+		})
+	}
+}
+
+func TestWarningMessageContent(t *testing.T) {
+	expected := "Your STACKIT Container Registry projects are recoverable for up to 30 days after deletion via a support request. After this period, projects and their data are permanently unrecoverable."
+	if warningMessage != expected {
+		t.Errorf("warning message mismatch:\ngot:  %q\nwant: %q", warningMessage, expected)
 	}
 }

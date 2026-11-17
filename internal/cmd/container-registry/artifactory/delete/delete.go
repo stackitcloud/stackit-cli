@@ -22,6 +22,7 @@ import (
 
 const (
 	artifactoryIdArg = "ARTIFACTORY_ID"
+	warningMessage   = "Your STACKIT Container Registry projects are recoverable for up to 30 days after deletion via a support request. After this period, projects and their data are permanently unrecoverable."
 )
 
 type inputModel struct {
@@ -59,7 +60,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				artifactoryLabel = model.ArtifactoryId
 			}
 
-			prompt := fmt.Sprintf("Are you sure you want to delete artifactory %q? (This cannot be undone)", artifactoryLabel)
+			printWarning(params.Printer)
+
+			prompt := fmt.Sprintf("Are you sure you want to delete artifactory %q?", artifactoryLabel)
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -113,4 +116,8 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *registry.APIClient) registry.ApiDeleteArtifactoryRequest {
 	return apiClient.DefaultAPI.DeleteArtifactory(ctx, model.ProjectId, model.Region, model.ArtifactoryId)
+}
+
+func printWarning(p *print.Printer) {
+	p.Warn("%s\n", warningMessage)
 }
