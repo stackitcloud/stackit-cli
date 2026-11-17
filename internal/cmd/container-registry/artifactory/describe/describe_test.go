@@ -174,6 +174,8 @@ func TestOutputResult(t *testing.T) {
 		artifactory *registry.Artifactory
 	}
 	desc := "docker hub mirror"
+	errDesc := "failed to provision artifactory backend"
+	emptyErrDesc := ""
 	tests := []struct {
 		name    string
 		args    args
@@ -186,6 +188,36 @@ func TestOutputResult(t *testing.T) {
 					Id:                 testArtifactoryId,
 					Name:               "my-artifactory",
 					State:              registry.ARTIFACTORYSTATE_ACTIVE,
+					Url:                "https://example.com",
+					ConsumedQuotaBytes: 1024,
+					CreateTime:         time.Now(),
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "with error description",
+			args: args{
+				artifactory: &registry.Artifactory{
+					Id:                 testArtifactoryId,
+					Name:               "my-artifactory",
+					State:              registry.ARTIFACTORYSTATE_ERROR,
+					ErrorDescription:   &errDesc,
+					Url:                "https://example.com",
+					ConsumedQuotaBytes: 1024,
+					CreateTime:         time.Now(),
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "with empty error description",
+			args: args{
+				artifactory: &registry.Artifactory{
+					Id:                 testArtifactoryId,
+					Name:               "my-artifactory",
+					State:              registry.ARTIFACTORYSTATE_ERROR,
+					ErrorDescription:   &emptyErrDesc,
 					Url:                "https://example.com",
 					ConsumedQuotaBytes: 1024,
 					CreateTime:         time.Now(),

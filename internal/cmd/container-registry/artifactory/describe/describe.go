@@ -101,6 +101,10 @@ func outputResult(p *print.Printer, outputFormat string, artifactory *registry.A
 		table.AddRow("NAME", artifactory.Name)
 		table.AddSeparator()
 		table.AddRow("STATE", string(artifactory.State))
+		if artifactory.ErrorDescription != nil && *artifactory.ErrorDescription != "" {
+			table.AddSeparator()
+			table.AddRow("ERROR DESCRIPTION", *artifactory.ErrorDescription)
+		}
 		table.AddSeparator()
 		table.AddRow("URL", artifactory.Url)
 		table.AddSeparator()
