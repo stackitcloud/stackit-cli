@@ -13,8 +13,20 @@ stackit container-registry artifactory update ARTIFACTORY_ID [flags]
 ### Examples
 
 ```
-  Update the proxy configuration for an artifactory with ID "xxx"
+  Update the upstream proxy URL for an artifactory with ID "xxx"
   $ stackit container-registry artifactory update xxx --proxy-url https://registry-1.docker.io
+
+  Update the proxy description for an artifactory with ID "xxx"
+  $ stackit container-registry artifactory update xxx --proxy-description "Updated proxy description"
+
+  Update the proxy credentials reading secret from stdin for an artifactory with ID "xxx"
+  $ stackit container-registry artifactory update xxx --proxy-access-key my-user --proxy-access-secret -
+
+  Update the proxy credentials providing path to a file with secret for an artifactory with ID "xxx"
+  $ stackit container-registry artifactory update xxx --proxy-access-key my-user --proxy-access-secret @./secret.txt
+
+  Update all proxy configuration fields for an artifactory with ID "xxx"
+  $ stackit container-registry artifactory update xxx --proxy-url https://custom-registry.com --proxy-description "Updated mirror" --proxy-access-key my-user --proxy-access-secret @./secret.txt
 ```
 
 ### Options

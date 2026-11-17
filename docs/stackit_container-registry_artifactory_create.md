@@ -13,20 +13,23 @@ stackit container-registry artifactory create [flags]
 ### Examples
 
 ```
-  Create an artifactory with name "my-registry"
+  Create a standard artifactory
   $ stackit container-registry artifactory create --name my-registry
 
   Create a proxy-cache artifactory without credentials
   $ stackit container-registry artifactory create --name my-proxy --proxy-url https://custom-registry.com --proxy-registry-type harbor
 
-  Create a proxy-cache artifactory for Docker Hub, reading secret from stdin
+  Create a proxy-cache artifactory with a description
+  $ stackit container-registry artifactory create --name my-proxy --proxy-url https://custom-registry.com --proxy-registry-type harbor --proxy-description "Internal mirror"
+
+  Create a proxy-cache artifactory for Docker Hub with credentials from stdin
   $ stackit container-registry artifactory create --name docker-proxy --proxy-url https://registry-1.docker.io --proxy-registry-type docker-hub --proxy-access-key my-user --proxy-access-secret -
 
-  Create a proxy-cache artifactory with credentials, reading secret from stdin
-  $ stackit container-registry artifactory create --name my-proxy --proxy-url https://custom-registry.com --proxy-registry-type harbor --proxy-access-key my-user --proxy-access-secret -
-
-  Create a proxy-cache artifactory with credentials, providing the path to a file with the secret
+  Create a proxy-cache artifactory with credentials from a file
   $ stackit container-registry artifactory create --name my-proxy --proxy-url https://custom-registry.com --proxy-registry-type harbor --proxy-access-key my-user --proxy-access-secret @./secret.txt
+
+  Create a proxy-cache artifactory with all proxy options configured
+  $ stackit container-registry artifactory create --name docker-proxy --proxy-url https://registry-1.docker.io --proxy-registry-type docker-hub --proxy-description "Docker Hub mirror" --proxy-access-key my-user --proxy-access-secret @./secret.txt
 ```
 
 ### Options

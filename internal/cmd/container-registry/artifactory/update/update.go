@@ -47,8 +47,25 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args:  args.SingleArg(artifactoryIdArg, utils.ValidateUUID),
 		Example: examples.Build(
 			examples.NewExample(
-				`Update the proxy configuration for an artifactory with ID "xxx"`,
-				"$ stackit container-registry artifactory update xxx --proxy-url https://registry-1.docker.io"),
+				`Update the upstream proxy URL for an artifactory with ID "xxx"`,
+				"$ stackit container-registry artifactory update xxx --proxy-url https://registry-1.docker.io",
+			),
+			examples.NewExample(
+				`Update the proxy description for an artifactory with ID "xxx"`,
+				`$ stackit container-registry artifactory update xxx --proxy-description "Updated proxy description"`,
+			),
+			examples.NewExample(
+				`Update the proxy credentials reading secret from stdin for an artifactory with ID "xxx"`,
+				"$ stackit container-registry artifactory update xxx --proxy-access-key my-user --proxy-access-secret -",
+			),
+			examples.NewExample(
+				`Update the proxy credentials providing path to a file with secret for an artifactory with ID "xxx"`,
+				"$ stackit container-registry artifactory update xxx --proxy-access-key my-user --proxy-access-secret @./secret.txt",
+			),
+			examples.NewExample(
+				`Update all proxy configuration fields for an artifactory with ID "xxx"`,
+				`$ stackit container-registry artifactory update xxx --proxy-url https://custom-registry.com --proxy-description "Updated mirror" --proxy-access-key my-user --proxy-access-secret @./secret.txt`,
+			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
