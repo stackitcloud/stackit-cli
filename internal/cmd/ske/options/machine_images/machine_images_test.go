@@ -184,7 +184,7 @@ func TestOutputResult(t *testing.T) {
 							Name: utils.Ptr("image1"),
 							Versions: []ske.MachineImageVersion{
 								{
-									Cri: []ske.CRI{
+									Cri: []ske.MachineImageVersionCRI{
 										{
 											Name: ske.NAMEOFTHECRILIBRARY_CONTAINERD.Ptr(),
 										},

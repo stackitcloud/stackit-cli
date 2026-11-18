@@ -162,7 +162,7 @@ func fixtureProviderOptions(mods ...func(*ske.ProviderOptions)) *ske.ProviderOpt
 					{
 						State:   utils.Ptr("supported"),
 						Version: utils.Ptr("1.2.3"),
-						Cri: []ske.CRI{
+						Cri: []ske.MachineImageVersionCRI{
 							{
 								Name: ske.NAMEOFTHECRILIBRARY_CONTAINERD.Ptr(),
 							},
@@ -171,7 +171,7 @@ func fixtureProviderOptions(mods ...func(*ske.ProviderOptions)) *ske.ProviderOpt
 					{
 						State:   utils.Ptr("supported"),
 						Version: utils.Ptr("3.2.1"),
-						Cri: []ske.CRI{
+						Cri: []ske.MachineImageVersionCRI{
 							{
 								Name: ske.NAMEOFTHECRILIBRARY_CONTAINERD.Ptr(),
 							},
@@ -185,7 +185,7 @@ func fixtureProviderOptions(mods ...func(*ske.ProviderOptions)) *ske.ProviderOpt
 					{
 						State:   utils.Ptr("supported"),
 						Version: utils.Ptr("4.4.4"),
-						Cri: []ske.CRI{
+						Cri: []ske.MachineImageVersionCRI{
 							{
 								Name: ske.NAMEOFTHECRILIBRARY_CONTAINERD.Ptr(),
 							},
@@ -208,7 +208,7 @@ func fixtureProviderOptions(mods ...func(*ske.ProviderOptions)) *ske.ProviderOpt
 					{
 						State:   utils.Ptr("not-supported"),
 						Version: utils.Ptr("4.4.4"),
-						Cri: []ske.CRI{
+						Cri: []ske.MachineImageVersionCRI{
 							{
 								Name: ske.NAMEOFTHECRILIBRARY_CONTAINERD.Ptr(),
 							},
@@ -222,7 +222,7 @@ func fixtureProviderOptions(mods ...func(*ske.ProviderOptions)) *ske.ProviderOpt
 					{
 						State:   utils.Ptr("supported"),
 						Version: utils.Ptr("4.4.4"),
-						Cri:     []ske.CRI{},
+						Cri:     []ske.MachineImageVersionCRI{},
 					},
 				},
 			},
