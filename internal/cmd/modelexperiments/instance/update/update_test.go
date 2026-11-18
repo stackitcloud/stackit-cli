@@ -18,7 +18,10 @@ import (
 
 type testCtxKey struct{}
 
-const testRegion = "eu01"
+const (
+	testRegion = "eu01"
+	testName   = "example"
+)
 
 var (
 	testCtx        = context.WithValue(context.Background(), testCtxKey{}, "foo")
@@ -40,6 +43,14 @@ func fixtureFlagValues(mods ...func(map[string]string)) map[string]string {
 	return flagValues
 }
 
+func fixtureArgValues(mods ...func(argValues []string)) []string {
+	argValues := []string{testInstanceId}
+	for _, mod := range mods {
+		mod(argValues)
+	}
+	return argValues
+}
+
 func fixtureInputModel(mods ...func(*inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
@@ -58,15 +69,10 @@ func fixtureInputModel(mods ...func(*inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(*modelexperiments.ApiPartialUpdateInstanceRequest)) modelexperiments.ApiPartialUpdateInstanceRequest {
-	request := testClient.DefaultAPI.PartialUpdateInstance(
-		testCtx,
-		testProjectId,
-		testRegion,
-		testInstanceId,
-	)
+	request := testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId)
 
 	payload := modelexperiments.PartialUpdateInstancePayload{
-		Name: utils.Ptr("example"),
+		Name: utils.Ptr(testName),
 	}
 
 	request = request.PartialUpdateInstancePayload(payload)
@@ -88,18 +94,18 @@ func TestParseInput(t *testing.T) {
 	}{
 		{
 			description: "name",
-			argValues:   []string{testInstanceId},
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
-				flagValues[nameFlag] = "example"
+				flagValues[nameFlag] = testName
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
-				model.Name = utils.Ptr("example")
+				model.Name = utils.Ptr(testName)
 			}),
 		},
 		{
 			description: "description",
-			argValues:   []string{testInstanceId},
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[descriptionFlag] = "team tracking server"
 			}),
@@ -110,7 +116,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "labels",
-			argValues:   []string{testInstanceId},
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[labelsFlag] = "env=prod,team=ml"
 			}),
@@ -125,7 +131,7 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "retention",
-			argValues:   []string{testInstanceId},
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[retentionFlag] = "30d"
 			}),
@@ -136,16 +142,69 @@ func TestParseInput(t *testing.T) {
 		},
 		{
 			description: "no update flags",
-			argValues:   []string{testInstanceId},
+			argValues:   fixtureArgValues(),
 			flagValues:  fixtureFlagValues(),
 			isValid:     false,
 		},
 		{
+			description: "no values",
+			argValues:   []string{},
+			flagValues:  map[string]string{},
+			isValid:     false,
+		},
+		{
+			description: "no arg values",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[nameFlag] = testName
+			}),
+			isValid: false,
+		},
+		{
+			description: "no flag values",
+			argValues:   fixtureArgValues(),
+			flagValues:  map[string]string{},
+			isValid:     false,
+		},
+		{
 			description: "project id missing",
-			argValues:   []string{testInstanceId},
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, globalflags.ProjectIdFlag)
-				flagValues[nameFlag] = "example"
+				flagValues[nameFlag] = testName
+			}),
+			isValid: false,
+		},
+		{
+			description: "project id invalid",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
+				flagValues[nameFlag] = testName
+			}),
+			isValid: false,
+		},
+		{
+			description: "project id invalid 1",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[globalflags.ProjectIdFlag] = ""
+				flagValues[nameFlag] = testName
+			}),
+			isValid: false,
+		},
+		{
+			description: "instance id invalid",
+			argValues:   []string{"invalid-uuid"},
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[nameFlag] = testName
+			}),
+			isValid: false,
+		},
+		{
+			description: "instance id missing",
+			argValues:   []string{""},
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[nameFlag] = testName
 			}),
 			isValid: false,
 		},
@@ -153,20 +212,12 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			testutils.TestParseInput(
-				t,
-				NewCmd,
-				parseInput,
-				tt.expectedModel,
-				tt.argValues,
-				tt.flagValues,
-				tt.isValid,
-			)
+			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
 	}
 }
 
-func TestBuildUpdateInstanceRequest(t *testing.T) {
+func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
@@ -175,7 +226,7 @@ func TestBuildUpdateInstanceRequest(t *testing.T) {
 		{
 			description: "name",
 			model: fixtureInputModel(func(model *inputModel) {
-				model.Name = utils.Ptr("example")
+				model.Name = utils.Ptr(testName)
 			}),
 			expectedRequest: fixtureRequest(),
 		},
@@ -185,18 +236,9 @@ func TestBuildUpdateInstanceRequest(t *testing.T) {
 				model.Description = utils.Ptr("team tracking server")
 			}),
 			expectedRequest: func() modelexperiments.ApiPartialUpdateInstanceRequest {
-				request := testClient.DefaultAPI.PartialUpdateInstance(
-					testCtx,
-					testProjectId,
-					testRegion,
-					testInstanceId,
-				)
+				request := testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId)
 
-				request = request.PartialUpdateInstancePayload(
-					modelexperiments.PartialUpdateInstancePayload{
-						Description: utils.Ptr("team tracking server"),
-					},
-				)
+				request = request.PartialUpdateInstancePayload(modelexperiments.PartialUpdateInstancePayload{Description: utils.Ptr("team tracking server")})
 
 				return request
 			}(),
@@ -211,20 +253,13 @@ func TestBuildUpdateInstanceRequest(t *testing.T) {
 				model.Labels = &labels
 			}),
 			expectedRequest: func() modelexperiments.ApiPartialUpdateInstanceRequest {
-				request := testClient.DefaultAPI.PartialUpdateInstance(
-					testCtx,
-					testProjectId,
-					testRegion,
-					testInstanceId,
-				)
+				request := testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId)
 
 				labels := map[string]*string{
 					"env":  utils.Ptr("prod"),
 					"team": utils.Ptr("ml"),
 				}
-				return request.PartialUpdateInstancePayload(
-					modelexperiments.PartialUpdateInstancePayload{Labels: &labels},
-				)
+				return request.PartialUpdateInstancePayload(modelexperiments.PartialUpdateInstancePayload{Labels: &labels})
 			}(),
 		},
 		{
@@ -233,18 +268,9 @@ func TestBuildUpdateInstanceRequest(t *testing.T) {
 				model.Retention = utils.Ptr("30d")
 			}),
 			expectedRequest: func() modelexperiments.ApiPartialUpdateInstanceRequest {
-				request := testClient.DefaultAPI.PartialUpdateInstance(
-					testCtx,
-					testProjectId,
-					testRegion,
-					testInstanceId,
-				)
+				request := testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId)
 
-				request = request.PartialUpdateInstancePayload(
-					modelexperiments.PartialUpdateInstancePayload{
-						DeletedExperimentRetention: utils.Ptr("30d"),
-					},
-				)
+				request = request.PartialUpdateInstancePayload(modelexperiments.PartialUpdateInstancePayload{DeletedExperimentRetention: utils.Ptr("30d")})
 
 				return request
 			}(),
@@ -253,18 +279,9 @@ func TestBuildUpdateInstanceRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(
-				testCtx,
-				tt.model,
-				testClient,
-			)
+			request := buildRequest(testCtx, tt.model, testClient)
 
-			diff := cmp.Diff(
-				request,
-				tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
-			)
+			diff := cmp.Diff(request, tt.expectedRequest, cmp.AllowUnexported(tt.expectedRequest), cmpopts.EquateComparable(testCtx))
 
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -297,16 +314,8 @@ func TestOutputResult(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(
-				params.Printer,
-				"",
-				tt.resp,
-			); (err != nil) != tt.wantErr {
-				t.Errorf(
-					"outputResult() error = %v, wantErr %v",
-					err,
-					tt.wantErr,
-				)
+			if err := outputResult(params.Printer, fixtureInputModel(), tt.resp); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

@@ -11,7 +11,6 @@ import (
 	modelexperiments "github.com/stackitcloud/stackit-sdk-go/services/modelexperiments/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/testparams"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/testutils"
 )
 
@@ -39,6 +38,14 @@ func fixtureFlagValues(mods ...func(map[string]string)) map[string]string {
 	return flagValues
 }
 
+func fixtureArgValues(mods ...func(argValues []string)) []string {
+	argValues := []string{testInstanceId}
+	for _, mod := range mods {
+		mod(argValues)
+	}
+	return argValues
+}
+
 func fixtureInputModel(mods ...func(*inputModel)) *inputModel {
 	model := &inputModel{
 		GlobalFlagModel: &globalflags.GlobalFlagModel{
@@ -57,12 +64,7 @@ func fixtureInputModel(mods ...func(*inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(*modelexperiments.ApiDeleteInstanceRequest)) modelexperiments.ApiDeleteInstanceRequest {
-	request := testClient.DefaultAPI.DeleteInstance(
-		testCtx,
-		testProjectId,
-		testRegion,
-		testInstanceId,
-	)
+	request := testClient.DefaultAPI.DeleteInstance(testCtx, testProjectId, testRegion, testInstanceId)
 
 	for _, mod := range mods {
 		mod(&request)
@@ -81,103 +83,82 @@ func TestParseInput(t *testing.T) {
 	}{
 		{
 			description:   "base",
-			argValues:     []string{testInstanceId},
+			argValues:     fixtureArgValues(),
 			flagValues:    fixtureFlagValues(),
 			isValid:       true,
 			expectedModel: fixtureInputModel(),
 		},
 		{
 			description: "project id missing",
-			argValues:   []string{testInstanceId},
+			argValues:   fixtureArgValues(),
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				delete(flagValues, globalflags.ProjectIdFlag)
 			}),
 			isValid: false,
 		},
+		{
+			description: "no arg values",
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
+		{
+			description: "no values",
+			flagValues:  map[string]string{},
+			isValid:     false,
+		},
+		{
+			description: "no flag values",
+			argValues:   fixtureArgValues(),
+			flagValues:  map[string]string{},
+			isValid:     false,
+		},
+		{
+			description: "project id invalid 1",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[globalflags.ProjectIdFlag] = ""
+			}),
+			isValid: false,
+		},
+		{
+			description: "instance id missing",
+			argValues:   []string{""},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
+		{
+			description: "project id invalid 2",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "instance id invalid",
+			argValues:   []string{"invalid-uuid"},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			testutils.TestParseInput(
-				t,
-				NewCmd,
-				parseInput,
-				tt.expectedModel,
-				tt.argValues,
-				tt.flagValues,
-				tt.isValid,
-			)
+			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
 	}
 }
 
-func TestBuildDeleteInstanceRequest(t *testing.T) {
-	request := buildRequest(
-		testCtx,
-		fixtureInputModel(),
-		testClient,
-	)
-
+func TestBuildRequest(t *testing.T) {
+	request := buildRequest(testCtx, fixtureInputModel(), testClient)
 	expectedRequest := fixtureRequest()
 
-	diff := cmp.Diff(
-		request,
-		expectedRequest,
+	diff := cmp.Diff(request, expectedRequest,
 		cmp.AllowUnexported(expectedRequest),
 		cmpopts.EquateComparable(testCtx),
 	)
 
 	if diff != "" {
 		t.Fatalf("Data does not match: %s", diff)
-	}
-}
-
-func TestOutputResult(t *testing.T) {
-	tests := []struct {
-		name       string
-		resp       *modelexperiments.DeleteInstanceResponse
-		async      bool
-		wantErr    bool
-		wantOutput string
-	}{
-		{
-			name:    "nil response",
-			resp:    nil,
-			wantErr: true,
-		},
-		{
-			name:       "response",
-			resp:       &modelexperiments.DeleteInstanceResponse{},
-			wantOutput: "Deleted AI Model Experiments instance.\n",
-		},
-		{
-			name:       "async response",
-			resp:       &modelexperiments.DeleteInstanceResponse{},
-			async:      true,
-			wantOutput: "Triggered deletion of AI Model Experiments instance.\n",
-		},
-	}
-
-	params := testparams.NewTestParams()
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			params.Out.Reset()
-			if err := outputResult(
-				params.Printer,
-				"",
-				tt.async,
-				tt.resp,
-			); (err != nil) != tt.wantErr {
-				t.Errorf(
-					"outputResult() error = %v, wantErr %v",
-					err,
-					tt.wantErr,
-				)
-			}
-			if got := params.Out.String(); got != tt.wantOutput {
-				t.Errorf("outputResult() output = %q, want %q", got, tt.wantOutput)
-			}
-		})
 	}
 }

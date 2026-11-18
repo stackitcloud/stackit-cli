@@ -18,7 +18,10 @@ import (
 
 type testCtxKey struct{}
 
-const testRegion = "eu01"
+const (
+	testRegion = "eu01"
+	testName   = "example"
+)
 
 var (
 	testCtx       = context.WithValue(context.Background(), testCtxKey{}, "foo")
@@ -29,7 +32,7 @@ var (
 func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
 	flagValues := map[string]string{
 		globalflags.ProjectIdFlag: testProjectId,
-		nameFlag:                  "example",
+		nameFlag:                  testName,
 		globalflags.RegionFlag:    testRegion,
 	}
 	for _, mod := range mods {
@@ -45,7 +48,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 			Region:    testRegion,
 			Verbosity: globalflags.VerbosityDefault,
 		},
-		Name: "example",
+		Name: testName,
 	}
 	for _, mod := range mods {
 		mod(model)
@@ -56,7 +59,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 func fixtureRequest(mods ...func(request *modelexperiments.ApiCreateInstanceRequest)) modelexperiments.ApiCreateInstanceRequest {
 	request := testClient.DefaultAPI.CreateInstance(testCtx, testProjectId, testRegion)
 	request = request.CreateInstancePayload(modelexperiments.CreateInstancePayload{
-		Name: "example",
+		Name: testName,
 	})
 	for _, mod := range mods {
 		mod(&request)
@@ -77,6 +80,11 @@ func TestParseInput(t *testing.T) {
 			flagValues:    fixtureFlagValues(),
 			isValid:       true,
 			expectedModel: fixtureInputModel(),
+		},
+		{
+			description: "no values",
+			flagValues:  map[string]string{},
+			isValid:     false,
 		},
 		{
 			description: "name missing",
@@ -114,6 +122,20 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: false,
 		},
+		{
+			description: "project id invalid 1",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[globalflags.ProjectIdFlag] = ""
+			}),
+			isValid: false,
+		},
+		{
+			description: "project id invalid 2",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -123,7 +145,7 @@ func TestParseInput(t *testing.T) {
 	}
 }
 
-func TestBuildCreateInstanceRequest(t *testing.T) {
+func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
@@ -141,7 +163,7 @@ func TestBuildCreateInstanceRequest(t *testing.T) {
 			}),
 			expectedRequest: fixtureRequest(func(request *modelexperiments.ApiCreateInstanceRequest) {
 				payload := modelexperiments.CreateInstancePayload{
-					Name:        "example",
+					Name:        testName,
 					Description: utils.Ptr("team tracking server"),
 				}
 				*request = request.CreateInstancePayload(payload)
@@ -154,8 +176,21 @@ func TestBuildCreateInstanceRequest(t *testing.T) {
 			}),
 			expectedRequest: fixtureRequest(func(request *modelexperiments.ApiCreateInstanceRequest) {
 				payload := modelexperiments.CreateInstancePayload{
-					Name:   "example",
+					Name:   testName,
 					Labels: &map[string]string{"env": "prod", "team": "ml"},
+				}
+				*request = request.CreateInstancePayload(payload)
+			}),
+		},
+		{
+			description: "with retention",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Retention = utils.Ptr("30d")
+			}),
+			expectedRequest: fixtureRequest(func(request *modelexperiments.ApiCreateInstanceRequest) {
+				payload := modelexperiments.CreateInstancePayload{
+					Name:                       testName,
+					DeletedExperimentRetention: utils.Ptr("30d"),
 				}
 				*request = request.CreateInstancePayload(payload)
 			}),
@@ -197,7 +232,11 @@ func TestOutputResult(t *testing.T) {
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(params.Printer, "", false, "test-project", tt.resp); (err != nil) != tt.wantErr {
+			model := fixtureInputModel(func(model *inputModel) {
+				model.OutputFormat = ""
+				model.Async = false
+			})
+			if err := outputResult(params.Printer, model, "test-project", tt.resp); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

@@ -69,12 +69,7 @@ func fixtureInputModel(mods ...func(*inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(*modelexperiments.ApiGetInstanceRequest)) modelexperiments.ApiGetInstanceRequest {
-	request := testClient.DefaultAPI.GetInstance(
-		testCtx,
-		testProjectId,
-		testRegion,
-		testInstanceId,
-	)
+	request := testClient.DefaultAPI.GetInstance(testCtx, testProjectId, testRegion, testInstanceId)
 
 	for _, mod := range mods {
 		mod(&request)
@@ -124,24 +119,44 @@ func TestParseInput(t *testing.T) {
 			}),
 			isValid: false,
 		},
+		{
+			description: "project id invalid",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "project id invalid 1",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[globalflags.ProjectIdFlag] = ""
+			}),
+			isValid: false,
+		},
+		{
+			description: "instance id invalid",
+			argValues:   []string{"invalid-uuid"},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
+		{
+			description: "instance id missing",
+			argValues:   []string{""},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			testutils.TestParseInput(
-				t,
-				NewCmd,
-				parseInput,
-				tt.expectedModel,
-				tt.argValues,
-				tt.flagValues,
-				tt.isValid,
-			)
+			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
 	}
 }
 
-func TestBuildDescribeInstanceRequest(t *testing.T) {
+func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
@@ -157,13 +172,7 @@ func TestBuildDescribeInstanceRequest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
-
-			diff := cmp.Diff(
-				request,
-				tt.expectedRequest,
-				cmp.AllowUnexported(tt.expectedRequest),
-				cmpopts.EquateComparable(testCtx),
-			)
+			diff := cmp.Diff(request, tt.expectedRequest, cmp.AllowUnexported(tt.expectedRequest), cmpopts.EquateComparable(testCtx))
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
 			}
@@ -195,16 +204,8 @@ func TestOutputResult(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := outputResult(
-				params.Printer,
-				"",
-				tt.resp,
-			); (err != nil) != tt.wantErr {
-				t.Errorf(
-					"outputResult() error = %v, wantErr %v",
-					err,
-					tt.wantErr,
-				)
+			if err := outputResult(params.Printer, fixtureInputModel(), tt.resp); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

@@ -78,15 +78,21 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
 				projectLabel = model.ProjectId
+			} else if projectLabel == "" {
+				projectLabel = model.ProjectId
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, projectLabel, resp)
+			return outputResult(params.Printer, model, projectLabel, resp)
 		},
 	}
 
-	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
+	configureFlags(cmd)
 
 	return cmd
+}
+
+func configureFlags(cmd *cobra.Command) {
+	cmd.Flags().Int64(limitFlag, 0, "Maximum number of entries to list")
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
@@ -126,12 +132,12 @@ func applyLimit(resp *modelexperiments.ListInstancesResponse, limit *int64) {
 	resp.Instances = resp.Instances[:int(*limit)]
 }
 
-func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *modelexperiments.ListInstancesResponse) error {
+func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp *modelexperiments.ListInstancesResponse) error {
 	if resp == nil {
 		return fmt.Errorf("response is nil")
 	}
 
-	return p.OutputResult(outputFormat, resp.Instances, func() error {
+	return p.OutputResult(model.OutputFormat, resp, func() error {
 		if len(resp.Instances) == 0 {
 			p.Outputf("No instances found for project %q\n", projectLabel)
 			return nil

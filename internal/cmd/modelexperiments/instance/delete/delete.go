@@ -11,7 +11,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/modelexperiments/client"
+	meUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/modelexperiments/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/spinner"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -54,10 +56,21 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			prompt := fmt.Sprintf(
-				"Are you sure you want to delete AI Model Experiments instance %q?",
-				model.InstanceId,
-			)
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
+			} else if projectLabel == "" {
+				projectLabel = model.ProjectId
+			}
+
+			instanceLabel, err := meUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+				instanceLabel = model.InstanceId
+			}
+
+			prompt := fmt.Sprintf("Are you sure you want to delete AI Model Experiments instance %q from project %q?", instanceLabel, projectLabel)
 
 			if err := params.Printer.PromptForConfirmation(prompt); err != nil {
 				return err
@@ -65,7 +78,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			req := buildRequest(ctx, model, apiClient)
 
-			resp, err := req.Execute()
+			_, err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("delete AI Model Experiments instance: %w", err)
 			}
@@ -80,7 +93,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				}
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, model.Async, resp)
+			operationState := "Deleted"
+			if model.Async {
+				operationState = "Triggered deletion of"
+			}
+			params.Printer.Outputf("%s AI Model Experiments instance %q\n", operationState, instanceLabel)
+			return nil
 		},
 	}
 
@@ -106,19 +124,4 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *modelexperiments.APIClient) modelexperiments.ApiDeleteInstanceRequest {
 	return apiClient.DefaultAPI.DeleteInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
-}
-
-func outputResult(p *print.Printer, outputFormat string, async bool, resp *modelexperiments.DeleteInstanceResponse) error {
-	if resp == nil {
-		return fmt.Errorf("response is nil")
-	}
-
-	return p.OutputResult(outputFormat, resp.Instance, func() error {
-		operationState := "Deleted"
-		if async {
-			operationState = "Triggered deletion of"
-		}
-		p.Outputf("%s AI Model Experiments instance.\n", operationState)
-		return nil
-	})
 }

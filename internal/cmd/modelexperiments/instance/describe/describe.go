@@ -64,7 +64,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("describe AI Model Experiments instance: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, resp)
+			return outputResult(params.Printer, model, resp)
 		},
 	}
 
@@ -92,12 +92,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *modelexperi
 	return apiClient.DefaultAPI.GetInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 }
 
-func outputResult(p *print.Printer, outputFormat string, resp *modelexperiments.GetInstanceResponse) error {
+func outputResult(p *print.Printer, model *inputModel, resp *modelexperiments.GetInstanceResponse) error {
 	if resp == nil {
 		return fmt.Errorf("response instance is nil")
 	}
 
-	return p.OutputResult(outputFormat, resp.Instance, func() error {
+	return p.OutputResult(model.OutputFormat, resp, func() error {
 		table := tables.NewTable()
 		table.AddRow("ID", resp.Instance.Id)
 		table.AddSeparator()
@@ -106,6 +106,22 @@ func outputResult(p *print.Printer, outputFormat string, resp *modelexperiments.
 		table.AddRow("REGION", utils.PtrString(resp.Instance.Region))
 		table.AddSeparator()
 		table.AddRow("STATUS", resp.Instance.State)
+		table.AddSeparator()
+		table.AddRow("DESCRIPTION", utils.PtrString(resp.Instance.Description))
+		table.AddSeparator()
+		table.AddRow("DELETED EXPERIMENT RETENTION", utils.PtrString(resp.Instance.DeletedExperimentRetention))
+		table.AddSeparator()
+		table.AddRow("ERROR MESSAGE", utils.PtrString(resp.Instance.ErrorMessage))
+		table.AddSeparator()
+		table.AddRow("ARTIFACT STORAGE NAME", utils.PtrString(resp.Instance.BucketName))
+		table.AddSeparator()
+		table.AddRow("URL", resp.Instance.Url)
+		table.AddSeparator()
+		labels := ""
+		if resp.Instance.Labels != nil {
+			labels = fmt.Sprint(*resp.Instance.Labels)
+		}
+		table.AddRow("LABELS", labels)
 		table.AddSeparator()
 		err := table.Display(p)
 		if err != nil {

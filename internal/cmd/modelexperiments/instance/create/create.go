@@ -48,8 +48,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				`Create an AI Model Experiments instance with name "my-tracking"`,
 				`$ stackit model-experiments instance create --name my-tracking`),
 			examples.NewExample(
-				`Create an instance with a description and labels`,
-				`$ stackit model-experiments instance create --name my-tracking --description "team tracking server" --labels env=prod,team=ml`),
+				`Create an instance with a description, labels, and deleted experiment retention`,
+				`$ stackit model-experiments instance create --name my-tracking --description "team tracking server" --labels env=prod,team=ml --deleted-experiment-retention 30d`),
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
@@ -67,6 +67,8 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
+			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
 			}
 
@@ -94,7 +96,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				}
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, model.Async, projectLabel, resp)
+			return outputResult(params.Printer, model, projectLabel, resp)
 		},
 	}
 	configureFlags(cmd)
@@ -104,7 +106,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(nameFlag, "n", "", "Instance name")
 	cmd.Flags().String(descriptionFlag, "", "Instance description")
-	cmd.Flags().StringToString(labelsFlag, nil, `Labels as comma-separated key-value pairs, e.g. "--labels env=prod,team=ml"`)
+	cmd.Flags().StringToString(labelsFlag, nil, `Labels are comma-separated key-value string pairs, e.g. "--labels env=prod,team=ml"`)
 	cmd.Flags().String(retentionFlag, "", `Retention period for deleted experiments before permanent purge, e.g. "30d" (min 1d, max 90d)`)
 	err := flags.MarkFlagsRequired(cmd, nameFlag)
 	cobra.CheckErr(err)
@@ -147,19 +149,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *modelexperi
 	return req.CreateInstancePayload(payload)
 }
 
-func outputResult(p *print.Printer, outputFormat string, async bool, projectLabel string, resp *modelexperiments.CreateInstanceResponse) error {
-	var instance any
-	if resp != nil {
-		instance = resp.Instance
-	}
-
-	return p.OutputResult(outputFormat, instance, func() error {
+func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp *modelexperiments.CreateInstanceResponse) error {
+	return p.OutputResult(model.OutputFormat, resp, func() error {
 		if resp == nil {
 			return fmt.Errorf("response instance is nil")
 		}
 
 		operationState := "Created"
-		if async {
+		if model.Async {
 			operationState = "Triggered creation of"
 		}
 		p.Outputf("%s AI Model Experiments instance for project %q. Instance ID: %s\n", operationState, projectLabel, resp.Instance.Id)

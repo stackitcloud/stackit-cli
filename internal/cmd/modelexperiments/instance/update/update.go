@@ -12,7 +12,9 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/pkg/flags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/print"
+	"github.com/stackitcloud/stackit-cli/internal/pkg/projectname"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/services/modelexperiments/client"
+	meUtils "github.com/stackitcloud/stackit-cli/internal/pkg/services/modelexperiments/utils"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
 
@@ -76,6 +78,25 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
+			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+				projectLabel = model.ProjectId
+			} else if projectLabel == "" {
+				projectLabel = model.ProjectId
+			}
+
+			instanceLabel, err := meUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
+			if err != nil {
+				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+				instanceLabel = model.InstanceId
+			}
+
+			prompt := fmt.Sprintf("Are you sure you want to update AI Model Experiments instance %q in project %q?", instanceLabel, projectLabel)
+			if err := params.Printer.PromptForConfirmation(prompt); err != nil {
+				return err
+			}
+
 			req := buildRequest(ctx, model, apiClient)
 
 			resp, err := req.Execute()
@@ -83,7 +104,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return fmt.Errorf("update AI Model Experiments instance: %w", err)
 			}
 
-			return outputResult(params.Printer, model.OutputFormat, resp)
+			return outputResult(params.Printer, model, resp)
 		},
 	}
 
@@ -95,8 +116,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(nameFlag, "n", "", "Instance name")
 	cmd.Flags().String(descriptionFlag, "", "Instance description")
-	cmd.Flags().StringToString(labelsFlag, nil, `Labels as comma-separated key-value pairs, e.g. "--labels env=prod,team=ml"`)
+	cmd.Flags().StringToString(labelsFlag, nil, `Labels are comma-separated key-value string pairs, e.g. "--labels env=prod,team=ml"`)
 	cmd.Flags().String(retentionFlag, "", `Retention period for deleted experiments before permanent purge, e.g. "30d" (min 1d, max 90d)`)
+	cmd.MarkFlagsOneRequired(nameFlag, descriptionFlag, labelsFlag, retentionFlag)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inputModel, error) {
@@ -106,21 +128,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		return nil, &cliErr.ProjectIdError{}
 	}
 
-	labels, err := cmd.Flags().GetStringToString(labelsFlag)
-	if err != nil {
-		return nil, fmt.Errorf("parse %q flag: %w", labelsFlag, err)
-	}
-
+	labels := flags.FlagToStringToAny(p, cmd, labelsFlag)
 	var labelsPtr *map[string]*string
-
 	if len(labels) > 0 {
 		convertedLabels := make(map[string]*string, len(labels))
-
 		for key, value := range labels {
-			valueCopy := value
+			valueCopy := fmt.Sprint(value)
 			convertedLabels[key] = &valueCopy
 		}
-
 		labelsPtr = &convertedLabels
 	}
 
@@ -133,13 +148,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		Description: flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		Labels:      labelsPtr,
 		Retention:   flags.FlagToStringPointer(p, cmd, retentionFlag),
-	}
-
-	if model.Name == nil &&
-		model.Description == nil &&
-		model.Labels == nil &&
-		model.Retention == nil {
-		return nil, fmt.Errorf("at least one update flag must be provided")
 	}
 
 	p.DebugInputModel(model)
@@ -171,16 +179,13 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *modelexperi
 	return req.PartialUpdateInstancePayload(payload)
 }
 
-func outputResult(p *print.Printer, outputFormat string, resp *modelexperiments.PartialUpdateInstanceResponse) error {
+func outputResult(p *print.Printer, model *inputModel, resp *modelexperiments.PartialUpdateInstanceResponse) error {
 	if resp == nil {
 		return fmt.Errorf("response instance is nil")
 	}
 
-	return p.OutputResult(outputFormat, resp.Instance, func() error {
-		p.Outputf(
-			"Updated AI Model Experiments instance. Instance ID: %s\n",
-			resp.Instance.Id,
-		)
+	return p.OutputResult(model.OutputFormat, resp, func() error {
+		p.Outputf("Updated AI Model Experiments instance. Instance ID: %s\n", resp.Instance.Id)
 		return nil
 	})
 }

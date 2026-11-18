@@ -57,11 +57,7 @@ func fixtureInputModel(mods ...func(*inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(*modelexperiments.ApiListInstancesRequest)) modelexperiments.ApiListInstancesRequest {
-	request := testClient.DefaultAPI.ListInstances(
-		testCtx,
-		testProjectId,
-		testRegion,
-	)
+	request := testClient.DefaultAPI.ListInstances(testCtx, testProjectId, testRegion)
 
 	for _, mod := range mods {
 		mod(&request)
@@ -85,6 +81,11 @@ func TestParseInput(t *testing.T) {
 			expectedModel: fixtureInputModel(),
 		},
 		{
+			description: "no values",
+			flagValues:  map[string]string{},
+			isValid:     false,
+		},
+		{
 			description: "limit",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[limitFlag] = "10"
@@ -102,9 +103,37 @@ func TestParseInput(t *testing.T) {
 			isValid: false,
 		},
 		{
+			description: "project id invalid",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "project id invalid 1",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[globalflags.ProjectIdFlag] = ""
+			}),
+			isValid: false,
+		},
+		{
 			description: "limit must be greater than zero",
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[limitFlag] = "0"
+			}),
+			isValid: false,
+		},
+		{
+			description: "limit negative",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "-1"
+			}),
+			isValid: false,
+		},
+		{
+			description: "limit invalid string",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[limitFlag] = "invalid"
 			}),
 			isValid: false,
 		},
@@ -112,34 +141,17 @@ func TestParseInput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			testutils.TestParseInput(
-				t,
-				NewCmd,
-				parseInput,
-				tt.expectedModel,
-				tt.argValues,
-				tt.flagValues,
-				tt.isValid,
-			)
+			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
 	}
 }
 
-func TestBuildListInstancesRequest(t *testing.T) {
-	request := buildRequest(
-		testCtx,
-		fixtureInputModel(),
-		testClient,
-	)
+func TestBuildRequest(t *testing.T) {
+	request := buildRequest(testCtx, fixtureInputModel(), testClient)
 
 	expectedRequest := fixtureRequest()
 
-	diff := cmp.Diff(
-		request,
-		expectedRequest,
-		cmp.AllowUnexported(expectedRequest),
-		cmpopts.EquateComparable(testCtx),
-	)
+	diff := cmp.Diff(request, expectedRequest, cmp.AllowUnexported(expectedRequest), cmpopts.EquateComparable(testCtx))
 
 	if diff != "" {
 		t.Fatalf("Data does not match: %s", diff)
@@ -245,17 +257,8 @@ func TestOutputResult(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			params := testparams.NewTestParams()
-			if err := outputResult(
-				params.Printer,
-				"",
-				"test-project",
-				tt.resp,
-			); (err != nil) != tt.wantErr {
-				t.Errorf(
-					"outputResult() error = %v, wantErr %v",
-					err,
-					tt.wantErr,
-				)
+			if err := outputResult(params.Printer, fixtureInputModel(), "test-project", tt.resp); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
 			for _, expected := range tt.wantOutput {
