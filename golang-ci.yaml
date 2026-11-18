@@ -15,6 +15,7 @@ linters:
     - revive
     - sqlclosecheck
     - wastedassign
+    - wsl_v5
   disable:
     - noctx # false positive: finds errors with http.NewRequest that dont make sense
     - unparam # false positives
@@ -39,7 +40,7 @@ linters:
         - experimental
     gosec:
       excludes:
-      # Suppressions: (see https://github.com/securego/gosec#available-rules for details)
+        # Suppressions: (see https://github.com/securego/gosec#available-rules for details)
         - G104 # "Audit errors not checked" -> which we don't need and is a badly implemented version of errcheck
         - G102 # "Bind to all interfaces" -> since this is normal in k8s
         - G304 # "File path provided as taint input" -> too many false positives
@@ -66,6 +67,9 @@ linters:
         - name: atomic
         - name: empty-lines
         - name: early-return
+    wsl_v5:
+      allow-whole-block: true
+      branch-max-lines: 4
   exclusions:
     generated: lax
     paths:
