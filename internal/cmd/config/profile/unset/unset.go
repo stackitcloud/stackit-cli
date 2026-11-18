@@ -42,10 +42,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				params.Printer.Warn("The default profile is not authenticated, please login using the 'stackit auth login' command.\n")
 				return nil
 			}
+
 			params.Printer.Debug(print.DebugLevel, "found valid authentication flow for active profile: %s", flow)
 
 			return nil
 		},
 	}
+
 	return cmd
 }

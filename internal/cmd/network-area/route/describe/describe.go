@@ -53,6 +53,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -66,6 +67,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("describe static route: %w", err)
@@ -75,6 +77,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -98,6 +101,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -111,6 +115,7 @@ func outputResult(p *print.Printer, outputFormat string, route *iaas.Route) erro
 		table := tables.NewTable()
 		table.AddRow("ID", utils.PtrString(route.Id))
 		table.AddSeparator()
+
 		destination := route.Destination
 		if destination.DestinationCIDRv4 != nil {
 			table.AddRow("DESTINATION TYPE", destination.DestinationCIDRv4.Type)
@@ -123,6 +128,7 @@ func outputResult(p *print.Printer, outputFormat string, route *iaas.Route) erro
 			table.AddRow("DESTINATION", destination.DestinationCIDRv6.Value)
 			table.AddSeparator()
 		}
+
 		nexthop := route.Nexthop
 		if nexthop.NexthopIPv4 != nil {
 			table.AddRow("NEXTHOP", nexthop.NexthopIPv4.Value)
@@ -141,11 +147,13 @@ func outputResult(p *print.Printer, outputFormat string, route *iaas.Route) erro
 			table.AddRow("NEXTHOP TYPE", nexthop.NexthopInternet.Type)
 			table.AddSeparator()
 		}
+
 		if len(route.Labels) > 0 {
 			labels := []string{}
 			for key, value := range route.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
+
 			table.AddSeparator()
 			table.AddRow("LABELS", strings.Join(labels, "\n"))
 		}
@@ -154,6 +162,7 @@ func outputResult(p *print.Printer, outputFormat string, route *iaas.Route) erro
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

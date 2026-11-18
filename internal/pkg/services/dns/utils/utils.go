@@ -15,6 +15,7 @@ func GetZoneName(ctx context.Context, apiClient dns.DefaultAPI, projectId, zoneI
 	if err != nil {
 		return "", fmt.Errorf("get DNS zone: %w", err)
 	}
+
 	return resp.Zone.Name, nil
 }
 
@@ -23,12 +24,15 @@ func GetZoneIdByDnsName(ctx context.Context, apiClient dns.DefaultAPI, projectId
 	if err != nil {
 		return "", fmt.Errorf("list DNS zones: %w", err)
 	}
+
 	if resp == nil || len(resp.Zones) == 0 {
 		return "", fmt.Errorf("no DNS zone found with DNS name %q in project %q", dnsName, projectId)
 	}
+
 	if len(resp.Zones) > 1 {
 		return "", fmt.Errorf("multiple DNS zones found with DNS name %q in project %q", dnsName, projectId)
 	}
+
 	return resp.Zones[0].Id, nil
 }
 
@@ -37,6 +41,7 @@ func GetRecordSetName(ctx context.Context, apiClient dns.DefaultAPI, projectId, 
 	if err != nil {
 		return "", fmt.Errorf("get DNS recordset: %w", err)
 	}
+
 	return resp.Rrset.Name, nil
 }
 
@@ -45,6 +50,7 @@ func GetRecordSetType(ctx context.Context, apiClient dns.DefaultAPI, projectId, 
 	if err != nil {
 		return utils.Ptr(""), fmt.Errorf("get DNS recordset: %w", err)
 	}
+
 	return utils.Ptr(string(resp.Rrset.Type)), nil
 }
 
@@ -59,6 +65,7 @@ func FormatTxtRecord(input string) (string, error) {
 	}
 
 	result := ""
+
 	chunks := int(math.Ceil(length / 255))
 	for i := range chunks {
 		skip := 255 * i

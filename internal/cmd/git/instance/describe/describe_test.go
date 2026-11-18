@@ -30,6 +30,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -41,6 +42,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -49,6 +51,7 @@ func fixtureRequest(mods ...func(request *git.ApiGetInstanceRequest)) git.ApiGet
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -120,16 +123,19 @@ func TestParseInput(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			params := testparams.NewTestParams()
+
 			cmd := NewCmd(params.CmdParams)
 			if err := globalflags.Configure(cmd.Flags()); err != nil {
 				t.Errorf("cannot configure global flags: %v", err)
 			}
+
 			for flag, value := range tt.flagValues {
 				err := cmd.Flags().Set(flag, value)
 				if err != nil {
 					if !tt.isValid {
 						return
 					}
+
 					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
 				}
 			}
@@ -138,6 +144,7 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error validating flags: %v", err)
 			}
 
@@ -152,12 +159,14 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error parsing flags: %v", err)
 			}
 
 			if !tt.isValid {
 				t.Fatalf("did not fail on invalid input")
 			}
+
 			diff := cmp.Diff(model, tt.expectedModel)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -182,6 +191,7 @@ func TestBuildRequest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
+
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest, git.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
@@ -198,6 +208,7 @@ func TestOutputResult(t *testing.T) {
 		outputFormat string
 		resp         *git.Instance
 	}
+
 	tests := []struct {
 		name    string
 		args    args

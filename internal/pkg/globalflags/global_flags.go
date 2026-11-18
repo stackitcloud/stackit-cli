@@ -54,36 +54,42 @@ type GlobalFlagModel struct {
 
 func Configure(flagSet *pflag.FlagSet) error {
 	flagSet.VarP(flags.UUIDFlag(), ProjectIdFlag, "p", "Project ID")
+
 	err := viper.BindPFlag(config.ProjectIdKey, flagSet.Lookup(ProjectIdFlag))
 	if err != nil {
 		return fmt.Errorf("bind --%s flag to config: %w", ProjectIdFlag, err)
 	}
 
 	OutputFormatFlag.Register(flagSet)
+
 	err = viper.BindPFlag(config.OutputFormatKey, flagSet.Lookup(OutputFormatFlag.Name()))
 	if err != nil {
 		return fmt.Errorf("bind --%s flag to config: %w", OutputFormatFlag.Name(), err)
 	}
 
 	flagSet.Bool(AsyncFlag, false, "If set, runs the command asynchronously")
+
 	err = viper.BindPFlag(config.AsyncKey, flagSet.Lookup(AsyncFlag))
 	if err != nil {
 		return fmt.Errorf("bind --%s flag to config: %w", AsyncFlag, err)
 	}
 
 	flagSet.BoolP(AssumeYesFlag, "y", false, "If set, skips all confirmation prompts")
+
 	err = viper.BindPFlag(config.AssumeYesKey, flagSet.Lookup(AssumeYesFlag))
 	if err != nil {
 		return fmt.Errorf("bind --%s flag to config: %w", AssumeYesFlag, err)
 	}
 
 	VerbosityFlag.Register(flagSet)
+
 	err = viper.BindPFlag(config.VerbosityKey, flagSet.Lookup(VerbosityFlag.Name()))
 	if err != nil {
 		return fmt.Errorf("bind --%s flag to config: %w", VerbosityFlag.Name(), err)
 	}
 
 	flagSet.String(RegionFlag, "", "Target region for region-specific requests")
+
 	err = viper.BindPFlag(config.RegionKey, flagSet.Lookup(RegionFlag))
 	if err != nil {
 		return fmt.Errorf("bind --%s flag to config: %w", RegionFlag, err)

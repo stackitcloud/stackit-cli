@@ -41,6 +41,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -53,6 +54,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a credentials group with name %q?", model.CredentialsGroupName)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -60,6 +62,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				// Check if the service is enabled for the given project
@@ -67,11 +70,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if enabledErr != nil {
 					return fmt.Errorf("check if Object Storage is enabled: %w", enabledErr)
 				}
+
 				if !enabled {
 					return &errors.ServiceDisabledError{
 						Service: "object-storage",
 					}
 				}
+
 				return fmt.Errorf("create Object Storage credentials group: %w", err)
 			}
 
@@ -79,6 +84,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -101,6 +107,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -109,6 +116,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *objectstora
 	req = req.CreateCredentialsGroupPayload(objectstorage.CreateCredentialsGroupPayload{
 		DisplayName: model.CredentialsGroupName,
 	})
+
 	return req
 }
 
@@ -123,6 +131,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *objectstorage.Cre
 			resp.CredentialsGroup.CredentialsGroupId,
 		)
 		p.Outputf("URN: %s\n", resp.CredentialsGroup.Urn)
+
 		return nil
 	})
 }

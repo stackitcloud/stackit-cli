@@ -108,6 +108,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("write config to file: %w", err)
 			}
+
 			return nil
 		},
 	}
@@ -140,6 +141,7 @@ Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
 
 Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
 `)
+
 	return cmd
 }
 
@@ -278,6 +280,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	projectIdSet := projectIdFromFlag != nil
 
 	allowedUrlDomainFromFlag := flags.FlagToStringPointer(p, cmd, allowedUrlDomainFlag)
+
 	allowedUrlDomainFlagValue := flags.FlagToStringValue(p, cmd, allowedUrlDomainFlag)
 	if allowedUrlDomainFromFlag != nil && allowedUrlDomainFlagValue == "" {
 		p.Warn("The allowed URL domain is set to empty. All URLs will be accepted regardless of their domain.\n")
@@ -289,6 +292,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -307,9 +311,11 @@ func parseSessionTimeLimit(p *print.Printer, cmd *cobra.Command) (*string, error
 	if err != nil {
 		return nil, fmt.Errorf("parse value \"%s\": %w", *sessionTimeLimit, err)
 	}
+
 	if duration <= 0 {
 		return nil, fmt.Errorf("value must be positive")
 	}
+
 	if duration > time.Duration(24)*time.Hour {
 		return nil, fmt.Errorf("value can't be larger than 24h")
 	}

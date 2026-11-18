@@ -50,9 +50,11 @@ func StringEnumFlag[T ~string](name string, possibleValues []T, docs string, opt
 			f.options = append(f.options, v)
 		}
 	}
+
 	for _, opt := range opts {
 		opt(f)
 	}
+
 	return f
 }
 
@@ -92,13 +94,17 @@ func (s *stringEnumFlag[T]) String() string {
 func (s *stringEnumFlag[T]) fmtValues(xs []T) string {
 	var sb strings.Builder
 	sb.WriteString("[")
+
 	for i, v := range xs {
 		sb.WriteString(string(v))
+
 		if i != len(xs)-1 {
 			sb.WriteString(", ")
 		}
 	}
+
 	sb.WriteString("]")
+
 	return sb.String()
 }
 
@@ -125,6 +131,7 @@ func (s *stringEnumFlag[T]) Type() string {
 func (s *stringEnumFlag[T]) Reset() {
 	if s.defaultValue == "" {
 		var zero T
+
 		s.value = zero
 		s.valueSet = false
 	} else {

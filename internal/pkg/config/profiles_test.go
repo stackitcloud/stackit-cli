@@ -73,6 +73,7 @@ func TestValidateProfile(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("expected profile to be valid but got error: %v", err)
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("expected profile to be invalid but got no error")
 			}
@@ -117,6 +118,7 @@ func TestGetProfileFolderPath(t *testing.T) {
 			if tt.defaultConfigFolderNotSet {
 				defaultConfigFolderPath = ""
 			}
+
 			actual := GetProfileFolderPath(tt.profile)
 			if actual != tt.expected {
 				t.Errorf("expected profile folder path to be %q but got %q", tt.expected, actual)
@@ -159,11 +161,13 @@ func TestImportProfile(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			params := testparams.NewTestParams()
+
 			err := ImportProfile(params.Printer, tt.profile, tt.config, tt.setAsActive)
 			if err != nil {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("profile should be valid but got error: %v\n", err)
 			}
 
@@ -174,11 +178,13 @@ func TestImportProfile(t *testing.T) {
 
 		t.Cleanup(func() {
 			params := testparams.NewTestParams()
+
 			err := DeleteProfile(params.Printer, tt.profile)
 			if err != nil {
 				if !tt.isValid {
 					return
 				}
+
 				fmt.Printf("could not clean up imported profile: %v\n", err)
 			}
 		})
@@ -191,6 +197,7 @@ func TestExportProfile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	t.Cleanup(func() {
 		func(path string) {
 			err := os.RemoveAll(path)
@@ -203,6 +210,7 @@ func TestExportProfile(t *testing.T) {
 	// Create test config directory
 	testConfigFolderPath := filepath.Join(testDir, "config")
 	initConfig(testConfigFolderPath)
+
 	err = Write()
 	if err != nil {
 		t.Fatalf("could not write profile, %v", err)
@@ -211,10 +219,12 @@ func TestExportProfile(t *testing.T) {
 	// Create prerequisite profile
 	params := testparams.NewTestParams()
 	profileName := "export-profile-test"
+
 	err = CreateProfile(params.Printer, profileName, true, false, false)
 	if err != nil {
 		t.Fatalf("could not create prerequisite profile, %v", err)
 	}
+
 	t.Cleanup(func() {
 		func(p *print.Printer, profile string) {
 			err := DeleteProfile(p, profile)
@@ -262,8 +272,10 @@ func TestExportProfile(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("export should be valid but got error: %v\n", err)
 			}
+
 			if !tt.isValid {
 				t.Fatalf("export should be invalid but got no error\n")
 			}

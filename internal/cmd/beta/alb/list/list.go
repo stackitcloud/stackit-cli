@@ -48,6 +48,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -62,6 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
@@ -74,6 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("list load balancerse: %w", err)
 			}
+
 			items := response.GetLoadBalancers()
 
 			// Truncate output
@@ -86,6 +89,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -113,6 +117,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -130,6 +135,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, items []a
 
 		table := tables.NewTable()
 		table.SetHeader("NAME", "EXTERNAL ADDRESS", "REGION", "STATUS", "VERSION", "ERRORS")
+
 		for i := range items {
 			item := &items[i]
 
@@ -137,6 +143,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, items []a
 			if item.Errors != nil {
 				errNo = len(item.Errors)
 			}
+
 			table.AddRow(utils.PtrString(item.Name),
 				utils.PtrString(item.ExternalAddress),
 				utils.PtrString(item.Region),
@@ -145,6 +152,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, items []a
 				errNo,
 			)
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

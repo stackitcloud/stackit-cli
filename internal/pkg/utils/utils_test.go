@@ -100,6 +100,7 @@ func TestConvertInt32PToFloat64P(t *testing.T) {
 func TestConvertInt32PToFloat64PLossyConversion(t *testing.T) {
 	i := int32(900_000_001)
 	f := ConvertInt32PToFloat32P(&i)
+
 	s := fmt.Sprintf("%f", *f)
 	if s != "900000000.000000" {
 		t.Errorf("Expected lossy conversion of %d to %f, got %s", i, *f, s)
@@ -252,6 +253,7 @@ func TestValidateURLDomain(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("expected URL to be valid, got error: %v", err)
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("expected URL to be invalid, got no error")
 			}
@@ -263,6 +265,7 @@ func TestUserAgentConfigOption(t *testing.T) {
 	type args struct {
 		providerVersion string
 	}
+
 	tests := []struct {
 		name string
 		args args
@@ -279,12 +282,14 @@ func TestUserAgentConfigOption(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			clientConfigActual := sdkConfig.Configuration{}
+
 			err := tt.want(&clientConfigActual)
 			if err != nil {
 				t.Errorf("error configuring client: %v", err)
 			}
 
 			clientConfigExpected := sdkConfig.Configuration{}
+
 			err = UserAgentConfigOption(tt.args.providerVersion)(&clientConfigExpected)
 			if err != nil {
 				t.Errorf("error configuring client: %v", err)
@@ -388,6 +393,7 @@ func TestConvertStringMapToInterfaceMap(t *testing.T) {
 					t.Errorf("ConvertStringMapToInterfaceMap() unexpected key %s in result", k)
 					continue
 				}
+
 				if v != expectedVal {
 					t.Errorf("ConvertStringMapToInterfaceMap() value for key %s = %v, want %v", k, v, expectedVal)
 				}
@@ -448,11 +454,13 @@ func TestMap(t *testing.T) {
 		input []T
 		mapFn func(T) U
 	}
+
 	type testCase[T any, U any] struct {
 		name string
 		args args[T, U]
 		want []U
 	}
+
 	tests := []testCase[string, *string]{
 		{
 			name: "default",

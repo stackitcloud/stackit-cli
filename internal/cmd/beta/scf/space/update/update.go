@@ -46,6 +46,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(p.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -60,6 +61,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			spaceLabel := scfUtils.GetSpaceLabel(ctx, p.Printer, apiClient.DefaultAPI, model.ProjectId, model.Region, model.OrganizationId, model.SpaceId)
 
 			prompt := fmt.Sprintf("Are you sure you want to update STACKIT Cloud Foundry space %q?", spaceLabel)
+
 			err = p.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -67,6 +69,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update STACKIT Cloud Foundry space: %w", err)
@@ -76,6 +79,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -103,6 +107,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -117,7 +122,9 @@ func outputResult(p *print.Printer, model *inputModel, resp *scf.Space) error {
 		if resp != nil && resp.Name != "" {
 			spaceLabel = resp.Name
 		}
+
 		p.Outputf("Updated STACKIT Cloud Foundry space %q\n", spaceLabel)
+
 		return nil
 	})
 }

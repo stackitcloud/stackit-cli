@@ -47,6 +47,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return fmt.Errorf("parse input: %w", err)
@@ -62,12 +63,16 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
+
 			prompt := fmt.Sprintf("Are you sure you want to update credential %q for %q?", *model.CredentialsRef, projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return fmt.Errorf("update credential: %w", err)
@@ -78,6 +83,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("update credential: %w", err)
 			}
+
 			if resp == nil {
 				return fmt.Errorf("response is nil")
 			}
@@ -86,12 +92,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd, params)
+
 	return cmd
 }
 
 func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.Flags().StringP(usernameFlag, "u", "", "Username for the credentials")
 	cmd.Flags().StringP(displaynameFlag, "d", "", "Displayname for the credentials")
+
 	password := flags.SecretFlag(passwordFlag, params)
 	cmd.Flags().Var(password, passwordFlag, password.Usage())
 
@@ -121,13 +129,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (input
 		Displayname:     flags.FlagToStringPointer(p, cmd, displaynameFlag),
 		CredentialsRef:  &inputArgs[0],
 	}
+
 	pw, err := flags.ResolveSecretFlag(p, cmd, passwordFlag)
 	if err != nil {
 		return model, err
 	}
+
 	model.Password = pw
 
 	p.DebugInputModel(model)
+
 	return model, nil
 }
 
@@ -136,6 +147,7 @@ func outputResult(p *print.Printer, model inputModel, response *alb.UpdateCreden
 	if model.GlobalFlagModel != nil {
 		outputFormat = model.OutputFormat
 	}
+
 	if response == nil {
 		return fmt.Errorf("no response passed")
 	}

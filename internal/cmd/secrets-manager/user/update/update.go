@@ -53,6 +53,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args: args.SingleArg(userIdArg, utils.ValidateUUID),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -67,16 +68,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := secretsManagerUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
 			userLabel, err := secretsManagerUtils.GetUserLabel(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.UserId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get user label: %v", err)
+
 				userLabel = fmt.Sprintf("%q", model.UserId)
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update user %s of instance %q?", userLabel, instanceLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -94,11 +98,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			params.Printer.Info("Updated user %s of instance %q\n", userLabel, instanceLabel)
+
 			return nil
 		},
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -137,6 +143,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -160,5 +167,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *secretsmana
 	req = req.UpdateUserPayload(secretsmanager.UpdateUserPayload{
 		Write: utils.Ptr(write),
 	})
+
 	return req, nil
 }

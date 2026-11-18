@@ -104,6 +104,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := edgeUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
@@ -114,24 +115,29 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				} else {
 					prompt = fmt.Sprintf("Are you sure you want to update your kubeconfig for instance %q of project %q? This will update your kubeconfig file. \nIf the kubeconfig file does not exist, it will create a new one.", instanceLabel, projectLabel)
 				}
+
 				err = params.Printer.PromptForConfirmation(prompt)
 				if err != nil {
 					return err
 				}
 			}
+
 			req, err := buildRequest(ctx, model, apiClient)
 			if err != nil {
 				return fmt.Errorf("build kubeconfig create request: %w", err)
 			}
+
 			respKubeconfig, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create kubeconfig for Edge Cloud instance: %w", err)
 			}
+
 			if respKubeconfig == nil {
 				return fmt.Errorf("no kubeconfig returned from the API")
 			}
 
 			var expiration = int64(model.Expiration) // #nosec G115 ValidateExpiration ensures safe bounds, conversion is safe
+
 			err = spinner.Run(params.Printer, "Creating kubeconfig", func() error {
 				_, err = wait.KubeconfigWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId, &expiration).WaitWithContext(ctx)
 				return err
@@ -146,6 +152,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -189,12 +196,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 				Details: err.Error(),
 			}
 		}
+
 		if err := commonKubeconfig.ValidateExpiration(&expTime); err != nil {
 			return nil, &cliErr.FlagValidationError{
 				Flag:    expirationFlag,
 				Details: err.Error(),
 			}
 		}
+
 		model.Expiration = expTime
 	} else {
 		// Default expiration is 1 hour
@@ -212,6 +221,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 				Details: fmt.Sprintf("must be used with --%s", globalflags.OutputFormatFlag.Name()),
 			}
 		}
+
 		if globalFlags.OutputFormat != print.JSONOutputFormat && globalFlags.OutputFormat != print.YAMLOutputFormat {
 			return nil, &cliErr.FlagValidationError{
 				Flag:    globalflags.OutputFormatFlag.Name(),
@@ -222,6 +232,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 
 	// Log the parsed model if --verbosity is set to debug
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -290,6 +301,7 @@ func outputResult(p *print.Printer, outputFormat string, model *inputModel, kube
 	} else {
 		p.Outputln(kubeconfigData)
 	}
+
 	return nil
 }
 
@@ -301,12 +313,14 @@ func marshalKubeconfig(kubeconfigMap map[string]interface{}, format string) (str
 		if err != nil {
 			return "", fmt.Errorf("marshal kubeconfig to JSON: %w", err)
 		}
+
 		return string(kubeconfigJSON), nil
 	case print.YAMLOutputFormat:
 		kubeconfigYAML, err := yaml.MarshalWithOptions(kubeconfigMap, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return "", fmt.Errorf("marshal kubeconfig to YAML: %w", err)
 		}
+
 		return string(kubeconfigYAML), nil
 	default:
 		return "", fmt.Errorf("format is not JSON or YAML: %s", format)

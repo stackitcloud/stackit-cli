@@ -33,6 +33,7 @@ func cmdFactory(params *types.CmdParams) *cobra.Command {
 		testCodeFile:                {Data: []byte(testCode)},
 		testCodeFileTrailingNewline: {Data: []byte(testCode + "\n")},
 	}
+
 	return NewCmd(params)
 }
 
@@ -51,6 +52,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -67,11 +69,13 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *dns.ApiMoveZoneRequest)) dns.ApiMoveZoneRequest {
 	request := testClient.DefaultAPI.MoveZone(testCtx, testTargetProjectId)
+
 	request = request.MoveZonePayload(dns.MoveZonePayload{
 		Code:        testCode,
 		ZoneDnsName: testDnsName,
@@ -79,6 +83,7 @@ func fixtureRequest(mods ...func(request *dns.ApiMoveZoneRequest)) dns.ApiMoveZo
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -220,6 +225,7 @@ func TestOutputResult(t *testing.T) {
 		model *inputModel
 		resp  *dns.Message
 	}
+
 	tests := []struct {
 		name    string
 		args    args

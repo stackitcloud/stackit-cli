@@ -52,20 +52,24 @@ func fixtureClusterConfig(mods ...func(clusterConfig *clusterConfig)) *clusterCo
 	for _, mod := range mods {
 		mod(clusterConfig)
 	}
+
 	return clusterConfig
 }
 
 func fixtureLoginRequest(mods ...func(request *ske.ApiCreateKubeconfigRequest)) ske.ApiCreateKubeconfigRequest {
 	request := testClient.DefaultAPI.CreateKubeconfig(testCtx, testProjectId, testRegion, testClusterName)
+
 	request = request.CreateKubeconfigPayload(ske.CreateKubeconfigPayload{})
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
 func setExecCredentialEnv(t *testing.T, cluster *clientauthenticationv1.Cluster) {
 	t.Helper()
+
 	execCredential := clientauthenticationv1.ExecCredential{
 		TypeMeta: v1.TypeMeta{
 			APIVersion: clientauthenticationv1.SchemeGroupVersion.String(),
@@ -75,10 +79,12 @@ func setExecCredentialEnv(t *testing.T, cluster *clientauthenticationv1.Cluster)
 			Cluster: cluster,
 		},
 	}
+
 	execCredentialJSON, err := json.Marshal(execCredential)
 	if err != nil {
 		t.Fatalf("marshal ExecCredential: %v", err)
 	}
+
 	t.Setenv("KUBERNETES_EXEC_INFO", string(execCredentialJSON))
 }
 
@@ -93,9 +99,11 @@ func TestParseClusterConfigWithoutExecClusterInfo(t *testing.T) {
 	params := testparams.NewTestParams()
 	cmd := &cobra.Command{}
 	configureFlags(cmd)
+
 	if err := cmd.Flags().Set(clusterNameFlag, testClusterName); err != nil {
 		t.Fatalf("set cluster name flag: %v", err)
 	}
+
 	if err := cmd.Flags().Set(organizationFlag, testOrganization); err != nil {
 		t.Fatalf("set organization flag: %v", err)
 	}
@@ -104,10 +112,12 @@ func TestParseClusterConfigWithoutExecClusterInfo(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parse cluster config: %v", err)
 	}
+
 	expected := fixtureClusterConfig()
 	if diff := cmp.Diff(actual, expected, cmpopts.IgnoreFields(clusterConfig{}, "cacheKey")); diff != "" {
 		t.Fatalf("Data does not match: %s", diff)
 	}
+
 	if actual.cacheKey == "" {
 		t.Fatal("cache key is empty")
 	}
@@ -159,7 +169,9 @@ func TestParseClusterConfigPrecedence(t *testing.T) {
 			t.Setenv(envServiceAccountEmail, "workload@sa.stackit.cloud")
 
 			globalConfig := fmt.Sprintf(`{"project_id":%q,"region":%q}`, globalProjectID, globalRegion)
+
 			viper.SetConfigType("json")
+
 			if err := viper.ReadConfig(strings.NewReader(globalConfig)); err != nil {
 				t.Fatalf("read global config: %v", err)
 			}
@@ -169,25 +181,31 @@ func TestParseClusterConfigPrecedence(t *testing.T) {
 				execConfig.STACKITProjectID = ""
 				execConfig.Region = ""
 			}
+
 			configJSON, err := json.Marshal(execConfig)
 			if err != nil {
 				t.Fatalf("marshal cluster config: %v", err)
 			}
+
 			setExecCredentialEnv(t, &clientauthenticationv1.Cluster{
 				Server: "https://api.example.stackit.cloud",
 				Config: runtime.RawExtension{Raw: configJSON},
 			})
 
 			params := testparams.NewTestParams()
+
 			cmd := &cobra.Command{}
 			if err := globalflags.Configure(cmd.Flags()); err != nil {
 				t.Fatalf("configure global flags: %v", err)
 			}
+
 			configureFlags(cmd)
+
 			if tt.explicitFlags {
 				if err := cmd.Flags().Set(globalflags.ProjectIdFlag, flagProjectID); err != nil {
 					t.Fatalf("set project ID flag: %v", err)
 				}
+
 				if err := cmd.Flags().Set(globalflags.RegionFlag, flagRegion); err != nil {
 					t.Fatalf("set region flag: %v", err)
 				}
@@ -197,6 +215,7 @@ func TestParseClusterConfigPrecedence(t *testing.T) {
 			if err != nil {
 				t.Fatalf("parse cluster config: %v", err)
 			}
+
 			expected := fixtureClusterConfig(func(config *clusterConfig) {
 				config.STACKITProjectID = tt.expectedID
 				config.Region = tt.expectedRegion
@@ -217,6 +236,7 @@ func TestParseClusterConfigPrefersExplicitClusterIdentity(t *testing.T) {
 	if err != nil {
 		t.Fatalf("marshal cluster config: %v", err)
 	}
+
 	setExecCredentialEnv(t, &clientauthenticationv1.Cluster{
 		Server: "https://api.example.stackit.cloud",
 		Config: runtime.RawExtension{Raw: configJSON},
@@ -227,9 +247,11 @@ func TestParseClusterConfigPrefersExplicitClusterIdentity(t *testing.T) {
 	params := testparams.NewTestParams()
 	cmd := &cobra.Command{}
 	configureFlags(cmd)
+
 	if err := cmd.Flags().Set(clusterNameFlag, explicitClusterName); err != nil {
 		t.Fatalf("set cluster name flag: %v", err)
 	}
+
 	if err := cmd.Flags().Set(organizationFlag, explicitOrganizationID); err != nil {
 		t.Fatalf("set organization flag: %v", err)
 	}
@@ -238,6 +260,7 @@ func TestParseClusterConfigPrefersExplicitClusterIdentity(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parse cluster config: %v", err)
 	}
+
 	expected := fixtureClusterConfig(func(config *clusterConfig) {
 		config.ClusterName = explicitClusterName
 		config.OrganizationID = explicitOrganizationID
@@ -256,6 +279,7 @@ func TestParseClusterConfigUsesExecClusterInfoAsFallback(t *testing.T) {
 	if err != nil {
 		t.Fatalf("marshal cluster config: %v", err)
 	}
+
 	setExecCredentialEnv(t, &clientauthenticationv1.Cluster{
 		Server: "https://api.example.stackit.cloud",
 		Config: runtime.RawExtension{Raw: configJSON},
@@ -264,10 +288,12 @@ func TestParseClusterConfigUsesExecClusterInfoAsFallback(t *testing.T) {
 	params := testparams.NewTestParams()
 	cmd := &cobra.Command{}
 	configureFlags(cmd)
+
 	actual, err := parseClusterConfig(params.Printer, cmd, true, true, true)
 	if err != nil {
 		t.Fatalf("parse cluster config: %v", err)
 	}
+
 	expected := fixtureClusterConfig()
 	if diff := cmp.Diff(actual, expected, cmpopts.IgnoreFields(clusterConfig{}, "cacheKey")); diff != "" {
 		t.Fatalf("Data does not match: %s", diff)
@@ -283,10 +309,12 @@ func TestParseClusterConfigReportsMissingExplicitFields(t *testing.T) {
 	params := testparams.NewTestParams()
 	cmd := &cobra.Command{}
 	configureFlags(cmd)
+
 	_, err := parseClusterConfig(params.Printer, cmd, true, true, true)
 	if err == nil {
 		t.Fatal("Expected error but no error was returned")
 	}
+
 	for _, expectedFlag := range []string{"--cluster-name", "--project-id", "--region", "--organization-id"} {
 		if !strings.Contains(err.Error(), expectedFlag) {
 			t.Errorf("Expected error to mention %s, got %q", expectedFlag, err)
@@ -305,9 +333,11 @@ func TestParseClusterConfigWithAccessTokenWithoutStoredAuth(t *testing.T) {
 	params := testparams.NewTestParams()
 	cmd := &cobra.Command{}
 	configureFlags(cmd)
+
 	if err := cmd.Flags().Set(clusterNameFlag, testClusterName); err != nil {
 		t.Fatalf("set cluster name flag: %v", err)
 	}
+
 	if err := cmd.Flags().Set(organizationFlag, testOrganization); err != nil {
 		t.Fatalf("set organization flag: %v", err)
 	}
@@ -316,6 +346,7 @@ func TestParseClusterConfigWithAccessTokenWithoutStoredAuth(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parse cluster config: %v", err)
 	}
+
 	expected := fixtureClusterConfig()
 	if diff := cmp.Diff(actual, expected, cmpopts.IgnoreFields(clusterConfig{}, "cacheKey")); diff != "" {
 		t.Fatalf("Data does not match: %s", diff)
@@ -327,10 +358,12 @@ func TestGetAccessTokenFromEnvironmentWithoutStoredSession(t *testing.T) {
 	t.Setenv(envAccessToken, accessToken)
 
 	params := testparams.NewTestParams()
+
 	actual, err := getAccessToken(params.CmdParams, false)
 	if err != nil {
 		t.Fatalf("get access token: %v", err)
 	}
+
 	if actual != accessToken {
 		t.Fatalf("Expected access token %q, got %q", accessToken, actual)
 	}
@@ -399,6 +432,7 @@ func TestWorkloadIdentityConfigured(t *testing.T) {
 			clearOIDCTokenSourceEnv(t)
 			t.Setenv(envServiceAccountEmail, "workload@sa.stackit.cloud")
 			tt.configure(t)
+
 			if actual := workloadIdentityConfigured(); actual != tt.expected {
 				t.Fatalf("workloadIdentityConfigured() = %t, want %t", actual, tt.expected)
 			}
@@ -408,12 +442,14 @@ func TestWorkloadIdentityConfigured(t *testing.T) {
 
 func TestGetWorkloadIdentityAccessToken(t *testing.T) {
 	const serviceAccountEmail = "workload@sa.stackit.cloud"
+
 	federatedToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(10 * time.Minute)),
 	}).SignedString([]byte("federated-token-signing-key"))
 	if err != nil {
 		t.Fatalf("sign federated token: %v", err)
 	}
+
 	accessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
 	}).SignedString([]byte("test-signing-key"))
@@ -426,6 +462,7 @@ func TestGetWorkloadIdentityAccessToken(t *testing.T) {
 		if err := req.ParseForm(); err != nil {
 			t.Errorf("parse form: %v", err)
 		}
+
 		expectedForm := url.Values{
 			"grant_type":            {"client_credentials"},
 			"client_assertion_type": {"urn:schwarz:params:oauth:client-assertion-type:workload-jwt"},
@@ -435,6 +472,7 @@ func TestGetWorkloadIdentityAccessToken(t *testing.T) {
 		if diff := cmp.Diff(req.Form, expectedForm); diff != "" {
 			t.Errorf("Token request does not match: %s", diff)
 		}
+
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = fmt.Fprintf(w, `{"access_token":%q,"expires_in":3600,"token_type":"Bearer"}`, accessToken)
 	}))
@@ -457,6 +495,7 @@ func TestGetWorkloadIdentityAccessToken(t *testing.T) {
 				if err := os.WriteFile(tokenPath, []byte(federatedToken), 0o600); err != nil {
 					t.Fatalf("write federated token: %v", err)
 				}
+
 				t.Setenv(auth.EnvFederatedTokenFile, tokenPath)
 			},
 		},
@@ -497,6 +536,7 @@ func TestGetWorkloadIdentityAccessToken(t *testing.T) {
 			if err != nil {
 				t.Fatalf("get workload identity access token: %v", err)
 			}
+
 			if actual != accessToken {
 				t.Fatalf("Expected access token %q, got %q", accessToken, actual)
 			}
@@ -506,6 +546,7 @@ func TestGetWorkloadIdentityAccessToken(t *testing.T) {
 
 func clearOIDCTokenSourceEnv(t *testing.T) {
 	t.Helper()
+
 	for _, env := range []string{
 		auth.EnvUseOIDC,
 		auth.EnvServiceAccountFederatedToken,
@@ -521,6 +562,7 @@ func clearOIDCTokenSourceEnv(t *testing.T) {
 
 func TestRetrieveTokenFromIDPWithoutCache(t *testing.T) {
 	clusterCredential := uuid.NewString()
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = fmt.Fprintf(w, `{"access_token":%q}`, clusterCredential)
@@ -531,6 +573,7 @@ func TestRetrieveTokenFromIDPWithoutCache(t *testing.T) {
 	if err != nil {
 		t.Fatalf("retrieve token without cache: %v", err)
 	}
+
 	if actual != clusterCredential {
 		t.Fatalf("Expected cluster credential %q, got %q", clusterCredential, actual)
 	}
@@ -622,10 +665,13 @@ zbRjZmli7cnenEnfnNoFIGbgkbjGXRUCIC5zFtWXFK7kA+B2vDxD0DlLcQodNwi4
 			if err != nil {
 				t.Fatalf("func returned error: %s", err)
 			}
+
 			if execCredential == nil {
 				t.Fatal("execCredential is nil")
 			}
+
 			expected, _ := json.Marshal(tt.expectedExecCredentialRequest)
+
 			diff := cmp.Diff(execCredential, expected)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -637,12 +683,14 @@ zbRjZmli7cnenEnfnNoFIGbgkbjGXRUCIC5zFtWXFK7kA+B2vDxD0DlLcQodNwi4
 func TestParseTokenToExecCredential(t *testing.T) {
 	expirationTime := time.Now().Add(30 * time.Minute)
 	expectedTime := expirationTime.Add(-5 * time.Minute)
+
 	token, err := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.RegisteredClaims{
 		ExpiresAt: jwt.NewNumericDate(expirationTime),
 	}).SigningString()
 	if err != nil {
 		t.Fatalf("token generation failed: %v", err)
 	}
+
 	token += ".signatureAAA"
 
 	tests := []struct {
@@ -672,10 +720,13 @@ func TestParseTokenToExecCredential(t *testing.T) {
 			if err != nil {
 				t.Fatalf("func returned error: %s", err)
 			}
+
 			if execCredential == nil {
 				t.Fatal("execCredential is nil")
 			}
+
 			expected, _ := json.Marshal(tt.expectedExecCredentialRequest)
+
 			diff := cmp.Diff(execCredential, expected)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

@@ -91,6 +91,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -105,12 +106,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			networkLabel, err := iaasUtils.GetNetworkName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.NetworkId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get network name: %v", err)
+
 				networkLabel = model.NetworkId
 			} else if networkLabel == "" {
 				networkLabel = model.NetworkId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update network %q?", networkLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -118,10 +121,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("update network area: %w", err)
 			}
+
 			networkId := model.NetworkId
 
 			// Wait for async operation, if async mode not enabled
@@ -134,15 +139,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 					return fmt.Errorf("wait for network update: %w", err)
 				}
 			}
+
 			operationState := "Updated"
 			if model.Async {
 				operationState = "Triggered update of"
 			}
+
 			params.Printer.Info("%s network %q\n", operationState, networkLabel)
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -191,13 +200,17 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient iaas.DefaultAPI) iaas.ApiPartialUpdateNetworkRequest {
 	req := apiClient.PartialUpdateNetwork(ctx, model.ProjectId, model.Region, model.NetworkId)
-	var payloadIPv4 *iaas.UpdateNetworkIPv4Body
-	var payloadIPv6 *iaas.UpdateNetworkIPv6Body
+
+	var (
+		payloadIPv4 *iaas.UpdateNetworkIPv4Body
+		payloadIPv6 *iaas.UpdateNetworkIPv6Body
+	)
 
 	if model.IPv6DnsNameServers != nil || model.NoIPv6Gateway || model.IPv6Gateway != nil {
 		payloadIPv6 = &iaas.UpdateNetworkIPv6Body{}

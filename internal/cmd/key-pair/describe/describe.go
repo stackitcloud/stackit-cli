@@ -55,6 +55,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -68,6 +69,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read key pair: %w", err)
@@ -76,11 +78,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if keypair := resp; keypair != nil {
 				return outputResult(params.Printer, model.OutputFormat, model.PublicKey, *keypair)
 			}
+
 			params.Printer.Outputln("No keypair found.")
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -100,6 +105,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -121,6 +127,7 @@ func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool,
 		if err != nil {
 			return fmt.Errorf("marshal key pair: %w", err)
 		}
+
 		p.Outputln(string(details))
 
 		return nil
@@ -136,6 +143,7 @@ func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool,
 		if err != nil {
 			return fmt.Errorf("marshal key pair: %w", err)
 		}
+
 		p.Outputln(string(details))
 
 		return nil
@@ -144,6 +152,7 @@ func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool,
 			p.Outputln(keyPair.PublicKey)
 			return nil
 		}
+
 		table := tables.NewTable()
 		table.AddRow("KEY PAIR NAME", utils.PtrString(keyPair.Name))
 		table.AddSeparator()
@@ -153,6 +162,7 @@ func outputResult(p *print.Printer, outputFormat string, showOnlyPublicKey bool,
 			for key, value := range keyPair.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
+
 			table.AddRow("LABELS", strings.Join(labels, "\n"))
 			table.AddSeparator()
 		}

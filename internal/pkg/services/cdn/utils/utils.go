@@ -14,15 +14,18 @@ func ParseGeofencing(p *print.Printer, geofencingInput []string) *map[string][]s
 			p.Debug(print.ErrorLevel, "invalid geofencing entry (no space found): %q", in)
 			continue
 		}
+
 		urlPart := in[:firstSpace]
 		countriesPart := in[firstSpace+1:]
 		geofencing[urlPart] = nil
+
 		countries := strings.Split(countriesPart, ",")
 		for _, country := range countries {
 			country = strings.TrimSpace(country)
 			geofencing[urlPart] = append(geofencing[urlPart], country)
 		}
 	}
+
 	return &geofencing
 }
 
@@ -34,7 +37,9 @@ func ParseOriginRequestHeaders(p *print.Printer, originRequestHeadersInput []str
 			p.Debug(print.ErrorLevel, "invalid origin request header entry (no colon found): %q", in)
 			continue
 		}
+
 		originRequestHeaders[strings.TrimSpace(parts[0])] = strings.TrimSpace(parts[1])
 	}
+
 	return &originRequestHeaders
 }

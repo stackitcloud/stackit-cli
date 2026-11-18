@@ -39,6 +39,7 @@ func TestParseGeofencing(t *testing.T) {
 			},
 		},
 	}
+
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -82,6 +83,7 @@ func TestParseOriginRequestHeaders(t *testing.T) {
 			},
 		},
 	}
+
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

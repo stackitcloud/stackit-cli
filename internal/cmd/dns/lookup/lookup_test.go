@@ -34,6 +34,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, mod := range mods {
 		mod(argValues)
 	}
+
 	return argValues
 }
 
@@ -47,6 +48,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -64,6 +66,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -78,6 +81,7 @@ func fixtureRequest(mods ...func(payload *dns.LookupDomainPayload)) dns.ApiLooku
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return testClient.DefaultAPI.LookupDomain(testCtx).LookupDomainPayload(payload)
 }
 
@@ -265,12 +269,15 @@ func TestParseInputRawResponseWarning(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			params := testparams.NewTestParams()
 			cmd := NewCmd(params.CmdParams)
+
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
 			}
+
 			recordTypeFlag.Reset()
 			globalflags.OutputFormatFlag.Reset()
+
 			for flag, value := range tt.flagValues {
 				err := cmd.Flags().Set(flag, value)
 				if err != nil {
@@ -298,6 +305,7 @@ func TestOutputResult(t *testing.T) {
 		testRecordData      = "2001:db8::1"
 		testRawResponse     = ";; opcode: QUERY, status: NOERROR"
 	)
+
 	fixtureResponse := func() *dns.LookupDomainResponse {
 		return &dns.LookupDomainResponse{
 			State: []dns.LookupResult{
@@ -322,6 +330,7 @@ func TestOutputResult(t *testing.T) {
 		model *inputModel
 		resp  *dns.LookupDomainResponse
 	}
+
 	tests := []struct {
 		name          string
 		args          args
@@ -421,12 +430,14 @@ func TestOutputResult(t *testing.T) {
 			if err := outputResult(params.Printer, tt.args.model, tt.args.resp); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
+
 			output := params.Out.String()
 			for _, want := range tt.wantOutput {
 				if !strings.Contains(output, want) {
 					t.Errorf("output %q does not contain %q", output, want)
 				}
 			}
+
 			for _, notWant := range tt.notWantOutput {
 				if strings.Contains(output, notWant) {
 					t.Errorf("output %q contains %q", output, notWant)

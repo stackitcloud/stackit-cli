@@ -74,6 +74,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -106,6 +107,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -114,6 +116,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient scf.DefaultA
 	if model.Limit != nil && *model.Limit < pageSize {
 		pageSize = *model.Limit
 	}
+
 	return apiClient.ListSpaces(ctx, model.ProjectId, model.Region, model.OrganizationId).Page(page).PerPage(pageSize)
 }
 
@@ -123,6 +126,7 @@ func outputResult(p *print.Printer, outputFormat string, limit *int64, organizat
 			p.Outputf("No STACKIT Cloud Foundry spaces found for organization %q\n", organizationLabel)
 			return nil
 		}
+
 		limitReached := limit != nil && int64(len(resp.Resources)) >= *limit
 		if resp.Pagination.TotalPages != nil && *resp.Pagination.TotalPages > int64(1) && !limitReached {
 			p.Warn("Server responded with more than 1 page. Output will not show all existing spaces.\n")
@@ -133,6 +137,7 @@ func outputResult(p *print.Printer, outputFormat string, limit *int64, organizat
 		table.SetTitle("STACKIT Cloud Foundry spaces")
 		table.SetHeader("ID", "NAME", "PLATFORM ID", "CREATED")
 		table.AddSeparator()
+
 		for _, space := range resp.Resources {
 			table.AddRow(
 				space.Guid,
@@ -147,6 +152,7 @@ func outputResult(p *print.Printer, outputFormat string, limit *int64, organizat
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

@@ -49,6 +49,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -62,6 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read server: %w", err)
@@ -70,6 +72,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
+
 	return cmd
 }
 
@@ -87,6 +90,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -101,12 +105,14 @@ func outputResult(p *print.Printer, outputFormat string, server *iaas.Server) er
 	if server == nil {
 		return fmt.Errorf("api response is empty")
 	}
+
 	switch outputFormat {
 	case print.JSONOutputFormat:
 		details, err := json.MarshalIndent(server, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal server: %w", err)
 		}
+
 		p.Outputln(string(details))
 
 		return nil
@@ -115,6 +121,7 @@ func outputResult(p *print.Printer, outputFormat string, server *iaas.Server) er
 		if err != nil {
 			return fmt.Errorf("marshal server: %w", err)
 		}
+
 		p.Outputln(string(details))
 
 		return nil
@@ -132,12 +139,14 @@ func outputResult(p *print.Printer, outputFormat string, server *iaas.Server) er
 		table.AddSeparator()
 		table.AddRow("AVAILABILITY ZONE", utils.PtrString(server.AvailabilityZone))
 		table.AddSeparator()
+
 		if server.BootVolume != nil && server.BootVolume.Id != nil {
 			table.AddRow("BOOT VOLUME", *server.BootVolume.Id)
 			table.AddSeparator()
 			table.AddRow("DELETE ON TERMINATION", utils.PtrString(server.BootVolume.DeleteOnTermination))
 			table.AddSeparator()
 		}
+
 		table.AddRow("POWER STATUS", utils.PtrString(server.PowerStatus))
 		table.AddSeparator()
 
@@ -169,6 +178,7 @@ func outputResult(p *print.Printer, outputFormat string, server *iaas.Server) er
 			for key, value := range server.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
+
 			table.AddRow("LABELS", strings.Join(labels, "\n"))
 			table.AddSeparator()
 		}
@@ -217,6 +227,7 @@ func outputResult(p *print.Printer, outputFormat string, server *iaas.Server) er
 				maintenanceWindow.AddRow("DETAILS", *server.MaintenanceWindow.Details)
 				maintenanceWindow.AddSeparator()
 			}
+
 			maintenanceWindow.AddRow(
 				"STARTS AT",
 				utils.ConvertTimePToDateTimeString(&server.MaintenanceWindow.StartsAt),

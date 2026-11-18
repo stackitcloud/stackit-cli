@@ -136,6 +136,7 @@ func TestGetSecurityGroupRuleName(t *testing.T) {
 		getInstanceFails bool
 		getInstanceResp  *iaas.SecurityGroupRule
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -166,11 +167,13 @@ func TestGetSecurityGroupRuleName(t *testing.T) {
 				GetSecurityGroupRuleFails: tt.args.getInstanceFails,
 				GetSecurityGroupRuleResp:  tt.args.getInstanceResp,
 			}
+
 			got, err := GetSecurityGroupRuleName(context.Background(), newMock(m), "", "", "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetSecurityGroupRuleName() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetSecurityGroupRuleName() = %v, want %v", got, tt.want)
 			}
@@ -183,6 +186,7 @@ func TestGetSecurityGroupName(t *testing.T) {
 		getInstanceFails bool
 		getInstanceResp  *iaas.SecurityGroup
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -221,11 +225,13 @@ func TestGetSecurityGroupName(t *testing.T) {
 				GetSecurityGroupFails: tt.args.getInstanceFails,
 				GetSecurityGroupResp:  tt.args.getInstanceResp,
 			}
+
 			got, err := GetSecurityGroupName(context.Background(), newMock(m), "", "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetSecurityGroupName() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetSecurityGroupName() = %v, want %v", got, tt.want)
 			}
@@ -238,6 +244,7 @@ func TestGetPublicIp(t *testing.T) {
 		getPublicIpFails bool
 		getPublicIpResp  *iaas.PublicIp
 	}
+
 	tests := []struct {
 		name                   string
 		args                   args
@@ -281,14 +288,17 @@ func TestGetPublicIp(t *testing.T) {
 				GetPublicIpFails: tt.args.getPublicIpFails,
 				GetPublicIpResp:  tt.args.getPublicIpResp,
 			}
+
 			gotPublicIP, gotAssociatedResource, err := GetPublicIP(context.Background(), newMock(m), "", "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetPublicIP() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
 			if gotPublicIP != tt.wantPublicIp {
 				t.Errorf("GetPublicIP() = %v, want public IP %v", gotPublicIP, tt.wantPublicIp)
 			}
+
 			if gotAssociatedResource != tt.wantAssociatedResource {
 				t.Errorf("GetPublicIP() = %v, want associated resource %v", gotAssociatedResource, tt.wantAssociatedResource)
 			}
@@ -301,6 +311,7 @@ func TestGetServerName(t *testing.T) {
 		getInstanceFails bool
 		getInstanceResp  *iaas.Server
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -330,11 +341,13 @@ func TestGetServerName(t *testing.T) {
 				GetServerFails: tt.args.getInstanceFails,
 				GetServerResp:  tt.args.getInstanceResp,
 			}
+
 			got, err := GetServerName(context.Background(), newMock(m), "", "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetServerName() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetServerName() = %v, want %v", got, tt.want)
 			}
@@ -347,6 +360,7 @@ func TestGetVolumeName(t *testing.T) {
 		getInstanceFails bool
 		getInstanceResp  *iaas.Volume
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -396,11 +410,13 @@ func TestGetVolumeName(t *testing.T) {
 				GetVolumeFails: tt.args.getInstanceFails,
 				GetVolumeResp:  tt.args.getInstanceResp,
 			}
+
 			got, err := GetVolumeName(context.Background(), newMock(m), "", "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetVolumeName() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetVolumeName() = %v, want %v", got, tt.want)
 			}
@@ -413,6 +429,7 @@ func TestGetNetworkName(t *testing.T) {
 		getInstanceFails bool
 		getInstanceResp  *iaas.Network
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -451,11 +468,13 @@ func TestGetNetworkName(t *testing.T) {
 				GetNetworkFails: tt.args.getInstanceFails,
 				GetNetworkResp:  tt.args.getInstanceResp,
 			}
+
 			got, err := GetNetworkName(context.Background(), newMock(m), "", "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetNetworkName() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetNetworkName() = %v, want %v", got, tt.want)
 			}
@@ -468,6 +487,7 @@ func TestGetNetworkAreaName(t *testing.T) {
 		getInstanceFails bool
 		getInstanceResp  *iaas.NetworkArea
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -507,11 +527,13 @@ func TestGetNetworkAreaName(t *testing.T) {
 				GetNetworkAreaFails: tt.args.getInstanceFails,
 				GetNetworkAreaResp:  tt.args.getInstanceResp,
 			}
+
 			got, err := GetNetworkAreaName(context.Background(), newMock(m), "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetNetworkAreaName() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetNetworkAreaName() = %v, want %v", got, tt.want)
 			}
@@ -524,6 +546,7 @@ func TestListAttachedProjects(t *testing.T) {
 		getAttachedProjectsFails bool
 		getAttachedProjectsResp  *iaas.ProjectListResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -553,11 +576,13 @@ func TestListAttachedProjects(t *testing.T) {
 				GetAttachedProjectsFails: tt.args.getAttachedProjectsFails,
 				GetAttachedProjectsResp:  tt.args.getAttachedProjectsResp,
 			}
+
 			got, err := ListAttachedProjects(context.Background(), newMock(m), "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetAttachedProjects() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
 			if fmt.Sprintf("%v", got) != fmt.Sprintf("%v", tt.want) {
 				t.Errorf("GetAttachedProjects() = %v, want %v", got, tt.want)
 			}
@@ -570,6 +595,7 @@ func TestGetNetworkRangePrefix(t *testing.T) {
 		getNetworkAreaRangeFails bool
 		getNetworkAreaRangeResp  *iaas.NetworkRange
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -599,11 +625,13 @@ func TestGetNetworkRangePrefix(t *testing.T) {
 				GetNetworkAreaRangeFails: tt.args.getNetworkAreaRangeFails,
 				GetNetworkAreaRangeResp:  tt.args.getNetworkAreaRangeResp,
 			}
+
 			got, err := GetNetworkRangePrefix(context.Background(), newMock(m), "", "", "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetNetworkRangePrefix() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetNetworkRangePrefix() = %v, want %v", got, tt.want)
 			}
@@ -617,6 +645,7 @@ func TestGetRouteFromAPIResponse(t *testing.T) {
 		nexthop string
 		routes  []iaas.Route
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -887,6 +916,7 @@ func TestGetRouteFromAPIResponse(t *testing.T) {
 				t.Errorf("GetRouteFromAPIResponse() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetRouteFromAPIResponse() = %v, want %v", got, tt.want)
 			}
@@ -899,6 +929,7 @@ func TestGetNetworkRangeFromAPIResponse(t *testing.T) {
 		prefix        string
 		networkRanges []iaas.NetworkRange
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -956,6 +987,7 @@ func TestGetNetworkRangeFromAPIResponse(t *testing.T) {
 				t.Errorf("GetNetworkRangeFromAPIResponse() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetNetworkRangeFromAPIResponse() = %v, want %v", got, tt.want)
 			}
@@ -996,11 +1028,13 @@ func TestGetImageName(t *testing.T) {
 				GetImageFails: tt.imageErr,
 				GetImageResp:  tt.imageResp,
 			}
+
 			got, err := GetImageName(context.Background(), newMock(client), "", "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetImageName() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetImageName() = %v, want %v", got, tt.want)
 			}
@@ -1042,11 +1076,13 @@ func TestGetAffinityGroupName(t *testing.T) {
 				GetAffinityGroupsFails: tt.affinityErr,
 				GetAffinityGroupResp:   tt.affinityResp,
 			}
+
 			got, err := GetAffinityGroupName(ctx, newMock(client), "", "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetAffinityGroupName() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetAffinityGroupName() = %v, want %v", got, tt.want)
 			}
@@ -1059,6 +1095,7 @@ func TestGetRoutingTableOfAreaName(t *testing.T) {
 		getInstanceFails bool
 		getInstanceResp  *iaas.RoutingTable
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -1104,6 +1141,7 @@ func TestGetRoutingTableOfAreaName(t *testing.T) {
 				t.Errorf("GetRoutingTableOfAreaName() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetRoutingTableOfAreaName() = %v, want %v", got, tt.want)
 			}

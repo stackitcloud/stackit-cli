@@ -49,6 +49,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -63,16 +64,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			securityGroupLabel, err := iaasUtils.GetSecurityGroupName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.SecurityGroupId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get security group name: %v", err)
+
 				securityGroupLabel = model.SecurityGroupId
 			}
 
 			securityGroupRuleLabel, err := iaasUtils.GetSecurityGroupRuleName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.SecurityGroupRuleId, model.SecurityGroupId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get security group rule name: %v", err)
+
 				securityGroupRuleLabel = model.SecurityGroupRuleId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete security group rule %q from security group %q?", securityGroupRuleLabel, securityGroupLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -80,16 +84,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("delete security group rule: %w", err)
 			}
 
 			params.Printer.Info("Deleted security group rule %q from security group %q\n", securityGroupRuleLabel, securityGroupLabel)
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -115,6 +122,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 

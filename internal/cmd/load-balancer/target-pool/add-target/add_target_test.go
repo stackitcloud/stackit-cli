@@ -65,6 +65,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, mod := range mods {
 		mod(argValues)
 	}
+
 	return argValues
 }
 
@@ -79,6 +80,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -97,6 +99,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -147,6 +150,7 @@ func fixtureLoadBalancer(mods ...func(*loadbalancer.LoadBalancer)) *loadbalancer
 	for _, mod := range mods {
 		mod(&lb)
 	}
+
 	return &lb
 }
 
@@ -166,15 +170,18 @@ func fixturePayload(mods ...func(payload *loadbalancer.UpdateTargetPoolPayload))
 	for _, mod := range mods {
 		mod(payload)
 	}
+
 	return payload
 }
 
 func fixtureRequest(mods ...func(request *loadbalancer.ApiUpdateTargetPoolRequest)) loadbalancer.ApiUpdateTargetPoolRequest {
 	request := testClient.DefaultAPI.UpdateTargetPool(testCtx, testProjectId, testRegion, testLBName, testTargetPoolName)
+
 	request = request.UpdateTargetPoolPayload(*fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -271,6 +278,7 @@ func TestParseInput(t *testing.T) {
 					if !tt.isValid {
 						return
 					}
+
 					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
 				}
 			}
@@ -280,6 +288,7 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error validating args: %v", err)
 			}
 
@@ -288,6 +297,7 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error validating flags: %v", err)
 			}
 
@@ -296,12 +306,14 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error parsing flags: %v", err)
 			}
 
 			if !tt.isValid {
 				t.Fatalf("did not fail on invalid input")
 			}
+
 			diff := cmp.Diff(model, tt.expectedModel)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -407,11 +419,13 @@ func TestBuildRequest(t *testing.T) {
 				getLoadBalancerFails: tt.getLoadBalancerFails,
 				getLoadBalancerResp:  tt.getLoadBalancerResp,
 			}
+
 			request, err := buildRequest(testCtx, tt.model, newAPIMock(client))
 			if err != nil {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error building request: %v", err)
 			}
 

@@ -42,6 +42,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -57,17 +58,20 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *secretsmanager.ApiCreateInstanceRequest)) secretsmanager.ApiCreateInstanceRequest {
 	request := testClient.DefaultAPI.CreateInstance(testCtx, testProjectId)
+
 	request = request.CreateInstancePayload(secretsmanager.CreateInstancePayload{
 		Name: "example",
 	})
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -81,6 +85,7 @@ func fixtureUpdateACLsRequest(mods ...func(request *secretsmanager.ApiUpdateACLs
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -315,6 +320,7 @@ func TestOutputResult(t *testing.T) {
 		instanceId   string
 		instance     *secretsmanager.Instance
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -333,6 +339,7 @@ func TestOutputResult(t *testing.T) {
 			wantErr: false,
 		},
 	}
+
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

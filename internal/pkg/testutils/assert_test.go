@@ -112,6 +112,7 @@ func TestAssertError(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
+
 			mock := &mockTB{}
 			result := AssertError(mock, tt.got, tt.want)
 
@@ -131,6 +132,7 @@ func TestCheckErrorMatch(t *testing.T) {
 	t.Parallel()
 
 	underlying := &customError{msg: "root"}
+
 	wrapped := fmt.Errorf("wrap: %w", underlying)
 	if !checkErrorMatch(wrapped, &customError{}) {
 		t.Fatalf("expected wrapped customError to match via errors.As")
@@ -215,6 +217,7 @@ func TestAssertValue(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			mock := &mockTB{}
 			AssertValue(mock, tt.got, tt.want, tt.opts...)
 

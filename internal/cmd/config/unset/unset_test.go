@@ -57,6 +57,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]bool)) map[string]bool
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -108,6 +109,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -421,11 +423,13 @@ func TestParseInput(t *testing.T) {
 
 			for flag, value := range tt.flagValues {
 				stringBool := fmt.Sprintf("%v", value)
+
 				err := cmd.Flags().Set(flag, stringBool)
 				if err != nil {
 					if !tt.isValid {
 						return
 					}
+
 					t.Fatalf("setting flag --%s=%s: %v", flag, stringBool, err)
 				}
 			}
@@ -435,6 +439,7 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error validating flags: %v", err)
 			}
 
@@ -443,6 +448,7 @@ func TestParseInput(t *testing.T) {
 			if !tt.isValid {
 				t.Fatalf("did not fail on invalid input")
 			}
+
 			diff := cmp.Diff(model, tt.expectedModel)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)

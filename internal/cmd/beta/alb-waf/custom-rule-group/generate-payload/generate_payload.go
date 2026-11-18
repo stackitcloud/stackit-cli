@@ -87,6 +87,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -104,6 +105,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read ALB WAF custom rule group: %w", err)
@@ -113,10 +115,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				Name:  resp.Name,
 				Rules: albwafUtils.ToCreateCustomRules(resp.Rules),
 			}
+
 			return outputResult(params.Printer, model.FilePath, payload)
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -141,6 +145,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -152,6 +157,7 @@ func outputResult(p *print.Printer, filePath *string, payload any) error {
 	if payload == nil {
 		return fmt.Errorf("payload is empty")
 	}
+
 	payloadBytes, err := json.MarshalIndent(payload, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal payload: %w", err)

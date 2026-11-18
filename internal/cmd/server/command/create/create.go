@@ -77,6 +77,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a Command for server %s?", serverLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -87,6 +88,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create Server Command: %w", err)
@@ -96,6 +98,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -122,6 +125,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	var err error
+
 	model.Params, err = runcommandUtils.ParseScriptParams(model.Params)
 	if err != nil {
 		return nil, &cliErr.FlagValidationError{
@@ -131,6 +135,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -140,6 +145,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *runcommand.
 		CommandTemplateName: model.CommandTemplateName,
 		Parameters:          model.Params,
 	})
+
 	return req, nil
 }
 

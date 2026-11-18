@@ -74,6 +74,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
@@ -83,6 +84,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -115,6 +117,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -124,6 +127,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *automation.
 
 func fetchExecutions(ctx context.Context, model *inputModel, apiClient *automation.APIClient) ([]automation.ListExecutionsItem, error) {
 	req := buildRequest(ctx, model, apiClient)
+
 	opts := []paginate.Option{paginate.WithPageSize(maxPageSize)}
 	if model.Limit != nil {
 		opts = append(opts, paginate.WithLimit(int(*model.Limit)))
@@ -133,6 +137,7 @@ func fetchExecutions(ctx context.Context, model *inputModel, apiClient *automati
 	if err != nil {
 		return nil, fmt.Errorf("list volume automation executions: %w", err)
 	}
+
 	if items == nil {
 		items = []automation.ListExecutionsItem{}
 	}
@@ -152,6 +157,7 @@ func outputResult(p *print.Printer, outputFormat, automationId, projectLabel str
 		table.SetTitle("Volume Automation Executions")
 		table.SetHeader("ID", "STATUS", "CREATE TIME", "END TIME")
 		table.AddSeparator()
+
 		for _, execution := range executions {
 			table.AddRow(
 				execution.Id,
@@ -166,6 +172,7 @@ func outputResult(p *print.Printer, outputFormat, automationId, projectLabel str
 		if err != nil {
 			return fmt.Errorf("render tables: %w", err)
 		}
+
 		return nil
 	})
 }

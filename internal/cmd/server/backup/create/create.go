@@ -79,6 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a Backup for server %s?", model.ServerId)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -89,6 +90,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create Server Backup: %w", err)
@@ -98,6 +100,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -126,11 +129,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbackup.APIClient) (serverbackup.ApiCreateBackupRequest, error) {
 	req := apiClient.DefaultAPI.CreateBackup(ctx, model.ProjectId, model.ServerId, model.Region)
+
 	payload := serverbackup.CreateBackupPayload{
 		Name:            model.BackupName,
 		RetentionPeriod: model.BackupRetentionPeriod,
@@ -139,7 +144,9 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverbacku
 	if model.BackupVolumeIds == nil {
 		payload.VolumeIds = nil
 	}
+
 	req = req.CreateBackupPayload(payload)
+
 	return req, nil
 }
 

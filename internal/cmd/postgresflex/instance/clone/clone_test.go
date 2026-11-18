@@ -40,6 +40,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, mod := range mods {
 		mod(argValues)
 	}
+
 	return argValues
 }
 
@@ -52,6 +53,7 @@ func fixtureRequiredFlagValues(mods ...func(flagValues map[string]string)) map[s
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -66,6 +68,7 @@ func fixtureStandardFlagValues(mods ...func(flagValues map[string]string)) map[s
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -87,6 +90,7 @@ func fixtureRequiredInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -110,15 +114,18 @@ func fixtureStandardInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *postgresflex.ApiCloneInstanceRequest)) postgresflex.ApiCloneInstanceRequest {
 	request := testClient.DefaultAPI.CloneInstance(testCtx, testProjectId, testRegion, testInstanceId)
+
 	request = request.CloneInstancePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -138,6 +145,7 @@ func fixturePayload(mods ...func(payload *postgresflex.CloneInstancePayload)) po
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
@@ -377,6 +385,7 @@ func TestBuildRequest(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error building request: %v", err)
 			}
 
@@ -400,6 +409,7 @@ func Test_outputResult(t *testing.T) {
 		async         bool
 		resp          *postgresflex.CloneInstanceResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -412,6 +422,7 @@ func Test_outputResult(t *testing.T) {
 			resp:          &postgresflex.CloneInstanceResponse{Id: "id"},
 		}, false},
 	}
+
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

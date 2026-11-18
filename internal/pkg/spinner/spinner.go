@@ -21,20 +21,25 @@ func Run(p *print.Printer, message string, f func() error) error {
 		err := f()
 		return struct{}{}, err
 	})
+
 	return err
 }
 
 // Run2 starts a spinner and stops it when f (result arity 2) completes.
 func Run2[T any](p *print.Printer, message string, f func() (T, error)) (T, error) {
 	var r T
+
 	spinner := newSpinner(p)
 	spinner.start(message)
+
 	r, err := f()
 	if err != nil {
 		spinner.stopWithError()
 		return r, err
 	}
+
 	spinner.stop()
+
 	return r, nil
 }
 
@@ -55,12 +60,14 @@ func (s *Spinner) start(message string) {
 
 func (s *Spinner) stop() {
 	s.done <- true
+
 	close(s.done)
 	s.printer.Info("\r%s ✓ \n", s.message)
 }
 
 func (s *Spinner) stopWithError() {
 	s.done <- true
+
 	close(s.done)
 	s.printer.Info("\r%s ✗ \n", s.message)
 }
@@ -74,6 +81,7 @@ func (s *Spinner) animate() {
 		default:
 			s.printer.Info("\r%s %s ", s.message, s.states[i%len(s.states)])
 			i++
+
 			time.Sleep(s.delay)
 		}
 	}

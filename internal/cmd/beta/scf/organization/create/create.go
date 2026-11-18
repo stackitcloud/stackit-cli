@@ -45,6 +45,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(p.Printer, cmd)
 			if err != nil {
 				return err
@@ -59,10 +60,12 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, p.Printer, p.CliVersion, cmd)
 			if err != nil {
 				p.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a STACKIT Cloud Foundry organization for project %q?", projectLabel)
+
 			err = p.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -70,6 +73,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create STACKIT Cloud Foundry organization: %w", err)
@@ -79,6 +83,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -103,6 +108,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -113,6 +119,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient scf.DefaultA
 	}
 
 	req := apiClient.CreateOrganization(ctx, model.ProjectId, model.Region)
+
 	return req.CreateOrganizationPayload(payload)
 }
 
@@ -124,6 +131,7 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 		}
 
 		p.Outputf("Created STACKIT Cloud Foundry organization for project %q. Organization ID: %s\n", projectLabel, resp.Guid)
+
 		return nil
 	})
 }

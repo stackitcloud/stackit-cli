@@ -166,6 +166,7 @@ func initConfig(configPath string) {
 			cobra.CheckErr(err)
 		}
 	}
+
 	defer func() {
 		if f != nil {
 			if err := f.Close(); err != nil {
@@ -186,6 +187,7 @@ func Write() error {
 	if err != nil {
 		return fmt.Errorf("create config directory: %w", err)
 	}
+
 	return viper.WriteConfig()
 }
 
@@ -249,5 +251,6 @@ func getInitialProfileFilePath() string {
 	if configFolderPath == "" {
 		configFolderPath = getInitialConfigDir()
 	}
+
 	return filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", profileFileName, profileFileExtension))
 }

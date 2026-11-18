@@ -36,6 +36,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -52,6 +53,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -60,6 +62,7 @@ func fixtureRequest(mods ...func(request *postgresflex.ApiListBackupsRequest)) p
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -192,6 +195,7 @@ func Test_outputResult(t *testing.T) {
 		instanceLabel string
 		backups       []postgresflex.BackupData
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -238,6 +242,7 @@ func Test_outputResult(t *testing.T) {
 			wantErr: false,
 		},
 	}
+
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

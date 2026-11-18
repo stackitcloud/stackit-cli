@@ -77,6 +77,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
@@ -86,6 +87,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -118,6 +120,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 func outputResult(p *print.Printer, outputFormat, projectLabel string, resourcePools []sfs.ResourcePool) error {
@@ -129,6 +132,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resourceP
 
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "AVAILABILITY ZONE", "STATE", "TOTAL SIZE (GB)", "USED SIZE (GB)", "USED BY SNAPSHOTS (GB)")
+
 		for _, resourcePool := range resourcePools {
 			totalSizeGigabytes, usedSizeGigabytes, usedBySnapshotsGigabytes := "", "", ""
 			if resourcePool.HasSpace() {
@@ -136,6 +140,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resourceP
 				usedSizeGigabytes = utils.PtrString(resourcePool.Space.UsedGigabytes.Get())
 				usedBySnapshotsGigabytes = utils.PtrString(resourcePool.Space.UsedBySnapshotsGigabytes.Get())
 			}
+
 			table.AddRow(
 				utils.PtrString(resourcePool.Id),
 				utils.PtrString(resourcePool.Name),
@@ -146,6 +151,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resourceP
 				usedBySnapshotsGigabytes,
 			)
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

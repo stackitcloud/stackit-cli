@@ -35,6 +35,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -51,6 +52,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -58,10 +60,12 @@ func fixtureRequest(mods ...func(request *dns.ApiListZonesRequest)) dns.ApiListZ
 	request := testClient.DefaultAPI.ListZones(testCtx, testProjectId)
 	request = request.NameLike("some-pattern")
 	request = request.OrderByName("ASC")
+
 	request = request.PageSize(pageSizeDefault)
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -374,28 +378,35 @@ func TestFetchZones(t *testing.T) {
 				numAPICalls++
 
 				w.Header().Set("Content-Type", "application/json")
+
 				if tt.apiCallFails {
 					w.WriteHeader(http.StatusInternalServerError)
+
 					_, err := w.Write([]byte("{\"message\": \"Something bad happened\""))
 					if err != nil {
 						t.Errorf("Failed to write bad response: %v", err)
 					}
+
 					return
 				}
 
 				query := r.URL.Query()
+
 				pageStr := query.Get("page")
 				if pageStr == "" {
 					t.Errorf("Expected query param page to be set")
 				}
+
 				page, err := strconv.Atoi(pageStr)
 				if err != nil {
 					t.Errorf("Failed to parse query param page: %v", err)
 				}
+
 				pageSizeStr := query.Get("pageSize")
 				if pageSizeStr == "" {
 					t.Errorf("Expected query param pageSize to be set")
 				}
+
 				pageSize, err := strconv.Atoi(pageSizeStr)
 				if err != nil {
 					t.Errorf("Failed to parse query param pageSize: %v", err)
@@ -427,8 +438,10 @@ func TestFetchZones(t *testing.T) {
 					t.Errorf("Failed to write response: %v", err)
 				}
 			})
+
 			mockedServer := httptest.NewServer(handler)
 			defer mockedServer.Close()
+
 			client, err := dns.NewAPIClient(
 				sdkConfig.WithEndpoint(mockedServer.URL),
 				sdkConfig.WithoutAuthentication(),
@@ -444,12 +457,15 @@ func TestFetchZones(t *testing.T) {
 				}
 				return
 			}
+
 			if tt.apiCallFails {
 				t.Fatalf("did not fail on invalid input")
 			}
+
 			if numAPICalls != tt.expectedNumAPICalls {
 				t.Fatalf("Expected %d API calls, got %d", tt.expectedNumAPICalls, numAPICalls)
 			}
+
 			if len(zones) != tt.expectedNumItems {
 				t.Fatalf("Expected %d zones, got %d", tt.totalItems, len(zones))
 			}
@@ -463,6 +479,7 @@ func TestOutputResult(t *testing.T) {
 		projectLabel string
 		zones        []dns.Zone
 	}
+
 	tests := []struct {
 		name    string
 		args    args

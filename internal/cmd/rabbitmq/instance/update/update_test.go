@@ -51,6 +51,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, mod := range mods {
 		mod(argValues)
 	}
+
 	return argValues
 }
 
@@ -71,6 +72,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -95,11 +97,13 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *rabbitmq.ApiPartialUpdateInstanceRequest)) rabbitmq.ApiPartialUpdateInstanceRequest {
 	request := testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId)
+
 	request = request.PartialUpdateInstancePayload(rabbitmq.PartialUpdateInstancePayload{
 		Parameters: &rabbitmq.InstanceParameters{
 			EnableMonitoring:     utils.Ptr(true),
@@ -116,6 +120,7 @@ func fixtureRequest(mods ...func(request *rabbitmq.ApiPartialUpdateInstanceReque
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -409,11 +414,13 @@ func TestBuildRequest(t *testing.T) {
 				returnError:       tt.getOfferingsFails,
 				listOfferingsResp: tt.listOfferingsResp,
 			}
+
 			request, err := buildRequest(testCtx, tt.model, newAPIMock(settings))
 			if err != nil {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error building request: %v", err)
 			}
 

@@ -12,6 +12,7 @@ func TestTruncate(t *testing.T) {
 		s      *string
 		maxLen int
 	}
+
 	tests := []struct {
 		name string
 		args args

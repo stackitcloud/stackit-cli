@@ -52,6 +52,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -64,6 +65,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to add a target with IP %q to target pool %q of load balancer %q?", model.IP, model.TargetPoolName, model.LBName)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -74,16 +76,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("build request: %w", err)
 			}
+
 			_, err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("add target to target pool: %w", err)
 			}
 
 			params.Printer.Info("Added target to target pool of load balancer %q\n", model.LBName)
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -113,6 +118,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -128,6 +134,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient loadbalancer
 		DisplayName: &model.TargetName,
 		Ip:          &model.IP,
 	}
+
 	err = utils.AddTargetToTargetPool(targetPool, newTarget)
 	if err != nil {
 		return req, fmt.Errorf("add target to target pool: %w", err)

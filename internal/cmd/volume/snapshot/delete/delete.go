@@ -44,6 +44,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -59,10 +60,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			snapshotLabel, err := iaasUtils.GetSnapshotName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.SnapshotId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get snapshot name: %v", err)
+
 				snapshotLabel = model.SnapshotId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete snapshot %q? (This cannot be undone)", snapshotLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -70,6 +73,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("delete snapshot: %w", err)
@@ -90,10 +94,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered deletion of"
 			}
+
 			params.Printer.Outputf("%s snapshot %q\n", operationState, snapshotLabel)
+
 			return nil
 		},
 	}
+
 	return cmd
 }
 
@@ -111,6 +118,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 

@@ -34,6 +34,7 @@ func setupCmd() {
 	operation = &cobra.Command{
 		Use: "operation",
 	}
+
 	cmd.AddCommand(service)
 	service.AddCommand(resource)
 	resource.AddCommand(operation)
@@ -55,6 +56,7 @@ func setupBetaCmd() {
 	operation = &cobra.Command{
 		Use: "operation",
 	}
+
 	cmd.AddCommand(beta)
 	beta.AddCommand(service)
 	service.AddCommand(resource)
@@ -117,6 +119,7 @@ func TestObservabilityInputPlanError(t *testing.T) {
 	}
 
 	setupCmd()
+
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			err := &ObservabilityInputPlanError{
@@ -219,6 +222,7 @@ func TestDSAInputPlanError(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			setupCmd()
+
 			err := &DSAInputPlanError{
 				Cmd:  operation,
 				Args: tt.args,
@@ -300,6 +304,7 @@ func TestDatabaseInputFlavorError(t *testing.T) {
 		} else {
 			setupCmd()
 		}
+
 		t.Run(tt.description, func(t *testing.T) {
 			err := &DatabaseInputFlavorError{
 				Cmd:     operation,
@@ -543,6 +548,7 @@ func TestSingleArgExpectedError(t *testing.T) {
 	}
 
 	setupCmd()
+
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			err := &SingleArgExpectedError{
@@ -588,6 +594,7 @@ func TestSingleOptionalArgExpectedError(t *testing.T) {
 	}
 
 	setupCmd()
+
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			err := &SingleOptionalArgExpectedError{
@@ -627,6 +634,7 @@ func TestInputUnknownError(t *testing.T) {
 	}
 
 	setupCmd()
+
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			err := &InputUnknownError{
@@ -655,6 +663,7 @@ func TestSubcommandMissingError(t *testing.T) {
 	}
 
 	setupCmd()
+
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			err := &SubcommandMissingError{
@@ -684,6 +693,7 @@ func TestAppendUsageTip(t *testing.T) {
 	}
 
 	setupCmd()
+
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			err := AppendUsageTip(tt.err, cmd)
@@ -699,6 +709,7 @@ func TestInvalidFormatError(t *testing.T) {
 	type args struct {
 		format string
 	}
+
 	tests := []struct {
 		name string
 		args args
@@ -734,6 +745,7 @@ func TestBuildRequestError(t *testing.T) {
 		reason string
 		err    error
 	}
+
 	tests := []struct {
 		name string
 		args args
@@ -786,6 +798,7 @@ func TestRequestFailedError(t *testing.T) {
 	type args struct {
 		err error
 	}
+
 	tests := []struct {
 		name string
 		args args
@@ -835,6 +848,7 @@ func TestExtractMessageFromBody(t *testing.T) {
 	type args struct {
 		body []byte
 	}
+
 	tests := []struct {
 		name string
 		args args
@@ -912,14 +926,17 @@ func TestConstructorsReturnExpected(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			wantErr, wantIsErr := tt.want.(error)
+
 			gotErr, gotIsErr := tt.got.(error)
 			if wantIsErr {
 				if !gotIsErr {
 					t.Fatalf("expected error but got %T", tt.got)
 				}
+
 				if !errors.Is(gotErr, wantErr) {
 					t.Errorf("got error %v, want %v", gotErr, wantErr)
 				}
+
 				return
 			}
 

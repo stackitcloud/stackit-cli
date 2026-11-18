@@ -38,10 +38,12 @@ func fixtureEncryptionFlagValues(mods ...func(map[string]string)) map[string]str
 	values[encryptionKekKeyIdFlag] = testKeyId
 	values[encryptionKekKeyringIdFlag] = testKeyringId
 	values[encryptionKekKeyVersionFlag] = "1"
+
 	values[encryptionServiceAccountFlag] = "volume-kms@example.com"
 	for _, mod := range mods {
 		mod(values)
 	}
+
 	return values
 }
 
@@ -50,10 +52,12 @@ func fixtureEncryptedInputModel(mods ...func(*inputModel)) *inputModel {
 	model.EncryptionKekKeyId = new(testKeyId)
 	model.EncryptionKekKeyringId = new(testKeyringId)
 	model.EncryptionKekKeyVersion = new(int64(1))
+
 	model.EncryptionServiceAccount = new("volume-kms@example.com")
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -67,6 +71,7 @@ func fixtureEncryptionParameters(mods ...func(*iaas.VolumeEncryptionParameter)) 
 	for _, mod := range mods {
 		mod(parameters)
 	}
+
 	return parameters
 }
 
@@ -87,6 +92,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -111,26 +117,31 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateVolumeRequest)) iaas.ApiCreateVolumeRequest {
 	request := testClient.CreateVolume(testCtx, testProjectId, testRegion)
+
 	request = request.CreateVolumePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
 func fixtureRequiredRequest(mods ...func(request *iaas.ApiCreateVolumeRequest)) iaas.ApiCreateVolumeRequest {
 	request := testClient.CreateVolume(testCtx, testProjectId, testRegion)
+
 	request = request.CreateVolumePayload(iaas.CreateVolumePayload{
 		AvailabilityZone: "eu01-1",
 	})
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -152,6 +163,7 @@ func fixturePayload(mods ...func(payload *iaas.CreateVolumePayload)) iaas.Create
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
@@ -159,6 +171,7 @@ func TestParseInput(t *testing.T) {
 	const secretFile = "secret.txt"
 	// #nosec G101 // test-only secret value.
 	const secret = "c2VjcmV0"
+
 	tests := []struct {
 		description   string
 		argValues     []string
@@ -319,6 +332,7 @@ func TestParseInput(t *testing.T) {
 					secretFile: {Data: []byte(secret)},
 				}
 				params.Printer.StdIn = strings.NewReader(tt.stdin)
+
 				return NewCmd(params)
 			}, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
@@ -393,6 +407,7 @@ func TestOutputResult(t *testing.T) {
 		projectLabel string
 		volume       *iaas.Volume
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -412,6 +427,7 @@ func TestOutputResult(t *testing.T) {
 			wantErr: false,
 		},
 	}
+
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

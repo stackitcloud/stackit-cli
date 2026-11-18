@@ -51,6 +51,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -66,11 +67,13 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *observability.ApiCreateInstanceRequest)) observability.ApiCreateInstanceRequest {
 	request := testClient.DefaultAPI.CreateInstance(testCtx, testProjectId)
+
 	request = request.CreateInstancePayload(observability.CreateInstancePayload{
 		Name:   utils.Ptr("example-name"),
 		PlanId: testPlanId,
@@ -78,6 +81,7 @@ func fixtureRequest(mods ...func(request *observability.ApiCreateInstanceRequest
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -93,6 +97,7 @@ func fixturePlansResponse(mods ...func(response *observability.PlansResponse)) *
 	for _, mod := range mods {
 		mod(response)
 	}
+
 	return response
 }
 
@@ -275,11 +280,13 @@ func TestBuildRequest(t *testing.T) {
 				returnError:       tt.getPlansFails,
 				listPlansResponse: tt.getPlansResponse,
 			}
+
 			request, err := buildRequest(testCtx, tt.model, client.newMock())
 			if err != nil {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error building request: %v", err)
 			}
 
@@ -308,6 +315,7 @@ func TestOutputResult(t *testing.T) {
 		projectLabel string
 		resp         *observability.CreateInstanceResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -326,6 +334,7 @@ func TestOutputResult(t *testing.T) {
 			wantErr: false,
 		},
 	}
+
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

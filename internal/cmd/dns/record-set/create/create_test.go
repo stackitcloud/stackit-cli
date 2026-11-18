@@ -43,6 +43,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -62,11 +63,13 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *dns.ApiCreateRecordSetRequest)) dns.ApiCreateRecordSetRequest {
 	request := testClient.DefaultAPI.CreateRecordSet(testCtx, testProjectId, testZoneId)
+
 	request = request.CreateRecordSetPayload(dns.CreateRecordSetPayload{
 		Name:    "example.com",
 		Comment: utils.Ptr("comment"),
@@ -79,6 +82,7 @@ func fixtureRequest(mods ...func(request *dns.ApiCreateRecordSetRequest)) dns.Ap
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -329,6 +333,7 @@ func TestOutputResult(t *testing.T) {
 		zoneLabel string
 		resp      *dns.RecordSetResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args

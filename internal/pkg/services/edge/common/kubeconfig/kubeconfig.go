@@ -42,6 +42,7 @@ func ValidateExpiration(expiration *uint64) error {
 			return fmt.Errorf("%s is too small (minimum is %d seconds)", ExpirationFlag, minExpiration)
 		}
 	}
+
 	return nil
 }
 
@@ -115,6 +116,7 @@ func mergeKubeconfig(filePath *string, data string, switchContext bool) error {
 	if filePath == nil {
 		return fmt.Errorf("no kubeconfig file provided to be merged")
 	}
+
 	path := *filePath
 
 	// Check if the new kubeconfig data is empty
@@ -172,6 +174,7 @@ func writeKubeconfig(filePath *string, data string) error {
 	if filePath == nil {
 		return fmt.Errorf("no kubeconfig file provided to be written")
 	}
+
 	path := *filePath
 
 	// Check if the new kubeconfig data is empty
@@ -212,6 +215,7 @@ func getKubeconfigPath(filePath *string) (string, error) {
 	if isValidFilePath(filePath) {
 		return filepath.Abs(*filePath)
 	}
+
 	return "", &InvalidKubeconfigPathError{Path: *filePath}
 }
 
@@ -303,22 +307,26 @@ func WriteKubeconfig(filePath *string, kubeconfig string, options WriteOptions) 
 			if options.ConfirmFn != nil {
 				// If confirmation callback is provided, prompt the user for confirmation
 				prompt := fmt.Sprintf("Update your kubeconfig %q?", path)
+
 				err := options.ConfirmFn(prompt)
 				if err != nil {
 					// If the user doesn't confirm do not proceed with the merge
 					return nil, err
 				}
 			}
+
 			err := mergeKubeconfig(&path, kubeconfig, options.SwitchContext)
 			if err != nil {
 				return nil, err
 			}
+
 			return &path, err
 		}
 		// If overwrite was requested overwrite the existing file
 		if options.ConfirmFn != nil {
 			// If confirmation callback is provided, prompt the user for confirmation
 			prompt := fmt.Sprintf("Replace your kubeconfig %q?", path)
+
 			err := options.ConfirmFn(prompt)
 			if err != nil {
 				// If the user doesn't confirm do not proceed with the overwrite
@@ -332,5 +340,6 @@ func WriteKubeconfig(filePath *string, kubeconfig string, options WriteOptions) 
 	if err != nil {
 		return nil, err
 	}
+
 	return &path, err
 }

@@ -57,10 +57,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			resourcePoolName, err := sfsUtils.GetResourcePoolName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ResourcePoolId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get resource pool name: %v", err)
+
 				resourcePoolName = model.ResourcePoolId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete resource pool %q? (This cannot be undone)", resourcePoolName)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -86,6 +88,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, model.Async, resourcePoolName, resp)
 		},
 	}
+
 	return cmd
 }
 
@@ -108,6 +111,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -117,7 +121,9 @@ func outputResult(p *print.Printer, outputFormat string, async bool, resourcePoo
 		if async {
 			operationState = "Triggered deletion of"
 		}
+
 		p.Outputf("%s resource pool %q\n", operationState, resourcePoolName)
+
 		return nil
 	})
 }

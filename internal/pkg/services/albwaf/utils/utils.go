@@ -11,10 +11,12 @@ func ToCreateCustomRules(rules []albwaf.GetCustomRule) []albwaf.CreateCustomRule
 	if rules == nil {
 		return nil
 	}
+
 	createRules := make([]albwaf.CreateCustomRule, len(rules))
 	for i := range rules {
 		createRules[i] = *toCreateCustomRule(&rules[i])
 	}
+
 	return createRules
 }
 

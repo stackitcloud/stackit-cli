@@ -82,6 +82,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a os-update Schedule for server %s?", serverLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -92,6 +93,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create Server os-update Schedule: %w", err)
@@ -101,6 +103,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -131,6 +134,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -142,6 +146,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *serverupdat
 		Rrule:             model.Rrule,
 		MaintenanceWindow: model.MaintenanceWindow,
 	})
+
 	return req, nil
 }
 

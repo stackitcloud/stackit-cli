@@ -63,6 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
@@ -71,6 +72,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, model.TemplateId, projectLabel, resp)
 		},
 	}
+
 	return cmd
 }
 
@@ -93,6 +95,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -114,6 +117,7 @@ func outputResult(p *print.Printer, outputFormat, templateId, projectLabel strin
 		table.AddSeparator()
 		table.AddRow("DESCRIPTION", template.Description)
 		table.AddSeparator()
+
 		if template.Input != nil {
 			table.AddRow("INPUT KIND", template.Input.Kind)
 			table.AddSeparator()
@@ -125,6 +129,7 @@ func outputResult(p *print.Printer, outputFormat, templateId, projectLabel strin
 			outputStepsTable := tables.NewTable()
 			outputStepsTable.SetTitle("OUTPUT STEPS")
 			outputStepsTable.SetHeader("NAME", "KIND", "DETAILS")
+
 			for _, step := range template.Output.Steps {
 				var kind, details string
 				if step.Result != nil {
@@ -138,6 +143,7 @@ func outputResult(p *print.Printer, outputFormat, templateId, projectLabel strin
 				outputStepsTable.AddRow(step.Name, kind, details)
 				outputStepsTable.AddSeparator()
 			}
+
 			content = append(content, outputStepsTable)
 		}
 
@@ -145,6 +151,7 @@ func outputResult(p *print.Printer, outputFormat, templateId, projectLabel strin
 		if err != nil {
 			return fmt.Errorf("render tables: %w", err)
 		}
+
 		return nil
 	})
 }

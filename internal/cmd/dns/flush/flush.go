@@ -49,6 +49,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -61,6 +62,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to flush the cache for domain %q?", model.Domain)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -68,6 +70,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("flush DNS cache: %w", err)
@@ -77,6 +80,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -95,6 +99,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -104,6 +109,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 		Domain: model.Domain,
 		Type:   model.Type,
 	})
+
 	return req
 }
 
@@ -112,11 +118,13 @@ func outputResult(p *print.Printer, model *inputModel, resp *dns.FlushDomainResp
 		if resp == nil {
 			return fmt.Errorf("flush DNS cache response is empty")
 		}
+
 		if model.Type != nil {
 			p.Outputf("Triggered flush of the %s record cache for domain %q\n", *model.Type, model.Domain)
 		} else {
 			p.Outputf("Triggered flush of the cache for domain %q\n", model.Domain)
 		}
+
 		return nil
 	})
 }

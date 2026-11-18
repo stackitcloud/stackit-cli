@@ -115,12 +115,15 @@ func TestClusterExists(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if exists != tt.expectedExists {
 				t.Errorf("expected exists to be %t, got %t", tt.expectedExists, exists)
 			}
@@ -231,6 +234,7 @@ func fixtureProviderOptions(mods ...func(*ske.ProviderOptions)) *ske.ProviderOpt
 	for _, mod := range mods {
 		mod(providerOptions)
 	}
+
 	return providerOptions
 }
 
@@ -277,6 +281,7 @@ func fixtureGetDefaultPayload(mods ...func(*ske.CreateOrUpdateClusterPayload)) *
 	for _, mod := range mods {
 		mod(payload)
 	}
+
 	return payload
 }
 
@@ -426,12 +431,15 @@ func TestGetDefaultPayload(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			diff := cmp.Diff(output, tt.expectedOutput)
 			if diff != "" {
 				t.Fatalf("Output is not as expected: %s", diff)
@@ -517,12 +525,15 @@ func TestConvertToSeconds(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if *output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, *output)
 			}
@@ -602,6 +613,7 @@ func TestMergeKubeConfig(t *testing.T) {
 				if err != nil {
 					t.Errorf("could not write file: %s", tt.location)
 				}
+
 				defer func() {
 					err := os.Remove(testLocation)
 					if err != nil {
@@ -642,12 +654,14 @@ func TestMergeKubeConfig(t *testing.T) {
 						t.Errorf("the user %s does not exist in the final kubeconfig", name)
 					}
 				}
+
 				for name := range kubeConfigNew.Contexts {
 					_, exits := kubeConfigFinal.Contexts[name]
 					if !exits {
 						t.Errorf("the context %s does not exist in the final kubeconfig", name)
 					}
 				}
+
 				for name := range kubeConfigNew.Clusters {
 					_, exits := kubeConfigFinal.Clusters[name]
 					if !exits {
@@ -668,12 +682,14 @@ func TestMergeKubeConfig(t *testing.T) {
 							t.Errorf("the user %s does not exist in the final kubeconfig", name)
 						}
 					}
+
 					for name := range kubeConfigExisting.Contexts {
 						_, exits := kubeConfigFinal.Contexts[name]
 						if !exits {
 							t.Errorf("the context %s does not exist in the final kubeconfig", name)
 						}
 					}
+
 					for name := range kubeConfigExisting.Clusters {
 						_, exits := kubeConfigFinal.Clusters[name]
 						if !exits {
@@ -704,15 +720,17 @@ func TestGetDefaultKubeconfigPath(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			// prevent test from failing if user has set the environment variable
 			t.Setenv("KUBECONFIG", "")
-			output, err := GetDefaultKubeconfigPath()
 
+			output, err := GetDefaultKubeconfigPath()
 			if err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			userHome, err := os.UserHomeDir()
 			if err != nil {
 				t.Errorf("could not get user home directory")
 			}
+
 			if output != filepath.Join(userHome, ".kube", "config") {
 				t.Errorf("expected output to be %s, got %s", filepath.Join(userHome, ".kube", "config"), output)
 			}
@@ -748,16 +766,17 @@ func TestGetDefaultKubeconfigPathWithEnvVar(t *testing.T) {
 			if err != nil {
 				t.Errorf("could not set KUBECONFIG environment variable: %s", err)
 			}
+
 			err = os.Setenv("HOME", tt.userHome)
 			if err != nil {
 				t.Errorf("could not set HOME environment variable: %s", err)
 			}
 
 			output, err := GetDefaultKubeconfigPath()
-
 			if err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if output != tt.expected {
 				t.Errorf("expected output to be %s, got %s", tt.expected, output)
 			}

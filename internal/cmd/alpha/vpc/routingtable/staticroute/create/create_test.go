@@ -55,6 +55,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -76,15 +77,18 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiAddVPCStaticRouteRequest)) iaas.ApiAddVPCStaticRouteRequest {
 	request := testClient.DefaultAPI.AddVPCStaticRoute(testCtx, testProjectId, testVpcId, testRegion, testRoutingTableId)
+
 	request = request.AddVPCStaticRoutePayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -107,6 +111,7 @@ func fixturePayload(mods ...func(payload *iaas.AddVPCStaticRoutePayload)) iaas.A
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
@@ -352,6 +357,7 @@ func TestBuildRequest(t *testing.T) {
 			if (err != nil) != tt.expectErr {
 				t.Fatalf("buildRequest() error = %v, expectErr %v", err, tt.expectErr)
 			}
+
 			if tt.expectErr {
 				return
 			}

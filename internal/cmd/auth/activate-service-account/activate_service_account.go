@@ -106,6 +106,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if !errors.As(err, &activateServiceAccountError) {
 					return fmt.Errorf("authenticate service account: %w", err)
 				}
+
 				return err
 			}
 
@@ -115,10 +116,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			} else {
 				params.Printer.Outputf("You have been successfully authenticated to the STACKIT CLI!\nService account email: %s\n", email)
 			}
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -143,6 +146,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -186,6 +190,7 @@ func runOIDCMode(params *types.CmdParams, model *inputModel) error {
 		if !errors.As(err, &activateErr) {
 			return fmt.Errorf("authenticate service account via workload identity federation: %w", err)
 		}
+
 		return err
 	}
 
@@ -194,5 +199,6 @@ func runOIDCMode(params *types.CmdParams, model *inputModel) error {
 	} else {
 		params.Printer.Outputf("Authenticated via Workload Identity Federation.\nService account email: %s\n", saEmail)
 	}
+
 	return nil
 }

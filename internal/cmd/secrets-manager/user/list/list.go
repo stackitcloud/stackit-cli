@@ -51,6 +51,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -64,17 +65,22 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get Secrets Manager users: %w", err)
 			}
+
 			if len(resp.Users) == 0 {
 				instanceLabel, err := secretsManagerUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, *model.InstanceId)
 				if err != nil {
 					params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 					instanceLabel = *model.InstanceId
 				}
+
 				params.Printer.Info("No users found for instance %q\n", instanceLabel)
+
 				return nil
 			}
 
@@ -88,6 +94,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -120,6 +127,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -132,6 +140,7 @@ func outputResult(p *print.Printer, outputFormat string, users []secretsmanager.
 	return p.OutputResult(outputFormat, users, func() error {
 		table := tables.NewTable()
 		table.SetHeader("ID", "USERNAME", "DESCRIPTION", "WRITE ACCESS")
+
 		for i := range users {
 			user := users[i]
 			table.AddRow(
@@ -141,6 +150,7 @@ func outputResult(p *print.Printer, outputFormat string, users []secretsmanager.
 				user.Write,
 			)
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

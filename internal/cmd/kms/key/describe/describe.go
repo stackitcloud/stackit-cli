@@ -67,6 +67,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -81,12 +82,14 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
+
 	model := &inputModel{
 		GlobalFlagModel: globalFlags,
 		KeyID:           inputArgs[0],
 		KeyRingID:       flags.FlagToStringValue(p, cmd, flagKeyRingID),
 	}
 	p.DebugInputModel(model)
+
 	return model, nil
 }
 
@@ -98,6 +101,7 @@ func outputResult(p *print.Printer, outputFormat string, key *kms.Key) error {
 	if key == nil {
 		return fmt.Errorf("key response is empty")
 	}
+
 	return p.OutputResult(outputFormat, key, func() error {
 		table := tables.NewTable()
 		table.AddRow("ID", key.Id)
@@ -128,6 +132,7 @@ func outputResult(p *print.Printer, outputFormat string, key *kms.Key) error {
 		if err != nil {
 			return fmt.Errorf("display table: %w", err)
 		}
+
 		return nil
 	})
 }
