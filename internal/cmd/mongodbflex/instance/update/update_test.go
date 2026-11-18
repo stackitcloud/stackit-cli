@@ -122,7 +122,7 @@ func fixtureStandardInputModel(mods ...func(model *inputModel)) *inputModel {
 		ACL:            new([]string{"0.0.0.0/0"}),
 		BackupSchedule: new("0 0 * * *"),
 		StorageClass:   new("class"),
-		StorageSize:    new(int64(10)),
+		StorageSize:    new(int32(10)),
 		Version:        new("5.0"),
 		Type:           new("Single"),
 	}
@@ -416,7 +416,7 @@ func TestBuildRequest(t *testing.T) {
 			},
 			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testInstanceId, testRegion).
 				PartialUpdateInstancePayload(mongodbflex.PartialUpdateInstancePayload{
-					Storage: &mongodbflex.Storage{
+					Storage: &mongodbflex.StorageUpdate{
 						Class: new("class"),
 					},
 				}),
@@ -425,7 +425,7 @@ func TestBuildRequest(t *testing.T) {
 			description: "update storage class and size",
 			model: fixtureRequiredInputModel(func(model *inputModel) {
 				model.StorageClass = new("class")
-				model.StorageSize = new(int64(10))
+				model.StorageSize = new(int32(10))
 			}),
 			isValid: true,
 			mockClientSettings: mockClientSettings{
@@ -439,9 +439,9 @@ func TestBuildRequest(t *testing.T) {
 			},
 			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testInstanceId, testRegion).
 				PartialUpdateInstancePayload(mongodbflex.PartialUpdateInstancePayload{
-					Storage: &mongodbflex.Storage{
+					Storage: &mongodbflex.StorageUpdate{
 						Class: new("class"),
-						Size:  new(int64(10)),
+						Size:  new(int32(10)),
 					},
 				}),
 		},
