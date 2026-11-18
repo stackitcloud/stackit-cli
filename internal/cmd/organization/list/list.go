@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/auth"
-	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 
 	"github.com/spf13/cobra"
@@ -54,11 +53,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				return err
 			}
 
-			activeProfile, err := config.GetProfile()
+			model.Member, err = auth.GetAuthEmail()
 			if err != nil {
-				return fmt.Errorf("get profile: %w", err)
+				return fmt.Errorf("get email of authenticated user: %w", err)
 			}
-			model.Member = auth.GetProfileEmail(activeProfile)
 
 			// Configure API client
 			apiClient, err := client.ConfigureClient(params.Printer, params.CliVersion)

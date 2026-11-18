@@ -346,6 +346,7 @@ func GetProfileEmail(profile string) string {
 
 // GetAuthEmail returns the email of the authenticated account.
 // If the environment variable STACKIT_ACCESS_TOKEN is set, the email of this token will be returned.
+// If OIDC is enabled, the service account email from the environment will be returned.
 func GetAuthEmail() (string, error) {
 	// If STACKIT_ACCESS_TOKEN is set, get the mail from the token
 	if accessToken := os.Getenv(envAccessTokenName); accessToken != "" {
@@ -354,6 +355,12 @@ func GetAuthEmail() (string, error) {
 			return "", fmt.Errorf("error getting email from token: %w", err)
 		}
 		return email, nil
+	}
+
+	if IsOIDCEnabled() {
+		if email := OIDCServiceAccountEmail(); email != "" {
+			return email, nil
+		}
 	}
 
 	profile, err := config.GetProfile()

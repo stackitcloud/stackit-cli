@@ -38,29 +38,9 @@ func AuthenticationConfig(p *print.Printer, reauthorizeUserRoutine func(p *print
 	if IsOIDCEnabled() {
 		p.Debug(print.DebugLevel, "authenticating using workload identity federation (OIDC)")
 
-		email := OIDCServiceAccountEmail()
-		if email == "" {
-			return nil, fmt.Errorf(
-				"env var %s must be set when %s is enabled",
-				EnvServiceAccountEmail, EnvUseOIDC,
-			)
-		}
-
-		tokenFunc, err := OIDCTokenFunc()
+		rt, err := oidcRoundTripper()
 		if err != nil {
 			return nil, err
-		}
-
-		wifCfg := &sdkConfig.Configuration{
-			WorkloadIdentityFederation:       true,
-			ServiceAccountEmail:              email,
-			ServiceAccountFederatedTokenFunc: tokenFunc,
-			TokenCustomUrl:                   viper.GetString(config.TokenCustomEndpointKey),
-		}
-
-		rt, err := sdkAuth.WorkloadIdentityFederationAuth(wifCfg)
-		if err != nil {
-			return nil, fmt.Errorf("initialize workload identity federation: %w", err)
 		}
 
 		return sdkConfig.WithCustomAuth(rt), nil
@@ -119,10 +99,20 @@ func AuthenticationConfig(p *print.Printer, reauthorizeUserRoutine func(p *print
 	return authCfgOption, nil
 }
 
+// UserSessionExpired checks whether the stored session has expired.
+// Authentication via environment variables (STACKIT_ACCESS_TOKEN or OIDC) does not use a stored session,
+// so it never counts as expired. The same applies if no session expiration is stored.
 func UserSessionExpired() (bool, error) {
+	if os.Getenv(envAccessTokenName) != "" || IsOIDCEnabled() {
+		return false, nil
+	}
+
 	sessionExpiresAtString, err := GetAuthField(SESSION_EXPIRES_AT_UNIX)
 	if err != nil {
 		return false, fmt.Errorf("get %s: %w", SESSION_EXPIRES_AT_UNIX, err)
+	}
+	if sessionExpiresAtString == "" {
+		return false, nil
 	}
 	sessionExpiresAtInt, err := strconv.Atoi(sessionExpiresAtString)
 	if err != nil {
@@ -166,6 +156,48 @@ func getSessionExpiration() (time.Duration, error) {
 	return duration, nil
 }
 
+// oidcRoundTripper initializes the workload identity federation (OIDC) authentication flow from the environment.
+func oidcRoundTripper() (http.RoundTripper, error) {
+	email := OIDCServiceAccountEmail()
+	if email == "" {
+		return nil, fmt.Errorf(
+			"env var %s must be set when %s is enabled",
+			EnvServiceAccountEmail, EnvUseOIDC,
+		)
+	}
+
+	tokenFunc, err := OIDCTokenFunc()
+	if err != nil {
+		return nil, err
+	}
+
+	rt, err := sdkAuth.WorkloadIdentityFederationAuth(&sdkConfig.Configuration{
+		WorkloadIdentityFederation:       true,
+		ServiceAccountEmail:              email,
+		ServiceAccountFederatedTokenFunc: tokenFunc,
+		TokenCustomUrl:                   viper.GetString(config.TokenCustomEndpointKey),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("initialize workload identity federation: %w", err)
+	}
+	return rt, nil
+}
+
+// oidcAccessToken returns an access token obtained through workload identity federation (OIDC).
+func oidcAccessToken() (string, error) {
+	rt, err := oidcRoundTripper()
+	if err != nil {
+		return "", err
+	}
+	flow, ok := rt.(interface {
+		GetAccessToken() (string, error)
+	})
+	if !ok {
+		return "", fmt.Errorf("workload identity federation does not support retrieving access tokens")
+	}
+	return flow.GetAccessToken()
+}
+
 func getEmailFromToken(token string) (string, error) {
 	// We can safely use ParseUnverified because we are not authenticating the user at this point,
 	// We are parsing the token just to get the service account e-mail
@@ -185,6 +217,14 @@ func getEmailFromToken(token string) (string, error) {
 // For user token flows, it refreshes the token if necessary.
 // For service account flows, it returns the current access token.
 func GetValidAccessToken(p *print.Printer) (string, error) {
+	if accessToken := os.Getenv(envAccessTokenName); accessToken != "" {
+		return accessToken, nil
+	}
+
+	if IsOIDCEnabled() {
+		return oidcAccessToken()
+	}
+
 	flow, err := GetAuthFlow()
 	if err != nil {
 		return "", fmt.Errorf("get authentication flow: %w", err)
