@@ -23,8 +23,8 @@ stackit server os-update schedule create [flags]
 ### Options
 
 ```
-  -e, --enabled                    Is the server os-update schedule enabled (default true)
-  -h, --help                       Help for "stackit server os-update schedule create"
+  -e, --enabled[=true|false]       Is the server os-update schedule enabled (default true)
+  -h, --help[=true|false]          Help for "stackit server os-update schedule create"
   -d, --maintenance-window int32   os-update maintenance window (in hours, 1-24) (default 23)
   -n, --name string                os-update schedule name
   -r, --rrule string               os-update RRULE (recurrence rule) (default "DTSTART;TZID=Europe/Sofia:20200803T023000 RRULE:FREQ=DAILY;INTERVAL=1")
@@ -34,12 +34,12 @@ stackit server os-update schedule create [flags]
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

@@ -32,7 +32,7 @@ stackit security-group rule create [flags]
       --description string                The rule description
       --direction string                  The direction of the traffic which the rule should match. The possible values are: "ingress", "egress"
       --ether-type string                 The ethertype which the rule should match
-  -h, --help                              Help for "stackit security-group rule create"
+  -h, --help[=true|false]                 Help for "stackit security-group rule create"
       --icmp-parameter-code int           ICMP code. Can be set if the protocol is ICMP
       --icmp-parameter-type int           ICMP type. Can be set if the protocol is ICMP
       --ip-range string                   The remote IP range which the rule should match
@@ -47,12 +47,12 @@ stackit security-group rule create [flags]
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

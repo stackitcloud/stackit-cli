@@ -30,7 +30,7 @@ stackit mongodbflex backup restore [flags]
 ```
       --backup-id string            Backup ID
       --backup-instance-id string   Instance ID of the target instance to restore the backup to
-  -h, --help                        Help for "stackit mongodbflex backup restore"
+  -h, --help[=true|false]           Help for "stackit mongodbflex backup restore"
       --instance-id string          Instance ID
       --timestamp string            Timestamp to restore the instance to, in a date-time with the RFC3339 layout format, e.g. 2024-01-01T00:00:00Z
 ```
@@ -38,12 +38,12 @@ stackit mongodbflex backup restore [flags]
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

@@ -20,7 +20,7 @@ stackit load-balancer target-pool remove-target TARGET_IP [flags]
 ### Options
 
 ```
-  -h, --help                      Help for "stackit load-balancer target-pool remove-target"
+  -h, --help[=true|false]         Help for "stackit load-balancer target-pool remove-target"
       --lb-name string            Load balancer name
       --target-pool-name string   Target IP of the target to remove. Must be a valid IPv4 or IPv6
 ```
@@ -28,12 +28,12 @@ stackit load-balancer target-pool remove-target TARGET_IP [flags]
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

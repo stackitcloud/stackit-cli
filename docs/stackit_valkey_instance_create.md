@@ -26,31 +26,31 @@ stackit valkey instance create [flags]
 ### Options
 
 ```
-      --acl strings                     List of IP networks in CIDR notation which are allowed to access this instance (default [])
-      --enable-monitoring               Enable monitoring
-      --graphite string                 Graphite host
-  -h, --help                            Help for "stackit valkey instance create"
-      --metrics-frequency int32         Metrics frequency in seconds
-      --metrics-prefix string           Metrics prefix
-      --min-replicas-to-write int32     Minimum number of replicas that must acknowledge a write for it to be accepted
-      --monitoring-instance-id string   Monitoring instance ID
-  -n, --name string                     Instance name
-      --plan-id string                  Plan ID
-      --plan-name string                Plan name
-      --repl-backlog-size string        Replication backlog size (e.g. "1mb")
-      --syslog strings                  Syslog
-      --version string                  Instance Valkey version
+      --acl strings                      List of IP networks in CIDR notation which are allowed to access this instance (default [])
+      --enable-monitoring[=true|false]   Enable monitoring
+      --graphite string                  Graphite host
+  -h, --help[=true|false]                Help for "stackit valkey instance create"
+      --metrics-frequency int32          Metrics frequency in seconds
+      --metrics-prefix string            Metrics prefix
+      --min-replicas-to-write int32      Minimum number of replicas that must acknowledge a write for it to be accepted
+      --monitoring-instance-id string    Monitoring instance ID
+  -n, --name string                      Instance name
+      --plan-id string                   Plan ID
+      --plan-name string                 Plan name
+      --repl-backlog-size string         Replication backlog size (e.g. "1mb")
+      --syslog strings                   Syslog
+      --version string                   Instance Valkey version
 ```
 
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

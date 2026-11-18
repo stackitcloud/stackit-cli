@@ -29,25 +29,25 @@ stackit dns zone list [flags]
 ### Options
 
 ```
-      --active                 Filter for active zones
-  -h, --help                   Help for "stackit dns zone list"
-      --inactive               Filter for inactive zones
-      --include-deleted        Includes successfully deleted zones (if unset, these are filtered out)
-      --limit int              Maximum number of entries to list
-      --name-like string       Filter by name
-      --order-by-name string   Order by name, (one of: [asc, desc])
-      --page-size int          Number of items fetched in each API call. Does not affect the number of items in the command output (default 100)
+      --active[=true|false]            Filter for active zones
+  -h, --help[=true|false]              Help for "stackit dns zone list"
+      --inactive[=true|false]          Filter for inactive zones
+      --include-deleted[=true|false]   Includes successfully deleted zones (if unset, these are filtered out)
+      --limit int                      Maximum number of entries to list
+      --name-like string               Filter by name
+      --order-by-name string           Order by name, (one of: [asc, desc])
+      --page-size int                  Number of items fetched in each API call. Does not affect the number of items in the command output (default 100)
 ```
 
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

@@ -13,7 +13,7 @@ require (
 	github.com/lmittmann/tint v1.2.1
 	github.com/mattn/go-colorable v0.1.16
 	github.com/spf13/cobra v1.10.2
-	github.com/spf13/pflag v1.0.10
+	github.com/spf13/pflag v1.1.0
 	github.com/spf13/viper v1.21.0
 	github.com/stackitcloud/stackit-sdk-go/core v0.27.1
 	github.com/stackitcloud/stackit-sdk-go/services/alb v0.20.0
@@ -21,9 +21,9 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/authorization v0.16.0
 	github.com/stackitcloud/stackit-sdk-go/services/automation v0.2.1
 	github.com/stackitcloud/stackit-sdk-go/services/cdn v1.22.0
-	github.com/stackitcloud/stackit-sdk-go/services/dns v0.25.0
+	github.com/stackitcloud/stackit-sdk-go/services/dns v0.26.0
 	github.com/stackitcloud/stackit-sdk-go/services/edge v0.14.0
-	github.com/stackitcloud/stackit-sdk-go/services/git v0.15.0
+	github.com/stackitcloud/stackit-sdk-go/services/git v0.16.0
 	github.com/stackitcloud/stackit-sdk-go/services/iaas v1.15.1
 	github.com/stackitcloud/stackit-sdk-go/services/intake v0.12.0
 	github.com/stackitcloud/stackit-sdk-go/services/logs v0.12.0
@@ -40,20 +40,20 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/serviceaccount v0.22.0
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.8.0
 	github.com/stackitcloud/stackit-sdk-go/services/ske v1.22.0
-	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.19.0
+	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.20.0
 	github.com/stackitcloud/stackit-sdk-go/services/valkey v0.4.0
 	github.com/stackitcloud/stackit-sdk-go/services/vpn v0.15.3
 	github.com/zalando/go-keyring v0.2.8
-	golang.org/x/mod v0.42.0
-	golang.org/x/oauth2 v0.37.0
+	golang.org/x/mod v0.43.0
+	golang.org/x/oauth2 v0.38.0
 	golang.org/x/term v0.47.0
 	golang.org/x/text v0.43.0
-	k8s.io/apimachinery v0.37.1
-	k8s.io/client-go v0.37.1
+	k8s.io/apimachinery v0.37.2
+	k8s.io/client-go v0.37.2
 )
 
 require (
-	golang.org/x/net v0.59.0 // indirect
+	golang.org/x/net v0.61.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 )
@@ -239,8 +239,8 @@ require (
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/exp/typeparams v0.0.0-20260209203927-2842357ff358 // indirect
 	golang.org/x/sync v0.24.0 // indirect
-	golang.org/x/telemetry v0.0.0-20260924152758-ed294f943157 // indirect
-	golang.org/x/tools v0.51.0 // indirect
+	golang.org/x/telemetry v0.0.0-20261009151841-97e8ea77aa2a // indirect
+	golang.org/x/tools v0.52.0 // indirect
 	google.golang.org/protobuf v1.36.12-0.20260120151049-f2248ac996af // indirect
 	honnef.co/go/tools v0.7.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260721132016-d427ff9ee9ad // indirect
@@ -281,7 +281,7 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.37.1 // indirect
+	k8s.io/api v0.37.2 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/utils v0.0.0-20260626114624-be93311217bd
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect

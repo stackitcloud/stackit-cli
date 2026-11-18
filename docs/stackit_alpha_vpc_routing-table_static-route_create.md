@@ -28,7 +28,7 @@ stackit alpha vpc routing-table static-route create [flags]
 ```
       --destination-type string    Destination type (one of: [cidrv4, cidrv6])
       --destination-value string   Destination value
-  -h, --help                       Help for "stackit alpha vpc routing-table static-route create"
+  -h, --help[=true|false]          Help for "stackit alpha vpc routing-table static-route create"
       --labels stringToString      Labels are key-value string pairs which can be attached to a static route. E.g. '--labels key1=value1,key2=value2,...' (default [])
       --nexthop-type string        Next hop type (one of: [ipv4, ipv6, internet, blackhole])
       --nexthop-value string       NextHop value
@@ -39,12 +39,12 @@ stackit alpha vpc routing-table static-route create [flags]
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

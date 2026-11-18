@@ -1,6 +1,7 @@
 package observability
 
 import (
+	"github.com/stackitcloud/stackit-cli/internal/cmd/observability/acl"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/observability/credentials"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/observability/grafana"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/observability/instance"
@@ -31,4 +32,5 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(credentials.NewCmd(params))
 	cmd.AddCommand(scrapeconfig.NewCmd(params))
 	cmd.AddCommand(plans.NewCmd(params))
+	cmd.AddCommand(acl.NewCmd(params))
 }

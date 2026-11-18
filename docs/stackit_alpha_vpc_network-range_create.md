@@ -23,7 +23,7 @@ stackit alpha vpc network-range create [flags]
 ```
       --default-prefix-length int   The default prefix length for network ranges in the VPC
       --description string          Description of the network range
-  -h, --help                        Help for "stackit alpha vpc network-range create"
+  -h, --help[=true|false]           Help for "stackit alpha vpc network-range create"
       --ip-version string           IP version of the network-range (one of: [ipv4])
       --labels stringToString       Labels are key-value string pairs which can be attached to a network range. E.g. '--labels key1=value1,key2=value2,...' (default [])
       --max-prefix-length int       The maximal prefix length for network ranges in the VPC
@@ -36,12 +36,12 @@ stackit alpha vpc network-range create [flags]
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

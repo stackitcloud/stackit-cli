@@ -21,7 +21,7 @@ stackit server backup volume-backup restore VOLUME_BACKUP_ID [flags]
 
 ```
   -b, --backup-id string           Backup ID
-  -h, --help                       Help for "stackit server backup volume-backup restore"
+  -h, --help[=true|false]          Help for "stackit server backup volume-backup restore"
   -r, --restore-volume-id string   Restore Volume ID
   -s, --server-id string           Server ID
 ```
@@ -29,12 +29,12 @@ stackit server backup volume-backup restore VOLUME_BACKUP_ID [flags]
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

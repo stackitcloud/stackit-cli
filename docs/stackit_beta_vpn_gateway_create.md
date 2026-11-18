@@ -30,7 +30,7 @@ stackit beta vpn gateway create [flags]
       --availability-zone-tunnel-2 string            Availability Zone of Tunnel 2
       --bgp-local-asn int                            ASN for private use (reserved by IANA), both 16Bit and 32Bit ranges are valid (RFC 6996)
       --bgp-override-advertised-routes stringArray   A list of IPv4 Prefixes to advertise via BGP
-  -h, --help                                         Help for "stackit beta vpn gateway create"
+  -h, --help[=true|false]                            Help for "stackit beta vpn gateway create"
       --labels stringToString                        Labels in key=value format, separated by commas (default [])
       --name string                                  Gateway name
       --plan-id string                               Plan ID
@@ -40,12 +40,12 @@ stackit beta vpn gateway create [flags]
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO
