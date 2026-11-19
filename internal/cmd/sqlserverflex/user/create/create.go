@@ -60,6 +60,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args: args.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -74,10 +75,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := sqlserverflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a user for instance %q?", instanceLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -85,6 +88,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create SQLServer Flex user: %w", err)
@@ -106,6 +110,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -132,6 +137,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -142,6 +148,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sqlserverfl
 		Username: model.Username,
 		Roles:    model.Roles,
 	})
+
 	return req
 }
 
@@ -155,16 +162,21 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, use
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
+
 		p.Outputf("%s user for instance %q. User ID: %d\n\n", operationState, instanceLabel, user.Id)
 		p.Outputf("Username: %s\n", user.Username)
 		p.Outputf("Password: %s\n", user.Password)
+
 		if len(user.Roles) != 0 {
 			p.Outputf("Roles: [%v]\n", strings.Join(user.Roles, ", "))
 		}
+
 		if user.Host != "" {
 			p.Outputf("Host: %s\n", user.Host)
 		}
+
 		p.Outputf("Port: %d\n", user.Port)
+
 		if user.Uri != "" {
 			p.Outputf("URI: %s\n", user.Uri)
 		}

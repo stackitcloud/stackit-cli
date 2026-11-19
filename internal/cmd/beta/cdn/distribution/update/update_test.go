@@ -43,6 +43,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, m := range mods {
 		m(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -58,6 +59,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -66,15 +68,18 @@ func fixtureRequest(mods ...func(payload *cdn.PatchDistributionPayload)) cdn.Api
 	if payload := fixturePayload(mods...); payload != nil {
 		req = req.PatchDistributionPayload(*fixturePayload(mods...))
 	}
+
 	return req
 }
 
 func fixturePayload(mods ...func(payload *cdn.PatchDistributionPayload)) *cdn.PatchDistributionPayload {
 	payload := cdn.NewPatchDistributionPayload()
+
 	payload.Config = &cdn.ConfigPatch{}
 	for _, m := range mods {
 		m(payload)
 	}
+
 	return payload
 }
 
@@ -87,6 +92,7 @@ func TestParseInput(t *testing.T) {
 		isValid     bool
 		expected    *inputModel
 	}
+
 	tests := []testCase{
 		{
 			description: "base",
@@ -372,6 +378,7 @@ func TestParseInput(t *testing.T) {
 					testPwFile: {Data: []byte(testPw)},
 				}
 				params.Printer.StdIn = strings.NewReader(tt.stdin)
+
 				return NewCmd(params)
 			}, parseInput, tt.expected, tt.argValues, tt.flagValues, tt.isValid)
 		})
@@ -562,6 +569,7 @@ func TestOutputResult(t *testing.T) {
 			if err := outputResult(params.Printer, tt.outputFormat, testProjectId, tt.response); (err != nil) != tt.wantErr {
 				t.Fatalf("outputResult: %v", err)
 			}
+
 			if params.Out.String() != tt.expected {
 				t.Errorf("want:\n%s\ngot:\n%s", tt.expected, params.Out.String())
 			}

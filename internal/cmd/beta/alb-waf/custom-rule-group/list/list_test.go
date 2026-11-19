@@ -41,6 +41,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -52,15 +53,18 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *albwaf.ApiListCustomRuleGroupRequest)) albwaf.ApiListCustomRuleGroupRequest {
 	request := testClient.DefaultAPI.ListCustomRuleGroup(testCtx, testProjectId, testRegion)
+
 	request = request.PageSize(strconv.FormatInt(maxPageSize, 10))
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -136,6 +140,7 @@ func TestBuildRequest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient, "", maxPageSize)
+
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest, albwaf.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
@@ -153,6 +158,7 @@ func Test_outputResult(t *testing.T) {
 		projectLabel string
 		items        []albwaf.GetCustomRuleGroupResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args

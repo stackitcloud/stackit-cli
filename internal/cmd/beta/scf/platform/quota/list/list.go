@@ -44,6 +44,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(p.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -57,6 +58,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("list STACKIT Cloud Foundry platform quotas: %w", err)
@@ -65,6 +67,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			return outputResult(p.Printer, model, resp)
 		},
 	}
+
 	return cmd
 }
 
@@ -82,6 +85,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -101,6 +105,7 @@ func outputResult(p *print.Printer, model *inputModel, quotas []scf.Quota) error
 		table.SetTitle("STACKIT Cloud Foundry platform quotas")
 		table.SetHeader("ID", "NAME", "PLATFORM ID", "CREATED")
 		table.AddSeparator()
+
 		for _, quota := range quotas {
 			table.AddRow(
 				quota.GetGuid(),
@@ -115,6 +120,7 @@ func outputResult(p *print.Printer, model *inputModel, quotas []scf.Quota) error
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

@@ -47,6 +47,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -57,15 +58,18 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			serverLabel, err := iaasUtils.GetServerName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ServerId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get server name: %v", err)
+
 				serverLabel = model.ServerId
 			} else if serverLabel == "" {
 				serverLabel = model.ServerId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to attach service account %q to server %q?", model.ServiceAccMail, serverLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -73,6 +77,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("attach service account to server: %w", err)
@@ -82,6 +87,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -103,6 +109,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 		serviceAccMail = flags.FlagToStringValue(p, cmd, serviceAccFlag)
 	} else if len(inputArgs) > 0 {
 		serviceAccMail = inputArgs[0]
+
 		p.Warn("Using a positional argument for the service account email is deprecated and will be removed after 2026-12. Please use the '--%s' flag instead.\n", serviceAccFlag)
 	} else {
 		return nil, fmt.Errorf(`service account must be specified by using either the --%s flag or (deprecated) as a positional argument`, serviceAccFlag)
@@ -115,6 +122,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 

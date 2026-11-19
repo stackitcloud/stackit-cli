@@ -25,6 +25,7 @@ func getIDPWellKnownConfigURL() (wellKnownConfigURL string, err error) {
 	customWellKnownConfig := viper.GetString(config.IdentityProviderCustomWellKnownConfigurationKey)
 	if customWellKnownConfig != "" {
 		wellKnownConfigURL = customWellKnownConfig
+
 		err := utils.ValidateURLDomain(wellKnownConfigURL)
 		if err != nil {
 			return "", fmt.Errorf("validate custom identity provider well-known configuration: %w", err)
@@ -54,8 +55,10 @@ func retrieveIDPWellKnownConfigWithStorage(p *print.Printer, persistTokenEndpoin
 	if err != nil {
 		return nil, fmt.Errorf("get IDP well-known configuration: %w", err)
 	}
+
 	if idpWellKnownConfigURL != defaultWellKnownConfig {
 		p.Warn("You are using a custom identity provider well-known configuration (%s) for authentication.\n", idpWellKnownConfigURL)
+
 		err := p.PromptForEnter("Press Enter to proceed with the login...")
 		if err != nil {
 			return nil, err
@@ -63,11 +66,14 @@ func retrieveIDPWellKnownConfigWithStorage(p *print.Printer, persistTokenEndpoin
 	}
 
 	p.Debug(print.DebugLevel, "get IDP well-known configuration from %s", idpWellKnownConfigURL)
+
 	httpClient := &http.Client{}
+
 	idpWellKnownConfig, err := parseWellKnownConfigurationWithStorage(httpClient, idpWellKnownConfigURL, persistTokenEndpoint)
 	if err != nil {
 		return nil, fmt.Errorf("parse IDP well-known configuration: %w", err)
 	}
+
 	return idpWellKnownConfig, nil
 }
 
@@ -89,6 +95,7 @@ func GetIDPTokenEndpointStateless(p *print.Printer) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return wellKnownConfig.TokenEndpoint, nil
 }
 
@@ -100,6 +107,7 @@ func parseWellKnownConfiguration(httpClient apiClient, wellKnownConfigURL string
 
 func parseWellKnownConfigurationWithStorage(httpClient apiClient, wellKnownConfigURL string, persistTokenEndpoint bool) (wellKnownConfig *wellKnownConfig, err error) {
 	req, _ := http.NewRequest("GET", wellKnownConfigURL, http.NoBody)
+
 	res, err := httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("make the request: %w", err)
@@ -112,6 +120,7 @@ func parseWellKnownConfigurationWithStorage(httpClient apiClient, wellKnownConfi
 			err = fmt.Errorf("close response body: %w", closeErr)
 		}
 	}()
+
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, fmt.Errorf("read response body: %w", err)
@@ -121,24 +130,31 @@ func parseWellKnownConfigurationWithStorage(httpClient apiClient, wellKnownConfi
 	if err != nil {
 		return nil, fmt.Errorf("unmarshal response: %w", err)
 	}
+
 	if wellKnownConfig == nil {
 		return nil, fmt.Errorf("nil well-known configuration response")
 	}
+
 	if wellKnownConfig.Issuer == "" {
 		return nil, fmt.Errorf("found no issuer")
 	}
+
 	if utils.ValidateURLDomain(wellKnownConfig.Issuer) != nil {
 		return nil, fmt.Errorf("issuer is invalid")
 	}
+
 	if wellKnownConfig.AuthorizationEndpoint == "" {
 		return nil, fmt.Errorf("found no authorization endpoint")
 	}
+
 	if utils.ValidateURLDomain(wellKnownConfig.AuthorizationEndpoint) != nil {
 		return nil, fmt.Errorf("authorization endpoint is invalid")
 	}
+
 	if wellKnownConfig.TokenEndpoint == "" {
 		return nil, fmt.Errorf("found no token endpoint")
 	}
+
 	if utils.ValidateURLDomain(wellKnownConfig.TokenEndpoint) != nil {
 		return nil, fmt.Errorf("token endpoint is invalid")
 	}
@@ -149,5 +165,6 @@ func parseWellKnownConfigurationWithStorage(httpClient apiClient, wellKnownConfi
 			return nil, fmt.Errorf("set token endpoint in the authentication storage: %w", err)
 		}
 	}
+
 	return wellKnownConfig, err
 }

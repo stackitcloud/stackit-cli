@@ -57,6 +57,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -73,6 +74,7 @@ func fixtureFlagValuesWithPrefix(mods ...func(flagValues map[string]string)) map
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -87,6 +89,7 @@ func fixtureFlagValuesWithPrefixLength(mods ...func(flagValues map[string]string
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -107,6 +110,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -124,6 +128,7 @@ func fixtureInputModelWithPrefix(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -139,20 +144,24 @@ func fixtureInputModelWithPrefixLength(mods ...func(model *inputModel)) *inputMo
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *iaas.ApiCreateNetworkRequest)) iaas.ApiCreateNetworkRequest {
 	request := testClient.DefaultAPI.CreateNetwork(testCtx, testProjectId, testRegion)
+
 	request = request.CreateNetworkPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
 func fixtureRequiredRequest(mods ...func(request *iaas.ApiCreateNetworkRequest)) iaas.ApiCreateNetworkRequest {
 	request := testClient.DefaultAPI.CreateNetwork(testCtx, testProjectId, testRegion)
+
 	request = request.CreateNetworkPayload(iaas.CreateNetworkPayload{
 		Name:   testNetworkName,
 		Routed: utils.Ptr(true),
@@ -160,6 +169,7 @@ func fixtureRequiredRequest(mods ...func(request *iaas.ApiCreateNetworkRequest))
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -175,6 +185,7 @@ func fixturePayload(mods ...func(payload *iaas.CreateNetworkPayload)) iaas.Creat
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
@@ -187,6 +198,7 @@ func fixturePayloadWithPrefix(mods ...func(payload *iaas.CreateNetworkPayload)) 
 			Prefix:      testIPv4Prefix,
 		},
 	}
+
 	payload.Ipv6 = &iaas.CreateNetworkIPv6{
 		CreateNetworkIPv6WithPrefix: &iaas.CreateNetworkIPv6WithPrefix{
 			Nameservers: testIPv6NameServers,
@@ -197,6 +209,7 @@ func fixturePayloadWithPrefix(mods ...func(payload *iaas.CreateNetworkPayload)) 
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
@@ -208,6 +221,7 @@ func fixturePayloadWithPrefixLength(mods ...func(payload *iaas.CreateNetworkPayl
 			Nameservers:  testIPv4NameServers,
 		},
 	}
+
 	payload.Ipv6 = &iaas.CreateNetworkIPv6{
 		CreateNetworkIPv6WithPrefixLength: &iaas.CreateNetworkIPv6WithPrefixLength{
 			PrefixLength: testIPv6PrefixLength,
@@ -217,6 +231,7 @@ func fixturePayloadWithPrefixLength(mods ...func(payload *iaas.CreateNetworkPayl
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
@@ -695,6 +710,7 @@ func TestOutputResult(t *testing.T) {
 		projectLabel string
 		network      *iaas.Network
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -713,6 +729,7 @@ func TestOutputResult(t *testing.T) {
 			wantErr: false,
 		},
 	}
+
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

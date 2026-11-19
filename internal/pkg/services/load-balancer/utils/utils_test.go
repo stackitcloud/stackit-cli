@@ -105,6 +105,7 @@ func fixtureLoadBalancer(mods ...func(*loadbalancer.LoadBalancer)) *loadbalancer
 	for _, mod := range mods {
 		mod(&lb)
 	}
+
 	return &lb
 }
 
@@ -194,12 +195,15 @@ func TestGetCredentialsDisplayName(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}
@@ -274,12 +278,15 @@ func TestGetLoadBalancerTargetPool(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			diff := cmp.Diff(output, tt.expectedOutput)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -522,12 +529,15 @@ func TestAddTargetToTargetPool(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			diff := cmp.Diff(tt.targetPool, tt.expectedTargetPool)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -661,12 +671,15 @@ func TestRemoveTargetFromTargetPool(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			diff := cmp.Diff(tt.targetPool, tt.expectedTargetPool)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -828,12 +841,15 @@ func TestGetTargetName(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			if output != tt.expectedOutput {
 				t.Errorf("expected output to be %s, got %s", tt.expectedOutput, output)
 			}
@@ -966,12 +982,15 @@ func TestGetUsedObsCredentials(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Errorf("failed on valid input")
 			}
+
 			if !tt.isValid && err == nil {
 				t.Errorf("did not fail on invalid input")
 			}
+
 			if !tt.isValid {
 				return
 			}
+
 			diff := cmp.Diff(output, tt.expectedOutput)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -1138,11 +1157,13 @@ func TestFilterCredentials(t *testing.T) {
 				listLoadBalancersResp:  tt.listLoadBalancersResp,
 				listLoadBalancersFails: tt.listLoadBalancersFails,
 			}
+
 			filteredCredentials, err := FilterCredentials(testCtx, newAPIMock(client), tt.allCredentials, testProjectId, testRegion, tt.filterOp)
 			if err != nil {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error filtering credentials: %v", err)
 			}
 

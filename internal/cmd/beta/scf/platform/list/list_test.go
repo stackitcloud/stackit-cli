@@ -40,6 +40,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -55,6 +56,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -63,6 +65,7 @@ func fixtureRequest(mods ...func(request *scf.ApiListPlatformsRequest)) scf.ApiL
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -172,6 +175,7 @@ func TestOutputResult(t *testing.T) {
 			},
 		},
 	}
+
 	tests := []struct {
 		name         string
 		outputFormat string
@@ -215,6 +219,7 @@ func TestOutputResult(t *testing.T) {
 			if err := outputResult(params.Printer, tt.outputFormat, testProjectId, tt.limit, tt.resp); err != nil {
 				t.Errorf("outputResult() error = %v", err)
 			}
+
 			warned := strings.Contains(params.Err.String(), "more than 1 page")
 			if warned != tt.expectWarn {
 				t.Errorf("expected warning = %t, got %t (stderr: %q)", tt.expectWarn, warned, params.Err.String())

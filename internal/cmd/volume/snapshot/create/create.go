@@ -56,6 +56,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -70,6 +71,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
@@ -77,10 +79,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			volumeLabel, err := iaasUtils.GetVolumeName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.VolumeID)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get volume name: %v", err)
+
 				volumeLabel = model.VolumeID
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create snapshot from volume %q? (This cannot be undone)", volumeLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -88,6 +92,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create snapshot: %w", err)
@@ -107,12 +112,15 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered creation of"
 			}
+
 			params.Printer.Outputf("%s snapshot of %q in %q. Snapshot ID: %s\n", operationState, volumeLabel, projectLabel, utils.PtrString(resp.Id))
+
 			return nil
 		},
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -134,6 +142,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	volumeID := flags.FlagToStringValue(p, cmd, volumeIdFlag)
 
 	name := flags.FlagToStringPointer(p, cmd, nameFlag)
+
 	labels := flags.FlagToStringToAny(p, cmd, labelsFlag)
 	if labels == nil {
 		labels = map[string]any{}
@@ -147,6 +156,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -158,5 +168,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	payload.Labels = model.Labels
 
 	req = req.CreateSnapshotPayload(*payload)
+
 	return req
 }

@@ -57,6 +57,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, nil)
 			if err != nil {
 				return err
@@ -88,6 +89,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -121,6 +123,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -146,6 +149,7 @@ func outputResult(p *print.Printer, outputFormat string, routingTables []iaas.Ro
 
 		table := tables.NewTable()
 		table.SetHeader("ID", "NAME", "DESCRIPTION", "DEFAULT", "LABELS", "SYSTEM ROUTES", "DYNAMIC ROUTES", "CREATED AT", "UPDATED AT")
+
 		for _, routingTable := range routingTables {
 			var labels []string
 			if len(routingTable.Labels) > 0 {
@@ -166,6 +170,7 @@ func outputResult(p *print.Printer, outputFormat string, routingTables []iaas.Ro
 				utils.ConvertTimePToDateTimeString(routingTable.UpdatedAt),
 			)
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

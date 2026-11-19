@@ -15,9 +15,11 @@ func GetOrganizationName(ctx context.Context, apiClient scf.DefaultAPI, projectI
 	if err != nil {
 		return "", fmt.Errorf("get STACKIT Cloud Foundry organization: %w", err)
 	}
+
 	if resp == nil {
 		return "", fmt.Errorf("get STACKIT Cloud Foundry organization: empty response")
 	}
+
 	return resp.Name, nil
 }
 
@@ -26,9 +28,11 @@ func GetSpaceName(ctx context.Context, apiClient scf.DefaultAPI, projectId, regi
 	if err != nil {
 		return "", fmt.Errorf("get STACKIT Cloud Foundry space: %w", err)
 	}
+
 	if resp == nil {
 		return "", fmt.Errorf("get STACKIT Cloud Foundry space: empty response")
 	}
+
 	return resp.Name, nil
 }
 
@@ -39,9 +43,11 @@ func GetOrganizationLabel(ctx context.Context, p *print.Printer, apiClient scf.D
 		p.Debug(print.ErrorLevel, "get organization name: %v", err)
 		return organizationId
 	}
+
 	if name == "" {
 		return organizationId
 	}
+
 	return name
 }
 
@@ -52,9 +58,11 @@ func GetSpaceLabel(ctx context.Context, p *print.Printer, apiClient scf.DefaultA
 		p.Debug(print.ErrorLevel, "get space name: %v", err)
 		return spaceId
 	}
+
 	if name == "" {
 		return spaceId
 	}
+
 	return name
 }
 

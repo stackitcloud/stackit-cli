@@ -46,6 +46,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -58,6 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read MariaDB instance: %w", err)
@@ -66,6 +68,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
+
 	return cmd
 }
 
@@ -83,6 +86,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -102,16 +106,19 @@ func outputResult(p *print.Printer, outputFormat string, instance *mariadb.Insta
 		table.AddSeparator()
 		table.AddRow("NAME", instance.Name)
 		table.AddSeparator()
+
 		if _, ok := instance.LastOperation.GetStateOk(); ok {
 			table.AddRow("LAST OPERATION TYPE", instance.LastOperation.GetType())
 			table.AddSeparator()
 			table.AddRow("LAST OPERATION STATE", instance.LastOperation.GetState())
 			table.AddSeparator()
 		}
+
 		table.AddRow("PLAN ID", instance.PlanId)
 		// Only show ACL if it's present and not empty
 		if instance.Parameters != nil {
 			acl := instance.Parameters[aclParameterKey]
+
 			aclStr, ok := acl.(string)
 			if ok {
 				if aclStr != "" {
@@ -120,6 +127,7 @@ func outputResult(p *print.Printer, outputFormat string, instance *mariadb.Insta
 				}
 			}
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

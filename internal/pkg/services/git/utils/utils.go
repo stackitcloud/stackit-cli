@@ -12,5 +12,6 @@ func GetInstanceName(ctx context.Context, apiClient git.DefaultAPI, projectId, i
 	if err != nil {
 		return "", fmt.Errorf("get instance: %w", err)
 	}
+
 	return resp.Name, nil
 }

@@ -44,6 +44,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -59,15 +60,18 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 func fixturePayload(mods ...func(payload *alb.UpdateLoadBalancerPayload)) (payload alb.UpdateLoadBalancerPayload) {
 	if err := json.Unmarshal(testConfiguration, &payload); err != nil {
 		log.Panicf("cannot deserialize test configuration: %v", err)
 	}
+
 	for _, f := range mods {
 		f(&payload)
 	}
+
 	return payload
 }
 
@@ -78,6 +82,7 @@ func fixtureRequest(mods ...func(request *alb.ApiUpdateLoadBalancerRequest)) alb
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -196,6 +201,7 @@ func TestOutputResult(t *testing.T) {
 		projectLabel string
 		resp         *alb.LoadBalancer
 	}
+
 	tests := []struct {
 		name    string
 		args    args

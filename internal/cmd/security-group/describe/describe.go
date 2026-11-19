@@ -38,6 +38,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -85,6 +86,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -92,6 +94,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.SecurityGrou
 	if resp == nil {
 		return fmt.Errorf("security group response is empty")
 	}
+
 	return p.OutputResult(outputFormat, resp, func() error {
 		var content []tables.Table
 
@@ -101,6 +104,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.SecurityGrou
 		if id := resp.Id; id != nil {
 			table.AddRow("ID", *id)
 		}
+
 		table.AddSeparator()
 
 		table.AddRow("NAME", resp.Name)
@@ -121,6 +125,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.SecurityGrou
 			for key, value := range resp.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
+
 			table.AddRow("LABELS", strings.Join(labels, "\n"))
 			table.AddSeparator()
 		}

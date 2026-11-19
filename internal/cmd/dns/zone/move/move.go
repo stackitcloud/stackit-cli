@@ -60,6 +60,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -72,6 +73,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to move the zone with domain name %q to project %q?", model.ZoneDomainName, model.TargetProjectId)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -83,11 +85,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if err != nil {
 					return err
 				}
+
 				code = &generatedCode
 			}
 
 			// Call API
 			req := buildRequest(ctx, model, *code, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("move DNS zone: %w", err)
@@ -97,6 +101,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd, params)
+
 	return cmd
 }
 
@@ -114,6 +119,7 @@ func generateMoveCode(ctx context.Context, p *print.Printer, apiClient *dns.APIC
 	}
 
 	p.Debug(print.DebugLevel, "generated move code for zone %q", zoneId)
+
 	return createResp.Code, nil
 }
 
@@ -141,6 +147,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	if err != nil {
 		return nil, err
 	}
+
 	if code != nil {
 		// Move codes never contain surrounding whitespace, but files written
 		// by editors usually end with a trailing newline.
@@ -156,6 +163,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -165,6 +173,7 @@ func buildRequest(ctx context.Context, model *inputModel, code string, apiClient
 		Code:        code,
 		ZoneDnsName: model.ZoneDomainName,
 	})
+
 	return req
 }
 

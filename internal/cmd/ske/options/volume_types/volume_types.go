@@ -35,6 +35,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -48,6 +49,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, apiClient, model)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get SKE provider options: %w", err)
@@ -56,6 +58,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model, resp)
 		},
 	}
+
 	return cmd
 }
 
@@ -67,6 +70,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -90,6 +94,7 @@ func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOpti
 
 		table := tables.NewTable()
 		table.SetHeader("TYPE")
+
 		for i := range volumeTypes {
 			z := volumeTypes[i]
 			table.AddRow(utils.PtrString(z.Name))
@@ -99,6 +104,7 @@ func outputResult(p *print.Printer, model *inputModel, options *ske.ProviderOpti
 		if err != nil {
 			return fmt.Errorf("display output: %w", err)
 		}
+
 		return nil
 	})
 }

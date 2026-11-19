@@ -62,6 +62,7 @@ func (f *secretFlag) Set(value string) error {
 		f.source = secretStdin
 	case strings.HasPrefix(value, "@"):
 		f.path = strings.Trim(value[1:], `"'`)
+
 		f.source = secretFile
 		if f.path == "" {
 			f.source = secretInvalid
@@ -94,10 +95,12 @@ func ResolveSecretFlag(p *print.Printer, cmd *cobra.Command, name string) (*stri
 	if flag == nil {
 		return nil, fmt.Errorf("secret flag --%s not found", name)
 	}
+
 	value, ok := flag.Value.(*secretFlag)
 	if !ok {
 		return nil, fmt.Errorf("flag --%s is not a secret flag", name)
 	}
+
 	if !flag.Changed {
 		return nil, nil
 	}
@@ -109,16 +112,19 @@ func ResolveSecretFlag(p *print.Printer, cmd *cobra.Command, name string) (*stri
 		if err != nil {
 			return nil, fmt.Errorf("reading secret --%s: %w", name, err)
 		}
+
 		secret = string(data)
 	case secretStdin:
 		input, err := p.PromptForPassword(fmt.Sprintf("enter %s: ", name))
 		if err != nil {
 			return nil, fmt.Errorf("reading secret --%s from stdin: %w", name, err)
 		}
+
 		secret = input
 	default:
 		return nil, fmt.Errorf("invalid source for --%s: use @<file> or - for stdin; literal secrets are not supported", name)
 	}
+
 	return &secret, nil
 }
 
@@ -133,10 +139,13 @@ func ResolveSecretFlagWithAutoPrompt(p *print.Printer, cmd *cobra.Command, name 
 	if err != nil || value != nil {
 		return value, err
 	}
+
 	p.Warn("Automatically reading --%s from stdin is deprecated and will stop working %s. Use --%s - instead.\n", name, autoPromptRemovalDate, name)
+
 	input, err := p.PromptForPassword(fmt.Sprintf("enter %s: ", name))
 	if err != nil {
 		return nil, fmt.Errorf("reading secret --%s from stdin: %w", name, err)
 	}
+
 	return &input, nil
 }

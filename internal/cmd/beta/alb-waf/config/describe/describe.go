@@ -43,6 +43,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -56,6 +57,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read ALB WAF configuration: %w", err)
@@ -64,6 +66,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
+
 	return cmd
 }
 
@@ -80,6 +83,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -92,6 +96,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *albwaf.GetWAFResp
 		if resp == nil {
 			return fmt.Errorf("no WAF configuration found")
 		}
+
 		table := tables.NewTable()
 		table.SetTitle("WAF Configuration")
 		table.AddRow("NAME", resp.Name)
@@ -101,6 +106,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *albwaf.GetWAFResp
 		if resp.ManagedRuleSetName != nil && *resp.ManagedRuleSetName != "" {
 			managedRuleSet = *resp.ManagedRuleSetName
 		}
+
 		table.AddRow("MANAGED RULE SET", managedRuleSet)
 		table.AddSeparator()
 
@@ -108,6 +114,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *albwaf.GetWAFResp
 		if resp.CustomRuleGroupName != nil && *resp.CustomRuleGroupName != "" {
 			customRuleGroup = *resp.CustomRuleGroupName
 		}
+
 		table.AddRow("CUSTOM RULE GROUP", customRuleGroup)
 		table.AddSeparator()
 
@@ -120,6 +127,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *albwaf.GetWAFResp
 		if resp.Usage != nil {
 			usageCount = utils.PtrString(resp.Usage.Count)
 		}
+
 		table.AddRow("USAGE COUNT", usageCount)
 		table.AddSeparator()
 
@@ -132,6 +140,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *albwaf.GetWAFResp
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }
@@ -141,6 +150,7 @@ func formatLabels(labels map[string]string) string {
 	for k, v := range labels {
 		pairs = append(pairs, fmt.Sprintf("%s=%s", k, v))
 	}
+
 	return strings.Join(pairs, "\n")
 }
 
@@ -156,5 +166,6 @@ func formatUsageItems(items []albwaf.WAFUsageItem) string {
 			lines = append(lines, item.LoadBalancerName)
 		}
 	}
+
 	return strings.Join(lines, "\n")
 }

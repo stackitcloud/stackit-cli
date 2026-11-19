@@ -48,6 +48,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -61,6 +62,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("validate DNS zone move code: %w", err)
@@ -70,6 +72,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd, params)
+
 	return cmd
 }
 
@@ -93,6 +96,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	if err != nil {
 		return nil, err
 	}
+
 	if code == nil {
 		return nil, fmt.Errorf("flag --%s is required", codeFlag)
 	}
@@ -106,6 +110,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -114,6 +119,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 	req = req.ValidateMoveCodePayload(dns.ValidateMoveCodePayload{
 		Code: model.Code,
 	})
+
 	return req
 }
 

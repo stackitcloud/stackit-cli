@@ -52,6 +52,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -66,16 +67,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
 			credentialsLabel, err := loadBalancerUtils.GetCredentialsDisplayName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.CredentialsRef)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get credentials display name: %v", err)
+
 				credentialsLabel = model.CredentialsRef
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update observability credentials %q for Load Balancer on project %q?", credentialsLabel, projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -93,16 +97,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			params.Printer.Info("Updated observability credentials %q for Load Balancer on project %q\n", credentialsLabel, projectLabel)
+
 			return nil
 		},
 	}
 	configureFlags(cmd, params)
+
 	return cmd
 }
 
 func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.Flags().String(displayNameFlag, "", "Credentials name")
 	cmd.Flags().String(usernameFlag, "", "Username")
+
 	password := flags.SecretFlag(passwordFlag, params)
 	cmd.Flags().Var(password, passwordFlag, password.Usage())
 }
@@ -117,6 +124,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 
 	displayName := flags.FlagToStringPointer(p, cmd, displayNameFlag)
 	username := flags.FlagToStringPointer(p, cmd, usernameFlag)
+
 	password, err := flags.ResolveSecretFlag(p, cmd, passwordFlag)
 	if err != nil {
 		return nil, err
@@ -148,9 +156,12 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient loadbalancer
 	if model.DisplayName != nil {
 		payload.DisplayName = model.DisplayName
 	}
+
 	if model.Username != nil {
 		payload.Username = model.Username
 	}
+
 	req = req.UpdateCredentialsPayload(payload)
+
 	return req, nil
 }

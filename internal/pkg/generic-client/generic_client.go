@@ -17,11 +17,13 @@ type CreateApiClient[T any] func(opts ...sdkConfig.ConfigurationOption) (T, erro
 func ConfigureClientGeneric[T any](p *print.Printer, cliVersion, customEndpoint string, useRegion bool, createApiClient CreateApiClient[T]) (T, error) {
 	// return value if an error happens
 	var zero T
+
 	authCfgOption, err := auth.AuthenticationConfig(p, auth.AuthorizeUser)
 	if err != nil {
 		p.Debug(print.ErrorLevel, "configure authentication: %v", err)
 		return zero, &errors.AuthError{}
 	}
+
 	cfgOptions := []sdkConfig.ConfigurationOption{
 		utils.UserAgentConfigOption(cliVersion),
 		authCfgOption,

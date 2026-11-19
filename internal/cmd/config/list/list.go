@@ -63,6 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, configData, activeProfile)
 		},
 	}
+
 	return cmd
 }
 
@@ -80,34 +81,40 @@ func outputResult(p *print.Printer, outputFormat string, configData map[string]a
 		if activeProfile != "" {
 			configData["profile"] = activeProfile
 		}
+
 		details, err := json.MarshalIndent(configData, "", "  ")
 		if err != nil {
 			return fmt.Errorf("marshal config list: %w", err)
 		}
+
 		p.Outputln(string(details))
+
 		return nil
 	case print.YAMLOutputFormat:
 		details, err := yaml.MarshalWithOptions(configData, yaml.IndentSequence(true), yaml.UseJSONMarshaler())
 		if err != nil {
 			return fmt.Errorf("marshal config list: %w", err)
 		}
+
 		p.Outputln(string(details))
 
 		return nil
 	default:
-
 		// Sort the config options by key
 		configKeys := make([]string, 0, len(configData))
 		for k := range configData {
 			configKeys = append(configKeys, k)
 		}
+
 		sort.Strings(configKeys)
 
 		table := tables.NewTable()
 		if activeProfile != "" {
 			table.SetTitle(fmt.Sprintf("Profile: %q", activeProfile))
 		}
+
 		table.SetHeader("NAME", "VALUE")
+
 		for _, key := range configKeys {
 			value := configData[key]
 
@@ -119,6 +126,7 @@ func outputResult(p *print.Printer, outputFormat string, configData map[string]a
 				if !ok {
 					continue
 				}
+
 				valueString = strconv.FormatBool(valueBool)
 			}
 
@@ -139,10 +147,12 @@ func outputResult(p *print.Printer, outputFormat string, configData map[string]a
 			table.AddRow(key, valueString)
 			table.AddSeparator()
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	}
 }

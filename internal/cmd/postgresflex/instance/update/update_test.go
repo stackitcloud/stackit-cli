@@ -57,6 +57,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, mod := range mods {
 		mod(argValues)
 	}
+
 	return argValues
 }
 
@@ -68,6 +69,7 @@ func fixtureRequiredFlagValues(mods ...func(flagValues map[string]string)) map[s
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -87,6 +89,7 @@ func fixtureStandardFlagValues(mods ...func(flagValues map[string]string)) map[s
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -102,6 +105,7 @@ func fixtureRequiredInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -124,15 +128,18 @@ func fixtureStandardInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *postgresflex.ApiPartialUpdateInstanceRequest)) postgresflex.ApiPartialUpdateInstanceRequest {
 	request := testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testRegion, testInstanceId)
+
 	request = request.PartialUpdateInstancePayload(postgresflex.PartialUpdateInstancePayload{})
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -273,8 +280,10 @@ func TestParseInput(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			typeFlag.Reset()
+
 			params := testparams.NewTestParams()
 			cmd := NewCmd(params.CmdParams)
+
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
@@ -286,6 +295,7 @@ func TestParseInput(t *testing.T) {
 					if !tt.isValid {
 						return
 					}
+
 					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
 				}
 			}
@@ -296,6 +306,7 @@ func TestParseInput(t *testing.T) {
 					if !tt.isValid {
 						return
 					}
+
 					t.Fatalf("setting flag --%s=%s: %v", aclFlag, value, err)
 				}
 			}
@@ -305,6 +316,7 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error validating args: %v", err)
 			}
 
@@ -313,6 +325,7 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error validating flags: %v", err)
 			}
 
@@ -321,12 +334,14 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error parsing flags: %v", err)
 			}
 
 			if !tt.isValid {
 				t.Fatalf("did not fail on invalid input")
 			}
+
 			diff := cmp.Diff(model, tt.expectedModel)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -482,6 +497,7 @@ func TestBuildRequest(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error building request: %v", err)
 			}
 
@@ -503,6 +519,7 @@ func Test_outputResult(t *testing.T) {
 		instanceLabel string
 		resp          *postgresflex.GetInstanceResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -530,6 +547,7 @@ func Test_outputResult(t *testing.T) {
 			wantErr: false,
 		},
 	}
+
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

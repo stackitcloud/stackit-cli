@@ -51,6 +51,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -64,11 +65,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			grafanaConfigsReq := buildGetGrafanaConfigRequest(ctx, model, apiClient.DefaultAPI)
+
 			grafanaConfigsResp, err := grafanaConfigsReq.Execute()
 			if err != nil {
 				return fmt.Errorf("get Grafana configs: %w", err)
 			}
+
 			instanceReq := buildGetInstanceRequest(ctx, model, apiClient.DefaultAPI)
+
 			instanceResp, err := instanceReq.Execute()
 			if err != nil {
 				return fmt.Errorf("get instance: %w", err)
@@ -78,6 +82,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -101,6 +106,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -120,6 +126,7 @@ func outputResult(p *print.Printer, outputFormat string, showPassword bool, graf
 	} else if grafanaConfigs == nil {
 		return fmt.Errorf("grafanaConfigs is nil")
 	}
+
 	p.Warn("GrafanaAdminPassword and GrafanaAdminUser are deprecated and will be removed on 2026-07-05.")
 
 	return p.OutputResult(outputFormat, grafanaConfigs, func() error {
@@ -140,6 +147,7 @@ func outputResult(p *print.Printer, outputFormat string, showPassword bool, graf
 		table.AddRow("INITIAL ADMIN USER (DEFAULT)", utils.PtrString(instance.Instance.GrafanaAdminUser))
 		table.AddSeparator()
 		table.AddRow("INITIAL ADMIN PASSWORD (DEFAULT)", initialAdminPassword)
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

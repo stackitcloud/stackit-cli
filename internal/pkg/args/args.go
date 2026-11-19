@@ -30,6 +30,7 @@ func SingleArg(argName string, validate func(value string) error) cobra.Position
 				Count:    len(args),
 			}
 		}
+
 		if validate != nil {
 			err := validate(args[0])
 			if err != nil {
@@ -39,6 +40,7 @@ func SingleArg(argName string, validate func(value string) error) cobra.Position
 				}
 			}
 		}
+
 		return nil
 	}
 }
@@ -55,6 +57,7 @@ func SingleOptionalArg(argName string, validate func(value string) error) cobra.
 				Count:    len(args),
 			}
 		}
+
 		if len(args) == 1 && validate != nil {
 			err := validate(args[0])
 			if err != nil {
@@ -64,6 +67,7 @@ func SingleOptionalArg(argName string, validate func(value string) error) cobra.
 				}
 			}
 		}
+
 		return nil
 	}
 }

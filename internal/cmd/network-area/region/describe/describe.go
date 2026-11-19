@@ -52,6 +52,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -73,6 +74,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("describe network area region: %w", err)
@@ -86,6 +88,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -110,6 +113,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -122,29 +126,36 @@ func outputResult(p *print.Printer, outputFormat, region, areaId, areaName strin
 		table := tables.NewTable()
 		table.AddRow("ID", areaId)
 		table.AddSeparator()
+
 		if areaName != "" {
 			table.AddRow("NAME", areaName)
 			table.AddSeparator()
 		}
+
 		table.AddRow("REGION", region)
 		table.AddSeparator()
 		table.AddRow("STATUS", utils.PtrString(regionalArea.Status))
 		table.AddSeparator()
+
 		if ipv4 := regionalArea.Ipv4; ipv4 != nil {
 			if ipv4.NetworkRanges != nil {
 				var networkRanges []string
 				for _, networkRange := range ipv4.NetworkRanges {
 					networkRanges = append(networkRanges, networkRange.Prefix)
 				}
+
 				table.AddRow("NETWORK RANGES", strings.Join(networkRanges, ","))
 				table.AddSeparator()
 			}
+
 			table.AddRow("TRANSFER RANGE", ipv4.TransferNetwork)
 			table.AddSeparator()
+
 			if len(ipv4.DefaultNameservers) > 0 {
 				table.AddRow("DNS NAME SERVERS", strings.Join(ipv4.DefaultNameservers, ","))
 				table.AddSeparator()
 			}
+
 			table.AddRow("DEFAULT PREFIX LENGTH", ipv4.DefaultPrefixLen)
 			table.AddSeparator()
 			table.AddRow("MAX PREFIX LENGTH", ipv4.MaxPrefixLen)
@@ -156,6 +167,7 @@ func outputResult(p *print.Printer, outputFormat, region, areaId, areaName strin
 		if err := table.Display(p); err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

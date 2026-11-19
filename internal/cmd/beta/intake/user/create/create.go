@@ -57,6 +57,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(p.Printer, cmd)
 			if err != nil {
 				return err
@@ -71,10 +72,12 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, p.Printer, p.CliVersion, cmd)
 			if err != nil {
 				p.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create an Intake User for project %q?", projectLabel)
+
 			err = p.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -82,6 +85,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create Intake User: %w", err)
@@ -102,12 +106,14 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd, p)
+
 	return cmd
 }
 
 func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.Flags().String(displayNameFlag, "", "Display name")
 	cmd.Flags().Var(flags.UUIDFlag(), intakeIdFlag, "The UUID of the Intake to associate the user with")
+
 	password := flags.SecretFlag(passwordFlag, params)
 	cmd.Flags().Var(password, passwordFlag, password.Usage()+" Must contain lower, upper, number, and special characters (min 12 chars)")
 	cmd.Flags().String(userTypeFlag, string(intake.USERTYPE_INTAKE), "Type of user. One of 'intake' (default) or 'dead-letter'")
@@ -132,13 +138,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command) (*inputModel, error) {
 		Description:     flags.FlagToStringPointer(p, cmd, descriptionFlag),
 		Labels:          flags.FlagToStringToStringPointer(p, cmd, labelsFlag),
 	}
+
 	pw, err := flags.ResolveSecretFlag(p, cmd, passwordFlag)
 	if err != nil {
 		return nil, err
 	}
+
 	model.Password = pw
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -159,6 +168,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *intake.APIC
 	}
 
 	req = req.CreateIntakeUserPayload(payload)
+
 	return req
 }
 
@@ -173,7 +183,9 @@ func outputResult(p *print.Printer, model *inputModel, projectLabel string, resp
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
+
 		p.Outputf("%s Intake User for project %q. User ID: %s\n", operationState, projectLabel, resp.Id)
+
 		return nil
 	})
 }

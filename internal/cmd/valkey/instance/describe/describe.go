@@ -45,6 +45,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -58,6 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read Valkey instance: %w", err)
@@ -66,6 +68,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
+
 	return cmd
 }
 
@@ -83,6 +86,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -114,10 +118,12 @@ func outputResult(p *print.Printer, outputFormat string, instance *valkey.Instan
 		table.AddRow("LAST OPERATION TYPE", string(instance.LastOperation.Type))
 		table.AddSeparator()
 		table.AddRow("LAST OPERATION STATE", string(instance.LastOperation.State))
+
 		if acl, ok := instance.Parameters[aclParameterKey].(string); ok && acl != "" {
 			table.AddSeparator()
 			table.AddRow("ACL", acl)
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

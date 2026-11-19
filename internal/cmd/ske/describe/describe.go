@@ -37,6 +37,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -49,6 +50,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read SKE project details: %w", err)
@@ -57,6 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, resp, model.ProjectId)
 		},
 	}
+
 	return cmd
 }
 
@@ -71,6 +74,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -88,9 +92,11 @@ func outputResult(p *print.Printer, outputFormat string, project *serviceenablem
 		table := tables.NewTable()
 		table.AddRow("ID", projectId)
 		table.AddSeparator()
+
 		if project.HasState() {
 			table.AddRow("STATE", utils.PtrString(project.State))
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

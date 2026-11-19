@@ -46,6 +46,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(p.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -58,6 +59,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete Intake User %q?", model.UserId)
+
 			err = p.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -84,12 +86,14 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered deletion of"
 			}
+
 			p.Printer.Outputf("%s STACKIT Intake User %s\n", operationState, model.UserId)
 
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -116,6 +120,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 

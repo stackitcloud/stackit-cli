@@ -19,6 +19,7 @@ var instanceTypeToReplicas = map[string]int32{
 
 func AvailableInstanceTypes() []string {
 	instanceTypes := make([]string, len(instanceTypeToReplicas))
+
 	i := 0
 	for k := range instanceTypeToReplicas {
 		instanceTypes[i] = k
@@ -27,6 +28,7 @@ func AvailableInstanceTypes() []string {
 	// Dict keys aren't iterated in a consistent order
 	// So we sort the array to make the output consistent
 	slices.Sort(instanceTypes)
+
 	return instanceTypes
 }
 
@@ -56,15 +58,19 @@ func GetLatestPostgreSQLVersion(ctx context.Context, apiClient postgresflex.Defa
 	latestVersion := "0"
 	for i := range resp.Versions {
 		oldSemVer := fmt.Sprintf("v%s", latestVersion)
+
 		newSemVer := fmt.Sprintf("v%s", resp.Versions[i].Version)
 		if semver.Compare(newSemVer, oldSemVer) != 1 {
 			continue
 		}
+
 		latestVersion = resp.Versions[i].Version
 	}
+
 	if latestVersion == "0" {
 		return "", fmt.Errorf("no PostgreSQL versions found")
 	}
+
 	return latestVersion, nil
 }
 
@@ -73,6 +79,7 @@ func GetInstanceName(ctx context.Context, apiClient postgresflex.DefaultAPI, pro
 	if err != nil {
 		return "", fmt.Errorf("get PostgreSQL Flex instance: %w", err)
 	}
+
 	return resp.Name, nil
 }
 
@@ -81,5 +88,6 @@ func GetUserName(ctx context.Context, apiClient postgresflex.DefaultAPI, project
 	if err != nil {
 		return "", fmt.Errorf("get PostgreSQL Flex user: %w", err)
 	}
+
 	return resp.Name, nil
 }

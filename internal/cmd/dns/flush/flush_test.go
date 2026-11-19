@@ -31,6 +31,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, mod := range mods {
 		mod(argValues)
 	}
+
 	return argValues
 }
 
@@ -41,6 +42,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -55,11 +57,13 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *dns.ApiFlushDomainRequest)) dns.ApiFlushDomainRequest {
 	request := testClient.DefaultAPI.FlushDomain(testCtx)
+
 	request = request.FlushDomainPayload(dns.FlushDomainPayload{
 		Domain: testDomain,
 		Type:   utils.Ptr(testType),
@@ -67,6 +71,7 @@ func fixtureRequest(mods ...func(request *dns.ApiFlushDomainRequest)) dns.ApiFlu
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -200,6 +205,7 @@ func TestOutputResult(t *testing.T) {
 		model *inputModel
 		resp  *dns.FlushDomainResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args

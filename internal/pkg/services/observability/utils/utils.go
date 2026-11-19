@@ -54,6 +54,7 @@ func ValidatePlanId(planId string, resp *observability.PlansResponse) error {
 
 func LoadPlanId(planName string, resp *observability.PlansResponse) (string, error) {
 	availablePlanNames := ""
+
 	if resp == nil {
 		return "", fmt.Errorf("no Observability plans provided")
 	}
@@ -63,13 +64,16 @@ func LoadPlanId(planName string, resp *observability.PlansResponse) (string, err
 		if plan.Name == nil {
 			continue
 		}
+
 		if strings.EqualFold(*plan.Name, planName) {
 			return plan.Id, nil
 		}
+
 		availablePlanNames = fmt.Sprintf("%s\n- %s", availablePlanNames, *plan.Name)
 	}
 
 	details := fmt.Sprintf("You provided plan name %q, which is invalid. Available plan names are: %s", planName, availablePlanNames)
+
 	return "", &errors.ObservabilityInvalidPlanError{
 		Service: service,
 		Details: details,
@@ -125,6 +129,7 @@ func mapMetricsRelabelConfig(metricsRelabelConfigs []observability.MetricsRelabe
 	if metricsRelabelConfigs == nil {
 		return nil
 	}
+
 	var mappedConfigs []observability.UpdateScrapeConfigPayloadMetricsRelabelConfigsInner
 	for _, config := range metricsRelabelConfigs {
 		mappedConfig := observability.UpdateScrapeConfigPayloadMetricsRelabelConfigsInner{
@@ -138,6 +143,7 @@ func mapMetricsRelabelConfig(metricsRelabelConfigs []observability.MetricsRelabe
 		}
 		mappedConfigs = append(mappedConfigs, mappedConfig)
 	}
+
 	return mappedConfigs
 }
 
@@ -145,12 +151,14 @@ func mapStaticConfig(staticConfigs []observability.StaticConfigs) []observabilit
 	if staticConfigs == nil {
 		return nil
 	}
+
 	var mappedConfigs []observability.UpdateScrapeConfigPayloadStaticConfigsInner
 	for _, config := range staticConfigs {
 		var labels map[string]interface{}
 		if config.Labels != nil {
 			labels = mapStaticConfigLabels(*config.Labels)
 		}
+
 		mappedConfig := observability.UpdateScrapeConfigPayloadStaticConfigsInner{
 			Labels:  labels,
 			Targets: config.Targets,
@@ -170,6 +178,7 @@ func mapBasicAuth(basicAuth *observability.BasicAuth) *observability.UpdateScrap
 	if basicAuth.Password != "" {
 		password = &basicAuth.Password
 	}
+
 	if basicAuth.Username != "" {
 		username = &basicAuth.Username
 	}
@@ -195,6 +204,7 @@ func mapParams(params map[string][]string) map[string]interface{} {
 	for k, v := range params {
 		paramsMap[k] = v
 	}
+
 	return paramsMap
 }
 
@@ -203,6 +213,7 @@ func mapStaticConfigLabels(labels map[string]string) map[string]interface{} {
 	for k, v := range labels {
 		labelsMap[k] = v
 	}
+
 	return labelsMap
 }
 
@@ -211,6 +222,7 @@ func GetInstanceName(ctx context.Context, apiClient observability.DefaultAPI, in
 	if err != nil {
 		return "", fmt.Errorf("get Observability instance: %w", err)
 	}
+
 	return *resp.Name, nil
 }
 
@@ -218,6 +230,7 @@ func ToPayloadGenericOAuth(respOAuth *observability.GrafanaOauth) *observability
 	if respOAuth == nil {
 		return nil
 	}
+
 	return &observability.UpdateGrafanaConfigsPayloadGenericOauth{
 		ApiUrl:              respOAuth.ApiUrl,
 		AuthUrl:             respOAuth.AuthUrl,
@@ -238,6 +251,7 @@ func GetPartialUpdateGrafanaConfigsPayload(ctx context.Context, apiClient observ
 	if err != nil {
 		return nil, fmt.Errorf("get current Grafana configs: %w", err)
 	}
+
 	if currentConfigs == nil {
 		return nil, fmt.Errorf("no Grafana configs found for instance %q", instanceId)
 	}
@@ -251,6 +265,7 @@ func GetPartialUpdateGrafanaConfigsPayload(ctx context.Context, apiClient observ
 	if singleSignOn != nil {
 		payload.UseStackitSso = singleSignOn
 	}
+
 	if publicReadAccess != nil {
 		payload.PublicReadAccess = publicReadAccess
 	}

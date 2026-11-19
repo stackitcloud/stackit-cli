@@ -70,6 +70,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
@@ -79,6 +80,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -106,6 +108,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -114,6 +117,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient scf.DefaultA
 	if model.Limit != nil && *model.Limit < pageSize {
 		pageSize = *model.Limit
 	}
+
 	return apiClient.ListOrganizations(ctx, model.ProjectId, model.Region).WithDetails(true).Page(page).PerPage(pageSize)
 }
 
@@ -123,6 +127,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *scf
 			p.Outputf("No STACKIT Cloud Foundry organizations found for project %q\n", projectLabel)
 			return nil
 		}
+
 		if resp.Pagination.TotalPages != nil && *resp.Pagination.TotalPages > int64(1) {
 			p.Warn("Server responded with more than 1 page. Output will not show all existing organizations.\n")
 		}
@@ -132,6 +137,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *scf
 		table.SetTitle("STACKIT Cloud Foundry organizations")
 		table.SetHeader("ID", "NAME", "STATUS", "PLATFORM ID", "CREATED")
 		table.AddSeparator()
+
 		for _, organization := range resp.Resources {
 			table.AddRow(
 				organization.Guid,
@@ -147,6 +153,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, resp *scf
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

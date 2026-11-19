@@ -438,6 +438,7 @@ func (e *SingleArgExpectedError) Error() string {
 	} else {
 		err = fmt.Errorf(ARG_MISSING, e.Expected)
 	}
+
 	return AppendUsageTip(err, e.Cmd).Error()
 }
 
@@ -466,6 +467,7 @@ func (e *InputUnknownError) Error() string {
 	} else {
 		err = fmt.Errorf(SUBCOMMAND_UNKNOWN, e.ProvidedInput)
 	}
+
 	return AppendUsageTip(err, e.Cmd).Error()
 }
 
@@ -581,12 +583,15 @@ func (e *BuildRequestError) Error() string {
 	if e.Reason != "" && e.Err != nil {
 		return fmt.Sprintf("could not build request (%s): %v", e.Reason, e.Err)
 	}
+
 	if e.Reason != "" {
 		return fmt.Sprintf("could not build request: %s", e.Reason)
 	}
+
 	if e.Err != nil {
 		return fmt.Sprintf("could not build request: %v", e.Err)
 	}
+
 	return "could not build request"
 }
 

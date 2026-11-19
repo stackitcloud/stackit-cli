@@ -28,11 +28,14 @@ func (f *uuidFlag) Set(value string) error {
 	if value == "" {
 		return fmt.Errorf("value cannot be empty")
 	}
+
 	err := utils.ValidateUUID(value)
 	if err != nil {
 		return err
 	}
+
 	f.value = value
+
 	return nil
 }
 

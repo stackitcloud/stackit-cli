@@ -35,12 +35,15 @@ func (f *readFromFileFlag) Set(value string) error {
 		f.value = value
 	} else {
 		valuePath := strings.Trim(value[1:], `"'`)
+
 		valueBytes, err := f.reader(valuePath)
 		if err != nil {
 			return fmt.Errorf("read data from file: %w", err)
 		}
+
 		f.value = string(valueBytes)
 	}
+
 	return nil
 }
 

@@ -40,6 +40,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -56,6 +57,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -153,6 +155,7 @@ func TestOutputResult(t *testing.T) {
 		Pagination: scf.Pagination{TotalPages: new(int64(2))},
 		Resources:  []scf.Space{{Guid: uuid.NewString(), Name: "my-space", CreatedAt: time.Now()}},
 	}
+
 	tests := []struct {
 		name         string
 		outputFormat string
@@ -196,6 +199,7 @@ func TestOutputResult(t *testing.T) {
 			if err := outputResult(params.Printer, tt.outputFormat, tt.limit, "org", tt.resp); err != nil {
 				t.Errorf("outputResult() error = %v", err)
 			}
+
 			warned := strings.Contains(params.Err.String(), "more than 1 page")
 			if warned != tt.expectWarn {
 				t.Errorf("expected warning = %t, got %t (stderr: %q)", tt.expectWarn, warned, params.Err.String())

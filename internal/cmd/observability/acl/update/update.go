@@ -46,6 +46,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -60,10 +61,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := observabilityUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.InstanceId, model.ProjectId)
 			if err != nil || instanceLabel == "" {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to replace the ACLs of Observability instance %q?", instanceLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -71,16 +74,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			_, err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("update Observability instance ACLs: %w", err)
 			}
 
 			params.Printer.Info("Updated ACLs of Observability instance %q\n", instanceLabel)
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -111,6 +117,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -119,5 +126,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient observabilit
 	req = req.UpdateACLPayload(observability.UpdateACLPayload{
 		Acl: model.Acls,
 	})
+
 	return req
 }

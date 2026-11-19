@@ -43,6 +43,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -57,16 +58,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
 			affinityGroupLabel, err := iaasUtils.GetAffinityGroupName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.AffinityGroupId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get affinity group name: %v", err)
+
 				affinityGroupLabel = model.AffinityGroupId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete affinity group %q?", affinityGroupLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -74,15 +78,18 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			request := buildRequest(ctx, *model, apiClient)
+
 			err = request.Execute()
 			if err != nil {
 				return fmt.Errorf("delete affinity group: %w", err)
 			}
+
 			params.Printer.Info("Deleted affinity group %q for %q\n", affinityGroupLabel, projectLabel)
 
 			return nil
 		},
 	}
+
 	return cmd
 }
 
@@ -102,5 +109,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }

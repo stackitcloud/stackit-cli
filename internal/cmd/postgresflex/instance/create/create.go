@@ -120,6 +120,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
@@ -128,6 +129,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				// transform the model.FlavorId field from "*string" to "string" once this is removed
 				params.Printer.Warn("The --%s flag is not set, determining flavor ID by CPU und RAM. This behavior is deprecated, the --%s flag will be required after 2027-01-31.\n", flavorIdFlag, flavorIdFlag)
 			}
+
 			model.FlavorId, err = getFlavorId(ctx, model, apiClient.DefaultAPI)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "determining flavor id: %v", err)
@@ -136,6 +138,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			// remove after 2027-01-31
 			if model.RetentionDays == nil {
 				params.Printer.Warn("The --%s flag is not set. Using the default value (32). This behavior is deprecated, the --%s flag will be required after 2027-01-31.\n", retentionDaysFlag, retentionDaysFlag)
+
 				model.RetentionDays = utils.Ptr(int32(32)) // transform the model.RetentionDays field from "*int32" to "int32" once this is removed
 			}
 
@@ -153,6 +156,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("get latest PostgreSQL version: %w", err)
 				}
+
 				model.Version = utils.Ptr(version) // transform the model.Version field from "*string" to "string" once this is removed
 			}
 
@@ -167,6 +171,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create a PostgreSQL Flex instance for project %q?", projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -177,6 +182,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create PostgreSQL Flex instance: %w", err)
@@ -197,6 +203,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -297,6 +304,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -370,6 +378,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex
 		},
 		Version: *model.Version,
 	})
+
 	return req, nil
 }
 
@@ -378,11 +387,14 @@ func outputResult(p *print.Printer, outputFormat string, async bool, projectLabe
 		if resp == nil {
 			return fmt.Errorf("no response passed")
 		}
+
 		operationState := "Created"
 		if async {
 			operationState = "Triggered creation of"
 		}
+
 		p.Outputf("%s instance for project %q. Instance ID: %s\n", operationState, projectLabel, instanceId)
+
 		return nil
 	})
 }

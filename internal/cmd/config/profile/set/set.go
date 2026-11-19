@@ -51,6 +51,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("check if profile exists: %w", err)
 			}
+
 			if !profileExists {
 				return &errors.SetInexistentProfile{Profile: model.Profile}
 			}
@@ -68,11 +69,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				params.Printer.Warn("The active profile %q is not authenticated, please login using the 'stackit auth login' command.\n", model.Profile)
 				return nil
 			}
+
 			params.Printer.Debug(print.DebugLevel, "found valid authentication flow for active profile: %s", flow)
 
 			return nil
 		},
 	}
+
 	return cmd
 }
 
@@ -92,5 +95,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }

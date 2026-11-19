@@ -48,6 +48,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -62,10 +63,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := valkeyUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to create credentials for instance %q?", instanceLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -73,6 +76,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("create Valkey credentials: %w", err)
@@ -95,6 +99,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -119,6 +124,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -136,6 +142,7 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, res
 		if resp.Raw == nil {
 			resp.Raw = &valkey.RawCredentials{Credentials: valkey.Credentials{}}
 		}
+
 		resp.Raw.Credentials.Password = "hidden"
 	}
 
@@ -144,20 +151,26 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, res
 		if model.Async {
 			operationState = "Triggered creation of"
 		}
+
 		p.Outputf("%s credentials for instance %q. Credentials ID: %s\n\n", operationState, instanceLabel, resp.Id)
+
 		if resp.Raw != nil {
 			if username := resp.Raw.Credentials.Username; username != "" {
 				p.Outputf("Username: %s\n", username)
 			}
+
 			if !model.ShowPassword {
 				p.Outputf("Password: <hidden>\n")
 			} else {
 				p.Outputf("Password: %s\n", resp.Raw.Credentials.Password)
 			}
+
 			p.Outputf("Host: %s\n", resp.Raw.Credentials.Host)
 			p.Outputf("Port: %s\n", utils.PtrString(resp.Raw.Credentials.Port))
 		}
+
 		p.Outputf("URI: %s\n", resp.Uri)
+
 		return nil
 	})
 }

@@ -44,6 +44,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(p.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -58,6 +59,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			spaceLabel := scfUtils.GetSpaceLabel(ctx, p.Printer, apiClient.DefaultAPI, model.ProjectId, model.Region, model.OrganizationId, model.SpaceId)
 
 			prompt := fmt.Sprintf("Are you sure you want to delete STACKIT Cloud Foundry space %q?", spaceLabel)
+
 			err = p.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -70,10 +72,12 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			}
 
 			p.Printer.Info("Triggered deletion of STACKIT Cloud Foundry space %q\n", spaceLabel)
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -99,6 +103,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 

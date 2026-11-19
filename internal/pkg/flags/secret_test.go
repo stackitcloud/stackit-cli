@@ -32,6 +32,7 @@ func (f forbiddenSecretFS) Open(string) (fs.File, error) {
 // and resolution in RunE.
 func newSecretTestCommand(t *testing.T, params *testparams.TestParams, autoPrompt bool, got **string, applied *bool) *cobra.Command {
 	t.Helper()
+
 	cmd := &cobra.Command{
 		Args:          cobra.ExactArgs(1),
 		SilenceErrors: true,
@@ -44,10 +45,13 @@ func newSecretTestCommand(t *testing.T, params *testparams.TestParams, autoPromp
 			} else {
 				*got, err = ResolveSecretFlag(params.Printer, cmd, "password")
 			}
+
 			if err != nil {
 				return err
 			}
+
 			*applied = true
+
 			return nil
 		},
 	}
@@ -56,11 +60,13 @@ func newSecretTestCommand(t *testing.T, params *testparams.TestParams, autoPromp
 	cmd.Flags().Bool("other", false, "another option")
 	cmd.SetOut(params.Out)
 	cmd.SetErr(params.Err)
+
 	return cmd
 }
 
 func TestSecretFlagCommandParsing(t *testing.T) {
 	t.Parallel()
+
 	const fileBytes = " \x00\r\n@other-file\n-\n "
 	for _, tt := range []struct {
 		name        string
@@ -268,7 +274,9 @@ func TestSecretFlagCommandParsing(t *testing.T) {
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			params := testparams.NewTestParams()
+
 			params.Fs = fstest.MapFS{
 				"secret.txt":      {Data: []byte("file-secret\n")},
 				"secret file.txt": {Data: []byte("spaced-path-secret")},
@@ -279,23 +287,31 @@ func TestSecretFlagCommandParsing(t *testing.T) {
 			if tt.forbidFiles {
 				params.Fs = forbiddenSecretFS{t}
 			}
+
 			if tt.stdin {
 				params.Printer.AssumeYes = true
 				params.In.WriteString("stdin-secret\n")
 			} else {
 				params.Printer.StdIn = forbiddenSecretReader{t}
 			}
-			var got *string
-			var applied bool
+
+			var (
+				got     *string
+				applied bool
+			)
+
 			cmd := newSecretTestCommand(t, params, false, &got, &applied)
 			cmd.SetArgs(tt.args)
+
 			err := cmd.Execute()
 			if tt.wantErr == "" && err != nil || tt.wantErr != "" && (err == nil || !strings.Contains(err.Error(), tt.wantErr)) {
 				t.Fatalf("got error %v, want %q", err, tt.wantErr)
 			}
+
 			if applied == tt.wantNoRun {
 				t.Fatalf("mutation reached: %v, want %v", applied, !tt.wantNoRun)
 			}
+
 			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Fatalf("unexpected secret (-want +got):\n%s", diff)
 			}
@@ -305,6 +321,7 @@ func TestSecretFlagCommandParsing(t *testing.T) {
 
 func TestSecretFlagAutoPrompt(t *testing.T) {
 	t.Parallel()
+
 	for _, tt := range []struct {
 		name    string
 		args    []string
@@ -350,24 +367,33 @@ func TestSecretFlagAutoPrompt(t *testing.T) {
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			params := testparams.NewTestParams()
+
 			params.Fs = fstest.MapFS{"empty.txt": {}}
 			if tt.stdin != nil {
 				params.In.WriteString(*tt.stdin)
 			} else {
 				params.Printer.StdIn = forbiddenSecretReader{t}
 			}
-			var got *string
-			var applied bool
+
+			var (
+				got     *string
+				applied bool
+			)
+
 			cmd := newSecretTestCommand(t, params, true, &got, &applied)
 			cmd.SetArgs(tt.args)
+
 			err := cmd.Execute()
 			if (err != nil) != tt.wantErr || applied == tt.wantErr {
 				t.Fatalf("got applied=%v, err=%v", applied, err)
 			}
+
 			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Fatalf("unexpected secret (-want +got):\n%s", diff)
 			}
+
 			if tt.readErr != nil && !errors.Is(err, tt.readErr) {
 				t.Fatalf("got error %v, want %v", err, tt.readErr)
 			}
@@ -381,6 +407,7 @@ func (r failedSecretReader) Read([]byte) (int, error) { return 0, r.err }
 
 func TestSecretFlagStdin(t *testing.T) {
 	t.Parallel()
+
 	readErr := errors.New("input failed")
 	for _, tt := range []struct {
 		name    string
@@ -426,17 +453,24 @@ func TestSecretFlagStdin(t *testing.T) {
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			params := testparams.NewTestParams()
 			params.Printer.StdIn = tt.input
 			params.Printer.AssumeYes = true
-			var got *string
-			var applied bool
+
+			var (
+				got     *string
+				applied bool
+			)
+
 			cmd := newSecretTestCommand(t, params, false, &got, &applied)
 			cmd.SetArgs([]string{"RESOURCE", "--password=-"})
+
 			err := cmd.Execute()
 			if !errors.Is(err, tt.wantErr) || applied != (tt.wantErr == nil) {
 				t.Fatalf("got applied=%v, err=%v; want err=%v", applied, err, tt.wantErr)
 			}
+
 			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Fatalf("unexpected secret (-want +got):\n%s", diff)
 			}
@@ -446,8 +480,10 @@ func TestSecretFlagStdin(t *testing.T) {
 
 func TestSecretFlagMultipleReadsNoReadAhead(t *testing.T) {
 	t.Parallel()
+
 	params := testparams.NewTestParams()
 	params.In.WriteString("first-secret\nsecond-secret\ny\n")
+
 	secrets := []struct {
 		name string
 		want string
@@ -461,6 +497,7 @@ func TestSecretFlagMultipleReadsNoReadAhead(t *testing.T) {
 			want: "second-secret",
 		},
 	}
+
 	cmd := &cobra.Command{
 		Use:  "secret-test",
 		Args: cobra.NoArgs,
@@ -470,6 +507,7 @@ func TestSecretFlagMultipleReadsNoReadAhead(t *testing.T) {
 				if err != nil {
 					t.Fatalf("resolving %s: %v", secret.name, err)
 				}
+
 				if diff := cmp.Diff(new(secret.want), got); diff != "" {
 					t.Fatalf("unexpected value for --%s (-want +got):\n%s", secret.name, diff)
 				}
@@ -482,7 +520,9 @@ func TestSecretFlagMultipleReadsNoReadAhead(t *testing.T) {
 		flag := SecretFlag(secret.name, params.CmdParams)
 		cmd.Flags().Var(flag, secret.name, flag.Usage())
 	}
+
 	cmd.SetArgs([]string{"--first=-", "--second=-"})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatalf("secret reads consumed confirmation input: %v", err)
 	}

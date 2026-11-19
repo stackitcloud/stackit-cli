@@ -52,6 +52,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, m := range mods {
 		m(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -84,6 +85,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -117,10 +119,12 @@ func fixtureRequest(mods ...func(request *vpn.ApiCreateGatewayConnectionRequest)
 			},
 		},
 	}
+
 	request = request.CreateGatewayConnectionPayload(payload)
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -315,10 +319,12 @@ func TestOutputResult(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			params := testparams.NewTestParams()
+
 			err := outputResult(params.Printer, tt.model, testProjectId, tt.resp)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
+
 			if !tt.wantErr && params.Out.String() != tt.expected {
 				t.Errorf("want:\n%s\ngot:\n%s", tt.expected, params.Out.String())
 			}

@@ -84,16 +84,19 @@ The available performance class values can be obtained by running:
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
 			resourcePoolName, err := sfsUtils.GetResourcePoolName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ResourcePoolId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get resource pool name: %v", err)
+
 				resourcePoolName = model.ResourcePoolId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update resource-pool %q for project %q?", resourcePoolName, projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -120,6 +123,7 @@ The available performance class values can be obtained by running:
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -140,6 +144,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *sfs.APIClie
 		SnapshotsAreVisible: model.SnapshotsVisible,
 		SnapshotPolicyId:    *sfs.NewNullableString(model.SnapshotPolicyId),
 	})
+
 	return req
 }
 
@@ -172,6 +177,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -181,11 +187,14 @@ func outputResult(p *print.Printer, outputFormat string, async bool, resp *sfs.U
 			p.Outputln("Resource pool response is empty")
 			return nil
 		}
+
 		operationState := "Updated"
 		if async {
 			operationState = "Triggered update of"
 		}
+
 		p.Outputf("%s resource pool %s\n", operationState, utils.PtrString(resp.ResourcePool.Name))
+
 		return nil
 	})
 }

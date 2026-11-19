@@ -44,6 +44,7 @@ func (f *cidrSliceFlag) Set(value string) error {
 	}
 
 	f.value = append(f.value, cidrs...)
+
 	return nil
 }
 

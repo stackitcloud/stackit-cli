@@ -63,6 +63,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if resp == nil {
 					return fmt.Errorf("create volume automation execution response is empty")
 				}
+
 				err = spinner.Run(params.Printer, "Creating automation execution", func() error {
 					_, err := wait.VolumeExecutionWaitHandler(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.AutomationId, resp.Id).WaitWithContext(ctx)
 					return err
@@ -76,6 +77,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -102,6 +104,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -115,7 +118,9 @@ func outputResult(p *print.Printer, outputFormat string, async bool, automationI
 		if async {
 			operationState = "Triggered creation of"
 		}
+
 		p.Outputf("%s volume automation execution for automation %q. Execution ID %q.\n", operationState, automationId, execution.Id)
+
 		return nil
 	})
 }

@@ -45,6 +45,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -57,6 +58,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read load balancer: %w", err)
@@ -65,6 +67,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
+
 	return cmd
 }
 
@@ -82,6 +85,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -102,6 +106,7 @@ func outputResult(p *print.Printer, outputFormat string, loadBalancer *loadbalan
 		if loadBalancer.Listeners != nil {
 			content = append(content, buildListenersTable(loadBalancer.Listeners))
 		}
+
 		if loadBalancer.TargetPools != nil {
 			content = append(content, buildTargetPoolsTable(loadBalancer.TargetPools))
 		}
@@ -117,6 +122,7 @@ func outputResult(p *print.Printer, outputFormat string, loadBalancer *loadbalan
 
 func buildLoadBalancerTable(loadBalancer *loadbalancer.LoadBalancer) tables.Table {
 	acl := []string{}
+
 	privateAccessOnly := false
 	if loadBalancer.Options != nil {
 		if loadBalancer.Options.AccessControl != nil && loadBalancer.Options.AccessControl.AllowedSourceRanges != nil {
@@ -149,10 +155,12 @@ func buildLoadBalancerTable(loadBalancer *loadbalancer.LoadBalancer) tables.Tabl
 	table.AddSeparator()
 	table.AddRow("STATE", utils.PtrString(loadBalancer.Status))
 	table.AddSeparator()
+
 	if len(errorDescriptions) > 0 {
 		table.AddRow("ERROR DESCRIPTIONS", strings.Join(errorDescriptions, "\n"))
 		table.AddSeparator()
 	}
+
 	table.AddRow("PRIVATE ACCESS ONLY", privateAccessOnly)
 	table.AddSeparator()
 	table.AddRow("ATTACHED PUBLIC IP", externalAddress)
@@ -160,6 +168,7 @@ func buildLoadBalancerTable(loadBalancer *loadbalancer.LoadBalancer) tables.Tabl
 	table.AddRow("ATTACHED NETWORK ID", networkId)
 	table.AddSeparator()
 	table.AddRow("ACL", acl)
+
 	return table
 }
 
@@ -167,6 +176,7 @@ func buildListenersTable(listeners []loadbalancer.Listener) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Listeners")
 	table.SetHeader("NAME", "PORT", "PROTOCOL", "TARGET POOL")
+
 	for i := range listeners {
 		listener := listeners[i]
 		table.AddRow(
@@ -176,6 +186,7 @@ func buildListenersTable(listeners []loadbalancer.Listener) tables.Table {
 			utils.PtrString(listener.TargetPool),
 		)
 	}
+
 	return table
 }
 
@@ -183,8 +194,10 @@ func buildTargetPoolsTable(targetPools []loadbalancer.TargetPool) tables.Table {
 	table := tables.NewTable()
 	table.SetTitle("Target Pools")
 	table.SetHeader("NAME", "PORT", "TARGETS")
+
 	for _, targetPool := range targetPools {
 		table.AddRow(utils.PtrString(targetPool.Name), utils.PtrString(targetPool.TargetPort), len(targetPool.Targets))
 	}
+
 	return table
 }

@@ -69,6 +69,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			} else if projectLabel == "" {
 				projectLabel = model.ProjectId
@@ -78,6 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -105,6 +107,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -114,6 +117,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient scf.DefaultA
 	if model.Limit != nil && *model.Limit < pageSize {
 		pageSize = *model.Limit
 	}
+
 	return apiClient.ListPlatforms(ctx, model.ProjectId, model.Region).Page(1).PerPage(pageSize)
 }
 
@@ -123,6 +127,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, limit *in
 			p.Outputf("No STACKIT Cloud Foundry platforms found for project %q\n", projectLabel)
 			return nil
 		}
+
 		limitReached := limit != nil && int64(len(resp.Resources)) >= *limit
 		if resp.Pagination.TotalPages != nil && *resp.Pagination.TotalPages > int64(1) && !limitReached {
 			p.Warn("Server responded with more than 1 page. Output will not show all existing platforms.\n")
@@ -133,6 +138,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, limit *in
 		table.SetTitle("STACKIT Cloud Foundry platforms")
 		table.SetHeader("ID", "NAME", "REGION", "SYSTEM ID")
 		table.AddSeparator()
+
 		for _, platform := range resp.Resources {
 			table.AddRow(
 				platform.Guid,
@@ -147,6 +153,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, limit *in
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

@@ -45,6 +45,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -62,15 +63,18 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *alb.ApiCreateCredentialsRequest)) alb.ApiCreateCredentialsRequest {
 	request := testClient.DefaultAPI.CreateCredentials(testCtx, testProjectId, testRegion)
+
 	request = request.CreateCredentialsPayload(fixturePayload())
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -83,6 +87,7 @@ func fixturePayload(mods ...func(payload *alb.CreateCredentialsPayload)) alb.Cre
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
@@ -145,6 +150,7 @@ func TestParseInput(t *testing.T) {
 					testPwFile: {Data: []byte(testPassword)},
 				}
 				params.Printer.StdIn = strings.NewReader(tt.stdin)
+
 				return NewCmd(params)
 			}, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
@@ -185,6 +191,7 @@ func Test_outputResult(t *testing.T) {
 		item         *alb.CreateCredentialsResponse
 		outputFormat string
 	}
+
 	tests := []struct {
 		name    string
 		args    args

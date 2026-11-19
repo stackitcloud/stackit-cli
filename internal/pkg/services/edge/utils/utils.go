@@ -12,5 +12,6 @@ func GetInstanceName(ctx context.Context, apiClient edge.DefaultAPI, projectId, 
 	if err != nil {
 		return "", fmt.Errorf("get Edge Cloud instance: %w", err)
 	}
+
 	return resp.DisplayName, nil
 }

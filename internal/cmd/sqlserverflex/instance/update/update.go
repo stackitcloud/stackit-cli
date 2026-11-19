@@ -90,10 +90,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := sqlserverflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update instance %q?", instanceLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -104,6 +106,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("update SQLServer Flex instance: %w", err)
@@ -120,6 +123,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 					return fmt.Errorf("wait for SQLServer Flex instance update: %w", err)
 				}
 			}
+
 			if instance == nil {
 				instance, err = apiClient.DefaultAPI.GetInstance(ctx, model.ProjectId, model.Region, model.InstanceId).Execute()
 				if err != nil {
@@ -131,6 +135,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -194,14 +199,17 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient sqlserverflex.DefaultAPI) (sqlserverflex.ApiPartialUpdateInstanceRequest, error) {
 	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 
-	var flavorId *string
-	var err error
+	var (
+		flavorId *string
+		err      error
+	)
 
 	flavors, err := sqlserverflexUtils.ListAllFlavors(ctx, apiClient, model.ProjectId, model.Region)
 	if err != nil {
@@ -210,42 +218,51 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlserverfle
 
 	if model.FlavorId == nil && (model.RAM != nil || model.CPU != nil) {
 		ram := model.RAM
+
 		cpu := model.CPU
 		if model.RAM == nil || model.CPU == nil {
 			currentInstance, err := apiClient.GetInstance(ctx, model.ProjectId, model.Region, model.InstanceId).Execute()
 			if err != nil {
 				return req, fmt.Errorf("get SQLServer Flex instance: %w", err)
 			}
+
 			var currentFlavor *sqlserverflex.ListFlavors
 			for _, flavor := range flavors {
 				if flavor.Id == currentInstance.FlavorId {
 					currentFlavor = &flavor
 				}
 			}
+
 			if currentFlavor == nil {
 				return req, fmt.Errorf("can't find flavor %s in flavors list", currentInstance.FlavorId)
 			}
+
 			if model.RAM == nil {
 				ram = &currentFlavor.Memory
 			}
+
 			if model.CPU == nil {
 				cpu = &currentFlavor.Cpu
 			}
 		}
+
 		loadedId, err := sqlserverflexUtils.LoadFlavorId(*cpu, *ram, flavors)
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 			if !errors.As(err, &dsaInvalidPlanError) {
 				return req, fmt.Errorf("load flavor ID: %w", err)
 			}
+
 			return req, err
 		}
+
 		flavorId = &loadedId
 	} else if model.FlavorId != nil {
 		err := sqlserverflexUtils.ValidateFlavorId(*model.FlavorId, flavors)
 		if err != nil {
 			return req, err
 		}
+
 		flavorId = model.FlavorId
 	}
 
@@ -263,6 +280,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient sqlserverfle
 		FlavorId:       flavorId,
 		Version:        (*sqlserverflex.InstanceVersionOpt)(model.Version),
 	})
+
 	return req, nil
 }
 
@@ -270,12 +288,15 @@ func outputResult(p *print.Printer, model *inputModel, instanceLabel string, res
 	if resp == nil {
 		return fmt.Errorf("instance response is empty")
 	}
+
 	return p.OutputResult(model.OutputFormat, resp, func() error {
 		operationState := "Updated"
 		if model.Async {
 			operationState = "Triggered update of"
 		}
+
 		p.Info("%s instance %q\n", operationState, instanceLabel)
+
 		return nil
 	})
 }

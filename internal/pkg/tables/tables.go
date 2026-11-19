@@ -56,6 +56,7 @@ func (t *Table) EnableAutoMergeOnColumns(columns ...int) {
 	for _, c := range columns {
 		colConfigs = append(colConfigs, table.ColumnConfig{Number: c, AutoMerge: true})
 	}
+
 	t.table.SetColumnConfigs(colConfigs)
 }
 

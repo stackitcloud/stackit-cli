@@ -20,6 +20,7 @@ func ParseScriptParams(params *map[string]string) (*map[string]string, error) { 
 			if err != nil {
 				return nil, err
 			}
+
 			parsed[k] = string(fileContents)
 		}
 	}
