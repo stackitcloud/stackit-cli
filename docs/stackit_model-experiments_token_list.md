@@ -1,6 +1,6 @@
 ## stackit model-experiments token list
 
-Lists instance tokens
+Lists all AI Model Experiments instance tokens
 
 ### Synopsis
 
@@ -15,6 +15,15 @@ stackit model-experiments token list [flags]
 ```
   List all tokens for an instance
   $ stackit model-experiments token list --instance-id xxx
+
+  List tokens in region eu02
+  $ stackit model-experiments token list --instance-id xxx --region eu02
+
+  List tokens in JSON format
+  $ stackit model-experiments token list --instance-id xxx --output-format json
+
+  List up to 10 tokens for an instance
+  $ stackit model-experiments token list --instance-id xxx --limit 10
 ```
 
 ### Options
@@ -22,6 +31,7 @@ stackit model-experiments token list [flags]
 ```
   -h, --help                 Help for "stackit model-experiments token list"
       --instance-id string   ID of the instance
+      --limit int            Maximum number of entries to list
 ```
 
 ### Options inherited from parent commands

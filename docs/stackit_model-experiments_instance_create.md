@@ -16,8 +16,8 @@ stackit model-experiments instance create [flags]
   Create an AI Model Experiments instance with name "my-tracking"
   $ stackit model-experiments instance create --name my-tracking
 
-  Create an instance with a description and labels
-  $ stackit model-experiments instance create --name my-tracking --description "team tracking server" --labels env=prod,team=ml
+  Create an instance with a description, labels, and deleted experiment retention
+  $ stackit model-experiments instance create --name my-tracking --description "team tracking server" --labels env=prod,team=ml --deleted-experiment-retention 30d
 ```
 
 ### Options
@@ -26,7 +26,7 @@ stackit model-experiments instance create [flags]
       --deleted-experiment-retention string   Retention period for deleted experiments before permanent purge, e.g. "30d" (min 1d, max 90d)
       --description string                    Instance description
   -h, --help                                  Help for "stackit model-experiments instance create"
-      --labels stringToString                 Labels as comma-separated key-value pairs, e.g. "--labels env=prod,team=ml" (default [])
+      --labels stringToString                 Labels are comma-separated key-value string pairs, e.g. "--labels env=prod,team=ml" (default [])
   -n, --name string                           Instance name
 ```
 

@@ -1,6 +1,6 @@
 ## stackit model-experiments token delete
 
-Deletes an instance token
+Deletes an AI Model Experiments instance token
 
 ### Synopsis
 

@@ -1,6 +1,6 @@
 ## stackit model-experiments token create
 
-Creates an instance token
+Creates an AI Model Experiments instance token
 
 ### Synopsis
 
@@ -15,6 +15,9 @@ stackit model-experiments token create [flags]
 ```
   Create an auth token
   $ stackit model-experiments token create --instance-id xxx --name my-token
+
+  Create an auth token with a description, labels, and time to live
+  $ stackit model-experiments token create --instance-id xxx --name my-token --description "service token" --labels env=prod,team=ml --ttl-duration 30d
 ```
 
 ### Options
@@ -23,9 +26,9 @@ stackit model-experiments token create [flags]
       --description string      Token description
   -h, --help                    Help for "stackit model-experiments token create"
       --instance-id string      ID of the instance
-      --labels stringToString   Labels as comma-separated key-value pairs, e.g. "--labels env=prod,team=ml" (default [])
+      --labels stringToString   Labels are comma-separated key-value string pairs, e.g. "--labels env=prod,team=ml" (default [])
       --name string             Token name
-      --ttl-duration string     Token time to live duration
+      --ttl-duration string     Maximum allowed duration is 6 months. If not set, defaults to 6 months. Format example: "720h" or "30d"
 ```
 
 ### Options inherited from parent commands

@@ -30,9 +30,9 @@ stackit model-experiments token [flags]
 ### SEE ALSO
 
 * [stackit model-experiments](./stackit_model-experiments.md)	 - Provides functionality for AI Model Experiments
-* [stackit model-experiments token create](./stackit_model-experiments_token_create.md)	 - Creates an instance token
-* [stackit model-experiments token delete](./stackit_model-experiments_token_delete.md)	 - Deletes an instance token
-* [stackit model-experiments token describe](./stackit_model-experiments_token_describe.md)	 - Shows details of an instance token
-* [stackit model-experiments token list](./stackit_model-experiments_token_list.md)	 - Lists instance tokens
-* [stackit model-experiments token update](./stackit_model-experiments_token_update.md)	 - Updates an instance token
+* [stackit model-experiments token create](./stackit_model-experiments_token_create.md)	 - Creates an AI Model Experiments instance token
+* [stackit model-experiments token delete](./stackit_model-experiments_token_delete.md)	 - Deletes an AI Model Experiments instance token
+* [stackit model-experiments token describe](./stackit_model-experiments_token_describe.md)	 - Shows details of an AI Model Experiments instance token
+* [stackit model-experiments token list](./stackit_model-experiments_token_list.md)	 - Lists all AI Model Experiments instance tokens
+* [stackit model-experiments token update](./stackit_model-experiments_token_update.md)	 - Updates an AI Model Experiments instance token
 

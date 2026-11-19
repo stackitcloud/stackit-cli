@@ -1,6 +1,6 @@
 ## stackit model-experiments token update
 
-Updates an instance token
+Updates an AI Model Experiments instance token
 
 ### Synopsis
 
@@ -13,8 +13,17 @@ stackit model-experiments token update TOKEN_ID [flags]
 ### Examples
 
 ```
-  Update an auth token with ID "xxx"
+  Update the name of an auth token with ID "xxx"
   $ stackit model-experiments token update xxx --instance-id yyy --name updated-token
+
+  Update the description of an auth token
+  $ stackit model-experiments token update xxx --instance-id yyy --description "updated token"
+
+  Update labels on an auth token
+  $ stackit model-experiments token update xxx --instance-id yyy --labels env=prod,team=ml
+
+  Update multiple fields of an auth token
+  $ stackit model-experiments token update xxx --instance-id yyy --name updated-token --description "updated token" --labels env=prod,team=ml
 ```
 
 ### Options
@@ -23,7 +32,7 @@ stackit model-experiments token update TOKEN_ID [flags]
       --description string      Token description
   -h, --help                    Help for "stackit model-experiments token update"
       --instance-id string      ID of the instance
-      --labels stringToString   Labels as comma-separated key-value pairs, e.g. "--labels env=prod,team=ml" (default [])
+      --labels stringToString   Labels are comma-separated key-value string pairs, e.g. "--labels env=prod,team=ml" (default [])
       --name string             Token name
 ```
 

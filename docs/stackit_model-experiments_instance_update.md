@@ -32,7 +32,7 @@ stackit model-experiments instance update INSTANCE_ID [flags]
       --deleted-experiment-retention string   Retention period for deleted experiments before permanent purge, e.g. "30d" (min 1d, max 90d)
       --description string                    Instance description
   -h, --help                                  Help for "stackit model-experiments instance update"
-      --labels stringToString                 Labels as comma-separated key-value pairs, e.g. "--labels env=prod,team=ml" (default [])
+      --labels stringToString                 Labels are comma-separated key-value string pairs, e.g. "--labels env=prod,team=ml" (default [])
   -n, --name string                           Instance name
 ```
 

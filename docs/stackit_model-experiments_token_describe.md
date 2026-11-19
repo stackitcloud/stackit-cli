@@ -1,6 +1,6 @@
 ## stackit model-experiments token describe
 
-Shows details of an instance token
+Shows details of an AI Model Experiments instance token
 
 ### Synopsis
 
@@ -15,6 +15,9 @@ stackit model-experiments token describe TOKEN_ID [flags]
 ```
   Show details of an auth token with ID "xxx"
   $ stackit model-experiments token describe xxx --instance-id yyy
+
+  Show details of an auth token with ID "xxx" in JSON format
+  $ stackit model-experiments token describe xxx --instance-id yyy --output-format json
 ```
 
 ### Options
