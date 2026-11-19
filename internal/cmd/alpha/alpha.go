@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/stackitcloud/stackit-cli/internal/cmd/alpha/folder"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/alpha/vpc"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/examples"
@@ -36,5 +37,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 }
 
 func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
+	cmd.AddCommand(folder.NewCmd(params))
 	cmd.AddCommand(vpc.NewCmd(params))
 }
