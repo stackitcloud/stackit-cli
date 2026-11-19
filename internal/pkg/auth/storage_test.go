@@ -3,6 +3,7 @@ package auth
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -1227,4 +1228,286 @@ func TestAuthorizeDeauthorizeUserProfileAuth(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestStaleKeychainCleanupOnFallback(t *testing.T) {
+	keyring.MockInit()
+
+	profile, err := config.GetProfile()
+	if err != nil {
+		t.Fatalf("get profile: %v", err)
+	}
+
+	oldKeyringVal := "stale_rsa_2048_key"
+	newFileVal := "new_rsa_4096_key"
+
+	// 1. Initially set the old key in keyring
+	err = setAuthFieldInKeyring(profile, PRIVATE_KEY, oldKeyringVal)
+	if err != nil {
+		t.Fatalf("set in keyring: %v", err)
+	}
+
+	// Verify keyring has it
+	got, err := getAuthFieldFromKeyring(profile, PRIVATE_KEY)
+	if err != nil || got != oldKeyringVal {
+		t.Fatalf("expected %s in keyring, got %s (err: %v)", oldKeyringVal, got, err)
+	}
+
+	// 2. Simulate what setAuthFieldWithProfile does when keyring write fails:
+	// It writes to encoded text file and deletes from keyring
+	err = setAuthFieldInEncodedTextFile(profile, PRIVATE_KEY, newFileVal)
+	if err != nil {
+		t.Fatalf("set in text file: %v", err)
+	}
+
+	err = deleteAuthFieldInKeyring(profile, PRIVATE_KEY)
+	if err != nil {
+		t.Fatalf("delete from keyring: %v", err)
+	}
+
+	// 3. Now GetAuthField should return newFileVal, NOT the stale oldKeyringVal!
+	val, err := GetAuthField(PRIVATE_KEY)
+	if err != nil {
+		t.Fatalf("GetAuthField failed: %v", err)
+	}
+
+	if val != newFileVal {
+		t.Errorf("GetAuthField returned stale value %q, expected %q", val, newFileVal)
+	}
+
+	// Cleanup
+	_ = DeleteAuthField(PRIVATE_KEY)
+}
+
+func TestFileNotCreatedOnReadOrDelete(t *testing.T) {
+	keyring.MockInit()
+
+	profile, err := config.GetProfile()
+	if err != nil {
+		t.Fatalf("get profile: %v", err)
+	}
+
+	textFilePath := filepath.Join(config.GetProfileFolderPath(profile), textFileName)
+	_ = os.Remove(textFilePath)
+
+	// Ensure file doesn't exist
+	if _, err := os.Stat(textFilePath); !os.IsNotExist(err) {
+		t.Fatalf("expected file to not exist before test")
+	}
+
+	nonExistingField := authFieldKey("non_existent_field_12345")
+
+	// Call GetAuthField for a non-existent field
+	_, err = GetAuthField(nonExistingField)
+	if err == nil {
+		t.Errorf("expected error from GetAuthField for non-existent field")
+	}
+
+	// Verify file was NOT created
+	if _, err := os.Stat(textFilePath); !os.IsNotExist(err) {
+		t.Errorf("cli-auth-storage.txt was created on GetAuthField for non-existent field")
+	}
+
+	// Call DeleteAuthField for a non-existent field
+	_ = DeleteAuthField(nonExistingField)
+
+	// Verify file was still NOT created
+	if _, err := os.Stat(textFilePath); !os.IsNotExist(err) {
+		t.Errorf("cli-auth-storage.txt was created on DeleteAuthField for non-existent field")
+	}
+}
+
+func TestFileRemovedWhenEmpty(t *testing.T) {
+	profile, err := config.GetProfile()
+	if err != nil {
+		t.Fatalf("get profile: %v", err)
+	}
+
+	textFilePath := filepath.Join(config.GetProfileFolderPath(profile), textFileName)
+	_ = os.Remove(textFilePath)
+
+	field1 := authFieldKey("test-cleanup-field-1")
+	field2 := authFieldKey("test-cleanup-field-2")
+
+	// Write two fields to text file
+	if err := setAuthFieldInEncodedTextFile(profile, field1, "val1"); err != nil {
+		t.Fatalf("failed to set field1: %v", err)
+	}
+
+	if err := setAuthFieldInEncodedTextFile(profile, field2, "val2"); err != nil {
+		t.Fatalf("failed to set field2: %v", err)
+	}
+
+	if _, err := os.Stat(textFilePath); os.IsNotExist(err) {
+		t.Fatalf("expected file to exist after writing fields")
+	}
+
+	// Delete field1
+	if err := deleteAuthFieldInEncodedTextFile(profile, field1); err != nil {
+		t.Fatalf("failed to delete field1: %v", err)
+	}
+
+	if _, err := os.Stat(textFilePath); os.IsNotExist(err) {
+		t.Fatalf("expected file to still exist with field2 remaining")
+	}
+
+	// Delete field2
+	if err := deleteAuthFieldInEncodedTextFile(profile, field2); err != nil {
+		t.Fatalf("failed to delete field2: %v", err)
+	}
+
+	// Now file should be removed
+	if _, err := os.Stat(textFilePath); !os.IsNotExist(err) {
+		t.Errorf("expected cli-auth-storage.txt to be removed when empty, but it still exists")
+	}
+}
+
+func TestLogoutCleansUpAllCredentialsAndFile(t *testing.T) {
+	keyring.MockInit()
+
+	profile, err := config.GetProfile()
+	if err != nil {
+		t.Fatalf("get profile: %v", err)
+	}
+
+	textFilePath := filepath.Join(config.GetProfileFolderPath(profile), textFileName)
+
+	// Set user credentials
+	if err := SetAuthField(USER_EMAIL, "[EMAIL_REDACTED]"); err != nil {
+		t.Fatalf("set user email: %v", err)
+	}
+
+	if err := SetAuthField(ACCESS_TOKEN, "user-access-token"); err != nil {
+		t.Fatalf("set access token: %v", err)
+	}
+
+	// Set service account credentials
+	if err := SetAuthField(SERVICE_ACCOUNT_EMAIL, "[EMAIL_REDACTED]"); err != nil {
+		t.Fatalf("set sa email: %v", err)
+	}
+
+	if err := SetAuthField(SERVICE_ACCOUNT_KEY, `{"id":"test"}`); err != nil {
+		t.Fatalf("set sa key: %v", err)
+	}
+
+	// Also simulate fallback text file having a field
+	if err := setAuthFieldInEncodedTextFile(profile, PRIVATE_KEY, "some-private-key"); err != nil {
+		t.Fatalf("set private key in text file: %v", err)
+	}
+
+	// Ensure text file exists
+	if _, err := os.Stat(textFilePath); os.IsNotExist(err) {
+		t.Fatalf("expected text file to exist")
+	}
+
+	// Perform logout
+	if err := LogoutUser(); err != nil {
+		t.Fatalf("LogoutUser() failed: %v", err)
+	}
+
+	// Verify user fields are deleted
+	if _, err := GetAuthField(USER_EMAIL); err == nil {
+		t.Errorf("USER_EMAIL still exists after logout")
+	}
+
+	if _, err := GetAuthField(ACCESS_TOKEN); err == nil {
+		t.Errorf("ACCESS_TOKEN still exists after logout")
+	}
+
+	// Verify service account fields are deleted
+	if _, err := GetAuthField(SERVICE_ACCOUNT_EMAIL); err == nil {
+		t.Errorf("SERVICE_ACCOUNT_EMAIL still exists after logout")
+	}
+
+	if _, err := GetAuthField(SERVICE_ACCOUNT_KEY); err == nil {
+		t.Errorf("SERVICE_ACCOUNT_KEY still exists after logout")
+	}
+
+	if _, err := GetAuthField(PRIVATE_KEY); err == nil {
+		t.Errorf("PRIVATE_KEY still exists after logout")
+	}
+
+	// Verify text file was removed
+	if _, err := os.Stat(textFilePath); !os.IsNotExist(err) {
+		t.Errorf("cli-auth-storage.txt was not removed after logout")
+	}
+}
+
+func TestLoginUserCleansUpServiceAccountCredentials(t *testing.T) {
+	keyring.MockInit()
+
+	// Set SA credentials
+	if err := SetAuthField(SERVICE_ACCOUNT_EMAIL, "[EMAIL_REDACTED]"); err != nil {
+		t.Fatalf("set sa email: %v", err)
+	}
+
+	if err := SetAuthField(SERVICE_ACCOUNT_KEY, `{"id":"test"}`); err != nil {
+		t.Fatalf("set sa key: %v", err)
+	}
+
+	if err := SetAuthField(PRIVATE_KEY, "private-key-data"); err != nil {
+		t.Fatalf("set private key: %v", err)
+	}
+
+	// Now call LoginUser
+	if err := LoginUser("[EMAIL_REDACTED]", "user-token", "refresh-token", "1234567890"); err != nil {
+		t.Fatalf("LoginUser failed: %v", err)
+	}
+
+	// Verify SA fields were cleaned up
+	if val, err := GetAuthField(SERVICE_ACCOUNT_EMAIL); err == nil && val != "" {
+		t.Errorf("SERVICE_ACCOUNT_EMAIL still exists after LoginUser: %s", val)
+	}
+
+	if val, err := GetAuthField(SERVICE_ACCOUNT_KEY); err == nil && val != "" {
+		t.Errorf("SERVICE_ACCOUNT_KEY still exists after LoginUser: %s", val)
+	}
+
+	if val, err := GetAuthField(PRIVATE_KEY); err == nil && val != "" {
+		t.Errorf("PRIVATE_KEY still exists after LoginUser: %s", val)
+	}
+
+	// Verify user fields are present
+	if val, err := GetAuthField(USER_EMAIL); err != nil || val != "[EMAIL_REDACTED]" {
+		t.Errorf("expected USER_EMAIL '[EMAIL_REDACTED]', got %q (err: %v)", val, err)
+	}
+
+	// Cleanup
+	_ = LogoutUser()
+}
+
+func TestKeyringWriteCleansUpTextFile(t *testing.T) {
+	keyring.MockInit()
+
+	profile, err := config.GetProfile()
+	if err != nil {
+		t.Fatalf("get profile: %v", err)
+	}
+
+	key := authFieldKey("test-sync-key")
+
+	// Simulate old value in text file
+	if err := setAuthFieldInEncodedTextFile(profile, key, "old-file-value"); err != nil {
+		t.Fatalf("set in text file: %v", err)
+	}
+
+	// Now set with setAuthFieldWithProfile (which succeeds in keyring)
+	if err := setAuthFieldWithProfile(profile, key, "new-keyring-value"); err != nil {
+		t.Fatalf("setAuthFieldWithProfile failed: %v", err)
+	}
+
+	// Keyring has new value
+	val, err := getAuthFieldFromKeyring(profile, key)
+	if err != nil || val != "new-keyring-value" {
+		t.Errorf("expected new-keyring-value in keyring, got %q (err: %v)", val, err)
+	}
+
+	// Text file should no longer have the old key
+	_, err = getAuthFieldFromEncodedTextFile(profile, key)
+	if err == nil {
+		t.Errorf("expected key to be removed from text file when set in keyring")
+	}
+
+	// Cleanup
+	_ = deleteAuthFieldWithProfile(profile, key)
 }

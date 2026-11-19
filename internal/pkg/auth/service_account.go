@@ -107,6 +107,13 @@ func AuthenticateServiceAccount(p *print.Printer, rt http.RoundTripper, disableW
 	authFields[IDP_TOKEN_ENDPOINT] = ""
 
 	if !disableWriting {
+		// Clean up user credentials to avoid stale fields
+		_ = DeleteAuthField(USER_EMAIL)
+		_ = DeleteAuthField(REFRESH_TOKEN)
+		_ = DeleteAuthField(SERVICE_ACCOUNT_TOKEN)
+		_ = DeleteAuthField(SERVICE_ACCOUNT_KEY)
+		_ = DeleteAuthField(PRIVATE_KEY)
+
 		err = SetAuthFlow(authFlowType)
 		if err != nil {
 			return "", "", fmt.Errorf("set auth flow type: %w", err)
