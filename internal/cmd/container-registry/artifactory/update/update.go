@@ -64,7 +64,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			),
 			examples.NewExample(
 				`Update all proxy configuration fields for an artifactory with ID "xxx"`,
-				`$ stackit container-registry artifactory update xxx --proxy-url https://custom-registry.com --proxy-description "Updated mirror" --proxy-access-key my-user --proxy-access-secret @./secret.txt`,
+				`$ stackit container-registry artifactory update xxx --proxy-url https://registry-1.docker.io --proxy-description "Updated mirror" --proxy-access-key my-user --proxy-access-secret @./secret.txt`,
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {

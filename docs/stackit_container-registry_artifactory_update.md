@@ -26,13 +26,13 @@ stackit container-registry artifactory update ARTIFACTORY_ID [flags]
   $ stackit container-registry artifactory update xxx --proxy-access-key my-user --proxy-access-secret @./secret.txt
 
   Update all proxy configuration fields for an artifactory with ID "xxx"
-  $ stackit container-registry artifactory update xxx --proxy-url https://custom-registry.com --proxy-description "Updated mirror" --proxy-access-key my-user --proxy-access-secret @./secret.txt
+  $ stackit container-registry artifactory update xxx --proxy-url https://registry-1.docker.io --proxy-description "Updated mirror" --proxy-access-key my-user --proxy-access-secret @./secret.txt
 ```
 
 ### Options
 
 ```
-  -h, --help                         Help for "stackit container-registry artifactory update"
+  -h, --help[=true|false]            Help for "stackit container-registry artifactory update"
       --proxy-access-key string      Access key for upstream proxy registry authentication
       --proxy-access-secret secret   Proxy-Access-Secret. Use @<file> to read from a file (example: @./secret.txt), or - to read from stdin (hidden input on a terminal). Literal values are not supported.
       --proxy-description string     Description of the proxy registry
@@ -42,12 +42,12 @@ stackit container-registry artifactory update ARTIFACTORY_ID [flags]
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

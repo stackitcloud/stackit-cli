@@ -52,14 +52,6 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				"$ stackit container-registry artifactory create --name my-registry",
 			),
 			examples.NewExample(
-				`Create a proxy-cache artifactory without credentials`,
-				"$ stackit container-registry artifactory create --name my-proxy --proxy-url https://custom-registry.com --proxy-registry-type harbor",
-			),
-			examples.NewExample(
-				`Create a proxy-cache artifactory with a description`,
-				`$ stackit container-registry artifactory create --name my-proxy --proxy-url https://custom-registry.com --proxy-registry-type harbor --proxy-description "Internal mirror"`,
-			),
-			examples.NewExample(
 				`Create a proxy-cache artifactory for Docker Hub with credentials from stdin`,
 				"$ stackit container-registry artifactory create --name docker-proxy --proxy-url https://registry-1.docker.io --proxy-registry-type docker-hub --proxy-access-key my-user --proxy-access-secret -",
 			),

@@ -16,12 +16,6 @@ stackit container-registry artifactory create [flags]
   Create a standard artifactory
   $ stackit container-registry artifactory create --name my-registry
 
-  Create a proxy-cache artifactory without credentials
-  $ stackit container-registry artifactory create --name my-proxy --proxy-url https://custom-registry.com --proxy-registry-type harbor
-
-  Create a proxy-cache artifactory with a description
-  $ stackit container-registry artifactory create --name my-proxy --proxy-url https://custom-registry.com --proxy-registry-type harbor --proxy-description "Internal mirror"
-
   Create a proxy-cache artifactory for Docker Hub with credentials from stdin
   $ stackit container-registry artifactory create --name docker-proxy --proxy-url https://registry-1.docker.io --proxy-registry-type docker-hub --proxy-access-key my-user --proxy-access-secret -
 
@@ -35,7 +29,7 @@ stackit container-registry artifactory create [flags]
 ### Options
 
 ```
-  -h, --help                         Help for "stackit container-registry artifactory create"
+  -h, --help[=true|false]            Help for "stackit container-registry artifactory create"
   -n, --name string                  Artifactory name
       --proxy-access-key string      Access key for upstream proxy registry authentication
       --proxy-access-secret secret   Proxy-Access-Secret. Use @<file> to read from a file (example: @./secret.txt), or - to read from stdin (hidden input on a terminal). Literal values are not supported.
@@ -47,12 +41,12 @@ stackit container-registry artifactory create [flags]
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO
