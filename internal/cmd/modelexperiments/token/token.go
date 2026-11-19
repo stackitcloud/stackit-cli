@@ -21,12 +21,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args:  args.NoArgs,
 		Run:   utils.CmdHelp,
 	}
-	cmd.AddCommand(
-		list.NewCmd(params),
-		create.NewCmd(params),
-		delete.NewCmd(params),
-		describe.NewCmd(params),
-		update.NewCmd(params),
-	)
+	cmd.AddCommand(list.NewCmd(params))
+	cmd.AddCommand(create.NewCmd(params))
+	cmd.AddCommand(delete.NewCmd(params))
+	cmd.AddCommand(describe.NewCmd(params))
+	cmd.AddCommand(update.NewCmd(params))
 	return cmd
 }

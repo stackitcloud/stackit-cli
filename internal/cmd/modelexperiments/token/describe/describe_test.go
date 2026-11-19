@@ -17,57 +17,190 @@ import (
 
 type testContextKey struct{}
 
+const testRegion = "eu01"
+
 var (
-	testContext    = context.WithValue(context.Background(), testContextKey{}, "token-get")
+	testContext    = context.WithValue(context.Background(), testContextKey{}, "token-describe")
 	testClient     = &modelexperiments.APIClient{DefaultAPI: modelexperiments.DefaultAPIServiceMock{}}
 	testProjectID  = uuid.NewString()
 	testInstanceID = uuid.NewString()
 	testTokenID    = uuid.NewString()
 )
 
-func fixtureFlagValues(mods ...func(map[string]string)) map[string]string {
-	values := map[string]string{globalflags.ProjectIdFlag: testProjectID, instanceIDFlag: testInstanceID, globalflags.RegionFlag: "eu01"}
-	for _, mod := range mods {
-		mod(values)
+func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]string {
+	flagValues := map[string]string{
+		globalflags.ProjectIdFlag: testProjectID,
+		globalflags.RegionFlag:    testRegion,
+		instanceIDFlag:            testInstanceID,
 	}
-	return values
+	for _, mod := range mods {
+		mod(flagValues)
+	}
+	return flagValues
 }
-func fixtureInputModel() *inputModel {
-	return &inputModel{GlobalFlagModel: &globalflags.GlobalFlagModel{ProjectId: testProjectID, Region: "eu01", Verbosity: globalflags.VerbosityDefault}, TokenID: testTokenID, InstanceID: testInstanceID}
+
+func fixtureArgValues(mods ...func(argValues []string)) []string {
+	argValues := []string{testTokenID}
+	for _, mod := range mods {
+		mod(argValues)
+	}
+	return argValues
 }
+
+func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
+	model := &inputModel{
+		GlobalFlagModel: &globalflags.GlobalFlagModel{
+			ProjectId: testProjectID,
+			Region:    testRegion,
+			Verbosity: globalflags.VerbosityDefault,
+		},
+		TokenID:    testTokenID,
+		InstanceID: testInstanceID,
+	}
+	for _, mod := range mods {
+		mod(model)
+	}
+	return model
+}
+
 func fixtureRequest() modelexperiments.ApiGetInstanceTokenRequest {
-	return testClient.DefaultAPI.GetInstanceToken(testContext, testProjectID, "eu01", testTokenID, testInstanceID)
+	return testClient.DefaultAPI.GetInstanceToken(testContext, testProjectID, testRegion, testTokenID, testInstanceID)
 }
 
 func TestParseInput(t *testing.T) {
 	tests := []struct {
-		name  string
-		flags map[string]string
-		valid bool
-	}{{name: "base", flags: fixtureFlagValues(), valid: true}, {name: "project missing", flags: fixtureFlagValues(func(values map[string]string) { delete(values, globalflags.ProjectIdFlag) }), valid: false}}
+		description   string
+		argValues     []string
+		flagValues    map[string]string
+		isValid       bool
+		expectedModel *inputModel
+	}{
+		{
+			description:   "base",
+			argValues:     fixtureArgValues(),
+			flagValues:    fixtureFlagValues(),
+			isValid:       true,
+			expectedModel: fixtureInputModel(),
+		},
+		{
+			description: "no values",
+			argValues:   []string{},
+			flagValues:  map[string]string{},
+			isValid:     false,
+		},
+		{
+			description: "no arg values",
+			argValues:   []string{},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
+		{
+			description: "no flag values",
+			argValues:   fixtureArgValues(),
+			flagValues:  map[string]string{},
+			isValid:     false,
+		},
+		{
+			description: "project id missing",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, globalflags.ProjectIdFlag)
+			}),
+			isValid: false,
+		},
+		{
+			description: "project id invalid 1",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[globalflags.ProjectIdFlag] = ""
+			}),
+			isValid: false,
+		},
+		{
+			description: "project id invalid 2",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[globalflags.ProjectIdFlag] = "invalid-uuid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "instance id missing",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				delete(flagValues, instanceIDFlag)
+			}),
+			isValid: false,
+		},
+		{
+			description: "instance id empty",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[instanceIDFlag] = ""
+			}),
+			isValid: false,
+		},
+		{
+			description: "instance id invalid",
+			argValues:   fixtureArgValues(),
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[instanceIDFlag] = "invalid-uuid"
+			}),
+			isValid: false,
+		},
+		{
+			description: "token id empty",
+			argValues:   []string{""},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
+		{
+			description: "token id invalid",
+			argValues:   []string{"invalid-uuid"},
+			flagValues:  fixtureFlagValues(),
+			isValid:     false,
+		},
+	}
+
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			var want *inputModel
-			if tt.valid {
-				want = fixtureInputModel()
-			}
-			testutils.TestParseInput(t, NewCmd, parseInput, want, []string{testTokenID}, tt.flags, tt.valid)
+		t.Run(tt.description, func(t *testing.T) {
+			testutils.TestParseInput(t, NewCmd, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
 	}
 }
-func TestBuildDescribeRequest(t *testing.T) {
-	got := buildRequest(testContext, fixtureInputModel(), testClient)
-	want := fixtureRequest()
-	if diff := cmp.Diff(got, want, cmp.AllowUnexported(want), cmpopts.EquateComparable(testContext)); diff != "" {
-		t.Fatalf("request mismatch (-got +want):\n%s", diff)
+
+func TestBuildRequest(t *testing.T) {
+	request := buildRequest(testContext, fixtureInputModel(), testClient)
+	expectedRequest := fixtureRequest()
+	diff := cmp.Diff(request, expectedRequest, cmp.AllowUnexported(expectedRequest), cmpopts.EquateComparable(testContext))
+	if diff != "" {
+		t.Fatalf("Data does not match: %s", diff)
 	}
 }
+
 func TestOutputResult(t *testing.T) {
-	params := testparams.NewTestParams()
-	if err := outputResult(params.Printer, "", nil); err == nil {
-		t.Fatal("expected nil response error")
+	tests := []struct {
+		name    string
+		resp    *modelexperiments.GetInstanceTokenResponse
+		wantErr bool
+	}{
+		{
+			name:    "nil response",
+			resp:    nil,
+			wantErr: true,
+		},
+		{
+			name:    "empty token",
+			resp:    &modelexperiments.GetInstanceTokenResponse{},
+			wantErr: false,
+		},
 	}
-	if err := outputResult(params.Printer, "", &modelexperiments.GetInstanceTokenResponse{}); err == nil {
-		t.Fatal("expected nil token error")
+	params := testparams.NewTestParams()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := outputResult(params.Printer, fixtureInputModel(), tt.resp); (err != nil) != tt.wantErr {
+				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
 	}
 }
