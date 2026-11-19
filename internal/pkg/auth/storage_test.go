@@ -271,7 +271,7 @@ func TestSetGetAuthFieldWithProfile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			// Apppend random string to profile name to avoid conflicts
+			// Append random string to profile name to avoid conflicts
 			tt.activeProfile = makeProfileNameUnique(tt.activeProfile)
 
 			// Make sure profile name is valid
@@ -1288,7 +1288,6 @@ func TestFileNotCreatedOnReadOrDelete(t *testing.T) {
 	}
 
 	textFilePath := filepath.Join(config.GetProfileFolderPath(profile), textFileName)
-	_ = os.Remove(textFilePath)
 
 	// Ensure file doesn't exist
 	if _, err := os.Stat(textFilePath); !os.IsNotExist(err) {
@@ -1318,13 +1317,13 @@ func TestFileNotCreatedOnReadOrDelete(t *testing.T) {
 }
 
 func TestFileRemovedWhenEmpty(t *testing.T) {
+
 	profile, err := config.GetProfile()
 	if err != nil {
 		t.Fatalf("get profile: %v", err)
 	}
 
 	textFilePath := filepath.Join(config.GetProfileFolderPath(profile), textFileName)
-	_ = os.Remove(textFilePath)
 
 	field1 := authFieldKey("test-cleanup-field-1")
 	field2 := authFieldKey("test-cleanup-field-2")

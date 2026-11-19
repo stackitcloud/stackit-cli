@@ -3,6 +3,7 @@ package auth
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"testing"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
@@ -26,6 +27,21 @@ type keyFlowMocked struct {
 	tokenResponse      clients.TokenResponseBody
 	getAccessTokenFail bool
 	tokenInvalid       bool
+}
+
+// TestMain will be executed before all tests in the "auth" package.
+// It's used to configure a temp directory for the CLI configuration files.
+func TestMain(m *testing.M) {
+	tempDir, err := os.MkdirTemp("", "stackit-auth-test-*")
+	if err != nil {
+		fmt.Printf("could not create temp dir: %v", err)
+		os.Exit(1)
+	}
+	defer os.RemoveAll(tempDir)
+
+	config.SetDefaultConfigFolderPath(tempDir)
+
+	m.Run()
 }
 
 func (f *keyFlowMocked) GetAccessToken() (string, error) {

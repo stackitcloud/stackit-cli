@@ -141,7 +141,11 @@ var configFolderPath string
 var profileFilePath string
 
 func InitConfig() {
-	initConfig(getInitialConfigDir())
+	dir := defaultConfigFolderPath
+	if dir == "" {
+		dir = getInitialConfigDir()
+	}
+	initConfig(dir)
 }
 
 func initConfig(configPath string) {
@@ -253,4 +257,9 @@ func getInitialProfileFilePath() string {
 	}
 
 	return filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", profileFileName, profileFileExtension))
+}
+
+// SetDefaultConfigFolderPath overrides the default config folder path. Intended for testing.
+func SetDefaultConfigFolderPath(path string) {
+	defaultConfigFolderPath = path
 }
