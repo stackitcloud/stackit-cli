@@ -106,6 +106,12 @@ func setAuthFieldWithProfile(profile string, key authFieldKey, value string) err
 		if errFallback != nil {
 			return fmt.Errorf("write to keyring failed (%w), try writing to encoded text file: %w", err, errFallback)
 		}
+		// If writing to the text file succeeded as a fallback, clean up any stale key in the keyring
+		// so GetAuthField won't return outdated credentials.
+		_ = deleteAuthFieldInKeyring(profile, key)
+	} else {
+		// If writing to the keyring succeeded, clean up any old entry from the encoded text file.
+		_ = deleteAuthFieldInEncodedTextFile(profile, key)
 	}
 
 	return nil
@@ -130,31 +136,34 @@ func DeleteAuthField(key authFieldKey) error {
 }
 
 func deleteAuthFieldWithProfile(profile string, key authFieldKey) error {
+	var errKeyring, errFile error
+
 	err := deleteAuthFieldInKeyring(profile, key)
+	if err != nil && !errors.Is(err, keyring.ErrNotFound) {
+		errKeyring = err
+	}
+
+	err = deleteAuthFieldInEncodedTextFile(profile, key)
 	if err != nil {
-		// if the key is not found, we can ignore the error
-		if !errors.Is(err, keyring.ErrNotFound) {
-			errFallback := deleteAuthFieldInEncodedTextFile(profile, key)
-			if errFallback != nil {
-				return fmt.Errorf("delete from keyring failed (%w), try deleting from encoded text file: %w", err, errFallback)
-			}
-		}
+		errFile = err
+	}
+
+	if errKeyring != nil && errFile != nil {
+		return fmt.Errorf("delete from keyring: %w, delete from encoded text file: %w", errKeyring, errFile)
 	}
 
 	return nil
 }
 
 func deleteAuthFieldInEncodedTextFile(activeProfile string, key authFieldKey) error {
-	err := createEncodedTextFile(activeProfile)
-	if err != nil {
-		return err
-	}
-
 	textFileDir := config.GetProfileFolderPath(activeProfile)
 	textFilePath := filepath.Join(textFileDir, textFileName)
 
 	contentEncoded, err := os.ReadFile(textFilePath)
 	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
 		return fmt.Errorf("read file: %w", err)
 	}
 
@@ -170,7 +179,20 @@ func deleteAuthFieldInEncodedTextFile(activeProfile string, key authFieldKey) er
 		return fmt.Errorf("unmarshal file: %w", err)
 	}
 
+	if _, ok := content[key]; !ok {
+		return nil
+	}
+
 	delete(content, key)
+
+	if len(content) == 0 {
+		err = os.Remove(textFilePath)
+		if err != nil && !os.IsNotExist(err) {
+			return fmt.Errorf("remove empty encoded text file: %w", err)
+		}
+
+		return nil
+	}
 
 	contentBytes, err = json.Marshal(content)
 	if err != nil {
@@ -291,11 +313,6 @@ func getAuthFieldFromKeyring(activeProfile string, key authFieldKey) (string, er
 }
 
 func getAuthFieldFromEncodedTextFile(activeProfile string, key authFieldKey) (string, error) {
-	err := createEncodedTextFile(activeProfile)
-	if err != nil {
-		return "", err
-	}
-
 	textFileDir := config.GetProfileFolderPath(activeProfile)
 	textFilePath := filepath.Join(textFileDir, textFileName)
 
@@ -403,6 +420,17 @@ func GetAuthEmail() (string, error) {
 }
 
 func LoginUser(email, accessToken, refreshToken, sessionExpiresAtUnix string) error {
+	// Clean up any service account credentials that might be present
+	saFields := []authFieldKey{
+		SERVICE_ACCOUNT_KEY,
+		PRIVATE_KEY,
+		SERVICE_ACCOUNT_TOKEN,
+		SERVICE_ACCOUNT_EMAIL,
+	}
+	for _, key := range saFields {
+		_ = DeleteAuthField(key)
+	}
+
 	authFields := map[authFieldKey]string{
 		SESSION_EXPIRES_AT_UNIX: sessionExpiresAtUnix,
 		ACCESS_TOKEN:            accessToken,
@@ -419,11 +447,24 @@ func LoginUser(email, accessToken, refreshToken, sessionExpiresAtUnix string) er
 }
 
 func LogoutUser() error {
-	for _, key := range loginAuthFieldKeys {
+	for _, key := range authFieldKeys {
 		err := DeleteAuthField(key)
 		if err != nil {
 			return fmt.Errorf("delete auth field \"%s\": %w", key, err)
 		}
+	}
+
+	activeProfile, err := config.GetProfile()
+	if err != nil {
+		return fmt.Errorf("get profile: %w", err)
+	}
+
+	textFileDir := config.GetProfileFolderPath(activeProfile)
+	textFilePath := filepath.Join(textFileDir, textFileName)
+
+	err = os.Remove(textFilePath)
+	if err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("remove auth storage file: %w", err)
 	}
 
 	return nil
@@ -444,6 +485,14 @@ func DeleteProfileAuth(profile string) error {
 		if err != nil {
 			return fmt.Errorf("delete auth field \"%s\": %w", key, err)
 		}
+	}
+
+	textFileDir := config.GetProfileFolderPath(profile)
+	textFilePath := filepath.Join(textFileDir, textFileName)
+
+	err = os.Remove(textFilePath)
+	if err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("remove auth storage file: %w", err)
 	}
 
 	return nil

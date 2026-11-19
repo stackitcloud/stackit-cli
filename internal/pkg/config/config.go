@@ -254,3 +254,8 @@ func getInitialProfileFilePath() string {
 
 	return filepath.Join(configFolderPath, fmt.Sprintf("%s.%s", profileFileName, profileFileExtension))
 }
+
+// SetDefaultConfigFolderPath overrides the default config folder path. Intended for testing.
+func SetDefaultConfigFolderPath(path string) {
+	defaultConfigFolderPath = path
+}
