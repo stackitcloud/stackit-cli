@@ -32,6 +32,7 @@ const (
 	loadBalancerCustomEndpointFlag      = "load-balancer-custom-endpoint"
 	logMeCustomEndpointFlag             = "logme-custom-endpoint"
 	mariaDBCustomEndpointFlag           = "mariadb-custom-endpoint"
+	modelExperimentsCustomEndpointFlag  = "model-experiments-custom-endpoint"
 	mongoDBFlexCustomEndpointFlag       = "mongodbflex-custom-endpoint"
 	objectStorageCustomEndpointFlag     = "object-storage-custom-endpoint"
 	observabilityCustomEndpointFlag     = "observability-custom-endpoint"
@@ -157,6 +158,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(loadBalancerCustomEndpointFlag, "", "Load Balancer API base URL, used in calls to this API")
 	cmd.Flags().String(logMeCustomEndpointFlag, "", "LogMe API base URL, used in calls to this API")
 	cmd.Flags().String(mariaDBCustomEndpointFlag, "", "MariaDB API base URL, used in calls to this API")
+	cmd.Flags().String(modelExperimentsCustomEndpointFlag, "", "Model Experiments API base URL, used in calls to this API")
 	cmd.Flags().String(mongoDBFlexCustomEndpointFlag, "", "MongoDB Flex API base URL, used in calls to this API")
 	cmd.Flags().String(objectStorageCustomEndpointFlag, "", "Object Storage API base URL, used in calls to this API")
 	cmd.Flags().String(openSearchCustomEndpointFlag, "", "OpenSearch API base URL, used in calls to this API")
@@ -209,6 +211,8 @@ func configureFlags(cmd *cobra.Command) {
 	err = viper.BindPFlag(config.LogMeCustomEndpointKey, cmd.Flags().Lookup(logMeCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.MariaDBCustomEndpointKey, cmd.Flags().Lookup(mariaDBCustomEndpointFlag))
+	cobra.CheckErr(err)
+	err = viper.BindPFlag(config.ModelExperimentsCustomEndpointKey, cmd.Flags().Lookup(modelExperimentsCustomEndpointFlag))
 	cobra.CheckErr(err)
 	err = viper.BindPFlag(config.MongoDBFlexCustomEndpointKey, cmd.Flags().Lookup(mongoDBFlexCustomEndpointFlag))
 	cobra.CheckErr(err)
