@@ -2,6 +2,7 @@
   "allowed_url_domain": "stackit.cloud",
   "async": false,
   "authorization_custom_endpoint": "",
+  "container_registry_custom_endpoint": "",
   "dns_custom_endpoint": "",
   "edge_custom_endpoint": "",
   "iaas_custom_endpoint": "",

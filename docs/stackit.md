@@ -31,6 +31,7 @@ stackit [flags]
 * [stackit auth](./stackit_auth.md)	 - Authenticates the STACKIT CLI
 * [stackit beta](./stackit_beta.md)	 - Contains beta STACKIT CLI commands
 * [stackit config](./stackit_config.md)	 - Provides functionality for CLI configuration options
+* [stackit container-registry](./stackit_container-registry.md)	 - Provides functionality for Container Registry
 * [stackit curl](./stackit_curl.md)	 - Executes an authenticated HTTP request to an endpoint
 * [stackit dns](./stackit_dns.md)	 - Provides functionality for DNS
 * [stackit git](./stackit_git.md)	 - Provides functionality for STACKIT Git
