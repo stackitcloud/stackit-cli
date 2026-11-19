@@ -23,22 +23,25 @@ const (
 	IdentityProviderCustomClientIdKey               = "identity_provider_custom_client_id"
 	AllowedUrlDomainKey                             = "allowed_url_domain"
 
-	AuthorizationCustomEndpointKey = "authorization_custom_endpoint"
-	AutomationCustomEndpointKey    = "automation_custom_endpoint"
-	AlbCustomEndpoint              = "alb_custom _endpoint"
-	AlbWafCustomEndpointKey        = "alb_waf_custom_endpoint"
-	DNSCustomEndpointKey           = "dns_custom_endpoint"
-	EdgeCustomEndpointKey          = "edge_custom_endpoint"
-	LoadBalancerCustomEndpointKey  = "load_balancer_custom_endpoint"
-	LogMeCustomEndpointKey         = "logme_custom_endpoint"
-	MariaDBCustomEndpointKey       = "mariadb_custom_endpoint"
-	MongoDBFlexCustomEndpointKey   = "mongodbflex_custom_endpoint"
-	ObjectStorageCustomEndpointKey = "object_storage_custom_endpoint"
-	ObservabilityCustomEndpointKey = "observability_custom_endpoint"
-	OpenSearchCustomEndpointKey    = "opensearch_custom_endpoint"
-	PostgresFlexCustomEndpointKey  = "postgresflex_custom_endpoint"
-	RabbitMQCustomEndpointKey      = "rabbitmq_custom_endpoint"
-	ScfCustomEndpointKey           = "scf_custom_endpoint"
+	AuthorizationCustomEndpointKey          = "authorization_custom_endpoint"
+	AutomationCustomEndpointKey             = "automation_custom_endpoint"
+	AlbCustomEndpoint                       = "alb_custom _endpoint"
+	AlbWafCustomEndpointKey                 = "alb_waf_custom_endpoint"
+	DNSCustomEndpointKey                    = "dns_custom_endpoint"
+	EdgeCustomEndpointKey                   = "edge_custom_endpoint"
+	LoadBalancerCustomEndpointKey           = "load_balancer_custom_endpoint"
+	LogMeCustomEndpointKey                  = "logme_custom_endpoint"
+	MariaDBCustomEndpointKey                = "mariadb_custom_endpoint"
+	MongoDBFlexCustomEndpointKey            = "mongodbflex_custom_endpoint"
+	ObjectStorageCustomEndpointKey          = "object_storage_custom_endpoint"
+	ObjectStorageAccessKeyIdKey             = "object_storage_access_key_id"
+	ObjectStorageSecretAccessKeyKey         = "object_storage_secret_access_key"
+	ObjectStorageDataPlaneCustomEndpointKey = "object_storage_data_plane_custom_endpoint"
+	ObservabilityCustomEndpointKey          = "observability_custom_endpoint"
+	OpenSearchCustomEndpointKey             = "opensearch_custom_endpoint"
+	PostgresFlexCustomEndpointKey           = "postgresflex_custom_endpoint"
+	RabbitMQCustomEndpointKey               = "rabbitmq_custom_endpoint"
+	ScfCustomEndpointKey                    = "scf_custom_endpoint"
 	// Deprecated: Will be removed after 2027-08-31.
 	RedisCustomEndpointKey             = "redis_custom_endpoint"
 	ResourceManagerEndpointKey         = "resource_manager_custom_endpoint"
@@ -115,6 +118,9 @@ var ConfigKeys = []string{
 	MariaDBCustomEndpointKey,
 	MongoDBFlexCustomEndpointKey,
 	ObjectStorageCustomEndpointKey,
+	ObjectStorageAccessKeyIdKey,
+	ObjectStorageSecretAccessKeyKey,
+	ObjectStorageDataPlaneCustomEndpointKey,
 	ObservabilityCustomEndpointKey,
 	OpenSearchCustomEndpointKey,
 	PostgresFlexCustomEndpointKey,
@@ -209,6 +215,9 @@ func setConfigDefaults() {
 	viper.SetDefault(AutomationCustomEndpointKey, "")
 	viper.SetDefault(MongoDBFlexCustomEndpointKey, "")
 	viper.SetDefault(ObjectStorageCustomEndpointKey, "")
+	viper.SetDefault(ObjectStorageAccessKeyIdKey, "")
+	viper.SetDefault(ObjectStorageSecretAccessKeyKey, "")
+	viper.SetDefault(ObjectStorageDataPlaneCustomEndpointKey, "")
 	viper.SetDefault(OpenSearchCustomEndpointKey, "")
 	viper.SetDefault(PostgresFlexCustomEndpointKey, "")
 	viper.SetDefault(ResourceManagerEndpointKey, "")
