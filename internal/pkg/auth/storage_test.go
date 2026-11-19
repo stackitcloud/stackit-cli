@@ -115,6 +115,8 @@ func TestSetGetAuthField(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
+			config.SetDefaultConfigFolderPath(t.TempDir())
+
 			activeProfile, err := config.GetProfile()
 			if err != nil {
 				t.Errorf("get profile: %v", err)
@@ -271,6 +273,7 @@ func TestSetGetAuthFieldWithProfile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
+			config.SetDefaultConfigFolderPath(t.TempDir())
 			// Apppend random string to profile name to avoid conflicts
 			tt.activeProfile = makeProfileNameUnique(tt.activeProfile)
 
@@ -432,6 +435,7 @@ func TestSetGetAuthFieldKeyring(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
+			config.SetDefaultConfigFolderPath(t.TempDir())
 			keyring.MockInit()
 
 			// Apppend random string to profile name to avoid conflicts
@@ -502,6 +506,8 @@ func TestDeleteAuthField(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
+			config.SetDefaultConfigFolderPath(t.TempDir())
+
 			if !tt.keyringFails {
 				keyring.MockInit()
 			} else {
@@ -591,6 +597,8 @@ func TestDeleteAuthFieldWithProfile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
+			config.SetDefaultConfigFolderPath(t.TempDir())
+
 			if !tt.keyringFails {
 				keyring.MockInit()
 			} else {
@@ -655,6 +663,7 @@ func TestDeleteAuthFieldKeyring(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
+			config.SetDefaultConfigFolderPath(t.TempDir())
 			keyring.MockInit()
 
 			// Append random string to auth field key and value to avoid conflicts
@@ -741,6 +750,8 @@ func TestDeleteProfileFromKeyring(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
+			config.SetDefaultConfigFolderPath(t.TempDir())
+
 			if !tt.keyringFails {
 				keyring.MockInit()
 			} else {
@@ -888,6 +899,7 @@ func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
+			config.SetDefaultConfigFolderPath(t.TempDir())
 			// Append random string to profile name to avoid conflicts
 			tt.activeProfile = makeProfileNameUnique(tt.activeProfile)
 
@@ -1040,6 +1052,7 @@ func TestGetProfileEmail(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
+			config.SetDefaultConfigFolderPath(t.TempDir())
 			keyring.MockInit()
 
 			// Append random string to profile name to avoid conflicts
@@ -1188,6 +1201,7 @@ func TestAuthorizeDeauthorizeUserProfileAuth(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			config.SetDefaultConfigFolderPath(t.TempDir())
 			keyring.MockInit()
 
 			if err := LoginUser(tt.args.email, tt.args.accessToken, tt.args.refreshToken, tt.args.sessionExpiresAtUnix); (err != nil) != tt.wantErr {
@@ -1231,6 +1245,7 @@ func TestAuthorizeDeauthorizeUserProfileAuth(t *testing.T) {
 }
 
 func TestStaleKeychainCleanupOnFallback(t *testing.T) {
+	config.SetDefaultConfigFolderPath(t.TempDir())
 	keyring.MockInit()
 
 	profile, err := config.GetProfile()
@@ -1280,6 +1295,7 @@ func TestStaleKeychainCleanupOnFallback(t *testing.T) {
 }
 
 func TestFileNotCreatedOnReadOrDelete(t *testing.T) {
+	config.SetDefaultConfigFolderPath(t.TempDir())
 	keyring.MockInit()
 
 	profile, err := config.GetProfile()
@@ -1288,7 +1304,6 @@ func TestFileNotCreatedOnReadOrDelete(t *testing.T) {
 	}
 
 	textFilePath := filepath.Join(config.GetProfileFolderPath(profile), textFileName)
-	_ = os.Remove(textFilePath)
 
 	// Ensure file doesn't exist
 	if _, err := os.Stat(textFilePath); !os.IsNotExist(err) {
@@ -1318,13 +1333,14 @@ func TestFileNotCreatedOnReadOrDelete(t *testing.T) {
 }
 
 func TestFileRemovedWhenEmpty(t *testing.T) {
+	config.SetDefaultConfigFolderPath(t.TempDir())
+
 	profile, err := config.GetProfile()
 	if err != nil {
 		t.Fatalf("get profile: %v", err)
 	}
 
 	textFilePath := filepath.Join(config.GetProfileFolderPath(profile), textFileName)
-	_ = os.Remove(textFilePath)
 
 	field1 := authFieldKey("test-cleanup-field-1")
 	field2 := authFieldKey("test-cleanup-field-2")
@@ -1363,6 +1379,7 @@ func TestFileRemovedWhenEmpty(t *testing.T) {
 }
 
 func TestLogoutCleansUpAllCredentialsAndFile(t *testing.T) {
+	config.SetDefaultConfigFolderPath(t.TempDir())
 	keyring.MockInit()
 
 	profile, err := config.GetProfile()
@@ -1434,6 +1451,7 @@ func TestLogoutCleansUpAllCredentialsAndFile(t *testing.T) {
 }
 
 func TestLoginUserCleansUpServiceAccountCredentials(t *testing.T) {
+	config.SetDefaultConfigFolderPath(t.TempDir())
 	keyring.MockInit()
 
 	// Set SA credentials
@@ -1477,6 +1495,7 @@ func TestLoginUserCleansUpServiceAccountCredentials(t *testing.T) {
 }
 
 func TestKeyringWriteCleansUpTextFile(t *testing.T) {
+	config.SetDefaultConfigFolderPath(t.TempDir())
 	keyring.MockInit()
 
 	profile, err := config.GetProfile()
