@@ -16,6 +16,7 @@ func NewTestParams() *TestParams {
 	in := &bytes.Buffer{}
 	out := &bytes.Buffer{}
 	err := &bytes.Buffer{}
+
 	return &TestParams{
 		&types.CmdParams{
 			Printer: print.NewPrinter(

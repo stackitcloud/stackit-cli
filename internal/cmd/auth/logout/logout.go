@@ -30,8 +30,10 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			params.Printer.Info("Successfully logged out of the STACKIT CLI.\n")
+
 			return nil
 		},
 	}
+
 	return cmd
 }

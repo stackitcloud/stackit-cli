@@ -53,7 +53,7 @@ type inputModel struct {
 	BackupSchedule *string
 	FlavorId       *string
 	StorageClass   *string
-	StorageSize    *int64
+	StorageSize    *int32
 	Version        *string
 	Type           *string
 	CPU            *int32 // Deprecated: Will be removed after 2027-03-07.
@@ -91,10 +91,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := mongodbflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update instance %q?", instanceLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -105,10 +107,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update MongoDB Flex instance: %w", err)
 			}
+
 			instanceId := *resp.Item.Id
 
 			// Wait for async operation, if async mode not enabled
@@ -126,6 +130,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -135,7 +140,7 @@ func configureFlags(cmd *cobra.Command) {
 	cmd.Flags().String(backupScheduleFlag, "", "Backup schedule")
 	cmd.Flags().String(flavorIdFlag, "", "ID of the flavor")
 	cmd.Flags().String(storageClassFlag, "", "Storage class")
-	cmd.Flags().Int64(storageSizeFlag, 0, "Storage size (in GB)")
+	cmd.Flags().Int32(storageSizeFlag, 0, "Storage size (in GB)")
 	cmd.Flags().String(versionFlag, "", "Version")
 	cmd.Flags().Int32(cpuFlag, 0, "Number of CPUs")        // Deprecated: Will be removed after 2027-03-07.
 	cmd.Flags().Int32(ramFlag, 0, "Amount of RAM (in GB)") // Deprecated: Will be removed after 2027-03-07.
@@ -166,7 +171,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	acl := flags.FlagToStringSlicePointer(p, cmd, aclFlag)
 	backupSchedule := flags.FlagToStringPointer(p, cmd, backupScheduleFlag)
 	storageClass := flags.FlagToStringPointer(p, cmd, storageClassFlag)
-	storageSize := flags.FlagToInt64Pointer(p, cmd, storageSizeFlag)
+	storageSize := flags.FlagToInt32Pointer(p, cmd, storageSizeFlag)
 	version := flags.FlagToStringPointer(p, cmd, versionFlag)
 	instanceType := typeFlag.Ptr()
 
@@ -200,12 +205,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient mongodbflex.DefaultAPI) (mongodbflex.ApiPartialUpdateInstanceRequest, error) {
-	var flavorId *string
-	var err error
+	var (
+		flavorId *string
+		err      error
+	)
 
 	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.InstanceId, model.Region)
 
@@ -241,6 +249,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient mongodbflex.
 			if model.RAM == nil {
 				ram = currentFlavor.Memory
 			}
+
 			if model.CPU == nil {
 				cpu = currentFlavor.Cpu
 			}
@@ -252,6 +261,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient mongodbflex.
 			if !errors.As(err, &dsaInvalidPlanError) {
 				return req, fmt.Errorf("load flavor ID: %w", err)
 			}
+
 			return req, err
 		}
 	} else if model.FlavorId != nil {
@@ -263,16 +273,18 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient mongodbflex.
 		payloadAcl = &mongodbflex.ACL{Items: *model.ACL}
 	}
 
-	var payloadStorage *mongodbflex.Storage
+	var payloadStorage *mongodbflex.StorageUpdate
 	if model.StorageClass != nil || model.StorageSize != nil {
-		payloadStorage = &mongodbflex.Storage{
+		payloadStorage = &mongodbflex.StorageUpdate{
 			Class: model.StorageClass,
 			Size:  model.StorageSize,
 		}
 	}
 
-	var replicas *int32
-	var payloadOptions *map[string]string
+	var (
+		replicas       *int32
+		payloadOptions *map[string]string
+	)
 	if model.Type != nil {
 		replicasInt, err := mongodbflexUtils.GetInstanceReplicas(*model.Type)
 		if err != nil {
@@ -295,6 +307,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient mongodbflex.
 		Version:        model.Version,
 		Options:        payloadOptions,
 	})
+
 	return req, nil
 }
 
@@ -308,7 +321,9 @@ func outputResult(p *print.Printer, outputFormat string, async bool, instanceLab
 		if async {
 			operationState = "Triggered update of"
 		}
+
 		p.Info("%s instance %q\n", operationState, instanceLabel)
+
 		return nil
 	})
 }

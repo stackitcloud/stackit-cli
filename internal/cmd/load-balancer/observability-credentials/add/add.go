@@ -51,6 +51,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -65,10 +66,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to add observability credentials for Load Balancer on project %q?", projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -76,6 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("add Load Balancer observability credentials: %w", err)
@@ -85,12 +89,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd, params)
+
 	return cmd
 }
 
 func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.Flags().String(displayNameFlag, "", "Credentials display name")
 	cmd.Flags().String(usernameFlag, "", "Username")
+
 	password := flags.SecretFlag(passwordFlag, params)
 	cmd.Flags().Var(password, passwordFlag, password.Usage())
 
@@ -109,13 +115,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		DisplayName:     flags.FlagToStringPointer(p, cmd, displayNameFlag),
 		Username:        flags.FlagToStringPointer(p, cmd, usernameFlag),
 	}
+
 	pw, err := flags.ResolveSecretFlagWithAutoPrompt(p, cmd, passwordFlag) //nolint:staticcheck // Deprecated: preserve automatic prompting until 2027-04 (STACKITCLI-549).
 	if err != nil {
 		return nil, err
 	}
+
 	model.Password = pw
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -128,6 +137,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *loadbalance
 		Username:    model.Username,
 		Password:    model.Password,
 	})
+
 	return req
 }
 

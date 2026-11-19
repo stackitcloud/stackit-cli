@@ -49,6 +49,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(p.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -63,18 +64,21 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			organizationLabel, err := scfUtils.GetOrganizationName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.OrganizationId)
 			if err != nil {
 				p.Printer.Debug(print.ErrorLevel, "get organization name: %v", err)
+
 				organizationLabel = model.OrganizationId
 			} else if organizationLabel == "" {
 				organizationLabel = model.OrganizationId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update STACKIT Cloud Foundry organization %q?", organizationLabel)
+
 			err = p.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
 			}
 			// Call API
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update STACKIT Cloud Foundry organization: %w", err)
@@ -84,6 +88,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -112,6 +117,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return model, nil
 }
 
@@ -122,6 +128,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient scf.DefaultA
 	}
 
 	req := apiClient.UpdateOrganization(ctx, model.ProjectId, model.Region, model.OrganizationId)
+
 	return req.UpdateOrganizationPayload(payload)
 }
 

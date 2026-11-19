@@ -52,6 +52,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		Args: args.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -66,15 +67,18 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := mongodbflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, *model.InstanceId, model.Region)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = *model.InstanceId
 			}
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get backups for MongoDB Flex instance %q: %w", instanceLabel, err)
 			}
+
 			backups := resp.Items
 
 			restoreJobs, err := apiClient.DefaultAPI.ListRestoreJobs(ctx, model.ProjectId, *model.InstanceId, model.Region).Execute()
@@ -92,6 +96,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -124,6 +129,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -145,6 +151,7 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, backups 
 
 		table := tables.NewTable()
 		table.SetHeader("ID", "CREATED AT", "EXPIRES AT", "BACKUP SIZE", "RESTORE STATUS")
+
 		for i := range backups {
 			backup := backups[i]
 			restoreStatus := mongodbflexUtils.GetRestoreStatus(*backup.Id, restoreJobs)
@@ -156,6 +163,7 @@ func outputResult(p *print.Printer, outputFormat, instanceLabel string, backups 
 				backupSize,
 				restoreStatus)
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

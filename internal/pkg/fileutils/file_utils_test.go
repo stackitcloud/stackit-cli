@@ -31,6 +31,7 @@ func TestWriteToFile(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error: %s", err.Error())
 			}
+
 			if string(output) != tt.content {
 				t.Fatalf("unexpected output: got %q, want %q", output, tt.content)
 			}
@@ -75,9 +76,11 @@ func TestReadFileIfExists(t *testing.T) {
 			if err != nil {
 				t.Fatalf("read file: %v", err)
 			}
+
 			if exists != tt.exists {
 				t.Fatalf("expected exists to be %t but got %t", tt.exists, exists)
 			}
+
 			if content != tt.content {
 				t.Fatalf("expected content to be %q but got %q", tt.content, content)
 			}
@@ -151,6 +154,7 @@ func TestCopyFile(t *testing.T) {
 				}
 				return
 			}
+
 			if !tt.isValid {
 				t.Fatalf("expected error but got none")
 			}

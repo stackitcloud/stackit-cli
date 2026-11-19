@@ -43,6 +43,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, inputArgs []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, inputArgs)
 			if err != nil {
 				return fmt.Errorf("unable to parse input: %w", err)
@@ -57,12 +58,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			gatewayLabel, err := vpnUtils.GetGatewayName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.GatewayId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get gateway name: %v", err)
+
 				gatewayLabel = model.GatewayId
 			} else if gatewayLabel == "" {
 				gatewayLabel = model.GatewayId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete the vpn gateway %q? (This cannot be undone)", gatewayLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -70,6 +73,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("delete vpn gateway: %w", err)
@@ -92,9 +96,11 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			params.Printer.Outputf("%s gateway %q\n", operation, gatewayLabel)
+
 			return nil
 		},
 	}
+
 	return cmd
 }
 
@@ -112,6 +118,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 

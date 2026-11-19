@@ -46,6 +46,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -60,12 +61,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			routingTableLabel, err := iaasUtils.GetRoutingTableOfAreaName(ctx, apiClient.DefaultAPI, model.OrganizationId, model.NetworkAreaId, model.Region, model.RoutingTableId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get routing-table name: %v", err)
+
 				routingTableLabel = model.RoutingTableId
 			} else if routingTableLabel == "" {
 				routingTableLabel = model.RoutingTableId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete the route %q in routing-table %q for network area id %q?", model.RouteID, routingTableLabel, model.NetworkAreaId)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -80,17 +83,20 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				model.RoutingTableId,
 				model.RouteID,
 			)
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("delete route from routing-table: %w", err)
 			}
 
 			params.Printer.Outputf("Route %q from routing-table %q deleted.\n", model.RouteID, model.RoutingTableId)
+
 			return nil
 		},
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -117,5 +123,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }

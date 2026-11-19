@@ -38,6 +38,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -85,6 +86,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -99,39 +101,49 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.Image) error
 			table.AddRow("ID", *id)
 			table.AddSeparator()
 		}
+
 		table.AddRow("NAME", resp.Name)
 		table.AddSeparator()
+
 		if status := resp.Status; status != nil {
 			table.AddRow("STATUS", *status)
 			table.AddSeparator()
 		}
+
 		table.AddRow("FORMAT", resp.DiskFormat)
 		table.AddSeparator()
+
 		if diskSize := resp.MinDiskSize; diskSize != nil {
 			table.AddRow("DISK SIZE", *diskSize)
 			table.AddSeparator()
 		}
+
 		if ramSize := resp.MinRam; ramSize != nil {
 			table.AddRow("RAM SIZE", *ramSize)
 			table.AddSeparator()
 		}
+
 		if config := resp.Config; config != nil {
 			if architecture := config.Architecture; architecture != nil {
 				table.AddRow("ARCHITECTURE", *architecture)
 				table.AddSeparator()
 			}
+
 			if os := config.OperatingSystem; os != nil {
 				table.AddRow("OPERATING SYSTEM", *os)
 				table.AddSeparator()
 			}
+
 			if distro := config.OperatingSystemDistro; distro.IsSet() {
 				table.AddRow("OPERATING SYSTEM DISTRIBUTION", *distro.Get())
 				table.AddSeparator()
 			}
+
 			if version := config.OperatingSystemVersion; version.IsSet() {
 				table.AddRow("OPERATING SYSTEM VERSION", *version.Get())
 				table.AddSeparator()
 			}
+
 			if uefi := config.Uefi; uefi != nil {
 				table.AddRow("UEFI BOOT", *uefi)
 				table.AddSeparator()
@@ -143,6 +155,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *iaas.Image) error
 			for key, value := range resp.Labels {
 				labels = append(labels, fmt.Sprintf("%s: %s", key, value))
 			}
+
 			table.AddRow("LABELS", strings.Join(labels, "\n"))
 			table.AddSeparator()
 		}

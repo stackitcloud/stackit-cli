@@ -59,6 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -73,10 +74,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := observabilityUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.InstanceId, model.ProjectId)
 			if err != nil || instanceLabel == "" {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update instance %q?", instanceLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -89,6 +92,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if !errors.As(err, &observabilityInvalidPlanError) {
 					return fmt.Errorf("build Observability instance update request: %w", err)
 				}
+
 				return err
 			}
 
@@ -96,6 +100,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("update Observability instance: %w", err)
 			}
+
 			instanceId := model.InstanceId
 
 			// Wait for async operation, if async mode not enabled
@@ -113,11 +118,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered update of"
 			}
+
 			params.Printer.Info("%s instance %q\n", operationState, instanceLabel)
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -158,6 +166,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -188,8 +197,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient observabilit
 			if !errors.As(err, &observabilityInvalidPlanError) {
 				return req, fmt.Errorf("load plan ID: %w", err)
 			}
+
 			return req, err
 		}
+
 		payload.PlanId = &planId
 	} else if model.PlanId != nil && model.PlanName == "" {
 		err := observabilityUtils.ValidatePlanId(*model.PlanId, plans)
@@ -198,8 +209,10 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient observabilit
 			if !errors.As(err, &observabilityInvalidPlanError) {
 				return req, fmt.Errorf("validate plan ID: %w", err)
 			}
+
 			return req, err
 		}
+
 		payload.PlanId = model.PlanId
 	}
 
@@ -208,5 +221,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient observabilit
 	}
 
 	req = req.UpdateInstancePayload(payload)
+
 	return req, nil
 }

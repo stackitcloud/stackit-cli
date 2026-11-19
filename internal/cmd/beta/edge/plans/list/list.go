@@ -68,10 +68,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("get Edge Cloud plans: %w", err)
 			}
+
 			plans := resp.GetValidPlans()
 
 			// Truncate output
@@ -83,6 +85,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -112,6 +115,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 
 	// Log the parsed model if --verbosity is set to debug
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -131,6 +135,7 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, plans []e
 		table := tables.NewTable()
 		// List: only output the most important fields. Be sure to filter for any non-required fields.
 		table.SetHeader("ID", "NAME", "DESCRIPTION", "MAX EDGE HOSTS")
+
 		for i := range plans {
 			plan := plans[i]
 			table.AddRow(
@@ -139,10 +144,12 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, plans []e
 				utils.PtrString(plan.Description),
 				utils.PtrString(plan.MaxEdgeHosts))
 		}
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

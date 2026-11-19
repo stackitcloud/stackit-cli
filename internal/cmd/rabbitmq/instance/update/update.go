@@ -79,6 +79,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -93,10 +94,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := rabbitmqUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update instance %q?", instanceLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -109,12 +112,15 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if !errors.As(err, &dsaInvalidPlanError) {
 					return fmt.Errorf("build RabbitMQ instance update request: %w", err)
 				}
+
 				return err
 			}
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("update RabbitMQ instance: %w", err)
 			}
+
 			instanceId := model.InstanceId
 
 			// Wait for async operation, if async mode not enabled
@@ -132,11 +138,14 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if model.Async {
 				operationState = "Triggered update of"
 			}
+
 			params.Printer.Info("%s instance %q\n", operationState, instanceLabel)
+
 			return nil
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -210,6 +219,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -230,12 +240,14 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient rabbitMQClie
 		if err != nil {
 			return req, fmt.Errorf("get RabbitMQ offerings: %w", err)
 		}
+
 		planId, err = rabbitmqUtils.LoadPlanId(model.PlanName, model.Version, offerings) //nolint:staticcheck // deprecated but still supported until 2027-02-28
 		if err != nil {
 			var dsaInvalidPlanError *cliErr.DSAInvalidPlanError
 			if !errors.As(err, &dsaInvalidPlanError) {
 				return req, fmt.Errorf("load plan ID: %w", err)
 			}
+
 			return req, err
 		}
 	} else {
@@ -261,5 +273,6 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient rabbitMQClie
 		},
 		PlanId: planId,
 	})
+
 	return req, nil
 }

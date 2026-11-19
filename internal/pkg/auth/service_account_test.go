@@ -32,13 +32,16 @@ func (f *keyFlowMocked) GetAccessToken() (string, error) {
 	if f.getAccessTokenFail {
 		return "", fmt.Errorf("error")
 	}
+
 	if f.tokenInvalid {
 		return "", nil
 	}
+
 	raw, err := f.accessToken.SignedString(accessTokenSigningKey)
 	if err != nil {
 		return "", fmt.Errorf("sign string from token: %w", err)
 	}
+
 	return raw, nil
 }
 
@@ -159,6 +162,7 @@ func TestAuthenticateServiceAccount(t *testing.T) {
 				if err != nil {
 					t.Fatalf("signing string from token: %s", err)
 				}
+
 				flow = &tokenFlowMocked{
 					config: clients.TokenFlowConfig{
 						ServiceAccountToken: raw,
@@ -179,6 +183,7 @@ func TestAuthenticateServiceAccount(t *testing.T) {
 				if err != nil {
 					t.Fatalf("Expected no error but error was returned: %v", err)
 				}
+
 				if tt.expectedEmail != email {
 					t.Fatalf("The returned email is wrong. Expected %s, got %s", tt.expectedEmail, email)
 				}
@@ -194,6 +199,7 @@ func TestAuthenticateServiceAccount_WIF(t *testing.T) {
 		Email:            testEmail,
 		RegisteredClaims: jwt.RegisteredClaims{},
 	})
+
 	raw, err := tok.SignedString(accessTokenSigningKey)
 	if err != nil {
 		t.Fatalf("sign test token: %v", err)
@@ -238,9 +244,11 @@ func TestAuthenticateServiceAccount_WIF(t *testing.T) {
 				}
 				return
 			}
+
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
 			}
+
 			if email != testEmail {
 				t.Fatalf("email = %q, want %q", email, testEmail)
 			}
@@ -252,6 +260,7 @@ func TestAuthenticateServiceAccount_WIF(t *testing.T) {
 			if storedKey != "" {
 				t.Errorf("SERVICE_ACCOUNT_KEY was written to storage in WIF mode, want empty")
 			}
+
 			storedPrivKey, _ := GetAuthField(PRIVATE_KEY)
 			if storedPrivKey != "" {
 				t.Errorf("PRIVATE_KEY was written to storage in WIF mode, want empty")

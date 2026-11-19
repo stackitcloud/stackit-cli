@@ -61,6 +61,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, mod := range mods {
 		mod(argValues)
 	}
+
 	return argValues
 }
 
@@ -72,6 +73,7 @@ func fixtureRequiredFlagValues(mods ...func(flagValues map[string]string)) map[s
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -91,6 +93,7 @@ func fixtureStandardFlagValues(mods ...func(flagValues map[string]string)) map[s
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -106,6 +109,7 @@ func fixtureRequiredInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -122,22 +126,25 @@ func fixtureStandardInputModel(mods ...func(model *inputModel)) *inputModel {
 		ACL:            new([]string{"0.0.0.0/0"}),
 		BackupSchedule: new("0 0 * * *"),
 		StorageClass:   new("class"),
-		StorageSize:    new(int64(10)),
+		StorageSize:    new(int32(10)),
 		Version:        new("5.0"),
 		Type:           new("Single"),
 	}
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *mongodbflex.ApiPartialUpdateInstanceRequest)) mongodbflex.ApiPartialUpdateInstanceRequest {
 	request := testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testInstanceId, testRegion)
+
 	request = request.PartialUpdateInstancePayload(mongodbflex.PartialUpdateInstancePayload{})
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -278,8 +285,10 @@ func TestParseInput(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			typeFlag.Reset()
+
 			params := testparams.NewTestParams()
 			cmd := NewCmd(params.CmdParams)
+
 			err := globalflags.Configure(cmd.Flags())
 			if err != nil {
 				t.Fatalf("configure global flags: %v", err)
@@ -291,6 +300,7 @@ func TestParseInput(t *testing.T) {
 					if !tt.isValid {
 						return
 					}
+
 					t.Fatalf("setting flag --%s=%s: %v", flag, value, err)
 				}
 			}
@@ -301,6 +311,7 @@ func TestParseInput(t *testing.T) {
 					if !tt.isValid {
 						return
 					}
+
 					t.Fatalf("setting flag --%s=%s: %v", aclFlag, value, err)
 				}
 			}
@@ -310,6 +321,7 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error validating args: %v", err)
 			}
 
@@ -318,6 +330,7 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error validating flags: %v", err)
 			}
 
@@ -326,12 +339,14 @@ func TestParseInput(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error parsing flags: %v", err)
 			}
 
 			if !tt.isValid {
 				t.Fatalf("did not fail on invalid input")
 			}
+
 			diff := cmp.Diff(model, tt.expectedModel)
 			if diff != "" {
 				t.Fatalf("Data does not match: %s", diff)
@@ -416,7 +431,7 @@ func TestBuildRequest(t *testing.T) {
 			},
 			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testInstanceId, testRegion).
 				PartialUpdateInstancePayload(mongodbflex.PartialUpdateInstancePayload{
-					Storage: &mongodbflex.Storage{
+					Storage: &mongodbflex.StorageUpdate{
 						Class: new("class"),
 					},
 				}),
@@ -425,7 +440,7 @@ func TestBuildRequest(t *testing.T) {
 			description: "update storage class and size",
 			model: fixtureRequiredInputModel(func(model *inputModel) {
 				model.StorageClass = new("class")
-				model.StorageSize = new(int64(10))
+				model.StorageSize = new(int32(10))
 			}),
 			isValid: true,
 			mockClientSettings: mockClientSettings{
@@ -439,9 +454,9 @@ func TestBuildRequest(t *testing.T) {
 			},
 			expectedRequest: testClient.DefaultAPI.PartialUpdateInstance(testCtx, testProjectId, testInstanceId, testRegion).
 				PartialUpdateInstancePayload(mongodbflex.PartialUpdateInstancePayload{
-					Storage: &mongodbflex.Storage{
+					Storage: &mongodbflex.StorageUpdate{
 						Class: new("class"),
-						Size:  new(int64(10)),
+						Size:  new(int32(10)),
 					},
 				}),
 		},
@@ -517,6 +532,7 @@ func TestBuildRequest(t *testing.T) {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error building request: %v", err)
 			}
 
@@ -539,6 +555,7 @@ func TestOutputResult(t *testing.T) {
 		instanceLabel string
 		resp          *mongodbflex.UpdateInstanceResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -557,6 +574,7 @@ func TestOutputResult(t *testing.T) {
 			wantErr: false,
 		},
 	}
+
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

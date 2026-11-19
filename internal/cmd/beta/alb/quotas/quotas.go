@@ -37,6 +37,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -83,6 +84,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -98,6 +100,7 @@ func outputResult(p *print.Printer, outputFormat string, response alb.GetQuotaRe
 		table.AddRow("REGION", utils.PtrString(response.Region))
 		table.AddSeparator()
 		table.AddRow("MAX LOADBALANCERS", utils.PtrString(response.MaxLoadBalancers))
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

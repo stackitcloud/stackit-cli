@@ -36,6 +36,7 @@ func TestNoArgs(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Fatalf("should not have failed: %v", err)
 			}
+
 			if !tt.isValid && err == nil {
 				t.Fatalf("should have failed")
 			}
@@ -101,6 +102,7 @@ func TestSingleArg(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Fatalf("should not have failed: %v", err)
 			}
+
 			if !tt.isValid && err == nil {
 				t.Fatalf("should have failed")
 			}
@@ -172,6 +174,7 @@ func TestSingleOptionalArg(t *testing.T) {
 			if tt.isValid && err != nil {
 				t.Fatalf("should not have failed: %v", err)
 			}
+
 			if !tt.isValid && err == nil {
 				t.Fatalf("should have failed")
 			}

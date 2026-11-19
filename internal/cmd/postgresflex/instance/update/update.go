@@ -96,10 +96,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			instanceLabel, err := postgresflexUtils.GetInstanceName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.InstanceId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get instance name: %v", err)
+
 				instanceLabel = model.InstanceId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update instance %q? (This may cause downtime)", instanceLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -110,6 +112,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			err = req.Execute()
 			if err != nil {
 				return fmt.Errorf("update PostgreSQL Flex instance: %w", err)
@@ -138,6 +141,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -219,12 +223,15 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
 func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex.DefaultAPI) (postgresflex.ApiPartialUpdateInstanceRequest, error) {
-	var flavorId *string
-	var err error
+	var (
+		flavorId *string
+		err      error
+	)
 
 	req := apiClient.PartialUpdateInstance(ctx, model.ProjectId, model.Region, model.InstanceId)
 
@@ -259,6 +266,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex
 			if model.RAM == nil {
 				ram = utils.Ptr(currentFlavor.Memory)
 			}
+
 			if model.CPU == nil {
 				cpu = utils.Ptr(currentFlavor.Cpu)
 			}
@@ -270,6 +278,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex
 			if !errors.As(err, &dsaInvalidPlanError) {
 				return req, fmt.Errorf("load flavor ID: %w", err)
 			}
+
 			return req, err
 		}
 	} else if model.FlavorId != nil {
@@ -315,6 +324,7 @@ func outputResult(p *print.Printer, outputFormat string, async bool, instanceLab
 		}
 
 		p.Outputf("%s instance %q\n", operationState, instanceLabel)
+
 		return nil
 	})
 }

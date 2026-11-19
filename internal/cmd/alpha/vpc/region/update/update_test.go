@@ -174,6 +174,7 @@ func TestBuildRequest(t *testing.T) {
 			client := &iaas.DefaultAPIServiceMock{}
 
 			want := client.UpdateVPCRegion(ctx, testProjectId, testVpcId, "eu02").UpdateVPCRegionPayload(tt.wantPayload)
+
 			got := buildRequest(ctx, tt.inputModel, client)
 			if diff := cmp.Diff(want, got, cmp.AllowUnexported(want), cmpopts.EquateComparable(ctx, iaas.DefaultAPIService{})); diff != "" {
 				t.Fatalf("request mismatch (-want +got): %s", diff)

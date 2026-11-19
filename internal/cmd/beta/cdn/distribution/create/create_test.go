@@ -41,9 +41,11 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 		flagRegion.Name():         string(testRegions),
 	}
 	flagsHTTPBackend()(flagValues)
+
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -81,6 +83,7 @@ func flagRegions(regions ...cdn.Region) func(flagValues map[string]string) {
 			delete(flagValues, flagRegion.Name())
 			return
 		}
+
 		stringRegions := sdkUtils.EnumSliceToStringSlice(regions)
 		flagValues[flagRegion.Name()] = strings.Join(stringRegions, ",")
 	}
@@ -95,9 +98,11 @@ func fixtureModel(mods ...func(model *inputModel)) *inputModel {
 		Regions: []cdn.Region{testRegions},
 	}
 	modelHTTPBackend()(model)
+
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -151,6 +156,7 @@ func fixturePayload(mods ...func(payload *cdn.CreateDistributionPayload)) cdn.Cr
 	for _, mod := range mods {
 		mod(&payload)
 	}
+
 	return payload
 }
 
@@ -203,6 +209,7 @@ func TestParseInput(t *testing.T) {
 		isValid     bool
 		expected    *inputModel
 	}
+
 	tests := []testCase{
 		{
 			description: "base",
@@ -508,6 +515,7 @@ func TestParseInput(t *testing.T) {
 					testPwFile: {Data: []byte(testPw)},
 				}
 				params.Printer.StdIn = strings.NewReader(tt.stdin)
+
 				return NewCmd(params)
 			}, parseInput, tt.expected, tt.argValues, tt.flagValues, tt.isValid)
 		})
@@ -638,6 +646,7 @@ func TestOutputResult(t *testing.T) {
 			if err := outputResult(params.Printer, tt.outputFormat, testProjectId, tt.response); (err != nil) != tt.wantErr {
 				t.Fatalf("outputResult: %v", err)
 			}
+
 			if params.Out.String() != tt.expected {
 				t.Errorf("want:\n%s\ngot:\n%s", tt.expected, params.Out.String())
 			}

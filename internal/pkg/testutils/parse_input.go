@@ -67,11 +67,13 @@ func RunParseInputCase[T any](t *testing.T, tc ParseInputTestCase[T], opts ...Pa
 	if tc.CmdFactory == nil {
 		t.Fatalf("parse input case %q missing CmdFactory", tc.Name)
 	}
+
 	if tc.ParseInputFunc == nil {
 		t.Fatalf("parse input case %q missing ParseInputFunc", tc.Name)
 	}
 
 	params := testparams.NewTestParams()
+
 	cmd := tc.CmdFactory(params.CmdParams)
 	if cmd == nil {
 		t.Fatalf("parse input case %q produced nil command", tc.Name)
@@ -80,10 +82,12 @@ func RunParseInputCase[T any](t *testing.T, tc ParseInputTestCase[T], opts ...Pa
 	if err := globalflags.Configure(cmd.Flags()); err != nil {
 		t.Fatalf("configure global flags: %v", err)
 	}
+
 	cmd.Flags().VisitAll(func(flag *pflag.Flag) {
 		if flag.Value == nil {
 			return
 		}
+
 		if r, ok := flag.Value.(Resettable); ok {
 			r.Reset()
 		}

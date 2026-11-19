@@ -43,6 +43,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -85,6 +86,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -114,6 +116,7 @@ func outputResult(p *print.Printer, outputFormat string, resp *git.Instance) err
 		table.AddSeparator()
 		table.AddRow("CREATED", resp.Created)
 		table.AddSeparator()
+
 		if len(resp.Acl) > 0 {
 			table.AddRow("ACL", strings.Join(resp.Acl, ","))
 			table.AddSeparator()

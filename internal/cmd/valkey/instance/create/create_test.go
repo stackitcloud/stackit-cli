@@ -65,6 +65,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -90,11 +91,13 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *valkey.ApiCreateInstanceRequest)) valkey.ApiCreateInstanceRequest {
 	request := testClient.DefaultAPI.CreateInstance(testCtx, testProjectId, testRegion)
+
 	request = request.CreateInstancePayload(valkey.CreateInstancePayload{
 		InstanceName: "example-name",
 		Parameters: &valkey.InstanceParameters{
@@ -113,6 +116,7 @@ func fixtureRequest(mods ...func(request *valkey.ApiCreateInstanceRequest)) valk
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -432,11 +436,13 @@ func TestBuildRequest(t *testing.T) {
 				returnError:       tt.getOfferingsFails,
 				listOfferingsResp: tt.getOfferingsResp,
 			}
+
 			request, err := buildRequest(testCtx, tt.model, newAPIMock(client))
 			if err != nil {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error building request: %v", err)
 			}
 
@@ -461,6 +467,7 @@ func TestOutputResult(t *testing.T) {
 		instanceId   string
 		resp         *valkey.CreateInstanceResponse
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -486,6 +493,7 @@ func TestOutputResult(t *testing.T) {
 			wantErr: true,
 		},
 	}
+
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

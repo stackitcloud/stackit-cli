@@ -12,6 +12,7 @@ func CanDisableBackupService(ctx context.Context, client serverbackup.DefaultAPI
 	if err != nil {
 		return false, fmt.Errorf("list backup schedules: %w", err)
 	}
+
 	if len(schedules.Items) > 0 {
 		return false, nil
 	}
@@ -20,6 +21,7 @@ func CanDisableBackupService(ctx context.Context, client serverbackup.DefaultAPI
 	if err != nil {
 		return false, fmt.Errorf("list backups: %w", err)
 	}
+
 	if len(backups.Items) > 0 {
 		return false, nil
 	}

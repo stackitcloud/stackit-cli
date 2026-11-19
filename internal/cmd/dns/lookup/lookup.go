@@ -59,6 +59,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -72,6 +73,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("look up DNS domain: %w", err)
@@ -81,6 +83,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -107,6 +110,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -118,15 +122,18 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *dns.APIClie
 	if model.AllResolvers {
 		payload.Type = utils.Ptr(dns.LOOKUPDOMAINPAYLOADTYPE_ALL)
 	}
+
 	if model.IncludeRawResponse {
 		payload.IncludeRawResponse = utils.Ptr(true)
 	}
+
 	if model.Region != "" {
 		payload.Region = utils.Ptr(model.Region)
 	}
 
 	req := apiClient.DefaultAPI.LookupDomain(ctx)
 	req = req.LookupDomainPayload(payload)
+
 	return req
 }
 
@@ -135,17 +142,21 @@ func outputResult(p *print.Printer, model *inputModel, resp *dns.LookupDomainRes
 		if resp == nil {
 			return fmt.Errorf("look up DNS domain response is empty")
 		}
+
 		table := tables.NewTable()
 		table.SetHeader("RESOLVER IP", "NAME", "TYPE", "TTL", "DATA")
+
 		rows := 0
 		for _, result := range resp.State {
 			// When querying all resolvers, also list the ones without records,
 			// so it's visible which resolvers answered
 			if model.AllResolvers && len(result.Records) == 0 {
 				table.AddRow(utils.PtrString(result.ResolverIP), "", "", "", "No records found")
+
 				rows++
 				continue
 			}
+
 			for _, record := range result.Records {
 				table.AddRow(
 					utils.PtrString(result.ResolverIP),
@@ -154,19 +165,23 @@ func outputResult(p *print.Printer, model *inputModel, resp *dns.LookupDomainRes
 					utils.PtrString(record.Ttl),
 					utils.PtrString(record.Data),
 				)
+
 				rows++
 			}
 		}
+
 		if rows == 0 {
 			p.Outputf("No records found for domain %q\n", model.Domain)
 			return nil
 		}
 
 		table.EnableAutoMergeOnColumns(1)
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)
 		}
+
 		return nil
 	})
 }

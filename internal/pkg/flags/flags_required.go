@@ -10,5 +10,6 @@ func MarkFlagsRequired(cmd *cobra.Command, flags ...string) error {
 			return err
 		}
 	}
+
 	return nil
 }

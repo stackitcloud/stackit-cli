@@ -41,6 +41,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -55,16 +56,19 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(m)
 	}
+
 	return m
 }
 
 func fixtureRequest(mods ...func(request cdn.ApiListDistributionsRequest) cdn.ApiListDistributionsRequest) cdn.ApiListDistributionsRequest {
 	request := testClient.DefaultAPI.ListDistributions(testCtx, testProjectId)
 	request = request.PageSize(100)
+
 	request = request.SortBy(cdn.LISTDISTRIBUTIONSSORTBYPARAMETER_CREATED_AT)
 	for _, mod := range mods {
 		request = mod(request)
 	}
+
 	return request
 }
 
@@ -210,6 +214,7 @@ func TestBuildRequest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			req := buildRequest(testCtx, tt.inputModel, testClient, tt.nextPageID, maxPageSize)
+
 			diff := cmp.Diff(req, tt.expected,
 				cmp.AllowUnexported(tt.expected, cdn.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
@@ -233,6 +238,7 @@ func fixtureTestResponse(mods ...func(resp *testResponse)) testResponse {
 	for _, mod := range mods {
 		mod(&resp)
 	}
+
 	return resp
 }
 
@@ -270,6 +276,7 @@ func fixtureDistributions(count int) []cdn.Distribution {
 			AdditionalProperties: map[string]interface{}{},
 		}
 	}
+
 	return distributions
 }
 
@@ -372,19 +379,24 @@ func TestFetchDistributions(t *testing.T) {
 			handler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				resp := tt.responses[callCount]
 				callCount++
+
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(resp.statusCode)
+
 				bs, err := json.Marshal(resp.body)
 				if err != nil {
 					t.Fatalf("marshal: %v", err)
 				}
+
 				_, err = w.Write(bs)
 				if err != nil {
 					t.Fatalf("write: %v", err)
 				}
 			})
+
 			server := httptest.NewServer(handler)
 			defer server.Close()
+
 			client, err := cdn.NewAPIClient(
 				sdkConfig.WithEndpoint(server.URL),
 				sdkConfig.WithoutAuthentication(),
@@ -392,13 +404,16 @@ func TestFetchDistributions(t *testing.T) {
 			if err != nil {
 				t.Fatalf("failed to create test client: %v", err)
 			}
+
 			var mods []func(m *inputModel)
 			if tt.limit > 0 {
 				mods = append(mods, func(m *inputModel) {
 					m.Limit = utils.Ptr(tt.limit)
 				})
 			}
+
 			model := fixtureInputModel(mods...)
+
 			got, err := fetchDistributions(testCtx, model, client)
 			if err != nil {
 				if !tt.fails {
@@ -406,9 +421,11 @@ func TestFetchDistributions(t *testing.T) {
 				}
 				return
 			}
+
 			if callCount != len(tt.responses) {
 				t.Errorf("fetchDistributions() expected %d calls, got %d", len(tt.responses), callCount)
 			}
+
 			diff := cmp.Diff(got, tt.expected,
 				cmpopts.EquateComparable(
 					cdn.NullableString{},
@@ -478,6 +495,7 @@ func TestOutputResult(t *testing.T) {
 			if err := outputResult(params.Printer, tt.outputFormat, tt.distributions); err != nil {
 				t.Fatalf("outputResult: %v", err)
 			}
+
 			if params.Out.String() != tt.expected {
 				t.Errorf("want:\n%s\ngot:\n%s", tt.expected, params.Out.String())
 			}

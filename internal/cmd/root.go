@@ -90,6 +90,7 @@ func NewRootCmd(params *types.CmdParams) *cobra.Command {
 				} else {
 					p.Debug(print.DebugLevel, "the configured profile %q does not exist: folder %q is missing", profileSet, config.GetProfileFolderPath(profileSet))
 				}
+
 				p.Debug(print.DebugLevel, "the %q profile will be used", activeProfile)
 
 				p.Warn("configured profile %q does not exist, the %q profile configuration will be used\n", profileSet, activeProfile)
@@ -113,7 +114,9 @@ func NewRootCmd(params *types.CmdParams) *cobra.Command {
 					p.Outputf("Version: %s\n", params.CliVersion)
 					return nil
 				}
+
 				p.Outputf("Version: %s (%s)\n", params.CliVersion, parsedDate.Format(time.DateOnly))
+
 				return nil
 			}
 
@@ -148,6 +151,7 @@ func NewRootCmd(params *types.CmdParams) *cobra.Command {
 
 func beautifyUsageTemplate(cmd *cobra.Command) {
 	cobra.AddTemplateFunc("WhiteBold", print.WhiteBold)
+
 	usageTemplate := cmd.UsageTemplate()
 	usageTemplate = strings.NewReplacer(
 		`Usage:`, `{{WhiteBold "USAGE"}}`,
@@ -169,6 +173,7 @@ func configureFlags(cmd *cobra.Command) error {
 	if err != nil {
 		return fmt.Errorf("configure global flags: %w", err)
 	}
+
 	return nil
 }
 
@@ -217,6 +222,7 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 // traverseCommands calls f for c and all of its children.
 func traverseCommands(c *cobra.Command, f func(*cobra.Command)) {
 	f(c)
+
 	for _, c := range c.Commands() {
 		traverseCommands(c, f)
 	}
@@ -227,6 +233,7 @@ func Execute(params *types.CmdParams) bool {
 	cmd := NewRootCmd(params)
 
 	p := params.Printer
+
 	err := cmd.Execute()
 	if err != nil {
 		err := beautifyUnknownAndMissingCommandsError(cmd, err, params.Args)
@@ -234,6 +241,7 @@ func Execute(params *types.CmdParams) bool {
 		p.Error("%s", err.Error())
 		return false
 	}
+
 	return true
 }
 
@@ -249,6 +257,7 @@ func beautifyUnknownAndMissingCommandsError(rootCmd *cobra.Command, cmdErr error
 	if err != nil {
 		return cmdErr
 	}
+
 	if len(unparsedInputs) == 0 {
 		// This shouldn't happen
 		// If we're here, Cobra was able to parse everything, thus it wouldn't raise "unknown flag" errors

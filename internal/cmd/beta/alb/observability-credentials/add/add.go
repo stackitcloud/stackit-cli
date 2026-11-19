@@ -56,6 +56,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := "Are your sure you want to add credentials?"
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -63,6 +64,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("add credential: %w", err)
@@ -72,6 +74,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd, params)
+
 	return cmd
 }
 
@@ -93,13 +96,16 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		Username:        flags.FlagToStringPointer(p, cmd, usernameFlag),
 		Displayname:     flags.FlagToStringPointer(p, cmd, displaynameFlag),
 	}
+
 	pw, err := flags.ResolveSecretFlagWithAutoPrompt(p, cmd, passwordFlag) //nolint:staticcheck // Deprecated: preserve automatic prompting until 2027-04 (STACKITCLI-549).
 	if err != nil {
 		return nil, err
 	}
+
 	model.Password = pw
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -110,6 +116,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *alb.APIClie
 		Password:    model.Password,
 		Username:    model.Username,
 	}
+
 	return req.CreateCredentialsPayload(payload)
 }
 

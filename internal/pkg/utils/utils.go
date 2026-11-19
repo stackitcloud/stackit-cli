@@ -65,6 +65,7 @@ func ValidateUUID(value string) error {
 	if err != nil {
 		return fmt.Errorf("parse %s as UUID: %w", value, err)
 	}
+
 	return nil
 }
 
@@ -74,7 +75,9 @@ func ConvertInt64PToFloat64P(i *int64) *float64 {
 	if i == nil {
 		return nil
 	}
+
 	f := float64(*i)
+
 	return &f
 }
 
@@ -85,7 +88,9 @@ func ConvertInt32PToFloat32P(i *int32) *float32 {
 	if i == nil {
 		return nil
 	}
+
 	f := float32(*i)
+
 	return &f
 }
 
@@ -113,10 +118,12 @@ func ValidateURLDomain(value string) error {
 	}
 
 	urlHost = strings.ToLower(urlHost)
+
 	allowedUrlDomain = strings.ToLower(allowedUrlDomain)
 	if urlHost != allowedUrlDomain && !strings.HasSuffix(urlHost, "."+allowedUrlDomain) {
 		return fmt.Errorf(`only urls belonging to domain %s are allowed`, allowedUrlDomain)
 	}
+
 	return nil
 }
 
@@ -174,10 +181,12 @@ func ConvertStringMapToInterfaceMap(m *map[string]string) *map[string]interface{
 	if m == nil || len(*m) == 0 {
 		return nil
 	}
+
 	result := make(map[string]interface{}, len(*m))
 	for k, v := range *m {
 		result[k] = v
 	}
+
 	return &result
 }
 
@@ -200,6 +209,7 @@ func FormatPossibleValues(values ...string) []string {
 
 		formattedValues = append(formattedValues, value)
 	}
+
 	return formattedValues
 }
 
@@ -209,6 +219,7 @@ func Map[T, U any](input []T, mapFn func(T) U) []U {
 	for i := range input {
 		values[i] = mapFn(input[i])
 	}
+
 	return values
 }
 
@@ -239,6 +250,7 @@ func FlattenMap(inputMap map[string]interface{}) map[string]interface{} {
 	if inputMap == nil {
 		return nil
 	}
+
 	outputMap := make(map[string]interface{})
 	for key, value := range inputMap {
 		if valueMap, ok := value.(map[string]interface{}); ok {
@@ -246,6 +258,7 @@ func FlattenMap(inputMap map[string]interface{}) map[string]interface{} {
 				outputMap[key] = ""
 				continue
 			}
+
 			for nestedKey, nestedValue := range FlattenMap(valueMap) {
 				outputMap[key+"."+nestedKey] = nestedValue
 			}
@@ -253,5 +266,6 @@ func FlattenMap(inputMap map[string]interface{}) map[string]interface{} {
 			outputMap[key] = value
 		}
 	}
+
 	return outputMap
 }

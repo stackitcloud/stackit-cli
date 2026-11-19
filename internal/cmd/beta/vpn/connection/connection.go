@@ -22,6 +22,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		Run:   utils.CmdHelp,
 	}
 	addSubcommands(cmd, p)
+
 	return cmd
 }
 

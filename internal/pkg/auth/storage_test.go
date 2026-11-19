@@ -12,8 +12,10 @@ import (
 )
 
 func TestSetGetAuthField(t *testing.T) {
-	var testField1 authFieldKey = "test-field-1"
-	var testField2 authFieldKey = "test-field-2"
+	var (
+		testField1 authFieldKey = "test-field-1"
+		testField2 authFieldKey = "test-field-2"
+	)
 
 	testValue1 := fmt.Sprintf("value-1-%s", time.Now().Format(time.RFC3339))
 	testValue2 := fmt.Sprintf("value-2-%s", time.Now().Format(time.RFC3339))
@@ -160,8 +162,10 @@ func TestSetGetAuthField(t *testing.T) {
 }
 
 func TestSetGetAuthFieldWithProfile(t *testing.T) {
-	var testField1 authFieldKey = "test-field-1"
-	var testField2 authFieldKey = "test-field-2"
+	var (
+		testField1 authFieldKey = "test-field-1"
+		testField2 authFieldKey = "test-field-2"
+	)
 
 	testValue1 := fmt.Sprintf("value-1-%s", time.Now().Format(time.RFC3339))
 	testValue2 := fmt.Sprintf("value-2-%s", time.Now().Format(time.RFC3339))
@@ -323,8 +327,10 @@ func TestSetGetAuthFieldWithProfile(t *testing.T) {
 }
 
 func TestSetGetAuthFieldKeyring(t *testing.T) {
-	var testField1 authFieldKey = "test-field-1"
-	var testField2 authFieldKey = "test-field-2"
+	var (
+		testField1 authFieldKey = "test-field-1"
+		testField2 authFieldKey = "test-field-2"
+	)
 
 	testValue1 := fmt.Sprintf("value-1-keyring-%s", time.Now().Format(time.RFC3339))
 	testValue2 := fmt.Sprintf("value-2-keyring-%s", time.Now().Format(time.RFC3339))
@@ -777,8 +783,10 @@ func TestDeleteProfileFromKeyring(t *testing.T) {
 }
 
 func TestSetGetAuthFieldEncodedTextFile(t *testing.T) {
-	var testField1 authFieldKey = "test-field-1"
-	var testField2 authFieldKey = "test-field-2"
+	var (
+		testField1 authFieldKey = "test-field-1"
+		testField2 authFieldKey = "test-field-2"
+	)
 
 	testValue1 := fmt.Sprintf("value-1-text-%s", time.Now().Format(time.RFC3339))
 	testValue2 := fmt.Sprintf("value-2-text-%s", time.Now().Format(time.RFC3339))
@@ -1085,12 +1093,14 @@ func deleteProfileFiles(activeProfile string) error {
 		// Do not delete the default profile
 		return nil
 	}
+
 	textFileDir := config.GetProfileFolderPath(activeProfile)
 	// Remove the entire directory if the profile does not exist
 	err := os.RemoveAll(textFileDir)
 	if err != nil {
 		return fmt.Errorf("remove directory: %w", err)
 	}
+
 	return nil
 }
 
@@ -1108,6 +1118,7 @@ func TestAuthorizeDeauthorizeUserProfileAuth(t *testing.T) {
 		refreshToken         string
 		email                string
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -1196,6 +1207,7 @@ func TestAuthorizeDeauthorizeUserProfileAuth(t *testing.T) {
 				if err != nil {
 					t.Errorf("Field \"%s\" not set after authorization", loginAuthFieldKeys[i])
 				}
+
 				expectedKey := testLoginAuthFields[i]
 				if gotKey != expectedKey {
 					t.Errorf("Field \"%s\" is wrong: expected \"%s\", got \"%s\"", loginAuthFieldKeys[i], expectedKey, gotKey)

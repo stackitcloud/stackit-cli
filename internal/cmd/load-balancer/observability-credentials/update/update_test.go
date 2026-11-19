@@ -57,6 +57,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, mod := range mods {
 		mod(argValues)
 	}
+
 	return argValues
 }
 
@@ -71,6 +72,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -89,11 +91,13 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *loadbalancer.ApiUpdateCredentialsRequest)) loadbalancer.ApiUpdateCredentialsRequest {
 	request := testClient.DefaultAPI.UpdateCredentials(testCtx, testProjectId, testRegion, testCredentialsRef)
+
 	request = request.UpdateCredentialsPayload(loadbalancer.UpdateCredentialsPayload{
 		DisplayName: new("name"),
 		Username:    new("username"),
@@ -102,6 +106,7 @@ func fixtureRequest(mods ...func(request *loadbalancer.ApiUpdateCredentialsReque
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -115,6 +120,7 @@ func fixtureGetCredentialsResponse(mods ...func(response *loadbalancer.GetCreden
 	for _, mod := range mods {
 		mod(response)
 	}
+
 	return response
 }
 
@@ -222,6 +228,7 @@ func TestParseInput(t *testing.T) {
 					testPwFile: {Data: []byte(testPw)},
 				}
 				params.Printer.StdIn = strings.NewReader(tt.stdin)
+
 				return NewCmd(params)
 			}, parseInput, tt.expectedModel, tt.argValues, tt.flagValues, tt.isValid)
 		})
@@ -280,12 +287,13 @@ func TestBuildRequest(t *testing.T) {
 				getCredentialsError:    tt.getCredentialsFails,
 				getCredentialsResponse: tt.getCredentialsResponse,
 			}
-			request, err := buildRequest(testCtx, tt.model, newAPIMock(client))
 
+			request, err := buildRequest(testCtx, tt.model, newAPIMock(client))
 			if err != nil {
 				if !tt.isValid {
 					return
 				}
+
 				t.Fatalf("error building request: %v", err)
 			}
 

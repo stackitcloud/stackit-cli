@@ -47,6 +47,7 @@ func TestGetVPCName(t *testing.T) {
 		getVpcFails bool
 		getVpcResp  *iaas.VPC
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -83,11 +84,13 @@ func TestGetVPCName(t *testing.T) {
 				GetVPCFails: tt.args.getVpcFails,
 				GetVPCResp:  tt.args.getVpcResp,
 			}
+
 			got, err := GetVPCName(context.Background(), newMock(m), "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetVPCName() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetVPCName() = %v, want %v", got, tt.want)
 			}
@@ -100,6 +103,7 @@ func TestGetVPCNetworkRangePrefix(t *testing.T) {
 		getVpcNetworkRangeFails bool
 		getVpcNetworkRangeResp  *iaas.VPCNetworkRange
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -159,11 +163,13 @@ func TestGetVPCNetworkRangePrefix(t *testing.T) {
 				GetVPCNetworkRangeFails: tt.args.getVpcNetworkRangeFails,
 				GetVPCNetworkRangeResp:  tt.args.getVpcNetworkRangeResp,
 			}
+
 			got, err := GetVPCNetworkRangePrefix(context.Background(), newMock(m), "", "", "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetVPCNetworkRangePrefix() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetVPCNetworkRangePrefix() = %v, want %v", got, tt.want)
 			}
@@ -176,6 +182,7 @@ func TestGetVPCRoutingTable(t *testing.T) {
 		getVpcRoutingTableFails bool
 		getVpcRoutingTableResp  *iaas.VPCRoutingTable
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -212,11 +219,13 @@ func TestGetVPCRoutingTable(t *testing.T) {
 				GetVPCRoutingTableFails: tt.args.getVpcRoutingTableFails,
 				GetVPCRoutingTableResp:  tt.args.getVpcRoutingTableResp,
 			}
+
 			got, err := GetVPCRoutingTableName(context.Background(), newMock(m), "", "", "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetVPCNetworkRangePrefix() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf("GetVPCNetworkRangePrefix() = %v, want %v", got, tt.want)
 			}

@@ -19,10 +19,13 @@ func ProjectEnabled(ctx context.Context, apiClient serviceenablement.DefaultAPI,
 		if !ok {
 			return false, err
 		}
+
 		if oapiErr.StatusCode == http.StatusNotFound {
 			return false, nil
 		}
+
 		return false, err
 	}
+
 	return *project.State == serviceenablement.SERVICESTATUSSTATE_ENABLED, nil
 }

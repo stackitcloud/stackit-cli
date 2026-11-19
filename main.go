@@ -25,6 +25,7 @@ func main() {
 		os.Stdout,
 		os.Stderr,
 	)
+
 	params := types.CmdParams{
 		Printer:    printer,
 		CliVersion: version,

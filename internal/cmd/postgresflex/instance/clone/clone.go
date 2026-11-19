@@ -95,6 +95,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to clone instance %q?", instanceLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -105,6 +106,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("clone PostgreSQL Flex instance: %w", err)
@@ -125,6 +127,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -169,6 +172,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -176,6 +180,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient postgresflex
 	if model.StorageSize == nil {
 		return postgresflex.ApiCloneInstanceRequest{}, fmt.Errorf("storage size is nil")
 	}
+
 	if model.StorageClass == nil {
 		return postgresflex.ApiCloneInstanceRequest{}, fmt.Errorf("storage class is nil")
 	}
@@ -204,6 +209,7 @@ func outputResult(p *print.Printer, outputFormat string, async bool, instanceLab
 		}
 
 		p.Outputf("%s instance from instance %q. New Instance ID: %s\n", operationState, instanceLabel, instanceId)
+
 		return nil
 	})
 }

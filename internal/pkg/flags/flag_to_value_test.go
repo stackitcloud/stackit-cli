@@ -55,6 +55,7 @@ func TestFlagToStringToStringPointer(t *testing.T) {
 					},
 				}
 				cmd.Flags().StringToString(flagName, nil, "Labels are key-value string pairs.")
+
 				return cmd
 			}()
 
@@ -97,6 +98,7 @@ func TestFlagToStringToStringPointerPointer(t *testing.T) {
 			params := testparams.NewTestParams()
 			cmd := &cobra.Command{Use: "test"}
 			cmd.Flags().StringToString(flagName, nil, "Labels")
+
 			if tt.flagValue != nil {
 				if err := cmd.Flags().Set(flagName, *tt.flagValue); err != nil {
 					t.Fatal(err)
@@ -112,6 +114,7 @@ func TestFlagToStringToStringPointerPointer(t *testing.T) {
 
 func TestFlagToStringArrayValue(t *testing.T) {
 	const flagName = "geofencing"
+
 	tests := []struct {
 		name       string
 		flagValues []string
@@ -156,6 +159,7 @@ func TestFlagToStringArrayValue(t *testing.T) {
 					},
 				}
 				cmd.Flags().StringArray(flagName, []string{}, "url to multiple region codes, repeatable")
+
 				return cmd
 			}()
 			// set the flag value if a value use given, else consider the flag unset
@@ -177,6 +181,7 @@ func TestFlagToStringArrayValue(t *testing.T) {
 
 func TestFlagToInt32Pointer(t *testing.T) {
 	const flagName = "limit"
+
 	tests := []struct {
 		name      string
 		flagValue *string
@@ -206,6 +211,7 @@ func TestFlagToInt32Pointer(t *testing.T) {
 					},
 				}
 				cmd.Flags().Int32(flagName, 0, "limit")
+
 				return cmd
 			}()
 			// set the flag value if a value use given, else consider the flag unset
@@ -225,6 +231,7 @@ func TestFlagToInt32Pointer(t *testing.T) {
 
 func TestFlagWithDefaultToInt32Value(t *testing.T) {
 	const flagName = "limit"
+
 	tests := []struct {
 		name      string
 		flagValue *string
@@ -244,6 +251,7 @@ func TestFlagWithDefaultToInt32Value(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			params := testparams.NewTestParams()
+
 			cmd := func() *cobra.Command {
 				cmd := &cobra.Command{
 					Use:   "greet",
@@ -254,6 +262,7 @@ func TestFlagWithDefaultToInt32Value(t *testing.T) {
 					},
 				}
 				cmd.Flags().Int32(flagName, 0, "limit")
+
 				return cmd
 			}()
 			if tt.flagValue != nil {

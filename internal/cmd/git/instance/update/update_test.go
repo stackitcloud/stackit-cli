@@ -31,6 +31,7 @@ func fixtureArgValues(mods ...func(argValues []string)) []string {
 	for _, mod := range mods {
 		mod(argValues)
 	}
+
 	return argValues
 }
 
@@ -42,6 +43,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -54,17 +56,20 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
 func fixtureRequest(mods ...func(request *git.ApiPatchInstanceRequest)) git.ApiPatchInstanceRequest {
 	request := testClient.DefaultAPI.PatchInstance(testCtx, testProjectId, testInstanceId)
+
 	request = request.PatchInstancePayload(git.PatchInstancePayload{
 		Acl: []string{"0.0.0.0/0"},
 	})
 	for _, mod := range mods {
 		mod(&request)
 	}
+
 	return request
 }
 
@@ -194,6 +199,7 @@ func TestBuildRequest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			request := buildRequest(testCtx, tt.model, testClient)
+
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest, git.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
@@ -210,6 +216,7 @@ func TestOutputResult(t *testing.T) {
 		model *inputModel
 		resp  *git.Instance
 	}
+
 	tests := []struct {
 		name    string
 		args    args

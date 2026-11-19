@@ -38,6 +38,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -52,16 +53,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
 			imageName, err := iaasUtils.GetImageName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.ImageId)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get image name: %v", err)
+
 				imageName = model.ImageId
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete the image %q for %q?", imageName, projectLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -73,6 +77,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err := request.Execute(); err != nil {
 				return fmt.Errorf("delete image: %w", err)
 			}
+
 			params.Printer.Info("Deleted image %q for %q\n", imageName, projectLabel)
 
 			return nil
@@ -94,6 +99,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 

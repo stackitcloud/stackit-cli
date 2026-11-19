@@ -43,9 +43,11 @@ func StringEnumSliceFlag[T ~string](name string, possibleValues []T, docs string
 			f.options = append(f.options, v)
 		}
 	}
+
 	for _, opt := range opts {
 		opt(f)
 	}
+
 	return f
 }
 
@@ -81,13 +83,17 @@ func (s *stringEnumSliceFlag[T]) String() string {
 func (s *stringEnumSliceFlag[T]) fmtValues(xs []T) string {
 	var sb strings.Builder
 	sb.WriteString("[")
+
 	for i, v := range xs {
 		sb.WriteString(string(v))
+
 		if i != len(xs)-1 {
 			sb.WriteString(", ")
 		}
 	}
+
 	sb.WriteString("]")
+
 	return sb.String()
 }
 
@@ -102,7 +108,9 @@ func (s *stringEnumSliceFlag[T]) Set(value string) error {
 	if value == "" {
 		return fmt.Errorf("value cannot be empty")
 	}
+
 	values := strings.Split(value, ",")
+
 	return s.appendToValue(values)
 }
 
@@ -131,6 +139,7 @@ func (s *stringEnumSliceFlag[T]) appendToValue(values []string) error {
 			return fmt.Errorf("found value %q, expected one of %q", v, s.options)
 		}
 	}
+
 	return nil
 }
 

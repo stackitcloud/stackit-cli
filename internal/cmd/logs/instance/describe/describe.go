@@ -67,6 +67,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
+
 	return cmd
 }
 
@@ -75,11 +76,13 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	if globalFlags.ProjectId == "" {
 		return nil, &errors.ProjectIdError{}
 	}
+
 	model := &inputModel{
 		GlobalFlagModel: globalFlags,
 		InstanceID:      inputArgs[0],
 	}
 	p.DebugInputModel(model)
+
 	return model, nil
 }
 
@@ -91,6 +94,7 @@ func outputResult(p *print.Printer, outputFormat string, instance *logs.LogsInst
 	if instance == nil {
 		return fmt.Errorf("instance response is empty")
 	}
+
 	return p.OutputResult(outputFormat, instance, func() error {
 		table := tables.NewTable()
 		table.AddRow("ID", instance.Id)
@@ -115,6 +119,7 @@ func outputResult(p *print.Printer, outputFormat string, instance *logs.LogsInst
 		if err != nil {
 			return fmt.Errorf("display table: %w", err)
 		}
+
 		return nil
 	})
 }

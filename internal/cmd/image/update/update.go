@@ -117,6 +117,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -131,16 +132,19 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
 			if err != nil {
 				params.Printer.Debug(print.ErrorLevel, "get project name: %v", err)
+
 				projectLabel = model.ProjectId
 			}
 
 			imageLabel, err := iaasUtils.GetImageName(ctx, apiClient.DefaultAPI, model.ProjectId, model.Region, model.Id)
 			if err != nil {
 				params.Printer.Debug(print.WarningLevel, "cannot retrieve image name: %v", err)
+
 				imageLabel = model.Id
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update the image %q?", imageLabel)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -153,6 +157,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("update image: %w", err)
 			}
+
 			params.Printer.Info("Updated image \"%v\" for %q\n", resp.Name, projectLabel)
 
 			return nil
@@ -160,6 +165,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 	}
 
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -234,6 +240,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, cliArgs []string) (*inputM
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -255,39 +262,51 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 		if model.Config.BootMenu != nil {
 			payload.Config.BootMenu = model.Config.BootMenu
 		}
+
 		if model.Config.CdromBus != nil {
 			payload.Config.CdromBus = *iaas.NewNullableString(model.Config.CdromBus)
 		}
+
 		if model.Config.DiskBus != nil {
 			payload.Config.DiskBus = *iaas.NewNullableString(model.Config.DiskBus)
 		}
+
 		if model.Config.NicModel != nil {
 			payload.Config.NicModel = *iaas.NewNullableString(model.Config.NicModel)
 		}
+
 		if model.Config.OperatingSystem != nil {
 			payload.Config.OperatingSystem = model.Config.OperatingSystem
 		}
+
 		if model.Config.OperatingSystemDistro != nil {
 			payload.Config.OperatingSystemDistro = *iaas.NewNullableString(model.Config.OperatingSystemDistro)
 		}
+
 		if model.Config.OperatingSystemVersion != nil {
 			payload.Config.OperatingSystemVersion = *iaas.NewNullableString(model.Config.OperatingSystemVersion)
 		}
+
 		if model.Config.RescueBus != nil {
 			payload.Config.RescueBus = *iaas.NewNullableString(model.Config.RescueBus)
 		}
+
 		if model.Config.RescueDevice != nil {
 			payload.Config.RescueDevice = *iaas.NewNullableString(model.Config.RescueDevice)
 		}
+
 		if model.Config.SecureBoot != nil {
 			payload.Config.SecureBoot = model.Config.SecureBoot
 		}
+
 		if model.Config.Uefi != nil {
 			payload.Config.Uefi = model.Config.Uefi
 		}
+
 		if model.Config.VideoModel != nil {
 			payload.Config.VideoModel = *iaas.NewNullableString(model.Config.VideoModel)
 		}
+
 		if model.Config.VirtioScsi != nil {
 			payload.Config.VirtioScsi = model.Config.VirtioScsi
 		}

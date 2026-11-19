@@ -12,8 +12,10 @@ func GetGatewayName(ctx context.Context, client vpn.DefaultAPI, projectId, regio
 	if err != nil {
 		return "", fmt.Errorf("get gateway: %w", err)
 	}
+
 	if resp != nil {
 		return resp.DisplayName, nil
 	}
+
 	return "", nil
 }

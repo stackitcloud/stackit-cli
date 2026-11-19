@@ -48,6 +48,7 @@ func BuildDebugStrFromMap(inputMap map[string]any) string {
 	for key := range inputMap {
 		keys = append(keys, key)
 	}
+
 	sort.Strings(keys)
 
 	var keyValues []string
@@ -71,6 +72,7 @@ func BuildDebugStrFromMap(inputMap map[string]any) string {
 					sliceStr[i] = fmt.Sprintf("%v", item)
 				}
 			}
+
 			valueStr = BuildDebugStrFromSlice(sliceStr)
 		}
 
@@ -78,6 +80,7 @@ func BuildDebugStrFromMap(inputMap map[string]any) string {
 	}
 
 	result := strings.Join(keyValues, ", ")
+
 	return fmt.Sprintf("[%s]", result)
 }
 
@@ -97,6 +100,7 @@ func buildHeaderMap(headers http.Header, includeHeaders []string) map[string]any
 			headersMap[key] = strings.Join(values, ", ")
 		}
 	}
+
 	return headersMap
 }
 
@@ -112,13 +116,16 @@ func drainBody(b io.ReadCloser) (r1, r2 io.ReadCloser, err error) {
 		// No copying needed. Preserve the magic sentinel meaning of NoBody.
 		return http.NoBody, http.NoBody, nil
 	}
+
 	var buf bytes.Buffer
 	if _, err = buf.ReadFrom(b); err != nil {
 		return nil, b, err
 	}
+
 	if err := b.Close(); err != nil {
 		return nil, b, err
 	}
+
 	return io.NopCloser(&buf), io.NopCloser(bytes.NewReader(buf.Bytes())), nil
 }
 
@@ -129,6 +136,7 @@ func BuildDebugStrFromHTTPRequest(req *http.Request) ([]string, error) {
 	if req == nil {
 		return nil, fmt.Errorf("request is nil")
 	}
+
 	if req.URL == nil || req.Proto == "" || req.Method == "" {
 		return nil, fmt.Errorf("request is invalid")
 	}
@@ -150,20 +158,25 @@ func BuildDebugStrFromHTTPRequest(req *http.Request) ([]string, error) {
 	if err != nil {
 		return []string{status, headers}, fmt.Errorf("drain response body: %w", err)
 	}
+
 	bodyBytes, err := io.ReadAll(req.Body)
 	if err != nil {
 		return []string{status, headers}, fmt.Errorf("read response body: %w", err)
 	}
+
 	req.Body = save
+
 	var bodyMap map[string]any
 	if len(bodyBytes) != 0 {
 		if err := json.Unmarshal(bodyBytes, &bodyMap); err != nil {
 			return nil, fmt.Errorf("unmarshal response body: %w", err)
 		}
 	}
+
 	if len(bodyMap) == 0 {
 		return []string{status, headers}, nil
 	}
+
 	body := fmt.Sprintf("request body: %s", BuildDebugStrFromMap(bodyMap))
 
 	return []string{status, headers, body}, nil
@@ -199,20 +212,25 @@ func BuildDebugStrFromHTTPResponse(resp *http.Response) ([]string, error) {
 	if err != nil {
 		return []string{status, headers}, fmt.Errorf("drain response body: %w", err)
 	}
+
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return []string{status, headers}, fmt.Errorf("read response body: %w", err)
 	}
+
 	resp.Body = save
+
 	var bodyMap map[string]any
 	if len(bodyBytes) != 0 {
 		if err := json.Unmarshal(bodyBytes, &bodyMap); err != nil {
 			return nil, fmt.Errorf("unmarshal response body: %w", err)
 		}
 	}
+
 	if len(bodyMap) == 0 {
 		return []string{status, headers}, nil
 	}
+
 	body := fmt.Sprintf("response body: %s", BuildDebugStrFromMap(bodyMap))
 
 	return []string{status, headers, body}, nil
@@ -236,9 +254,11 @@ func (rt roundTripperWithCapture) RoundTrip(req *http.Request) (*http.Response, 
 	if err != nil {
 		rt.p.Debug(ErrorLevel, "printing request to debug logs: %v", err)
 	}
+
 	for _, line := range reqStr {
 		rt.p.Debug(DebugLevel, line)
 	}
+
 	resp, err := rt.transport.RoundTrip(req)
 	defer func() {
 		if err == nil {
@@ -246,11 +266,13 @@ func (rt roundTripperWithCapture) RoundTrip(req *http.Request) (*http.Response, 
 			if tempErr != nil {
 				rt.p.Debug(ErrorLevel, "printing HTTP response to debug logs: %v", tempErr)
 			}
+
 			for _, line := range respStrSlice {
 				rt.p.Debug(DebugLevel, line)
 			}
 		}
 	}()
+
 	return resp, err
 }
 
@@ -259,6 +281,7 @@ func isEmpty(value interface{}) bool {
 	if value == nil {
 		return true
 	}
+
 	switch v := value.(type) {
 	case string:
 		return v == ""

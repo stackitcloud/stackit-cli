@@ -56,6 +56,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(p.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -68,6 +69,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to assign role %q to user %q in STACKIT Cloud Foundry organization %q?", model.Role, scfUtils.UserLabel(model.UserGuid, model.UserName), model.OrganizationId)
+
 			err = p.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -75,6 +77,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("set STACKIT Cloud Foundry organization role: %w", err)
@@ -84,6 +87,7 @@ func NewCmd(p *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -115,6 +119,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -126,6 +131,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient scf.DefaultA
 	}
 
 	req := apiClient.CreateOrgRole(ctx, model.ProjectId, model.Region, model.OrganizationId)
+
 	return req.CreateOrgRolePayload(payload)
 }
 

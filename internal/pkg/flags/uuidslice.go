@@ -42,6 +42,7 @@ func (f *uuidSliceFlag) Set(value string) error {
 	}
 
 	f.value = append(f.value, uuids...)
+
 	return nil
 }
 

@@ -44,6 +44,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
 			model, err := parseInput(params.Printer, cmd, args)
 			if err != nil {
 				return err
@@ -56,6 +57,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, model, apiClient.DefaultAPI)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("read Observability instance: %w", err)
@@ -64,6 +66,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return outputResult(params.Printer, model.OutputFormat, resp)
 		},
 	}
+
 	return cmd
 }
 
@@ -81,6 +84,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }
 
@@ -104,6 +108,7 @@ func outputResult(p *print.Printer, outputFormat string, instance *observability
 		table.AddSeparator()
 		table.AddRow("PLAN NAME", instance.PlanName)
 		table.AddSeparator()
+
 		plan := instance.Instance.Plan
 		table.AddRow("METRIC SAMPLES (PER MIN)", plan.TotalMetricSamples)
 		table.AddSeparator()
@@ -117,6 +122,7 @@ func outputResult(p *print.Printer, outputFormat string, instance *observability
 		table.AddSeparator()
 		table.AddRow("GRAFANA URL", instance.Instance.GrafanaUrl)
 		table.AddSeparator()
+
 		err := table.Display(p)
 		if err != nil {
 			return fmt.Errorf("render table: %w", err)

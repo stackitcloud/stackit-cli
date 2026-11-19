@@ -41,6 +41,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			if userSessionExpired {
 				return &cliErr.SessionExpiredError{}
 			}
@@ -59,6 +60,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("marshal image list: %w", err)
 				}
+
 				params.Printer.Outputln(string(details))
 
 				return nil
@@ -87,5 +89,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }

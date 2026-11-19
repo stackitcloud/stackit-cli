@@ -35,6 +35,7 @@ func fixtureFlagValues(mods ...func(flagValues map[string]string)) map[string]st
 	for _, mod := range mods {
 		mod(flagValues)
 	}
+
 	return flagValues
 }
 
@@ -50,6 +51,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 	for _, mod := range mods {
 		mod(model)
 	}
+
 	return model
 }
 
@@ -86,6 +88,7 @@ func fixtureResponse(mods ...func(resp *cdn.GetDistributionResponse)) *cdn.GetDi
 	for _, mod := range mods {
 		mod(response)
 	}
+
 	return response
 }
 
@@ -171,6 +174,7 @@ func TestBuildRequest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
 			got := buildRequest(testCtx, tt.model, testClient)
+
 			diff := cmp.Diff(got, tt.expected,
 				cmp.AllowUnexported(tt.expected, cdn.DefaultAPIService{}),
 				cmpopts.EquateComparable(testCtx),
@@ -399,6 +403,7 @@ func TestOutputResult(t *testing.T) {
 			if err := outputResult(params.Printer, tt.format, tt.distribution); (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
 			}
+
 			diff := cmp.Diff(params.Out.String(), tt.expected)
 			if diff != "" {
 				t.Fatalf("outputResult() output mismatch (-want +got):\n%s", diff)

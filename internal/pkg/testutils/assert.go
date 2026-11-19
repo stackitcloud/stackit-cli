@@ -60,7 +60,9 @@ func AssertError(t testing.TB, got error, want any) bool {
 		if want == nil || want == false {
 			return true
 		}
+
 		t.Errorf("got nil error, want %v", want)
+
 		return false
 	}
 
@@ -87,11 +89,14 @@ func AssertError(t testing.TB, got error, want any) bool {
 		if checkErrorMatch(got, wantErr) {
 			return false
 		}
+
 		t.Errorf("got error %v, want %v", got, wantErr)
+
 		return false
 	}
 
 	t.Errorf("invalid want type %T for AssertError", want)
+
 	return false
 }
 
@@ -131,6 +136,7 @@ func (config *valueComparisonConfig) getDiffFunc() DiffFunc {
 	if config.diffFunc != nil {
 		return config.diffFunc
 	}
+
 	return func(got, want any) string {
 		return cmp.Diff(got, want, config.cmpOptions...)
 	}

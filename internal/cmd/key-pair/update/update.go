@@ -52,6 +52,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to update key pair %q?", *model.KeyPairName)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return fmt.Errorf("update key pair: %w", err)
@@ -59,10 +60,12 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 
 			// Call API
 			req := buildRequest(ctx, &model, apiClient)
+
 			resp, err := req.Execute()
 			if err != nil {
 				return fmt.Errorf("update key pair: %w", err)
 			}
+
 			if resp == nil {
 				return fmt.Errorf("response is nil")
 			}
@@ -71,6 +74,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 		},
 	}
 	configureFlags(cmd)
+
 	return cmd
 }
 
@@ -87,6 +91,7 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *iaas.APICli
 	payload := iaas.UpdateKeyPairPayload{
 		Labels: model.Labels,
 	}
+
 	return req.UpdateKeyPairPayload(payload)
 }
 
@@ -101,6 +106,7 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) inputM
 	}
 
 	p.DebugInputModel(model)
+
 	return model
 }
 

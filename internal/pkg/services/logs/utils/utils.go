@@ -19,6 +19,7 @@ func GetInstanceName(ctx context.Context, apiClient logs.DefaultAPI, projectId, 
 	} else if resp == nil {
 		return "", ErrResponseNil
 	}
+
 	return resp.DisplayName, nil
 }
 
@@ -29,5 +30,6 @@ func GetAccessTokenName(ctx context.Context, apiClient logs.DefaultAPI, projectI
 	} else if resp == nil {
 		return "", ErrResponseNil
 	}
+
 	return resp.DisplayName, nil
 }

@@ -11,6 +11,7 @@ func TestOutputResult(t *testing.T) {
 		outputFormat string
 		profiles     []profileInfo
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -22,6 +23,7 @@ func TestOutputResult(t *testing.T) {
 			wantErr: false,
 		},
 	}
+
 	params := testparams.NewTestParams()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

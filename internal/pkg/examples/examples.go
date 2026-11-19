@@ -24,6 +24,7 @@ func (e *Example) format() string {
 			formatted += "\n"
 		}
 	}
+
 	return formatted
 }
 
@@ -36,5 +37,6 @@ func Build(examples ...Example) string {
 			formatted += "\n\n"
 		}
 	}
+
 	return formatted
 }

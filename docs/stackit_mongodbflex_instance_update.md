@@ -29,7 +29,7 @@ stackit mongodbflex instance update INSTANCE_ID [flags]
   -h, --help[=true|false]        Help for "stackit mongodbflex instance update"
   -n, --name string              Instance name
       --storage-class string     Storage class
-      --storage-size int         Storage size (in GB)
+      --storage-size int32       Storage size (in GB)
       --type string              Instance type, (one of: [Replica, Sharded, Single])
       --version string           Version
 ```

@@ -49,6 +49,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("check if profile exists: %w", err)
 			}
+
 			if !profileExists {
 				return &errors.DeleteInexistentProfile{Profile: model.Profile}
 			}
@@ -61,11 +62,13 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get profile: %w", err)
 			}
+
 			if activeProfile == model.Profile {
 				params.Printer.Warn("The profile you are trying to delete is the active profile. The default profile will be set to active.\n")
 			}
 
 			prompt := fmt.Sprintf("Are you sure you want to delete profile %q? (This cannot be undone)", model.Profile)
+
 			err = params.Printer.PromptForConfirmation(prompt)
 			if err != nil {
 				return err
@@ -86,6 +89,7 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			return nil
 		},
 	}
+
 	return cmd
 }
 
@@ -105,5 +109,6 @@ func parseInput(p *print.Printer, cmd *cobra.Command, inputArgs []string) (*inpu
 	}
 
 	p.DebugInputModel(model)
+
 	return &model, nil
 }

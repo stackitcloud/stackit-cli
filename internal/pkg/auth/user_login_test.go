@@ -18,6 +18,7 @@ func (a *apiClientMocked) Do(_ *http.Request) (*http.Response, error) {
 			StatusCode: http.StatusNotFound,
 		}, fmt.Errorf("not found")
 	}
+
 	return &http.Response{
 		Status:     "200 OK",
 		StatusCode: http.StatusAccepted,
