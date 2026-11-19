@@ -274,9 +274,14 @@ func (p *Printer) PagerDisplay(content string) error {
 	// -K: exits if an interrupt character is typed
 	pagerCmd := exec.Command("less", "-F", "-S", "-w", "-R", "-K")
 
-	pager, pagerExists := os.LookupEnv("PAGER")
-	if pagerExists && pager != "nil" && pager != "" {
-		pagerCmd = exec.Command(pager) // #nosec G204
+	stackitPager, stackitPagerExists := os.LookupEnv("STACKIT_PAGER")
+	if stackitPagerExists && stackitPager != "nil" && stackitPager != "" {
+		pagerCmd = exec.Command(stackitPager) // #nosec G204
+	} else if !stackitPagerExists {
+		pager, pagerExists := os.LookupEnv("PAGER")
+		if pagerExists && pager != "nil" && pager != "" {
+			pagerCmd = exec.Command(pager) // #nosec G204
+		}
 	}
 
 	pagerCmd.Stdin = strings.NewReader(content)

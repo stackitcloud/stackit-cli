@@ -379,6 +379,59 @@ func TestPagerDisplay(t *testing.T) {
 	}
 }
 
+func TestPagerDisplay_StackitPager(t *testing.T) {
+	tests := []struct {
+		description     string
+		stackitPager    string
+		setStackitPager bool
+		pager           string
+		setPager        bool
+		content         string
+	}{
+		{
+			description:     "STACKIT_PAGER set takes precedence over PAGER",
+			stackitPager:    "non-existent-pager-stackit",
+			setStackitPager: true,
+			pager:           "non-existent-pager-fallback",
+			setPager:        true,
+			content:         "Test precedence message",
+		},
+		{
+			description:     "STACKIT_PAGER unset falls back to PAGER",
+			setStackitPager: false,
+			pager:           "non-existent-pager-fallback",
+			setPager:        true,
+			content:         "Test fallback message",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			if tt.setStackitPager {
+				t.Setenv("STACKIT_PAGER", tt.stackitPager)
+			}
+			if tt.setPager {
+				t.Setenv("PAGER", tt.pager)
+			}
+			var buf bytes.Buffer
+			p := &Printer{
+				StdOut:    &buf,
+				StdErr:    &buf,
+				Verbosity: InfoLevel,
+			}
+			viper.Reset()
+
+			err := p.PagerDisplay(tt.content)
+			if err != nil {
+				t.Fatalf("unexpected error: %s", err.Error())
+			}
+			expectedOutput := tt.content + "\n"
+			if buf.String() != expectedOutput {
+				t.Errorf("unexpected output: got %q, want %q", buf.String(), expectedOutput)
+			}
+		})
+	}
+}
+
 func TestDebug(t *testing.T) {
 	tests := []struct {
 		description string
