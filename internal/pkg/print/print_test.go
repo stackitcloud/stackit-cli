@@ -409,8 +409,9 @@ func TestPagerDisplay_StackitPager(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error: %s", err.Error())
 			}
-			if buf.String() != tt.content {
-				t.Errorf("unexpected output: got %q, want %q", buf.String(), tt.content)
+			expectedOutput := tt.content + "\n"
+			if buf.String() != expectedOutput {
+				t.Errorf("unexpected output: got %q, want %q", buf.String(), expectedOutput)
 			}
 		})
 	}
