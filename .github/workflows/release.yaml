@@ -93,9 +93,9 @@ jobs:
       - name: Create issue to inform about Homebrew PR
         run: |
           gh issue create \
-            --repo "${{ github.repository }}" \
-            --title "Homebrew Cask PR opened for ${{ github.ref_name }}" \
-            --body "A pull request has been automatically created for release **${{ github.ref_name }}**"
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Homebrew Cask PR opened for $GITHUB_REF_NAME" \
+            --body "A pull request has been automatically created for release **$GITHUB_REF_NAME**"
         env:
           GH_TOKEN: ${{ github.token }}
 
