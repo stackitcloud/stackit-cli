@@ -26,7 +26,7 @@ stackit sqlserverflex instance update INSTANCE_ID [flags]
       --acl strings              Lists of IP networks in CIDR notation which are allowed to access this instance (default [])
       --backup-schedule string   Backup schedule
       --flavor-id string         ID of the flavor
-  -h, --help                     Help for "stackit sqlserverflex instance update"
+  -h, --help[=true|false]        Help for "stackit sqlserverflex instance update"
   -n, --name string              Instance name
       --version string           Version
 ```
@@ -34,12 +34,12 @@ stackit sqlserverflex instance update INSTANCE_ID [flags]
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

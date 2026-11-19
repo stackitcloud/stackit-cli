@@ -30,7 +30,7 @@ stackit dns zone move [flags]
 
 ```
       --code secret                Code. Use @<file> to read from a file (example: @./secret.txt), or - to read from stdin (hidden input on a terminal). Literal values are not supported. If not set, a move code is generated automatically for the zone in the configured project, which must then be the zone's current project.
-  -h, --help                       Help for "stackit dns zone move"
+  -h, --help[=true|false]          Help for "stackit dns zone move"
       --target-project-id string   ID of the project the zone should be moved to
       --zone-domain-name string    Domain name of the zone to move
 ```
@@ -38,12 +38,12 @@ stackit dns zone move [flags]
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

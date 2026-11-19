@@ -32,7 +32,7 @@ const (
 
 	// Needed to avoid import cycle
 	// Originally defined in "internal/pkg/config/config.go"
-	outputFormatKey = "output-format"
+	outputFormatKey = "output_format"
 
 	JSONOutputFormat   = "json"
 	PrettyOutputFormat = "pretty"

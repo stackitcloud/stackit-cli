@@ -31,7 +31,7 @@ stackit sqlserverflex user create [flags]
 ### Options
 
 ```
-  -h, --help                 Help for "stackit sqlserverflex user create"
+  -h, --help[=true|false]    Help for "stackit sqlserverflex user create"
       --instance-id string   ID of the instance
       --roles strings        Roles of the user
       --username string      Username of the user
@@ -40,12 +40,12 @@ stackit sqlserverflex user create [flags]
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

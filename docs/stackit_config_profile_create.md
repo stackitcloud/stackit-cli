@@ -28,21 +28,21 @@ stackit config profile create PROFILE [flags]
 ### Options
 
 ```
-      --empty             Create the profile with the initial default configurations
-  -h, --help              Help for "stackit config profile create"
-      --ignore-existing   Suppress the error if the profile exists already. An existing profile will not be modified or overwritten
-      --no-set            Do not set the profile as the active profile
+      --empty[=true|false]             Create the profile with the initial default configurations
+  -h, --help[=true|false]              Help for "stackit config profile create"
+      --ignore-existing[=true|false]   Suppress the error if the profile exists already. An existing profile will not be modified or overwritten
+      --no-set[=true|false]            Do not set the profile as the active profile
 ```
 
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

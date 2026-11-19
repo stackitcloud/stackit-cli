@@ -39,27 +39,27 @@ stackit network update NETWORK_ID [flags]
 
 ```
       --description string              Description of the network (up to 255 characters). Use an empty string to clear it
-  -h, --help                            Help for "stackit network update"
+  -h, --help[=true|false]               Help for "stackit network update"
       --ipv4-dns-name-servers strings   List of DNS name servers IPv4. Nameservers cannot be defined for routed networks
       --ipv4-gateway string             The IPv4 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway
       --ipv6-dns-name-servers strings   List of DNS name servers for IPv6. Nameservers cannot be defined for routed networks
       --ipv6-gateway string             The IPv6 gateway of a network. If not specified, the first IP of the network will be assigned as the gateway
       --labels stringToString           Labels are key-value string pairs which can be attached to a network. E.g. '--labels key1=value1,key2=value2,...' (default [])
   -n, --name string                     Network name
-      --no-ipv4-gateway                 If set to true, the network doesn't have an IPv4 gateway
-      --no-ipv6-gateway                 If set to true, the network doesn't have an IPv6 gateway
+      --no-ipv4-gateway[=true|false]    If set to true, the network doesn't have an IPv4 gateway
+      --no-ipv6-gateway[=true|false]    If set to true, the network doesn't have an IPv6 gateway
       --routing-table-id string         The ID of the routing-table for the network
 ```
 
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

@@ -7,7 +7,11 @@ import (
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/scf/organization/delete"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/scf/organization/describe"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/scf/organization/list"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/scf/organization/manager"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/scf/organization/quota"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/scf/organization/role"
 	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/scf/organization/update"
+	"github.com/stackitcloud/stackit-cli/internal/cmd/beta/scf/organization/usage"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/types"
 	"github.com/stackitcloud/stackit-cli/internal/pkg/utils"
@@ -32,4 +36,8 @@ func addSubcommands(cmd *cobra.Command, params *types.CmdParams) {
 	cmd.AddCommand(delete.NewCmd(params))
 	cmd.AddCommand(describe.NewCmd(params))
 	cmd.AddCommand(list.NewCmd(params))
+	cmd.AddCommand(usage.NewCmd(params))
+	cmd.AddCommand(manager.NewCmd(params))
+	cmd.AddCommand(role.NewCmd(params))
+	cmd.AddCommand(quota.NewCmd(params))
 }

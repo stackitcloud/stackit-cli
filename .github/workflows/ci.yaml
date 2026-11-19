@@ -7,6 +7,8 @@ on:
     branches:
       - main
 
+permissions: {}
+
 env:
   CODE_COVERAGE_FILE_NAME: "coverage.out" # must be the same as in Makefile
   CODE_COVERAGE_ARTIFACT_NAME: "code-coverage"
@@ -17,10 +19,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v7.0.1
-      
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
       - name: Install go
-        uses: actions/setup-go@v7.0.0
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: "go.mod"
           cache: true
@@ -36,7 +40,7 @@ jobs:
         run: make test
 
       - name: Archive code coverage results
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ${{ env.CODE_COVERAGE_ARTIFACT_NAME }}
           path: ${{ env.CODE_COVERAGE_FILE_NAME }}
@@ -47,10 +51,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Check GoReleaser
-        uses: goreleaser/goreleaser-action@v7.3.0
+        uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
         with:
           args: check
 
@@ -65,7 +71,7 @@ jobs:
       pull-requests: write # write permission needed to comment on PR
     steps:
       - name: Check new code coverage
-        uses: fgrosse/go-coverage-report@v1.5.0
+        uses: fgrosse/go-coverage-report@c4bf7e78d1379325814b4dd42d80e526082e788b # v1.5.0
         continue-on-error: true  # Add this line to prevent pipeline failures in forks
         with:
           coverage-artifact-name: ${{ env.CODE_COVERAGE_ARTIFACT_NAME }}

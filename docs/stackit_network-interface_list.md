@@ -32,7 +32,7 @@ stackit network-interface list [flags]
 ### Options
 
 ```
-  -h, --help                    Help for "stackit network-interface list"
+  -h, --help[=true|false]       Help for "stackit network-interface list"
       --label-selector string   Filter by label
       --limit int               Maximum number of entries to list
       --network-id string       Network ID
@@ -41,12 +41,12 @@ stackit network-interface list [flags]
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

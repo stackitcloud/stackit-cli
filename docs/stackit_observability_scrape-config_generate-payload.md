@@ -37,7 +37,7 @@ stackit observability scrape-config generate-payload [flags]
 
 ```
   -f, --file-path string     If set, writes the payload to the given file. If unset, writes the payload to the standard output
-  -h, --help                 Help for "stackit observability scrape-config generate-payload"
+  -h, --help[=true|false]    Help for "stackit observability scrape-config generate-payload"
       --instance-id string   Instance ID
   -n, --job-name string      If set, generates an update payload with the current state of the given scrape config. If unset, generates a create payload with default values
 ```
@@ -45,12 +45,12 @@ stackit observability scrape-config generate-payload [flags]
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO

@@ -28,7 +28,7 @@ stackit logs access-token create [flags]
 ```
       --description string    Description of the access token
       --display-name string   Display name for the access token
-  -h, --help                  Help for "stackit logs access-token create"
+  -h, --help[=true|false]     Help for "stackit logs access-token create"
       --instance-id string    ID of the Logs instance
       --lifetime int32        Lifetime of the access token in days [1 - 180]
       --permissions strings   Permissions of the access token ["read" "write"]
@@ -37,12 +37,12 @@ stackit logs access-token create [flags]
 ### Options inherited from parent commands
 
 ```
-  -y, --assume-yes             If set, skips all confirmation prompts
-      --async                  If set, runs the command asynchronously
-  -o, --output-format string   Output format, (one of: [json, pretty, none, yaml])
-  -p, --project-id string      Project ID
-      --region string          Target region for region-specific requests
-      --verbosity string       Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
 ```
 
 ### SEE ALSO
