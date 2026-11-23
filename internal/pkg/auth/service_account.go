@@ -107,6 +107,27 @@ func AuthenticateServiceAccount(p *print.Printer, rt http.RoundTripper, disableW
 	authFields[IDP_TOKEN_ENDPOINT] = ""
 
 	if !disableWriting {
+		// Clean up user credentials to avoid stale fields
+		if err = DeleteAuthField(USER_EMAIL); err != nil {
+			p.Debug(print.ErrorLevel, "failed to delete auth field %s: %v", USER_EMAIL, err)
+		}
+
+		if err = DeleteAuthField(REFRESH_TOKEN); err != nil {
+			p.Debug(print.ErrorLevel, "failed to delete auth field %s: &v", USER_EMAIL, err)
+		}
+
+		if err = DeleteAuthField(SERVICE_ACCOUNT_TOKEN); err != nil {
+			p.Debug(print.ErrorLevel, "failed to delete auth field %s: &v", REFRESH_TOKEN, err)
+		}
+
+		if err = DeleteAuthField(SERVICE_ACCOUNT_KEY); err != nil {
+			p.Debug(print.ErrorLevel, "failed to delete auth field %s: &v", SERVICE_ACCOUNT_TOKEN, err)
+		}
+
+		if err = DeleteAuthField(PRIVATE_KEY); err != nil {
+			p.Debug(print.ErrorLevel, "failed to delete auth field %s: &v", SERVICE_ACCOUNT_KEY, err)
+		}
+
 		err = SetAuthFlow(authFlowType)
 		if err != nil {
 			return "", "", fmt.Errorf("set auth flow type: %w", err)
