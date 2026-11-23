@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/config"
 	pkgErrors "github.com/stackitcloud/stackit-cli/internal/pkg/errors"
@@ -108,13 +109,40 @@ func setAuthFieldWithProfile(profile string, key authFieldKey, value string) err
 		}
 		// If writing to the text file succeeded as a fallback, clean up any stale key in the keyring
 		// so GetAuthField won't return outdated credentials.
-		_ = deleteAuthFieldInKeyring(profile, key)
+		errDelete := deleteAuthFieldInKeyring(profile, key)
+		if errDelete != nil && !errors.Is(errDelete, keyring.ErrNotFound) && !isKeyringUnavailable(errDelete) {
+			return fmt.Errorf("cleanup stale key from keyring: %w", errDelete)
+		}
 	} else {
 		// If writing to the keyring succeeded, clean up any old entry from the encoded text file.
-		_ = deleteAuthFieldInEncodedTextFile(profile, key)
+		errCleanup := deleteAuthFieldInEncodedTextFile(profile, key)
+		if errCleanup != nil {
+			return fmt.Errorf("saved to keyring, but failed to clean up legacy fallback file: %w", errCleanup)
+		}
 	}
 
 	return nil
+}
+
+// isKeyringUnavailable returns true if the error indicates that no operational
+// OS keyring service is available on the system (e.g. headless CI, Docker, or
+// minimal server environments), allowing the CLI to fall back cleanly.
+func isKeyringUnavailable(err error) bool {
+	if err == nil {
+		return false
+	}
+	// Fallback provider error when compiled for or running on platforms without keyring support
+	if errors.Is(err, keyring.ErrUnsupportedPlatform) {
+		return true
+	}
+
+	errStr := strings.ToLower(err.Error())
+
+	return strings.Contains(errStr, "dbus") || // Linux: D-Bus session bus missing or unreachable (e.g. headless CI, Docker containers, remote SSH)
+		strings.Contains(errStr, "no secret service") || // Linux: D-Bus is running, but no Secret Service daemon (e.g. gnome-keyring, keepassxc) is registered
+		strings.Contains(errStr, "cannot connect") || // Generic IPC/socket connection failure to the system credential daemon
+		strings.Contains(errStr, "not supported") || // Environment or platform does not support the credential service
+		strings.Contains(errStr, "unavailable") // Explicit service unavailable errors (including unit tests with mock keyrings)
 }
 
 func setAuthFieldInKeyring(activeProfile string, key authFieldKey, value string) error {

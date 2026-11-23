@@ -37,7 +37,7 @@ func TestMain(m *testing.M) {
 		fmt.Printf("could not create temp dir: %v", err)
 		os.Exit(1)
 	}
-	defer os.RemoveAll(tempDir)
+	defer os.RemoveAll(tempDir) // nolint:errcheck // at this point removing the temp dir is not relevant
 
 	config.SetDefaultConfigFolderPath(tempDir)
 

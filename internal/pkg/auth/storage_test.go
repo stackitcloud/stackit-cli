@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -1276,7 +1277,10 @@ func TestStaleKeychainCleanupOnFallback(t *testing.T) {
 	}
 
 	// Cleanup
-	_ = DeleteAuthField(PRIVATE_KEY)
+	err = DeleteAuthField(PRIVATE_KEY)
+	if err != nil {
+		t.Fatalf("DeleteAuthField failed: %v", err)
+	}
 }
 
 func TestFileNotCreatedOnReadOrDelete(t *testing.T) {
@@ -1317,7 +1321,6 @@ func TestFileNotCreatedOnReadOrDelete(t *testing.T) {
 }
 
 func TestFileRemovedWhenEmpty(t *testing.T) {
-
 	profile, err := config.GetProfile()
 	if err != nil {
 		t.Fatalf("get profile: %v", err)
@@ -1472,41 +1475,117 @@ func TestLoginUserCleansUpServiceAccountCredentials(t *testing.T) {
 	}
 
 	// Cleanup
-	_ = LogoutUser()
+	err := LogoutUser()
+	if err != nil {
+		t.Fatalf("LogoutUser() failed: %v", err)
+	}
 }
 
-func TestKeyringWriteCleansUpTextFile(t *testing.T) {
-	keyring.MockInit()
-
-	profile, err := config.GetProfile()
-	if err != nil {
-		t.Fatalf("get profile: %v", err)
+func TestSetAuthFieldWithProfile(t *testing.T) {
+	tests := []struct {
+		description       string
+		keyringMockErr    error
+		setupCorruptFile  bool
+		setupStaleFileVal string
+		key               authFieldKey
+		value             string
+		wantErr           bool
+		errContains       string
+		verifyInKeyring   bool
+		verifyInFile      bool
+	}{
+		{
+			description:       "keyring write succeeds and cleans up stale text file entry",
+			setupStaleFileVal: "old-file-val",
+			key:               "test-sync-key",
+			value:             "new-keyring-val",
+			wantErr:           false,
+			verifyInKeyring:   true,
+		},
+		{
+			description:      "keyring write succeeds but fallback file cleanup fails",
+			setupCorruptFile: true,
+			key:              "test-corrupt-file-key",
+			value:            "value",
+			wantErr:          true,
+			errContains:      "saved to keyring, but failed to clean up legacy fallback file",
+		},
+		{
+			description:    "keyring write fails and keyring cleanup fails with unexpected error",
+			keyringMockErr: fmt.Errorf("access denied to secure enclave"),
+			key:            "test-keyring-delete-fail",
+			value:          "value",
+			wantErr:        true,
+			errContains:    "cleanup stale key from keyring",
+		},
+		{
+			description:    "keyring write fails and keyring cleanup is ignored when keyring is unavailable",
+			keyringMockErr: fmt.Errorf("dbus daemon unavailable"),
+			key:            "test-keyring-unavailable",
+			value:          "value",
+			wantErr:        false,
+			verifyInFile:   true,
+		},
 	}
 
-	key := authFieldKey("test-sync-key")
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			profile, err := config.GetProfile()
+			if err != nil {
+				t.Fatalf("get profile: %v", err)
+			}
 
-	// Simulate old value in text file
-	if err := setAuthFieldInEncodedTextFile(profile, key, "old-file-value"); err != nil {
-		t.Fatalf("set in text file: %v", err)
+			if tt.keyringMockErr != nil {
+				keyring.MockInitWithError(tt.keyringMockErr)
+			} else {
+				keyring.MockInit()
+			}
+
+			textFilePath := filepath.Join(config.GetProfileFolderPath(profile), textFileName)
+			if tt.setupCorruptFile {
+				if err := os.WriteFile(textFilePath, []byte("invalid-base64!!!"), 0o600); err != nil {
+					t.Fatalf("failed to write corrupt file: %v", err)
+				}
+				defer func() {
+					_ = os.Remove(textFilePath)
+				}()
+			} else if tt.setupStaleFileVal != "" {
+				if err := setAuthFieldInEncodedTextFile(profile, tt.key, tt.setupStaleFileVal); err != nil {
+					t.Fatalf("failed to set stale file value: %v", err)
+				}
+			}
+
+			defer func() {
+				_ = deleteAuthFieldInEncodedTextFile(profile, tt.key)
+				_ = deleteAuthFieldInKeyring(profile, tt.key)
+			}()
+
+			err = setAuthFieldWithProfile(profile, tt.key, tt.value)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("setAuthFieldWithProfile() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if tt.errContains != "" && !strings.Contains(err.Error(), tt.errContains) {
+				t.Errorf("expected error containing %q, got: %v", tt.errContains, err)
+			}
+
+			if tt.verifyInKeyring {
+				got, err := getAuthFieldFromKeyring(profile, tt.key)
+				if err != nil || got != tt.value {
+					t.Errorf("expected %q in keyring, got %q (err: %v)", tt.value, got, err)
+				}
+
+				if _, err := getAuthFieldFromEncodedTextFile(profile, tt.key); err == nil {
+					t.Errorf("expected key to be removed from text file")
+				}
+			}
+
+			if tt.verifyInFile {
+				got, err := getAuthFieldFromEncodedTextFile(profile, tt.key)
+				if err != nil || got != tt.value {
+					t.Errorf("expected %q in text file, got %q (err: %v)", tt.value, got, err)
+				}
+			}
+		})
 	}
-
-	// Now set with setAuthFieldWithProfile (which succeeds in keyring)
-	if err := setAuthFieldWithProfile(profile, key, "new-keyring-value"); err != nil {
-		t.Fatalf("setAuthFieldWithProfile failed: %v", err)
-	}
-
-	// Keyring has new value
-	val, err := getAuthFieldFromKeyring(profile, key)
-	if err != nil || val != "new-keyring-value" {
-		t.Errorf("expected new-keyring-value in keyring, got %q (err: %v)", val, err)
-	}
-
-	// Text file should no longer have the old key
-	_, err = getAuthFieldFromEncodedTextFile(profile, key)
-	if err == nil {
-		t.Errorf("expected key to be removed from text file when set in keyring")
-	}
-
-	// Cleanup
-	_ = deleteAuthFieldWithProfile(profile, key)
 }

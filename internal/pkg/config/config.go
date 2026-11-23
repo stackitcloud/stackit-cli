@@ -145,6 +145,7 @@ func InitConfig() {
 	if dir == "" {
 		dir = getInitialConfigDir()
 	}
+
 	initConfig(dir)
 }
 
