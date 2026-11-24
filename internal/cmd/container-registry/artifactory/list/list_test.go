@@ -55,7 +55,7 @@ func fixtureInputModel(mods ...func(model *inputModel)) *inputModel {
 }
 
 func fixtureRequest(mods ...func(request *registry.ApiListArtifactoriesRequest)) registry.ApiListArtifactoriesRequest {
-	request := testClient.DefaultAPI.ListArtifactories(testCtx, testProjectId, testRegion).PageSize(maxPageSize)
+	request := testClient.DefaultAPI.ListArtifactories(testCtx, testProjectId, testRegion)
 	for _, mod := range mods {
 		mod(&request)
 	}
@@ -138,30 +138,18 @@ func TestBuildRequest(t *testing.T) {
 	tests := []struct {
 		description     string
 		model           *inputModel
-		pageToken       string
-		pageSize        int32
 		expectedRequest registry.ApiListArtifactoriesRequest
 	}{
 		{
 			description:     "base",
 			model:           fixtureInputModel(),
-			pageSize:        maxPageSize,
 			expectedRequest: fixtureRequest(),
-		},
-		{
-			description: "with page token",
-			model:       fixtureInputModel(),
-			pageToken:   "next-token",
-			pageSize:    maxPageSize,
-			expectedRequest: fixtureRequest(func(request *registry.ApiListArtifactoriesRequest) {
-				*request = request.NextPageToken("next-token")
-			}),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			request := buildRequest(testCtx, tt.model, testClient, tt.pageToken, tt.pageSize)
+			request := buildRequest(testCtx, tt.model, testClient)
 
 			diff := cmp.Diff(request, tt.expectedRequest,
 				cmp.AllowUnexported(tt.expectedRequest, registry.DefaultAPIService{}),
@@ -172,6 +160,50 @@ func TestBuildRequest(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestArtifactoryPageRequest(t *testing.T) {
+	req := buildRequest(testCtx, fixtureInputModel(), testClient)
+	pageReq := &artifactoryPageRequest{req: req}
+
+	pageReq = pageReq.PageSize(10)
+	pageReq = pageReq.PageToken("test-token")
+
+	if pageReq == nil {
+		t.Fatal("expected non-nil pageReq")
+	}
+}
+
+func TestArtifactoryPageResponse(t *testing.T) {
+	t.Run("nil response", func(t *testing.T) {
+		resp := &artifactoryPageResponse{resp: nil}
+		if items := resp.GetItems(); items != nil {
+			t.Errorf("expected nil items, got %v", items)
+		}
+		if token := resp.GetNextPageToken(); token != "" {
+			t.Errorf("expected empty token, got %q", token)
+		}
+	})
+
+	t.Run("valid response", func(t *testing.T) {
+		token := "next-page"
+		expectedItems := []registry.Artifactory{
+			{Id: "art-1", Name: "name-1"},
+		}
+		resp := &artifactoryPageResponse{
+			resp: &registry.ArtifactoryList{
+				Artifactories: expectedItems,
+				NextPageToken: &token,
+			},
+		}
+
+		if diff := cmp.Diff(resp.GetItems(), expectedItems); diff != "" {
+			t.Errorf("items mismatch (-got +want):\n%s", diff)
+		}
+		if gotToken := resp.GetNextPageToken(); gotToken != token {
+			t.Errorf("token mismatch: got %q, want %q", gotToken, token)
+		}
+	})
 }
 
 func TestOutputResult(t *testing.T) {

@@ -2,11 +2,16 @@ package list
 
 import (
 	"context"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"sync/atomic"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
+	sdkConfig "github.com/stackitcloud/stackit-sdk-go/core/config"
 	registry "github.com/stackitcloud/stackit-sdk-go/services/registry/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/globalflags"
@@ -238,6 +243,102 @@ func TestOutputResult(t *testing.T) {
 			err := outputResult(params.Printer, tt.args.outputFormat, tt.args.projectLabel, tt.args.adapters)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("outputResult() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestFetchReplicationAdapters(t *testing.T) {
+	tests := []struct {
+		description   string
+		model         *inputModel
+		nextPageToken *string
+		statusCode    int
+		expectedLen   int
+		isValid       bool
+	}{
+		{
+			description: "single page",
+			model:       fixtureInputModel(),
+			statusCode:  http.StatusOK,
+			expectedLen: 3,
+			isValid:     true,
+		},
+		{
+			description:   "next page token is ignored",
+			model:         fixtureInputModel(),
+			nextPageToken: utils.Ptr("next-page"),
+			statusCode:    http.StatusOK,
+			expectedLen:   3,
+			isValid:       true,
+		},
+		{
+			description: "with limit",
+			model: fixtureInputModel(func(model *inputModel) {
+				model.Limit = utils.Ptr(int64(2))
+			}),
+			nextPageToken: utils.Ptr("next-page"),
+			statusCode:    http.StatusOK,
+			expectedLen:   2,
+			isValid:       true,
+		},
+		{
+			description: "api error",
+			model:       fixtureInputModel(),
+			statusCode:  http.StatusInternalServerError,
+			isValid:     false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			var calls atomic.Int32
+			handler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				calls.Add(1)
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(tt.statusCode)
+				if tt.statusCode != http.StatusOK {
+					return
+				}
+
+				resp := registry.ReplicationAdapterList{
+					ReplicationAdapters: []registry.ReplicationAdapter{
+						{RegistryType: "docker-hub", DisplayName: "Docker Hub"},
+						{RegistryType: "harbor", DisplayName: "Harbor"},
+						{RegistryType: "quay", DisplayName: "Quay"},
+					},
+					NextPageToken: tt.nextPageToken,
+				}
+				if err := json.NewEncoder(w).Encode(resp); err != nil {
+					t.Errorf("encode response: %v", err)
+				}
+			})
+			server := httptest.NewServer(handler)
+			defer server.Close()
+
+			client, err := registry.NewAPIClient(
+				sdkConfig.WithEndpoint(server.URL),
+				sdkConfig.WithoutAuthentication(),
+			)
+			if err != nil {
+				t.Fatalf("init client: %v", err)
+			}
+
+			adapters, err := fetchReplicationAdapters(testCtx, tt.model, client)
+			if !tt.isValid {
+				if err == nil {
+					t.Fatal("expected error, got nil")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if len(adapters) != tt.expectedLen {
+				t.Errorf("expected %d adapters, got %d", tt.expectedLen, len(adapters))
+			}
+			if got := calls.Load(); got != 1 {
+				t.Errorf("expected exactly 1 API call, got %d", got)
 			}
 		})
 	}

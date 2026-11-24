@@ -95,6 +95,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("create artifactory: %w", err)
 			}
+			if resp == nil {
+				return fmt.Errorf("create artifactory: nil response")
+			}
 			artifactoryId := resp.Id
 
 			// Wait for async operation, if async mode not enabled
@@ -132,8 +135,7 @@ func configureFlags(cmd *cobra.Command, params *types.CmdParams) {
 	err := flags.MarkFlagsRequired(cmd, nameFlag)
 	cobra.CheckErr(err)
 
-	cmd.MarkFlagsRequiredTogether(proxyUrlFlag, proxyRegistryTypeFlag)
-	cmd.MarkFlagsRequiredTogether(proxyAccessKeyFlag, proxyAccessSecretFlag)
+	cmd.MarkFlagsRequiredTogether(proxyUrlFlag, proxyRegistryTypeFlag, proxyAccessKeyFlag, proxyAccessSecretFlag)
 }
 
 func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, error) {
@@ -151,9 +153,9 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 		return nil, err
 	}
 
-	hasProxyDetails := proxyDesc != nil || proxyKey != nil || proxySecret != nil
-	if hasProxyDetails && (proxyUrl == nil || proxyRegistryType == nil) {
-		return nil, fmt.Errorf("both --%s and --%s are required when configuring a proxy", proxyUrlFlag, proxyRegistryTypeFlag)
+	hasProxy := proxyUrl != nil || proxyRegistryType != nil || proxyKey != nil || proxySecret != nil
+	if proxyDesc != nil && !hasProxy {
+		return nil, fmt.Errorf("--%s can only be set when configuring a proxy", proxyDescriptionFlag)
 	}
 
 	model := inputModel{

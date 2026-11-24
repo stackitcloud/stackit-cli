@@ -3,9 +3,9 @@ package list
 import (
 	"context"
 	"fmt"
-	"math"
 
 	"github.com/spf13/cobra"
+	"github.com/stackitcloud/stackit-sdk-go/core/experimental/paginate"
 	registry "github.com/stackitcloud/stackit-sdk-go/services/registry/v1api"
 
 	"github.com/stackitcloud/stackit-cli/internal/pkg/args"
@@ -107,51 +107,76 @@ func parseInput(p *print.Printer, cmd *cobra.Command, _ []string) (*inputModel, 
 	return &model, nil
 }
 
-func buildRequest(ctx context.Context, model *inputModel, apiClient *registry.APIClient, pageToken string, pageSize int32) registry.ApiListArtifactoriesRequest {
-	req := apiClient.DefaultAPI.ListArtifactories(ctx, model.ProjectId, model.Region)
-	if pageToken != "" {
-		req = req.NextPageToken(pageToken)
+func buildRequest(ctx context.Context, model *inputModel, apiClient *registry.APIClient) registry.ApiListArtifactoriesRequest {
+	return apiClient.DefaultAPI.ListArtifactories(ctx, model.ProjectId, model.Region)
+}
+
+type artifactoryPageRequest struct {
+	req registry.ApiListArtifactoriesRequest
+}
+
+type artifactoryPageResponse struct {
+	resp *registry.ArtifactoryList
+}
+
+func (r *artifactoryPageRequest) PageSize(pageSize int32) *artifactoryPageRequest {
+	r.req = r.req.PageSize(pageSize)
+	return r
+}
+
+func (r *artifactoryPageRequest) PageToken(pageToken string) *artifactoryPageRequest {
+	r.req = r.req.NextPageToken(pageToken)
+	return r
+}
+
+func (r *artifactoryPageRequest) Execute() (*artifactoryPageResponse, error) {
+	resp, err := r.req.Execute()
+	if err != nil {
+		return nil, err
 	}
-	if pageSize > 0 {
-		req = req.PageSize(pageSize)
+	if resp == nil {
+		return nil, fmt.Errorf("empty response")
 	}
-	return req
+
+	return &artifactoryPageResponse{resp: resp}, nil
+}
+
+func (r *artifactoryPageResponse) GetItems() []registry.Artifactory {
+	if r.resp == nil {
+		return nil
+	}
+
+	return r.resp.GetArtifactories()
+}
+
+func (r *artifactoryPageResponse) GetNextPageToken() string {
+	if r.resp == nil {
+		return ""
+	}
+
+	return r.resp.GetNextPageToken()
 }
 
 func fetchArtifactories(ctx context.Context, model *inputModel, apiClient *registry.APIClient) ([]registry.Artifactory, error) {
-	var pageToken string
-	artifactories := make([]registry.Artifactory, 0)
-	received := int64(0)
-	limit := int64(math.MaxInt64)
+	req := buildRequest(ctx, model, apiClient)
+
+	opts := []paginate.Option{
+		paginate.WithPageSize(maxPageSize),
+	}
 	if model.Limit != nil {
-		limit = *model.Limit
+		opts = append(opts, paginate.WithLimit(int(*model.Limit)))
 	}
-	for {
-		want := min(int64(maxPageSize), limit-received)
-		request := buildRequest(ctx, model, apiClient, pageToken, int32(want))
-		response, err := request.Execute()
-		if err != nil {
-			return nil, fmt.Errorf("get artifactories: %w", err)
-		}
-		if response == nil {
-			return nil, fmt.Errorf("get artifactories: empty response")
-		}
-		if response.Artifactories != nil {
-			artifactories = append(artifactories, response.Artifactories...)
-		}
-		pageToken = ""
-		if response.NextPageToken != nil {
-			pageToken = *response.NextPageToken
-		}
-		received += want
-		if pageToken == "" || received >= limit {
-			break
-		}
+
+	items, err := paginate.All(&artifactoryPageRequest{req: req}, opts...)
+	if err != nil {
+		return nil, fmt.Errorf("get artifactories: %w", err)
 	}
-	if model.Limit != nil && len(artifactories) > int(*model.Limit) {
-		artifactories = artifactories[:*model.Limit]
+
+	if items == nil {
+		items = []registry.Artifactory{}
 	}
-	return artifactories, nil
+
+	return items, nil
 }
 
 func outputResult(p *print.Printer, outputFormat, projectLabel string, artifactories []registry.Artifactory) error {

@@ -214,7 +214,7 @@ func TestPrintWarning(t *testing.T) {
 }
 
 func TestWarningMessageContent(t *testing.T) {
-	expected := "Your STACKIT Container Registry projects are recoverable for up to 30 days after deletion via a support request. After this period, projects and their data are permanently unrecoverable."
+	expected := "Your STACKIT Container Registry artifactories are recoverable for up to 30 days after deletion via a support request. After this period, artifactories and their data are permanently unrecoverable."
 	if warningMessage != expected {
 		t.Errorf("warning message mismatch:\ngot:  %q\nwant: %q", warningMessage, expected)
 	}

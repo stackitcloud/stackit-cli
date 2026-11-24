@@ -62,19 +62,9 @@ func NewCmd(params *types.CmdParams) *cobra.Command {
 			}
 
 			// Call API
-			req := buildRequest(ctx, model, apiClient)
-			resp, err := req.Execute()
+			adapters, err := fetchReplicationAdapters(ctx, model, apiClient)
 			if err != nil {
-				return fmt.Errorf("list replication adapters: %w", err)
-			}
-
-			var adapters []registry.ReplicationAdapter
-			if resp != nil {
-				adapters = resp.ReplicationAdapters
-			}
-
-			if model.Limit != nil && len(adapters) > int(*model.Limit) {
-				adapters = adapters[:*model.Limit]
+				return err
 			}
 
 			projectLabel, err := projectname.GetProjectName(ctx, params.Printer, params.CliVersion, cmd)
@@ -122,6 +112,30 @@ func buildRequest(ctx context.Context, model *inputModel, apiClient *registry.AP
 	return apiClient.DefaultAPI.ListReplicationAdapters(ctx, model.ProjectId, model.Region)
 }
 
+func fetchReplicationAdapters(ctx context.Context, model *inputModel, apiClient *registry.APIClient) ([]registry.ReplicationAdapter, error) {
+	// Note: the ListReplicationAdapters endpoint does not accept page_token/page_size
+	// query parameters (the SDK only exposes Execute()), so the next page token of the
+	// response cannot be forwarded. The list of adapter types is small and always
+	// fits in a single page.
+	resp, err := buildRequest(ctx, model, apiClient).Execute()
+	if err != nil {
+		return nil, fmt.Errorf("list replication adapters: %w", err)
+	}
+	if resp == nil {
+		return nil, fmt.Errorf("list replication adapters: empty response")
+	}
+
+	adapters := resp.GetReplicationAdapters()
+	if adapters == nil {
+		adapters = []registry.ReplicationAdapter{}
+	}
+	if model.Limit != nil && len(adapters) > int(*model.Limit) {
+		adapters = adapters[:*model.Limit]
+	}
+
+	return adapters, nil
+}
+
 func outputResult(p *print.Printer, outputFormat, projectLabel string, adapters []registry.ReplicationAdapter) error {
 	return p.OutputResult(outputFormat, adapters, func() error {
 		if len(adapters) == 0 {
@@ -140,7 +154,11 @@ func outputResult(p *print.Printer, outputFormat, projectLabel string, adapters 
 			)
 		}
 
-		p.Outputln(table.Render())
+		err := table.Display(p)
+		if err != nil {
+			return fmt.Errorf("render table: %w", err)
+		}
+
 		return nil
 	})
 }

@@ -96,12 +96,24 @@ func TestParseInput(t *testing.T) {
 			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
 				flagValues[proxyUrlFlag] = testProxyUrl
 				flagValues[proxyRegistryTypeFlag] = testProxyRegistryType
+				flagValues[proxyAccessKeyFlag] = testProxyAccessKey
+				flagValues[proxyAccessSecretFlag] = "@" + testSecretFile
 			}),
 			isValid: true,
 			expectedModel: fixtureInputModel(func(model *inputModel) {
 				model.ProxyUrl = utils.Ptr(testProxyUrl)
 				model.ProxyRegistryType = utils.Ptr(testProxyRegistryType)
+				model.ProxyAccessKey = utils.Ptr(testProxyAccessKey)
+				model.ProxyAccessSecret = utils.Ptr(testProxyAccessSecret)
 			}),
+		},
+		{
+			description: "proxy url without credentials",
+			flagValues: fixtureFlagValues(func(flagValues map[string]string) {
+				flagValues[proxyUrlFlag] = testProxyUrl
+				flagValues[proxyRegistryTypeFlag] = testProxyRegistryType
+			}),
+			isValid: false,
 		},
 		{
 			description: "with proxy full",

@@ -22,7 +22,7 @@ import (
 
 const (
 	artifactoryIdArg = "ARTIFACTORY_ID"
-	warningMessage   = "Your STACKIT Container Registry projects are recoverable for up to 30 days after deletion via a support request. After this period, projects and their data are permanently unrecoverable."
+	warningMessage   = "Your STACKIT Container Registry artifactories are recoverable for up to 30 days after deletion via a support request. After this period, artifactories and their data are permanently unrecoverable."
 )
 
 type inputModel struct {
