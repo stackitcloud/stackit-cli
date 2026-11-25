@@ -1,0 +1,55 @@
+## stackit container-registry artifactory create
+
+Creates a Container Registry artifactory
+
+### Synopsis
+
+Creates a Container Registry artifactory.
+
+```
+stackit container-registry artifactory create [flags]
+```
+
+### Examples
+
+```
+  Create a standard artifactory
+  $ stackit container-registry artifactory create --name my-registry
+
+  Create a proxy-cache artifactory for Docker Hub with credentials from stdin
+  $ stackit container-registry artifactory create --name docker-proxy --proxy-url https://registry-1.docker.io --proxy-registry-type docker-hub --proxy-access-key my-user --proxy-access-secret -
+
+  Create a proxy-cache artifactory with credentials from a file
+  $ stackit container-registry artifactory create --name my-proxy --proxy-url https://custom-registry.com --proxy-registry-type harbor --proxy-access-key my-user --proxy-access-secret @./secret.txt
+
+  Create a proxy-cache artifactory with all proxy options configured
+  $ stackit container-registry artifactory create --name docker-proxy --proxy-url https://registry-1.docker.io --proxy-registry-type docker-hub --proxy-description "Docker Hub mirror" --proxy-access-key my-user --proxy-access-secret @./secret.txt
+```
+
+### Options
+
+```
+  -h, --help[=true|false]            Help for "stackit container-registry artifactory create"
+  -n, --name string                  Artifactory name
+      --proxy-access-key string      Access key for upstream proxy registry authentication
+      --proxy-access-secret secret   Proxy-Access-Secret. Use @<file> to read from a file (example: @./secret.txt), or - to read from stdin (hidden input on a terminal). Literal values are not supported.
+      --proxy-description string     Description of the proxy registry
+      --proxy-registry-type string   Registry type of the upstream proxy (e.g., docker-hub, harbor)
+      --proxy-url string             Upstream registry URL to proxy
+```
+
+### Options inherited from parent commands
+
+```
+  -y, --assume-yes[=true|false]   If set, skips all confirmation prompts
+      --async[=true|false]        If set, runs the command asynchronously
+  -o, --output-format string      Output format, (one of: [json, pretty, none, yaml])
+  -p, --project-id string         Project ID
+      --region string             Target region for region-specific requests
+      --verbosity string          Verbosity of the CLI, (one of: [debug, info, warning, error]) (default "info")
+```
+
+### SEE ALSO
+
+* [stackit container-registry artifactory](./stackit_container-registry_artifactory.md)	 - Provides functionality for Container Registry artifactories
+

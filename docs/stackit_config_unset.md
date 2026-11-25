@@ -33,6 +33,7 @@ stackit config unset [flags]
       --authorization-custom-endpoint[=true|false]                       Authorization API base URL. If unset, uses the default base URL
       --automation-custom-endpoint[=true|false]                          Automation API base URL. If unset, uses the default base URL
       --cdn-custom-endpoint[=true|false]                                 Custom CDN endpoint URL. If unset, uses the default base URL
+      --container-registry-custom-endpoint[=true|false]                  Container Registry API base URL. If unset, uses the default base URL
       --dns-custom-endpoint[=true|false]                                 DNS API base URL. If unset, uses the default base URL
       --edge-custom-endpoint[=true|false]                                Edge API base URL. If unset, uses the default base URL
   -h, --help[=true|false]                                                Help for "stackit config unset"
