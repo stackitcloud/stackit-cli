@@ -41,5 +41,6 @@ stackit alpha [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
+* [stackit alpha bucket](./stackit_alpha_bucket.md)	 - Manages objects in STACKIT Object Storage buckets (data plane)
 * [stackit alpha vpc](./stackit_alpha_vpc.md)	 - Manages vpcs
 
