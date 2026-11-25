@@ -41,5 +41,6 @@ stackit alpha [flags]
 ### SEE ALSO
 
 * [stackit](./stackit.md)	 - Manage STACKIT resources using the command line
+* [stackit alpha folder](./stackit_alpha_folder.md)	 - Manages the lifecycle of folders.
 * [stackit alpha vpc](./stackit_alpha_vpc.md)	 - Manages vpcs
 
