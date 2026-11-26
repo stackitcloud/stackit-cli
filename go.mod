@@ -40,6 +40,7 @@ require (
 	github.com/stackitcloud/stackit-sdk-go/services/serviceenablement v1.8.0
 	github.com/stackitcloud/stackit-sdk-go/services/ske v1.23.0
 	github.com/stackitcloud/stackit-sdk-go/services/sqlserverflex v1.20.0
+	github.com/stackitcloud/stackit-sdk-go/services/telemetryrouter v0.7.0
 	github.com/stackitcloud/stackit-sdk-go/services/valkey v0.4.0
 	github.com/stackitcloud/stackit-sdk-go/services/vpn v0.16.0
 	github.com/zalando/go-keyring v0.2.8
